@@ -7,6 +7,114 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-09 — Phase 3: seed-content backfill (Frontier Board, Lexicon, Primer)
+
+One-time interactive seed-content backfill per the approved build plan's
+section 4: `content/frontier_board.json`, `content/lexicon.json`, and
+`content/primer.json` (new file) assembled from pre-drafted,
+adversarially-verified, live-fetched-and-cited candidate data and written
+to disk this turn, validated against `schemas/frontier_board.schema.json`
+and `schemas/lexicon.schema.json`, plus a new `tests/test_seed_content.py`
+covering both files' schema conformance and every cross-reference
+(`related[]` resolution, primer-slug resolution, citation-href presence).
+
+**Frontier Board: 4 rows shipped, against the plan's own >=12-row
+target — a real, logged shortfall, not silently accepted.** This turn's
+scope was to assemble the data already fetched-and-verified live by other
+agents this run, not to re-fetch additional labs; the handed-off candidate
+set covered only Anthropic, DeepSeek, Ai2, and NVIDIA (5 rows as given,
+collapsing to 4 distinct `(lab, model)` rows once merged — see below), far
+short of the plan's 12-core-row candidate list (which also named OpenAI,
+Google DeepMind, Meta, xAI, Mistral, Alibaba Qwen, Moonshot, Zhipu, and
+ByteDance). All three required regions are represented (US, China,
+open-weights) but China has only one row (DeepSeek). Full explanation and
+the specific list of labs a follow-up backfill turn would need to
+independently fetch-and-verify to close the gap is logged in
+`IMPROVEMENT_BACKLOG.md` under "Phase 3: seed-content backfill" — encoded
+as a non-blocking, non-strict `xfail` test
+(`test_frontier_board_meets_phase_3_target_row_count`) so the shortfall
+stays visible in every future `pytest` run without failing the suite.
+
+**Two of the five given board rows were both `(Anthropic, "Claude Fable
+5")`, sourced from two different Anthropic pages** — merged into one row
+per CLAUDE.md's Frontier Board upsert rule (keyed on exact `(lab, model)`,
+one row per release, refreshed in place, never duplicated). Kept the
+dedicated release-announcement URL as `source_url` and wrote one merged
+`significance` string covering both sources' point. Full reasoning logged
+in `IMPROVEMENT_BACKLOG.md`.
+
+**Lexicon: 30 of 30 target terms shipped — no shortfall.** Every entry's
+`related[]` list resolves to another entry's `term` in the same file, and
+every entry embeds its live citation as an `<a href>` anchor inside
+`deeper` (the schema has no separate `source_url` field, per the plan's
+own already-logged resolution) — both mechanically checked by
+`tests/test_seed_content.py`.
+
+**Primer: 10 of 10 intended dependency-ordered terms shipped — no
+shortfall.** `content/primer.json` = `{generated_at: "2026-07-09", terms:
+[...]}`, in the fixed dependency order (foundation model → transformer →
+attention → parameter count → context window → pretraining → fine-tuning
+→ RLHF → hallucination → open weights), each slug resolving to a real
+`content/lexicon.json` entry. The lowercase+hyphenate term→slug transform
+used here (distinct from `scripts/plan_run.py::kebab_slug`, a card-title
+slugifier) is flagged in `IMPROVEMENT_BACKLOG.md` as the convention a
+future Phase 4 site generator must match when building `/lexicon/<slug>/`
+routes.
+
+**Source URLs used this backfill (fetched-and-cited live by the upstream
+agents this run; spot-checkable against the corresponding `source_url` in
+`content/frontier_board.json` / the inline `<a href>` in each
+`content/lexicon.json` entry's `deeper` field):**
+
+Frontier Board —
+`https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5`
+(Anthropic, Claude Fable 5; the merged row's kept source — the given
+`models/overview` page URL was folded into this row's significance text
+rather than kept as a second citation, per the merge decision above),
+`https://api-docs.deepseek.com/news/news260424/` (DeepSeek-V4 Pro),
+`https://allenai.org/blog/olmo3` (Ai2 Olmo 3.1), `https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/`
+(NVIDIA Nemotron 3 Ultra).
+
+Lexicon (one arXiv/primary URL per term, all distinct except two terms
+that intentionally share Kaplan et al. 2020) —
+`https://arxiv.org/abs/1706.03762` (transformer, attention),
+`https://platform.claude.com/docs/en/build-with-claude/context-windows`
+(context window), `https://arxiv.org/abs/2203.02155` (RLHF),
+`https://arxiv.org/abs/1701.06538` (MoE), `https://arxiv.org/abs/1503.02531`
+(distillation), `https://www.anthropic.com/research/building-effective-agents`
+(agent), `https://arxiv.org/abs/2005.11401` (RAG),
+`https://arxiv.org/abs/1801.06146` (fine-tuning), `https://arxiv.org/abs/2202.03629`
+(hallucination), `https://arxiv.org/abs/2001.08361` (scaling laws, compute),
+`https://github.com/openai/evals` (evals), `https://arxiv.org/abs/1508.07909`
+(tokenization), `https://arxiv.org/abs/2005.14165` (parameter count),
+`https://arxiv.org/abs/2407.21783` (post-training), `https://arxiv.org/abs/2201.11903`
+(chain-of-thought), `https://arxiv.org/abs/1804.07461` (benchmark),
+`https://arxiv.org/abs/2103.00020` (multimodal), `https://arxiv.org/abs/2211.05102`
+(inference), `https://www.bis.gov/press-release/commerce-implements-new-export-controls-advanced-computing-semiconductor-manufacturing-items-peoples`
+(export controls), `https://arxiv.org/abs/2108.07258` (foundation model),
+`https://cdn.openai.com/papers/gpt-4-system-card.pdf` (system card),
+`https://arxiv.org/abs/2209.07858` (red teaming),
+`https://platform.claude.com/docs/en/about-claude/models/overview`
+(knowledge cutoff), `https://arxiv.org/abs/2408.03314` (test-time compute),
+`https://huggingface.co/openai/gpt-oss-120b` (open weights),
+`https://arxiv.org/abs/1606.06565` (alignment), `https://arxiv.org/abs/1810.04805`
+(pretraining), `https://arxiv.org/abs/2307.03718` (frontier model).
+
+Verification: `python -m pytest` — 468 passed, 2 deselected (live tests
+excluded by default per `pytest.ini`), 1 xfailed (the documented Frontier
+Board row-count shortfall above) — full suite green.
+
+**Carried forward, unchanged from every earlier checkpoint:** `analyze.yml`
+still needs the owner's `CLAUDE_CODE_OAUTH_TOKEN` secret and
+`vars.CLAUDE_MODEL` before it can run end-to-end; GitHub Pages still needs
+enabling before a future `deploy.yml` can publish; this branch still needs
+review and merge to `main`. Additionally, per this entry: a follow-up
+Frontier Board backfill (OpenAI, Google DeepMind, Meta, xAI, Mistral, and
+2-3 more China-region labs at minimum) remains open before Phase 3's own
+>=12-row acceptance bar is genuinely met, not just partially addressed.
+
+---
+
 ## 2026-07-09 — Phase 2 PM checkpoint round 1: citation-field spec-4-vs-spec-5 backlog entry (documentation-only)
 
 The PM's Phase 2 sign-off review independently re-ran the full test suite
