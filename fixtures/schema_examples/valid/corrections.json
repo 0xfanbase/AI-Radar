@@ -1,0 +1,11 @@
+[
+  {
+    "id": "2026-07-10-correction-1",
+    "card_id": "2026-07-09-example-model-release",
+    "original_claim": "Example Model 5 supports a 2 million token context window.",
+    "corrected_claim": "Example Model 5 supports a 1 million token context window.",
+    "reason": "Original card misread the announcement post; the lab's own page states 1 million tokens.",
+    "source_url": "https://example-lab.test/blog/example-model-5",
+    "corrected_at": "2026-07-10T09:00:00Z"
+  }
+]

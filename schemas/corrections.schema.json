@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/corrections.schema.json",
+  "title": "Corrections",
+  "description": "Spec-silent shape (spec sec-5 names 'corrections.json' without fields; the plan's Phase 2 section fixes the minimal shape used here, logged in IMPROVEMENT_BACKLOG.md). Top-level array published at content/corrections.json, the public corrections log linked from every card footer. Phase 1 ships this schema only -- entries are appended by the Phase 2 analyst when a pending correction (data/pending_corrections.json) is confirmed against fresh evidence.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "id",
+      "card_id",
+      "original_claim",
+      "corrected_claim",
+      "reason",
+      "source_url",
+      "corrected_at"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "card_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "content/cards/<id>.json this correction applies to."
+      },
+      "original_claim": {
+        "type": "string",
+        "minLength": 1
+      },
+      "corrected_claim": {
+        "type": "string",
+        "minLength": 1
+      },
+      "reason": {
+        "type": "string",
+        "minLength": 1
+      },
+      "source_url": {
+        "type": "string",
+        "format": "uri"
+      },
+      "corrected_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "additionalProperties": false
+  }
+}

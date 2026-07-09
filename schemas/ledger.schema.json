@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/ledger.schema.json",
+  "title": "Ledger",
+  "description": "Spec-silent shape (spec sec-4 says only 'ledger.json (cluster hash -> card id)'; decision logged in IMPROVEMENT_BACKLOG.md). data/ledger.json is a top-level object keyed by version + entries, where entries maps cluster_hash (sha256 of sorted normalized member URLs, per watcher/clustering.py) to its idempotency record. card_id is null until the Phase 2 analyst publishes a card for that cluster, and stays permanently null for clusters the verifier drops (status 'dropped') -- a later run with new corroborating evidence produces a different cluster_hash, so it is a fresh entry rather than a stuck one. Phase 1 seeds data/ledger.json = {\"version\": 1, \"entries\": {}}.",
+  "type": "object",
+  "required": ["version", "entries"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "entries": {
+      "type": "object",
+      "description": "Keyed by cluster_hash.",
+      "additionalProperties": {
+        "$ref": "#/$defs/ledger_entry"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "ledger_entry": {
+      "type": "object",
+      "required": ["card_id", "status", "first_seen", "last_seen", "member_urls"],
+      "properties": {
+        "card_id": {
+          "type": ["string", "null"],
+          "description": "Null until published; permanently null if the cluster was dropped."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["queued", "published", "dropped"]
+        },
+        "first_seen": {
+          "type": "string",
+          "format": "date",
+          "description": "First watch.yml run that produced this cluster_hash."
+        },
+        "last_seen": {
+          "type": "string",
+          "format": "date",
+          "description": "Most recent watch.yml run that re-derived this same cluster_hash (idempotency: re-runs bump this, not a new entry)."
+        },
+        "member_urls": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": "Normalized member URLs the cluster_hash was derived from."
+        },
+        "verifier_outcome": {
+          "type": ["object", "null"],
+          "description": "Set only when status is 'dropped': the verifier's reason for permanently dropping this cluster."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

@@ -1,0 +1,9 @@
+[
+  {
+    "term": "context window",
+    "one_liner": "The amount of text a model can consider at once when generating a response.",
+    "deeper": "Context window size is usually measured in tokens, not characters or words. Bigger windows let a model reason over longer documents, codebases, or conversations without losing earlier detail. See <a href=\"https://example-lab.test/docs/context-window\">Example Lab's docs</a> for how this is measured in practice.",
+    "related": ["transformer", "attention"],
+    "seen_in": ["2026-07-09-example-model-release"]
+  }
+]

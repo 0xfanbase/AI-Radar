@@ -1,0 +1,19 @@
+{
+  "id": "2026-07-09-example-model-release",
+  "date": "2026-07-09",
+  "what_happened": "Example Lab announced Example Model 5, a new frontier model with a longer context window and improved coding performance, in a post on its own blog.",
+  "why_it_matters": "It gives developers a cheaper option for long-document tasks and raises the bar other labs will be compared against.",
+  "one_liner": "Example Lab's newest model reads more at once and writes better code.",
+  "topics": ["models", "products"],
+  "status": "confirmed",
+  "citations": [
+    {
+      "url": "https://example-lab.test/blog/example-model-5",
+      "outlet": "Example Lab",
+      "quote": "Example Model 5 is our most capable model yet."
+    }
+  ],
+  "lexicon_terms": ["context window"],
+  "generated_at": "2026-07-09T07:15:00Z",
+  "model": "claude-sonnet-4-5"
+}

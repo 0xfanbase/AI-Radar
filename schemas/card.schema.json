@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/card.schema.json",
+  "title": "Card",
+  "description": "One Wire story card, written by the analyst/verifier and published to content/cards/<id>.json. Field list is spec sec-5 verbatim: {id, date, headline, what_happened, why_it_matters, one_liner, topics[], status, citations:[{url,outlet,quote}], lexicon_terms[], generated_at, model, correction_note?}. Phase 1 ships this schema only -- no cards exist until the Phase 2 analyst runs.",
+  "type": "object",
+  "required": [
+    "id",
+    "date",
+    "headline",
+    "what_happened",
+    "why_it_matters",
+    "one_liner",
+    "topics",
+    "status",
+    "citations",
+    "lexicon_terms",
+    "generated_at",
+    "model"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Stable slug, e.g. '2026-07-09-gpt-5-5-release'. Pre-computed by scripts/plan_run.py in Phase 2 so the analyst never invents/collides IDs."
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Calendar day (YYYY-MM-DD) this card belongs to on the Wire."
+    },
+    "headline": {
+      "type": "string",
+      "minLength": 1
+    },
+    "what_happened": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Own-words summary, spec cap: <=80 words."
+    },
+    "why_it_matters": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Newcomer-oriented, spec cap: <=50 words."
+    },
+    "one_liner": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Single ELI5 sentence."
+    },
+    "topics": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "models",
+          "research",
+          "chips/compute",
+          "policy",
+          "products",
+          "safety",
+          "open-source",
+          "China",
+          "funding"
+        ]
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["confirmed", "reported", "corrected"],
+      "description": "The corroboration-rule outcome: confirmed (primary source OR two independent reputable outlets), reported (visible sourcing but not corroboration-rule strength), corrected (a published correction changed the record -- see correction_note)."
+    },
+    "citations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["url", "outlet", "quote"],
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "outlet": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quote": {
+            "type": "string",
+            "description": "Supporting quote, spec cap: <=15 words, max one per source."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "lexicon_terms": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Lexicon terms used in this card, for auto-linking and the lexicon's seen_in[] back-reference."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Model identifier that generated this card, e.g. 'claude-sonnet-4-5'."
+    },
+    "correction_note": {
+      "type": ["string", "null"],
+      "description": "Optional short pointer to the content/corrections.json entry that corrected this card. Present only when status is 'corrected'."
+    }
+  },
+  "additionalProperties": false
+}

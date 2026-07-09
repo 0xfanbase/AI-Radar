@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/lexicon.schema.json",
+  "title": "Lexicon",
+  "description": "Top-level array of glossary entries (content/lexicon.json), spec sec-5 verbatim: [{term, one_liner, deeper, related[], seen_in[]}]. Phase 1 seeds data/lexicon.json = [] (empty) -- the 30-term backfill is Phase 3.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["term", "one_liner", "deeper", "related", "seen_in"],
+    "properties": {
+      "term": {
+        "type": "string",
+        "minLength": 1
+      },
+      "one_liner": {
+        "type": "string",
+        "minLength": 1,
+        "description": "One-sentence plain definition."
+      },
+      "deeper": {
+        "type": "string",
+        "minLength": 1,
+        "description": "~3-sentence deeper cut. Phase 3 embeds the entry's live source citation as an inline <a> anchor within this prose field (schema has no separate source_url field -- see IMPROVEMENT_BACKLOG.md)."
+      },
+      "related": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Related lexicon term names."
+      },
+      "seen_in": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Card IDs this term has appeared in (auto-grown by the analyst)."
+      }
+    },
+    "additionalProperties": false
+  }
+}
