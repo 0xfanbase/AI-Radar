@@ -1,0 +1,226 @@
+[
+  {
+    "cluster_hash": "658b8074914d8a04a8358d39b9c0fd809a416515bc4044bc6ebac0e53eda5e1e",
+    "rank": 1,
+    "score": 328.98436593831076,
+    "sources": [
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing the GPT Store",
+        "url": "https://openai.com/index/introducing-the-gpt-store"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-4.1 in the API",
+        "url": "https://openai.com/index/gpt-4-1"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing gpt-oss",
+        "url": "https://openai.com/index/introducing-gpt-oss"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-5",
+        "url": "https://openai.com/index/introducing-gpt-5"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-5 for developers",
+        "url": "https://openai.com/index/introducing-gpt-5-for-developers"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing gpt-oss-safeguard",
+        "url": "https://openai.com/index/introducing-gpt-oss-safeguard"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-5.1 for developers",
+        "url": "https://openai.com/index/gpt-5-1-for-developers"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-5.2",
+        "url": "https://openai.com/index/introducing-gpt-5-2"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-5.2-Codex",
+        "url": "https://openai.com/index/introducing-gpt-5-2-codex"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-5.3-Codex",
+        "url": "https://openai.com/index/introducing-gpt-5-3-codex"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-5.3-Codex-Spark",
+        "url": "https://openai.com/index/introducing-gpt-5-3-codex-spark"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-5.4",
+        "url": "https://openai.com/index/introducing-gpt-5-4"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-5.4 mini and nano",
+        "url": "https://openai.com/index/introducing-gpt-5-4-mini-and-nano"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-5.5",
+        "url": "https://openai.com/index/introducing-gpt-5-5"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing new capabilities to GPT-Rosalind",
+        "url": "https://openai.com/index/introducing-new-capabilities-to-gpt-rosalind"
+      },
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing GPT-Live",
+        "url": "https://openai.com/index/introducing-gpt-live"
+      },
+      {
+        "outlet": "openai.com",
+        "points": 644,
+        "source_type": "hn",
+        "title": "GPT\u2011Live",
+        "url": "https://openai.com/index/introducing-gpt-live/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "fca8a3981e7fce1f0d5153a691e2ef8e2675c1d36e5af760675c54e39ea70a00",
+    "rank": 2,
+    "score": 77.63851202269998,
+    "sources": [
+      {
+        "outlet": "alecscollon.com",
+        "points": 222,
+        "source_type": "hn",
+        "title": "I think I have LLM burnout",
+        "url": "https://www.alecscollon.com/blog/llm-burnout/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "cafc9d3c3da053e9739d61b137ae7a0eb001544e8ca90e0502d85a30c62c131e",
+    "rank": 3,
+    "score": 29.906195857934467,
+    "sources": [
+      {
+        "outlet": "mistral.ai",
+        "points": 438,
+        "source_type": "hn",
+        "title": "Mistral's Robostral Navigate: a state of the art robotics navigation model",
+        "url": "https://mistral.ai/news/robostral-navigate/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "af236497e3cd3b716e777defa47bd42ca1398d0075f80c8bac731c0bed05d910",
+    "rank": 4,
+    "score": 24.17360567382396,
+    "sources": [
+      {
+        "outlet": "combine-lab.github.io",
+        "points": 196,
+        "source_type": "hn",
+        "title": "The classifiers Anthropic puts in front of Fable are too zealous",
+        "url": "https://combine-lab.github.io/blog/2026/07/07/fable-is-not-a-useful-model.html"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "dcb832a0eb498c456b97b2dc3de310ff50242df86db5fb0b4b92e5fd4d7136bd",
+    "rank": 5,
+    "score": 21.861778235116677,
+    "sources": [
+      {
+        "outlet": "noma.security",
+        "points": 511,
+        "source_type": "hn",
+        "title": "GitLost: We Tricked GitHub's AI Agent into Leaking Private Repos",
+        "url": "https://noma.security/blog/gitlost-how-we-tricked-githubs-ai-agent-into-leaking-private-repos/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "b7534fef03b25a7f4c5d8924f988d1dd26d99733161f9edf042c2a9f9ce1dcd7",
+    "rank": 6,
+    "score": 21.30453224193048,
+    "sources": [
+      {
+        "outlet": "microsoft.github.io",
+        "points": 235,
+        "source_type": "hn",
+        "title": "Show HN: Microsoft releases Flint, a visualization language for AI agents",
+        "url": "https://microsoft.github.io/flint-chart/#/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "2a4094da082c3f1c1ffa21c976ed4b661883c249b3ec2a8163ffcf1a80e08e85",
+    "rank": 7,
+    "score": 21.134816688751783,
+    "sources": [
+      {
+        "outlet": "tryai.dev",
+        "points": 113,
+        "source_type": "hn",
+        "title": "We made Grok 4.5, GPT-5.5, and Claude build the same apps",
+        "url": "https://www.tryai.dev/blog/grok-4.5-vs-gpt-5.5-vs-claude-build-off"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "0d1dcf4ab4f0ca6008c7d60b149a762f3a2370c0c0dd234b073abaa04f6ae9db",
+    "rank": 8,
+    "score": 20.843604662078484,
+    "sources": [
+      {
+        "outlet": "cognition.com",
+        "points": 260,
+        "source_type": "hn",
+        "title": "SWE-1.7 Reach Near GPT 5.5 and Opus Intelligence",
+        "url": "https://cognition.com/blog/swe-1-7"
+      }
+    ]
+  }
+]

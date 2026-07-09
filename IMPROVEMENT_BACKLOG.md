@@ -502,3 +502,22 @@ Newest entries at the bottom of each section, in commit order.
   run's fetched URL set against the previous run's (held in memory across
   the script's `--runs N` loop) is the simplest way to report a per-source
   delta without fetching twice.
+- **2026-07-09 — `.github/workflows/watch.yml`'s cron is `17 6 * * *`
+  (06:17 UTC), not CLAUDE.md's documented "daily 07:00 HKT" (23:00 UTC)
+  target.** An off-hour minute avoids GitHub Actions' well-documented
+  top-of-hour scheduling congestion; the exact hour is a Phase 1
+  placeholder rather than a precise match to the eventual 07:00 HKT
+  target, since Phase 2 will need to revisit this cron anyway once
+  `analyze.yml` has to chain off of it. Worth tightening to an exact HKT
+  match in a later phase; not a correctness issue for Phase 1's own
+  acceptance criterion (live double-run idempotency), which doesn't
+  depend on wall-clock timing at all.
+- **2026-07-09 — `watch.yml`'s auto-commit message ends with `[skip ci]`
+  and `actions/cache`'s key is `watcher-cache-${{ github.run_id }}` with a
+  `watcher-cache-` restore-keys prefix.** Neither is spec-mandated;
+  `[skip ci]` avoids `ci.yml` (which runs on every `push`) re-running
+  pytest against a commit that only changes generated `data/*.json`, and
+  the run-id-suffixed cache key is the standard idiom for a cache that
+  should always re-save (an exact key hit skips the post-job save step,
+  which would otherwise freeze `data/.cache/`'s ETag store at its first
+  successful run forever).
