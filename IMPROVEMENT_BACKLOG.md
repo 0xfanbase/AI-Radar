@@ -141,3 +141,60 @@ Newest entries at the bottom of each section, in commit order.
   attempt.** Matches the plan's literal wording ("`urllib3.Retry` (3
   attempts, exponential backoff)") and the test scenario ("simulated
   503->503->200 sequence" = exactly 3 calls).
+- **2026-07-09 — `watcher/sources/hn.py`: the live HN Algolia API now
+  rejects `numericFilters` on `points`/`num_comments` outright** (`HTTP
+  400 "invalid numeric attribute(points), attribute not specified in
+  numericAttributesForFiltering setting"`), confirmed via real calls to
+  both `search_by_date` and `search`, tags on or off — the plan's
+  original "broad pool via search_by_date with points>=20" assumed
+  server-side points filtering was still available. Only `created_at_i`
+  still filters server-side, so the points threshold (and the final
+  points>=50-OR-velocity>=5.0 candidacy check) is applied entirely
+  client-side instead, after a broad time-bounded pull.
+- **2026-07-09 — `watcher/sources/hn.py`: windowed `search_by_date`
+  queries instead of one query across the full 48h lookback.** Algolia
+  caps any single query at 1000 accessible hits
+  (`paginationLimitedTo`) — confirmed live: a plain 48h `created_at_i`
+  filter matched 2326 stories but page 1 came back empty with an explicit
+  "you can only fetch the first 1000 hits" message, meaning an
+  un-windowed query would have silently truncated the lookback to
+  whatever the newest 1000 stories reach back to (well under 48h on a
+  busy day). Resolved by splitting the lookback into four non-overlapping
+  12h sub-windows, queried separately and merged/de-duplicated by
+  `objectID` — each comfortably clears the cap (verified live:
+  574/591/576/585 hits per window, summing exactly to the single query's
+  own `nbHits`).
+- **2026-07-09 — `watcher/sources/hn.py`'s `HN_KEYWORDS` matching uses
+  whole-word regex (`\bkeyword\b`), not a naive `keyword in
+  title.lower()` substring check.** A naive substring check on the
+  single-token keyword `"ai"` false-positives on ordinary English words
+  that merely contain that letter pair — confirmed against a real HN
+  title fetched live while building this fetcher: "Chat Control 1.0 and
+  2.0 Explained" contains "ai" inside "Expl-ai-ned" but is not
+  AI-relevant. Word-boundary matching avoids this while still matching
+  the list's multi-word phrase keywords (e.g. "chip export") correctly.
+- **2026-07-09 — `BROAD_POOL_POINTS_THRESHOLD = 20` (the plan's
+  "broad pool via search_by_date with points>=20" pre-filter) is kept
+  local to `watcher/sources/hn.py`, not added to `watcher/config.py`.**
+  `config.py`'s own docstring already reserves `HN_POINTS_THRESHOLD`
+  specifically for the final-candidacy points bar (50), and this turn's
+  file scope was `hn.py` only — same pattern `watcher/sources/arxiv.py`
+  already established for its locally-scoped `ARXIV_MAX_RESULTS`.
+  Interaction note for whoever tunes these later: because the broad-pool
+  prefilter (points>=20) runs before the final-candidacy check
+  (points>=50 OR velocity>=5.0), a very fresh, sub-20-point story could
+  in principle hit velocity>=5.0 (e.g. 6 points at 1h old) yet never
+  reach the final check because it's filtered out at stage 1 first. This
+  is the literal, as-specified algorithm rather than a bug worth
+  silently working around; flagged here in case a future pass wants the
+  two thresholds reconciled.
+- **2026-07-09 — `hn.algolia.com/robots.txt` currently 404s** (confirmed
+  live), which `watcher.http.check_robots_allowed()` treats as allow-all
+  — unlike `export.arxiv.org` (see the entry above), there is no policy
+  conflict to flag for this source; the gate is still called on every
+  fetch rather than assumed to stay that way.
+- **2026-07-09 — `watcher/sources/hn.py` public function name:
+  `fetch_hn_items(session, ...)`,** matching the
+  `fetch_<source>_items(session, ...)` shape already used by
+  `watcher/sources/arxiv.py`'s `fetch_arxiv_items` for a consistent
+  per-source-module interface.
