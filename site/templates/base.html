@@ -26,6 +26,9 @@
         </ul>
       </nav>
     </div>
+    {% if masthead_sparklines is defined and masthead_sparklines %}
+    {% include "_masthead_moving_strip.html" %}
+    {% endif %}
   </header>
 
   <main id="main-content" class="container">

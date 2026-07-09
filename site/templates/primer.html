@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Primer — AI Frontier Wire{% endblock %}
+
+{% block meta_description %}A fixed, ten-term, dependency-ordered on-ramp to the Lexicon -- start here if you're new to how frontier AI models work.{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for the Primer's fixed reading sequence.
+   * Scoped to this page only, built entirely from
+   * site/static/css/tokens.css's custom properties plus the
+   * already-established `.one-liner`/`.font-data` utilities from
+   * components.css -- no new site-wide stylesheet rules are introduced
+   * here. See IMPROVEMENT_BACKLOG.md.
+   */
+  .primer-intro {
+    max-width: 38rem;
+  }
+
+  .primer-steps {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    counter-reset: primer-step;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .primer-step {
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--color-panel);
+  }
+
+  .primer-step__label {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    opacity: 0.75;
+    margin: 0 0 0.2rem;
+  }
+
+  .primer-step__term {
+    margin: 0 0 0.35rem;
+  }
+
+  .primer-step__one-liner {
+    margin: 0;
+  }
+</style>
+
+<h1>Primer</h1>
+<p class="primer-intro">New to how frontier AI models work? These
+  {{ total_steps }} terms are ordered so each one builds on the one
+  before it -- start at the top and read straight through, or jump to any
+  term's full <a href="/lexicon/">Lexicon</a> page for a deeper cut and
+  its live source. Once you've read all {{ total_steps }}, the rest of
+  the Lexicon should read comfortably on its own.</p>
+
+{% if steps %}
+<ol class="primer-steps">
+  {% for step in steps %}
+  <li class="primer-step">
+    <p class="primer-step__label font-data">Step {{ step.step }} of {{ step.total_steps }}</p>
+    <h2 class="primer-step__term"><a href="/lexicon/{{ step.slug }}/">{{ step.term }}</a></h2>
+    <p class="primer-step__one-liner one-liner">{{ step.one_liner }}</p>
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p>The Primer's reading sequence hasn't been seeded yet -- check back
+  soon, or browse the full <a href="/lexicon/">Lexicon</a> in the
+  meantime.</p>
+{% endif %}
+
+{% endblock %}

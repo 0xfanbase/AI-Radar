@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Frontier Board — AI Frontier Wire{% endblock %}
+
+{% block meta_description %}A living tracker of frontier models across US, Chinese, and open-weights labs -- lab, model, release date, modality, context window, access, and significance, each row fact-checked against a primary source.{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for the Frontier Board's "observatory status
+   * wall" tables. Scoped to this page only (this <style> block is only
+   * ever emitted inside the rendered board.html document, never shared
+   * across pages), and built entirely from site/static/css/tokens.css's
+   * existing custom properties plus the already-established
+   * `.data`/`.font-data` utility from components.css -- no new
+   * site-wide stylesheet rules are introduced here. See
+   * IMPROVEMENT_BACKLOG.md for why this lives inline in the template
+   * rather than in components.css.
+   */
+  .board-intro {
+    max-width: 38rem;
+  }
+
+  .board-region {
+    margin-block-start: 2rem;
+  }
+
+  .board-region h2 {
+    margin-block-end: 0.5rem;
+  }
+
+  .board-table-wrap {
+    overflow-x: auto;
+  }
+
+  .board-table {
+    width: 100%;
+    min-width: 44rem;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+
+  .board-table caption {
+    text-align: left;
+  }
+
+  .board-table th,
+  .board-table td {
+    text-align: left;
+    vertical-align: top;
+    padding: 0.5em 0.75em;
+    border-bottom: 1px solid var(--color-hairline);
+  }
+
+  .board-table thead th {
+    font-family: var(--font-display);
+    color: var(--color-star-white);
+    white-space: nowrap;
+  }
+
+  .board-table tbody th[scope="row"] {
+    font-weight: 400;
+  }
+
+  .board-table td.board-cell--significance {
+    min-width: 18rem;
+  }
+
+  /*
+   * Pulse dot -- a small, static-by-default indicator next to a row's
+   * Model cell for anything verified within the last N days
+   * (board.py's PULSE_WINDOW_DAYS). It is `aria-hidden` (purely a visual
+   * accent layered on top of the row's own factual fields, never the
+   * sole carrier of any information a screen-reader user would need)
+   * and never animates the whole row -- only this one small element.
+   */
+  .board-pulse-dot {
+    display: inline-block;
+    width: 0.5em;
+    height: 0.5em;
+    margin-inline-start: 0.4em;
+    border-radius: 50%;
+    background: var(--color-signal-cyan);
+    vertical-align: middle;
+  }
+
+  /*
+   * The pulse *animation* exists only inside
+   * `prefers-reduced-motion: no-preference` -- there is no fallback
+   * animation outside this media query. Motion-sensitive readers simply
+   * see the static dot above.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .board-pulse-dot {
+      animation: board-pulse 2.2s ease-in-out infinite;
+    }
+
+    @keyframes board-pulse {
+      0%,
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(67, 229, 196, 0.6);
+      }
+      50% {
+        opacity: 0.55;
+        box-shadow: 0 0 0 4px rgba(67, 229, 196, 0);
+      }
+    }
+  }
+</style>
+
+<h1>Frontier Board</h1>
+<p class="board-intro">A living tracker of frontier models across US,
+  Chinese, and open-weights labs. Each row is fact-checked against its
+  own primary source (linked under Source) and refreshed as labs ship new
+  releases or access changes; rows verified in the last
+  {{ pulse_window_days }} days carry a small pulse dot next to the model
+  name.</p>
+
+{% if regions %}
+  {% for region in regions %}
+  <section class="board-region" aria-labelledby="{{ region.heading_id }}">
+    <h2 id="{{ region.heading_id }}">{{ region.heading }}</h2>
+    <div class="board-table-wrap">
+      <table
+        id="{{ region.table_id }}"
+        class="board-table data"
+        aria-labelledby="{{ region.heading_id }}"
+      >
+        <thead>
+          <tr>
+            <th scope="col">Lab</th>
+            <th scope="col">Model</th>
+            <th scope="col">Released</th>
+            <th scope="col">Modality</th>
+            <th scope="col">Context</th>
+            <th scope="col">Access</th>
+            <th scope="col">Significance</th>
+            <th scope="col">Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in region.rows %}
+          <tr>
+            <th scope="row">{{ row.lab }}</th>
+            <td>
+              {{ row.model }}
+              {% if row.pulse_eligible %}
+              <span
+                class="board-pulse-dot"
+                aria-hidden="true"
+                title="Verified in the last {{ pulse_window_days }} days"
+              ></span>
+              {% endif %}
+            </td>
+            <td>{{ row.release_date }}</td>
+            <td>{{ row.modality_display }}</td>
+            <td>{{ row.context_window_display }}</td>
+            <td>{{ row.access }}</td>
+            <td class="board-cell--significance">{{ row.significance }}</td>
+            <td><a href="{{ row.source_url }}">{{ row.source_host }}</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endfor %}
+{% else %}
+  <p>No frontier-model rows are tracked yet -- check back once the first
+    analyst run publishes a release story.</p>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,33 @@
+{# Thin, site-wide "what's moving" sparkline strip.
+
+   templates/base.html includes this partial directly, inside the
+   masthead, once a caller's render context carries a non-empty
+   `masthead_sparklines` list (see
+   site/builders/moving.py::build_masthead_context /
+   build_moving_context). Every builder that predates this commit
+   (board.py/lexicon.py/primer.py/wire.py) never sets that variable at
+   all, so base.html's own
+   `{% if masthead_sparklines is defined and masthead_sparklines %}`
+   guard keeps every one of their already-tested renders byte-for-byte
+   unchanged -- this strip only ever appears on a page whose own builder
+   opts in (today, only /moving/ itself). Full site-wide wiring (every
+   builder passing this same context) is a future site/generate.py
+   integration turn's job -- see IMPROVEMENT_BACKLOG.md.
+
+   Each sparkline is svg_sparkline.py's own fully-labeled output (aria-label
+   + <title> + a visible trend word) at the masthead's smaller dimensions --
+   there is no separate, unlabeled mini-chart here. The whole strip is one
+   link to /moving/ for the full page. #}
+<div class="masthead-strip">
+  <div class="container masthead-strip__inner">
+    <a class="masthead-strip__link" href="/moving/">What's moving</a>
+    <ul class="masthead-strip__list">
+      {% for item in masthead_sparklines %}
+      <li class="masthead-strip__item">
+        <span class="masthead-strip__topic">{{ item.display_name }}</span>
+        {{ item.sparkline_svg }}
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>

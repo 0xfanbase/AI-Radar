@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}What's Moving — AI Frontier Wire{% endblock %}
+
+{% block meta_description %}A pure-code, no-AI 7-day snapshot of Hacker News mention counts across every AI topic the Wire tracks.{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for What's Moving's topic list. Scoped to this
+   * page only, built entirely from site/static/css/tokens.css's existing
+   * custom properties plus the already-established `.data`/`.font-data`
+   * utility from components.css -- matches the Frontier Board/Primer/Wire
+   * builders' own established "inline <style>, no new site-wide rules"
+   * convention. See IMPROVEMENT_BACKLOG.md.
+   */
+  .moving-intro {
+    max-width: 38rem;
+  }
+
+  .moving-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .moving-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem 1.25rem;
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 0.85rem 1.1rem;
+    background: var(--color-panel);
+  }
+
+  .moving-row__label {
+    min-width: 9rem;
+  }
+
+  .moving-row__topic {
+    margin: 0;
+  }
+
+  .moving-row__trend {
+    margin: 0.15rem 0 0;
+    opacity: 0.85;
+  }
+
+  .moving-row__chart {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  .moving-row__total {
+    white-space: nowrap;
+  }
+
+  .moving-empty {
+    border: 1px dashed var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-block: 1.5rem;
+  }
+</style>
+
+<h1>What's Moving</h1>
+<p class="moving-intro">A pure-code, no-AI snapshot of Hacker News AI-story
+  mention counts over the last {{ window_days }} days, one row per topic
+  the Wire tracks. This isn't editorial judgment -- it's a raw velocity
+  signal for what the wider conversation is paying attention to right now;
+  see the <a href="/method/">Method page</a> for how the rest of the
+  pipeline decides what actually gets written up.</p>
+
+{% if topics %}
+<ul class="moving-list">
+  {% for row in topics %}
+  <li class="moving-row">
+    <div class="moving-row__label">
+      <h2 class="moving-row__topic">{{ row.display_name }}</h2>
+      <p class="moving-row__trend">{{ row.trend_label }}</p>
+    </div>
+    <div class="moving-row__chart">
+      {{ row.sparkline_svg }}
+      <span class="moving-row__total data">{{ row.total_mentions }} mentions / 7d</span>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="moving-empty">{{ empty_message }}</p>
+{% endif %}
+
+{% endblock %}

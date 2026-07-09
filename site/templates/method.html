@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Method — AI Frontier Wire{% endblock %}
+
+{% block meta_description %}How AI Frontier Wire finds, drafts, and fact-checks a story before it publishes, and what its own weekly self-audit checks for.{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for the Method page. Scoped to this page only,
+   * built entirely from site/static/css/tokens.css's existing custom
+   * properties plus the already-established `.data` utility from
+   * components.css -- matches the Frontier Board/Primer/Wire builders'
+   * own established "inline <style>, no new site-wide rules" convention.
+   * See IMPROVEMENT_BACKLOG.md.
+   */
+  .method-intro {
+    max-width: 38rem;
+  }
+
+  .method-section {
+    max-width: 38rem;
+    margin-block-start: 2rem;
+  }
+
+  .method-stats {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+  }
+
+  .method-stat {
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-panel);
+    min-width: 9rem;
+  }
+
+  .method-stat__value {
+    font-size: 1.5rem;
+    margin: 0;
+  }
+
+  .method-stat__label {
+    margin: 0.15rem 0 0;
+    opacity: 0.8;
+    font-size: 0.85rem;
+  }
+
+  .method-audit-pending {
+    border: 1px dashed var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-block-start: 1rem;
+  }
+</style>
+
+<h1>Method</h1>
+<p class="method-intro">Every story on this site moves through the same
+  fixed pipeline before it ever reaches this page, and the pipeline
+  itself is entirely code -- watching, drafting, and fact-checking are
+  each a separate, deliberately narrow step, and no single step can skip
+  the ones before it.</p>
+
+<section class="method-section" aria-labelledby="method-finding-heading">
+  <h2 id="method-finding-heading">1. Finding what's worth covering</h2>
+  <p>A daily, fully automated watcher pulls from a fixed set of sources --
+    frontier labs' own blogs and release pages, arXiv, and Hacker News --
+    clusters near-duplicate reports of the same story together, and ranks
+    the result by how many independent sources are covering it and how
+    much attention it's getting. Only the top handful of clusters each day
+    ever reach the next step; nothing is invented, and an empty result on
+    a quiet day is treated as a normal outcome, never a bug to route
+    around.</p>
+</section>
+
+<section class="method-section" aria-labelledby="method-writing-heading">
+  <h2 id="method-writing-heading">2. Drafting and fact-checking</h2>
+  <p>An AI analyst drafts each story from the sources the watcher found,
+    always in its own words, with short attributed quotes only. A story
+    only publishes as <strong>CONFIRMED</strong> if it's backed by the
+    lab's own announcement or by two independent, reputable outlets
+    reporting it separately; short of that bar it publishes as
+    <strong>REPORTED</strong>, with its sourcing shown plainly, or it
+    doesn't publish at all. A second AI pass -- the verifier -- then
+    re-checks the draft from scratch, in a fresh context, re-fetching
+    every citation and re-reading it independently. The verifier can strip
+    an unsupported sentence, drop a hollowed-out story entirely, or demote
+    a story's status, but it can never upgrade one -- it's a one-way
+    ratchet toward stricter, never looser.</p>
+</section>
+
+<section class="method-section" aria-labelledby="method-gate-heading">
+  <h2 id="method-gate-heading">3. A gate neither AI step can get past</h2>
+  <p>Before anything is published, a plain-code check confirms every
+    changed file is schema-valid and that the day's change only ever
+    touched the site's editorial content and pipeline-state folders --
+    never the workflows, the pipeline's own code, or the rules on this
+    page. If that check fails, nothing commits. This is also the concrete
+    reason a hostile instruction hidden in a fetched web page can't do
+    anything more than get treated as an ordinary quote to fact-check:
+    at the absolute worst, it could influence the wording of one story,
+    never the system that produces it.</p>
+</section>
+
+<section class="method-section" aria-labelledby="method-audit-heading">
+  <h2 id="method-audit-heading">4. Auditing itself</h2>
+  {% if audit.available %}
+  <p>The most recent self-audit ran {{ audit.generated_at }} and recorded
+    {{ audit.findings_count }} finding(s).</p>
+  {% else %}
+  <p class="method-audit-pending">{{ audit.message }}</p>
+  {% endif %}
+  <p>Once running, this weekly, entirely pure-code pass checks every
+    published citation for link rot, checks whether every AI/ML term
+    actually used in a story is defined in the Lexicon (and flags any
+    Lexicon term nothing has used in a while), tracks the verifier's own
+    pass rate over time, compares published stories against that week's
+    most-discussed Hacker News AI stories to catch genuine misses, and
+    looks for duplicate coverage of the same topic. Findings are logged as
+    findings, not failures -- a story correctly declined for weak sourcing
+    is not the same thing as a story the pipeline missed.</p>
+</section>
+
+<section class="method-section" aria-labelledby="method-stats-heading">
+  <h2 id="method-stats-heading">Pipeline stats, so far</h2>
+  <ul class="method-stats">
+    <li class="method-stat">
+      <p class="method-stat__value data">{{ ledger_stats.total_clusters }}</p>
+      <p class="method-stat__label">Stories the watcher has ever tracked</p>
+    </li>
+    <li class="method-stat">
+      <p class="method-stat__value data">{{ ledger_stats.published }}</p>
+      <p class="method-stat__label">Published to the Wire</p>
+    </li>
+    <li class="method-stat">
+      <p class="method-stat__value data">{{ ledger_stats.dropped }}</p>
+      <p class="method-stat__label">Dropped by the verifier</p>
+    </li>
+    <li class="method-stat">
+      <p class="method-stat__value data">{{ verifier_summary.total_runs }}</p>
+      <p class="method-stat__label">Analyst/verifier runs completed</p>
+    </li>
+    {% if verifier_summary.overall_pass_rate is not none %}
+    <li class="method-stat">
+      <p class="method-stat__value data">{{ (verifier_summary.overall_pass_rate * 100) | round | int }}%</p>
+      <p class="method-stat__label">Overall verifier pass rate</p>
+    </li>
+    {% endif %}
+  </ul>
+  <p>{{ ledger_stats.queued }} clustered stories are still queued, awaiting
+    their first analyst/verifier pass.</p>
+</section>
+
+{% endblock %}

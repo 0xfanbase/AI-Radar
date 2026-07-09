@@ -166,6 +166,55 @@ a {
   text-decoration: underline;
 }
 
+/* --- Masthead sparkline strip ------------------------------------------
+ * Thin, site-wide "what's moving" strip -- see
+ * site/templates/_masthead_moving_strip.html for when/why it renders.
+ * Its own <ul> scrolls horizontally on its own (never the page body) if
+ * it's wider than the viewport, matching the Board table's own
+ * `.board-table-wrap` precedent.
+ */
+.masthead-strip {
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.masthead-strip__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding-block: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.masthead-strip__link {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  white-space: nowrap;
+}
+
+.masthead-strip__list {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.masthead-strip__item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.masthead-strip__topic {
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
 .site-footer {
   border-top: 1px solid var(--color-hairline);
   padding-block: 1.25rem;
