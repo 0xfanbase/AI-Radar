@@ -1,1 +1,362 @@
-[]
+[
+  {
+    "term": "transformer",
+    "one_liner": "A transformer is a neural network design that reads all the words in a passage at once and learns which ones matter most to each other, making it the engine behind most modern AI language models.",
+    "deeper": "Before transformers, models typically processed text one word at a time in sequence, which made it slow and hard to capture relationships between distant words. The transformer instead uses a mechanism called self-attention to let every token weigh the relevance of every other token in parallel, dramatically speeding up training and improving how well models handle long-range context, as introduced in <a href=\"https://arxiv.org/abs/1706.03762\">Attention Is All You Need</a>. This architecture became the shared foundation for nearly all subsequent large language and multimodal models, from early GPT and BERT systems through today's frontier models.",
+    "related": [
+      "attention",
+      "context window",
+      "pretraining",
+      "parameter count"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "context window",
+    "one_liner": "A context window is the maximum amount of text (measured in tokens) that an AI model can \"see\" at once, including the prompt, any documents or tool results, and its own reply.",
+    "deeper": "Under the hood, the context window is the fixed-size buffer of tokens a transformer can attend over in one forward pass, since self-attention's cost grows with sequence length and a model is only trained to handle sequences up to some maximum. When a conversation, document, or agent's tool history grows past that limit, older content has to be dropped, summarized, or otherwise managed, which is why providers now expose the running budget explicitly so long-running agents can plan around it, as <a href=\"https://platform.claude.com/docs/en/build-with-claude/context-windows\">Anthropic's documentation on context windows</a> describes for Claude's token-budget tracking. A bigger window isn't automatically better, either: stuffing in more tokens can still degrade a model's recall and accuracy on what actually matters, a tradeoff sometimes called \"context rot.\"",
+    "related": [
+      "transformer",
+      "attention",
+      "tokenization",
+      "inference"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "RLHF",
+    "one_liner": "RLHF (Reinforcement Learning from Human Feedback) is a training method that teaches an AI model to give better answers by having people rank its responses and using those rankings as a reward signal.",
+    "deeper": "After a language model has been pretrained on raw text, RLHF adds a further post-training stage where human labelers compare multiple model outputs and rank them from best to worst, and those rankings are used to train a separate reward model that predicts which responses people prefer. The base model is then updated with reinforcement learning to produce outputs that score highly under that reward model, nudging it toward answers that are more helpful, honest, and safe rather than merely statistically likely. This technique, popularized by OpenAI's InstructGPT work, showed that a much smaller RLHF-tuned model could be preferred by humans over a far larger model trained without it, which is why RLHF became a standard step in building today's chat-oriented assistants (<a href=\"https://arxiv.org/abs/2203.02155\">Ouyang et al., 2022</a>).",
+    "related": [
+      "fine-tuning",
+      "post-training",
+      "alignment",
+      "red teaming"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "MoE",
+    "one_liner": "Mixture of Experts (MoE) is a way of building a big AI model out of many smaller \"expert\" sub-networks, where only a few experts are used for any given input instead of the whole model.",
+    "deeper": "Instead of routing every input through one giant dense network, an MoE model has a set of smaller expert sub-networks plus a learned \"router\" that picks a small subset (often just one or two) to process each token. This lets total parameter count grow enormously while keeping the compute cost per token much lower, since most of the experts stay idle on any given pass. The technique was popularized for deep learning by <a href=\"https://arxiv.org/abs/1701.06538\">Shazeer et al.'s sparsely-gated MoE paper</a>, and it now underlies several modern large language models that need high capacity without paying the full dense-model compute bill at inference time.",
+    "related": [
+      "transformer",
+      "parameter count",
+      "compute",
+      "inference"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "distillation",
+    "one_liner": "Distillation is a way of training a smaller \"student\" AI model to copy the behavior of a bigger, smarter \"teacher\" model so it performs almost as well but runs cheaper and faster.",
+    "deeper": "Distillation trains a smaller student model to reproduce a larger teacher model's behavior, often by learning from the teacher's full probability distribution over possible outputs rather than just its single best answer, since those \"soft\" probabilities reveal how the teacher weighs alternatives and carry more signal than a hard label alone. The technique was formalized by Hinton, Vinyals, and Dean in <a href=\"https://arxiv.org/abs/1503.02531\">Distilling the Knowledge in a Neural Network</a>, which showed that an ensemble's knowledge could be compressed into a single, much smaller network with little loss in accuracy. Today AI labs routinely use distillation to turn frontier models into leaner, cheaper variants for production deployment while keeping most of the original's capability.",
+    "related": [
+      "fine-tuning",
+      "post-training",
+      "parameter count",
+      "frontier model"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "agent",
+    "one_liner": "An agent is an AI system that can autonomously plan and take a sequence of actions—like using tools, calling APIs, or writing code—to accomplish a goal, rather than just giving one direct answer.",
+    "deeper": "Unlike a single-turn chatbot reply, an agent runs in a loop: it observes the current state, decides what to do next, takes an action such as invoking a tool, and feeds the result back in to decide its next step, repeating until the task is finished. This loop lets agents tackle multi-step, open-ended problems—like researching across many sources or iteratively debugging code—that a one-shot prompt can't handle alone. Anthropic's engineering guidance argues the most reliable agentic systems are usually built from simple, composable patterns rather than heavyweight frameworks, adding autonomy only when it measurably beats a fixed workflow, as laid out in <a href=\"https://www.anthropic.com/research/building-effective-agents\">Building Effective Agents</a>.",
+    "related": [
+      "chain-of-thought",
+      "RAG",
+      "context window",
+      "test-time compute"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "RAG",
+    "one_liner": "RAG (Retrieval-Augmented Generation) is a technique where an AI model looks up relevant documents from an external source before answering, so its response is grounded in real, up-to-date information rather than just what it memorized during training.",
+    "deeper": "Instead of relying solely on knowledge baked into a model's weights during pretraining, RAG systems first retrieve relevant passages from an external corpus (using a vector search or similar method) and then feed those passages into the model's context window alongside the user's query, letting the model generate an answer conditioned on that fresh evidence. This approach was formalized as a way to combine a pretrained parametric model with a non-parametric memory store that can be updated or swapped without retraining the model itself, as described in <a href=\"https://arxiv.org/abs/2005.11401\">Lewis et al., 2020</a>. In practice, RAG is one of the most common ways to reduce hallucination and extend a model's effective knowledge cutoff, since it lets frontier and open-weights models alike answer questions about private documents or recent events they were never trained on.",
+    "related": [
+      "context window",
+      "hallucination",
+      "knowledge cutoff",
+      "fine-tuning"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "fine-tuning",
+    "one_liner": "Fine-tuning is taking an already-trained AI model and continuing to train it on a smaller, more specific dataset so it gets better at a particular task or style.",
+    "deeper": "Fine-tuning starts from a model that already learned general patterns during pretraining on a huge, broad corpus, then keeps training it on a much smaller, task-specific dataset so it becomes specialized -- for instance, turning a general text model into one that follows instructions well or writes in a particular tone. This is far cheaper than training from scratch, since most of the heavy lifting already happened during pretraining, and the approach traces back to work showing that a single pretrained language model could be fine-tuned to state-of-the-art results across diverse text classification tasks using only a small amount of labeled data, as shown in the <a href=\"https://arxiv.org/abs/1801.06146\">ULMFiT paper</a>. Modern fine-tuning spans everything from updating all of a model's parameters to lightweight methods that touch only a small subset of weights, and it's the mechanism underlying post-training steps like instruction tuning and RLHF that turn a raw pretrained model into a helpful assistant.",
+    "related": [
+      "pretraining",
+      "post-training",
+      "RLHF",
+      "transformer"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "hallucination",
+    "one_liner": "Hallucination is when an AI model confidently states something false or made-up as if it were a fact.",
+    "deeper": "Hallucination happens because language models are trained to predict plausible-sounding next words rather than to verify truth, so when they lack reliable knowledge about a topic they still generate fluent, confident text that can be entirely fabricated. This can range from inventing citations and quotes to misstating facts or contradicting the very input it was given, and it grows more likely as prompts push into territory the model was never trained on or where grounding in real documents is unavailable. Researchers have cataloged this as a systemic failure mode across summarization, dialogue, and question-answering systems, as detailed in <a href=\"https://arxiv.org/abs/2202.03629\">a 2022 survey of hallucination in natural language generation</a>, and mitigation approaches like retrieval augmentation and reinforcement learning from human feedback are now standard tools for reducing it.",
+    "related": [
+      "RAG",
+      "RLHF",
+      "evals",
+      "knowledge cutoff"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "scaling laws",
+    "one_liner": "Scaling laws are the observed pattern that AI models reliably get better and more predictable as you feed them more data, more parameters, and more compute.",
+    "deeper": "Scaling laws describe how a model's loss (a measure of how well it predicts data) falls off in a smooth, predictable power-law curve as researchers increase model size, training data, and compute, rather than improving in some random or chaotic way. This predictability is what lets labs forecast the performance of a giant, expensive training run from the results of much smaller and cheaper experiments, guiding decisions about how to split a fixed compute budget between a bigger model and more training data. The idea was put on firm empirical footing by <a href=\"https://arxiv.org/abs/2001.08361\">Kaplan et al., \"Scaling Laws for Neural Language Models\"</a>, which showed loss scaling as a power law across more than seven orders of magnitude, and it has since been refined by later work but remains the core justification for why frontier labs keep building bigger models.",
+    "related": [
+      "compute",
+      "parameter count",
+      "pretraining",
+      "frontier model"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "evals",
+    "one_liner": "Evals are structured tests that measure how well an AI model performs on specific tasks, similar to a report card for grading its skills and safety.",
+    "deeper": "Evals are standardized sets of questions, tasks, or scenarios run against a model so its outputs can be scored against a known-correct answer or a rubric, letting labs track whether a new model or fine-tune actually improved (or regressed) on skills like math, coding, factuality, or refusing harmful requests. They range from simple multiple-choice benchmarks that can be graded automatically to elaborate agentic tasks graded by a human or by another model acting as a judge, and labs run them constantly during training, after fine-tuning, and before public release to decide if a model is ready to ship. OpenAI's open-source <a href=\"https://github.com/openai/evals\">Evals framework</a> is a widely used example, providing a registry of test templates and tooling so developers can grade existing models or build custom evals for their own use cases.",
+    "related": [
+      "benchmark",
+      "red teaming",
+      "alignment",
+      "system card"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "attention",
+    "one_liner": "Attention is the mechanism that lets a model look back over all the words it's seen and decide which ones matter most for figuring out what comes next.",
+    "deeper": "Mechanically, attention works by turning each token into a query, key, and value vector, then scoring every token against every other to produce a weighted blend of information rather than reading text strictly left to right or one word at a time. This was formalized as \"scaled dot-product attention\" and, run in parallel across many heads, became the sole building block of the Transformer architecture introduced in <a href=\"https://arxiv.org/abs/1706.03762\">Attention Is All You Need</a>, which replaced the recurrent and convolutional networks that previously dominated sequence modeling. Because attention lets every token directly access every other token in a single step, it made training far more parallelizable and is the reason today's language models can flexibly weigh distant context instead of forgetting earlier parts of a long input.",
+    "related": [
+      "transformer",
+      "context window",
+      "tokenization",
+      "compute"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "tokenization",
+    "one_liner": "Tokenization is the step where text is chopped into small chunks called tokens so a model can turn them into numbers it can actually compute with.",
+    "deeper": "Tokenization turns raw text into a sequence of discrete units—often word pieces smaller than whole words—that get mapped to numeric IDs and then to vector embeddings the model can process. Most modern language models rely on subword algorithms descended from byte pair encoding, a compression technique adapted for this purpose by <a href=\"https://arxiv.org/abs/1508.07909\">Sennrich et al.</a>, which repeatedly merges frequently co-occurring character sequences to keep the vocabulary compact while still handling rare or unseen words. Because a model only ever sees this token stream rather than raw characters, the tokenizer's design quietly shapes the effective size of the context window, how well the model handles different languages or code, and even quirky behaviors like spelling or arithmetic mistakes.",
+    "related": [
+      "transformer",
+      "context window",
+      "pretraining",
+      "attention"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "parameter count",
+    "one_liner": "Parameter count is the number of adjustable internal values (weights) a neural network learns during training, and it's the most common rough measure of a model's size.",
+    "deeper": "Each parameter is a numeric weight the model tunes during training to turn input tokens into useful predictions, so more parameters generally mean more capacity to store patterns from the training data. Parameter count is often used as shorthand for a model's scale and expected capability, though it's an imperfect proxy since architecture, training data quality, and training compute all matter too. The scaling trend became especially visible with <a href=\"https://arxiv.org/abs/2005.14165\">GPT-3</a>, which showed that growing a model to 175 billion parameters unlocked strong few-shot performance without task-specific fine-tuning.",
+    "related": [
+      "scaling laws",
+      "MoE",
+      "distillation",
+      "frontier model"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "post-training",
+    "one_liner": "Post-training is the set of steps—like fine-tuning and reinforcement learning from human feedback—that takes a raw pretrained language model and shapes it into a helpful, instruction-following assistant.",
+    "deeper": "After a model has absorbed general language patterns during pretraining on massive text corpora, post-training refines its behavior through supervised fine-tuning on curated examples, reward modeling, and techniques like RLHF or direct preference optimization to make responses more helpful, honest, and safe. This stage doesn't add much new knowledge but reshapes how the model expresses what it already learned, aligning it with human preferences and instruction-following formats. Meta's <a href=\"https://arxiv.org/abs/2407.21783\">Llama 3 paper</a> details a multi-round post-training pipeline combining rejection sampling, supervised fine-tuning, and direct preference optimization to turn a 405B-parameter base model into an instruction-tuned assistant.",
+    "related": [
+      "pretraining",
+      "RLHF",
+      "fine-tuning",
+      "alignment"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "chain-of-thought",
+    "one_liner": "Chain-of-thought is when an AI model writes out its intermediate reasoning steps, like showing its work on a math problem, instead of just jumping straight to a final answer.",
+    "deeper": "Chain-of-thought prompting encourages a language model to decompose a hard problem into a sequence of smaller, explicit reasoning steps before producing its final answer, mimicking how a person talks through a problem on scratch paper. This matters because many multi-step tasks -- arithmetic, logic puzzles, commonsense inference -- are too hard for a model to solve in a single forward leap from question to answer, but become tractable once the model is allowed to lay out intermediate deductions one at a time. The technique was first shown to dramatically improve large models' performance on reasoning benchmarks in <a href=\"https://arxiv.org/abs/2201.11903\">Wei et al., 2022</a>, and it has since become a foundation for both prompting strategies and the extended \"reasoning\" or \"thinking\" modes built into newer models.",
+    "related": [
+      "test-time compute",
+      "agent",
+      "hallucination",
+      "post-training"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "benchmark",
+    "one_liner": "A benchmark is a standardized set of test questions or tasks used to measure and compare how well different AI models perform.",
+    "deeper": "Benchmarks give researchers a common yardstick: instead of vague claims that a model is \"smart,\" everyone runs the same fixed set of problems through their models and compares scores directly. Many popular benchmarks bundle multiple tasks into one aggregate score, as the <a href=\"https://arxiv.org/abs/1804.07461\">GLUE benchmark</a> did by combining nine language-understanding tasks so progress could be tracked across a whole skill area rather than a single narrow dataset. Because models can overfit to a benchmark's quirks or even be trained on leaked test examples, a high score doesn't always guarantee real-world competence, which is why harder and more varied benchmarks keep replacing ones that become \"saturated.\"",
+    "related": [
+      "evals",
+      "frontier model",
+      "hallucination",
+      "scaling laws"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "multimodal",
+    "one_liner": "Multimodal AI describes models that can take in and reason about more than one kind of input at once — like text, images, audio, or video — instead of being limited to just one.",
+    "deeper": "Older language models only understood text, but multimodal models are trained to translate different kinds of data — pictures, sound, video — into a shared internal representation so the model can reason across them together rather than treating each as a separate problem. A widely-cited early approach, CLIP, showed that training on millions of image-caption pairs lets a model learn visual concepts straight from natural-language descriptions instead of a fixed set of labeled categories, as described in <a href=\"https://arxiv.org/abs/2103.00020\">Radford et al., 2021</a>. That same idea now underlies today's frontier chat assistants, which can take a photo, a PDF, or an audio clip alongside text in a single conversation and respond coherently across all of them.",
+    "related": [
+      "transformer",
+      "attention",
+      "foundation model",
+      "frontier model"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "compute",
+    "one_liner": "Compute is the raw processing power (chips, servers, time) needed to train and run an AI model — like the amount of \"engine work\" behind building or using it.",
+    "deeper": "In AI, compute usually means the total number of floating-point operations spent training or running a model, typically supplied by GPU or TPU clusters running for weeks or months. Researchers found that a model's loss improves predictably as you scale up compute (along with data and parameters), which is why labs have raced to build ever-larger training clusters, as shown empirically in <a href=\"https://arxiv.org/abs/2001.08361\">Kaplan et al., 2020</a>. Because compute is scarce, expensive, and export-controlled at the chip level, it has become as strategically important to frontier AI development as the algorithms and data themselves.",
+    "related": [
+      "scaling laws",
+      "frontier model",
+      "parameter count",
+      "export controls"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "inference",
+    "one_liner": "Inference is when a trained AI model uses what it already learned to produce an answer, prediction, or piece of text for new input you give it.",
+    "deeper": "Inference is the phase where an already-trained model is put to work: you feed it a prompt or other input, it runs a forward pass through its fixed parameters, and it produces an output without any further learning taking place. This is the counterpart to training, where the weights are actively being adjusted; because the weights are frozen during inference, each individual query is far cheaper than training but happens vastly more often, since every chat message, search, or API call triggers a fresh one. Since large language models generate output one token at a time and the compute and memory needed per step grow with model size and context length, labs have invested heavily in techniques like batching, quantization, and hardware-aware partitioning to make inference faster and cheaper at scale, as described in <a href=\"https://arxiv.org/abs/2211.05102\">Pope et al.'s work on efficiently scaling Transformer inference</a>.",
+    "related": [
+      "context window",
+      "compute",
+      "test-time compute",
+      "pretraining"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "export controls",
+    "one_liner": "Export controls are government rules that restrict which AI chips, models, or technical know-how a country's companies can sell or share with certain other countries.",
+    "deeper": "Governments use export controls to slow rivals' progress on strategically sensitive technology by blocking the sale of advanced AI hardware (like top-end GPUs), the software tools used to design and fabricate chips, and sometimes the trained model weights themselves. The most consequential recent example is the U.S. Commerce Department's Bureau of Industry and Security rules, first imposed in October 2022 and tightened repeatedly since, which require licenses to export advanced computing chips and semiconductor manufacturing equipment to China in order to limit its supercomputing and military AI capabilities, as described in the agency's own <a href=\"https://www.bis.gov/press-release/commerce-implements-new-export-controls-advanced-computing-semiconductor-manufacturing-items-peoples\">BIS press release</a>. Because frontier AI training depends on huge clusters of specialized chips, these controls shape which countries and labs can realistically compete at the largest scale, pushing restricted actors toward smuggling, domestic chip development, or more compute-efficient techniques instead.",
+    "related": [
+      "compute",
+      "frontier model",
+      "open weights",
+      "scaling laws"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "foundation model",
+    "one_liner": "A foundation model is a large AI model trained on broad data that can be adapted to many different downstream tasks, rather than being built for just one job.",
+    "deeper": "Instead of training a separate model from scratch for every task, labs now train one very large model on massive, broad datasets and then adapt that single base for translation, coding, image generation, or countless other uses through fine-tuning or prompting. The term was coined by Stanford researchers to capture how these models act as a shared \"foundation\" that many downstream applications are built on top of, while also flagging that this centrality creates outsized risk if the base model has flaws or biases, since those propagate into everything built on it (<a href=\"https://arxiv.org/abs/2108.07258\">Bommasani et al., 2021</a>). Not every foundation model is a \"frontier model\" in the state-of-the-art sense, but most modern frontier models—GPT-4, Claude, Gemini—are built as foundation models first and then specialized through further post-training.",
+    "related": [
+      "pretraining",
+      "fine-tuning",
+      "frontier model",
+      "scaling laws"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "system card",
+    "one_liner": "A system card is a report an AI lab publishes alongside a new model that explains what it can do, how it was tested, and what safety risks or limitations were found.",
+    "deeper": "A system card is a document released with an AI model that lays out its capabilities, evaluation results, known failure modes, and the safety mitigations applied before release, functioning like a nutrition label for software rather than a marketing pitch. It typically summarizes red-teaming findings, benchmark performance, and residual risks (like generating harmful content or being misused) so outside researchers, journalists, and regulators have a common reference point instead of relying on a lab's own claims. The format was popularized by OpenAI's <a href=\"https://cdn.openai.com/papers/gpt-4-system-card.pdf\">GPT-4 System Card</a>, and most frontier labs now publish their own version alongside major model releases.",
+    "related": [
+      "evals",
+      "red teaming",
+      "frontier model",
+      "alignment"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "red teaming",
+    "one_liner": "Red teaming is the practice of deliberately trying to make an AI model misbehave — trick it, jailbreak it, or get it to produce harmful output — before it's released, so the problems can be found and fixed first.",
+    "deeper": "In practice, red teaming means assembling people (and increasingly other AI models) whose job is to adversarially probe a system for weaknesses like generating dangerous instructions, leaking private data, or being manipulated into ignoring its safety training. Anthropic's early work in this area formalized the process of hiring crowdworkers to attack models, cataloguing the resulting failures, and studying how attack success rates change as models are scaled up and refined with techniques like RLHF, as described in <a href=\"https://arxiv.org/abs/2209.07858\">Ganguli et al., 2022</a>. Red teaming findings typically feed back into further fine-tuning and are often summarized publicly in a model's system card so outsiders can see what risks were tested and mitigated before release.",
+    "related": [
+      "alignment",
+      "evals",
+      "system card",
+      "RLHF"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "knowledge cutoff",
+    "one_liner": "Knowledge cutoff is the date after which an AI model has no built-in knowledge, because its training data was collected before that point.",
+    "deeper": "A model's knowledge cutoff marks where the data used to build it stops, so anything that happened after that date is invisible to the model unless a tool or live search feeds it fresh information. Labs often distinguish between the full range of dates present in the training set and a narrower window through which the model's knowledge is most complete and dependable, as <a href=\"https://platform.claude.com/docs/en/about-claude/models/overview\">Anthropic's models overview</a> does by listing both a \"training data cutoff\" and a \"reliable knowledge cutoff\" for each Claude model. Because later fine-tuning rarely adds significant new world facts, this cutoff persists even as a model keeps getting updated in other ways, which is why a model can state outdated information confidently or simply admit it doesn't know about recent events.",
+    "related": [
+      "pretraining",
+      "fine-tuning",
+      "hallucination",
+      "system card"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "test-time compute",
+    "one_liner": "Test-time compute means letting an AI model spend extra computation \"thinking\" or trying multiple approaches while answering a question, rather than relying solely on how it was trained beforehand.",
+    "deeper": "For years, making a model smarter mainly meant training a bigger model on more data, with the resulting network then fixed and used as-is to answer any query. Test-time compute instead spends extra computation at inference time — generating several candidate answers, extending a chain of reasoning, or searching against a verifier — and uses that extra effort to pick or refine a better final response. Researchers have shown that allocating this inference-time budget adaptively based on a prompt's difficulty can let a much smaller model match one many times its size, as demonstrated in <a href=\"https://arxiv.org/abs/2408.03314\">Snell et al., 2024</a>.",
+    "related": [
+      "chain-of-thought",
+      "inference",
+      "scaling laws",
+      "compute"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "open weights",
+    "one_liner": "Open weights means a company publishes the actual trained numbers (parameters) of an AI model so anyone can download it and run it on their own computers.",
+    "deeper": "Open weights refers to releasing the trained parameter file of a model publicly, letting anyone download, run, and fine-tune it on their own hardware, which is a narrower promise than \"open source\" since the training code, datasets, and pipeline usually stay private. This distinction matters in practice: an open-weight model gives developers control, privacy, and freedom from per-token API costs, but without the training recipe they cannot fully reproduce or audit how the model was built. OpenAI's 2025 gpt-oss release is a notable recent example of a frontier lab explicitly branding a model line this way, describing it as an <a href=\"https://huggingface.co/openai/gpt-oss-120b\">open-weight model</a> rather than a fully open-source one.",
+    "related": [
+      "fine-tuning",
+      "foundation model",
+      "frontier model",
+      "export controls"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "alignment",
+    "one_liner": "Alignment is the effort to make an AI system actually do what its designers and users intend, rather than just optimizing whatever narrow signal it was trained on.",
+    "deeper": "Alignment is the broad effort to steer a model's goals and behavior so they track what humans actually want, rather than whatever narrow objective it happened to be trained to optimize. The trouble is that objectives are hard to specify completely, so a system can find shortcuts that satisfy the letter of its training signal while missing the intent -- a failure mode Amodei et al. catalogued in their influential taxonomy of <a href=\"https://arxiv.org/abs/1606.06565\">concrete problems in AI safety</a>. In practice, labs now pursue alignment through techniques spread across the whole model lifecycle, including human feedback, red-teaming, and evaluations meant to surface deceptive or harmful behavior before a system is deployed.",
+    "related": [
+      "RLHF",
+      "red teaming",
+      "evals",
+      "hallucination"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "pretraining",
+    "one_liner": "Pretraining is the initial, most expensive phase of training an AI model, where it learns general language and reasoning patterns by predicting missing or next words across huge amounts of text scraped from books, websites, and code.",
+    "deeper": "Pretraining works by giving a neural network a simple, self-supervised objective -- usually predicting the next word (or a masked-out word) in a sequence -- across a massive, mostly unlabeled corpus, so it never needs humans to hand-label examples. Because the same objective scales to essentially unlimited text, pretraining is where a model absorbs the bulk of its grammar, world knowledge, and latent reasoning ability, before any task-specific tuning happens; the landmark demonstration of this recipe was Google's BERT paper, which showed that <a href=\"https://arxiv.org/abs/1810.04805\">pre-training deep bidirectional Transformers</a> on unlabeled text produced representations that transferred to many downstream NLP tasks with only light fine-tuning. Modern frontier models still follow this same two-stage template, first pretraining on trillions of tokens and then applying post-training methods like fine-tuning and RLHF to shape the model's behavior and align it with what users actually want.",
+    "related": [
+      "fine-tuning",
+      "post-training",
+      "scaling laws",
+      "transformer"
+    ],
+    "seen_in": []
+  },
+  {
+    "term": "frontier model",
+    "one_liner": "A frontier model is one of the most advanced AI systems in existence at a given time, pushing past what earlier models could do and often gaining surprising new abilities along the way.",
+    "deeper": "Frontier models sit at the very edge of what's currently achievable, built with the largest amounts of compute and data available, which is also why their full range of capabilities and failure modes is hard to map out ahead of time. The label was popularized to make the case that these especially capable systems deserve scrutiny beyond ordinary software, since a model competent enough to help with everyday tasks may also be competent enough to meaningfully lower the barrier to serious misuse, as argued in <a href=\"https://arxiv.org/abs/2307.03718\">Anderljung et al.</a>. In practice, AI labs use the term to justify extra precautions on their newest, largest systems -- things like staged rollouts, red-teaming, and published safety documentation -- before those models are made broadly available.",
+    "related": [
+      "foundation model",
+      "scaling laws",
+      "compute",
+      "evals"
+    ],
+    "seen_in": []
+  }
+]
