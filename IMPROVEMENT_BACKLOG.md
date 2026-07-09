@@ -1333,6 +1333,120 @@ notes.
   `site/requirements.txt` installed, per its own known gap) also still
   green (6 passed), unaffected by this commit.
 
+## Phase 4: `site/builders/board.py` + `site/templates/board.html` (Frontier Board) (2026-07-09)
+
+- **This turn's scope was explicitly `site/builders/board.py` +
+  `site/templates/board.html` (+ `tests/test_board_builder.py`) only** —
+  `site/generate.py` is deliberately *not* modified to call this builder.
+  No `wire.py` builder exists yet either (this landed alongside a
+  concurrent in-flight Wire builder in the same working tree —
+  `site/templates/card.html`/`wire_index.html`/`wire_month.html`
+  appeared mid-session from that parallel effort, untouched by this
+  commit), so `board.py` is fully self-sufficient: it builds its own
+  minimal Jinja `Environment` (`board.build_jinja_env()`, mirroring
+  `generate.py`'s own `build_jinja_env()` field-for-field) rather than
+  importing one from `generate.py`. Wiring `/board/` into
+  `generate.py`'s actual render pipeline (and giving it a real
+  `public/board/index.html` route) is left to whichever future commit
+  integrates all the Phase 4 builders together.
+- **Page-specific CSS (the pulse-dot styling, the `@keyframes` block, and
+  the table/region layout rules) lives inline in a `<style>` block inside
+  `board.html` itself, not in `site/static/css/components.css`.** This
+  turn's scope explicitly named only `board.py` and `board.html`, so
+  `components.css` was left untouched rather than extended with new
+  Board-specific selectors; a `<style>` element is valid HTML5 flow
+  content inside `<body>`/`<main>`, so this doesn't require any change to
+  `base.html` either (no new template block was needed to inject it into
+  `<head>`). A future integration pass may want to hoist this into
+  `components.css` alongside the eventual Lexicon/Primer/Moving page
+  styles for consistency, but that's a cosmetic consolidation, not a
+  functional gap — the reduced-motion-only `@keyframes` guarantee holds
+  either way.
+- **"JetBrains-Mono data styling with tabular figures" is applied to the
+  entire `<table class="board-table data">` element**, reusing
+  `components.css`'s existing `.data` utility class as-is (no new CSS
+  rule needed), rather than scoping it to only the numeric-looking
+  Released/Context columns. `components.css`'s own header comment
+  documents `.data`/`.font-data` as intended for "numeric fields (dates,
+  counts, context windows, scores)", but this task's instructions
+  described the mono/tabular treatment as a property of the "observatory
+  status wall" table as a whole, immediately before listing all eight
+  columns — read as a deliberate console/terminal-readout aesthetic for
+  the whole row, not just its two date/count cells. Logged as the more
+  defensible of two plausible readings, not a certainty.
+- **Region heading text: `"US"`, `"China"`, `"Open Weights"`** — the
+  first two are already display-ready; `"open-weights"` (the schema's
+  lowercase enum literal) is title-cased with the hyphen replaced by a
+  space for the `<h2>` text. The task's own wording ("US, CHINA, OPEN
+  WEIGHTS") is read as naming the three regions, not mandating literal
+  all-caps heading text — full caps was rejected as visually shoutier
+  than any other heading level elsewhere in the site (Wire/Lexicon/etc.
+  all use normal title-case headings).
+- **The pulse dot is rendered as a bare `aria-hidden="true"` `<span>`
+  with no visually-hidden text alternative**, per this task's own
+  explicit instruction ("a small dedicated pulse-dot element (aria-hidden)
+  next to the Model cell"). Unlike the status-chip rule elsewhere in this
+  project (status must always carry visible literal text, never
+  color/shape alone), currency-of-verification is a secondary, decorative
+  signal layered on top of the row's own always-fully-legible factual
+  fields (lab, model, dates, access, significance, source) — no
+  information is lost to a screen-reader user if the dot goes
+  unannounced, so this doesn't conflict with the project's existing
+  no-color-only-signal rule, which is about primary information (status),
+  not this secondary freshness indicator.
+- **Each region's `<table>` carries `aria-labelledby` pointing at its
+  immediately-preceding `<h2 id="board-region-<slug>-heading">`**, per the
+  build plan's own wording for this page ("one `<table>` per region,
+  `aria-labelledby`"), rather than a `<caption>` element (the other
+  standard mechanism for naming a table). Both `<section
+  aria-labelledby="...">` (the region landmark) and the `<table
+  aria-labelledby="...">` inside it point at the same heading id — this is
+  intentional double association (landmark name + table accessible name
+  both resolve to the same visible heading), not a conflict, since a
+  `<table>`'s accessible name and its containing `<section>`'s accessible
+  name are computed independently.
+- **A region with zero rows is omitted entirely (no empty placeholder
+  table)**, matching the same "don't render a broken-looking empty
+  section" precedent `site/generate.py`'s `load_cards()` docstring already
+  established for `content/cards/` being empty at this build stage. The
+  real, committed `content/frontier_board.json` (13 rows) spans all three
+  schema regions today, so this path is only exercised by
+  `tests/test_board_builder.py`'s synthetic zero-row and
+  region-subset cases, not by the real content — but `board.py`/
+  `board.html` handle it regardless, per this turn's explicit "any
+  template touching [empty collections] must handle it gracefully, not
+  crash or look broken" instruction (stated there about `content/cards/`
+  specifically, applied here to the same underlying risk for
+  `frontier_board.json`).
+- **Source cells display the URL's host (e.g. `platform.claude.com`),
+  not a generic "Source" label or the full URL**, via a small
+  `source_host()` helper (`urllib.parse.urlsplit(...).netloc`, stripping
+  a leading `www.`). A repeated generic "Source" link text on every row
+  of an 8-13-row table is a known link-purpose-in-context anti-pattern;
+  the host name is both more informative at a glance and still concise
+  enough for the mono-styled table's fixed-width feel.
+- **`is_pulse_eligible()`'s `today` argument is a required keyword/
+  positional parameter with no default**, and the module never imports
+  `datetime.date.today`/`datetime.datetime.now` anywhere — enforced by
+  this turn's own explicit instruction ("never a live now() call, so it
+  stays unit-testable"). The 7-day window boundary is inclusive at both
+  ends (`0 <= delta_days <= 7`); a `last_verified` date after `today`
+  (clock skew or bad seed data) is treated as not pulse-eligible rather
+  than via `abs()`, which would incorrectly light the dot for a
+  bad-future-dated row.
+- Verification: `python -m pytest` — 543 passed, 2 deselected (up from
+  512 before this commit: 31 new tests in `tests/test_board_builder.py`),
+  full suite green. `site/tests/test_build.py` (run explicitly with
+  `site/requirements.txt` installed) also still green (6 passed),
+  unaffected by this commit — `site/builders/board.py` is not yet called
+  from `site/generate.py`. `board.render_board_page()` manually exercised
+  against the real, committed `content/frontier_board.json` (13 rows)
+  with `today=date(2026, 7, 9)`, producing a well-formed page with three
+  region tables (US=6, China=5, open-weights=2 rows), every row's
+  `source_url` present as a real `<a href>` link, and every row showing a
+  pulse dot (expected: all 13 rows share today's own `last_verified`
+  date in the real seed content).
+
 ## Phase 4: `site/builders/wire.py` + templates (The Wire) (2026-07-09)
 
 - **This turn's scope was explicitly `site/builders/wire.py` +
@@ -1464,3 +1578,385 @@ notes.
   (matching this environment's real, empty `content/cards/` directory),
   producing a well-formed home page with the honest
   "No cards published yet" empty-state message and no crash.
+
+## Phase 4: `site/builders/lexicon.py` + `site/builders/primer.py` + templates (2026-07-09)
+
+- **This turn's scope was explicitly `site/builders/lexicon.py` +
+  `site/templates/lexicon_index.html` + `site/templates/lexicon_term.html`
+  + `site/builders/primer.py` + `site/templates/primer.html` (+
+  `tests/test_lexicon_builder.py`/`tests/test_primer_builder.py`) only** --
+  `site/generate.py` is deliberately *not* modified to call either
+  builder, matching the precedent `site/builders/board.py` and
+  `site/builders/wire.py` already established in this same working tree:
+  both new builders build their own minimal Jinja `Environment` via their
+  own `build_jinja_env()` (field-for-field identical to `generate.py`'s
+  own) rather than importing one from `generate.py` or from each other.
+  Wiring `/lexicon/`, `/lexicon/<slug>/`, and `/primer/` into
+  `generate.py`'s actual render pipeline is left to whichever future
+  commit integrates all the Phase 4 builders together.
+- **`deeper` field HTML handling (the core judgment call this turn's
+  instructions flagged explicitly):** after reading all 30 real entries,
+  every one has *exactly* one inline `<a href="...">...</a>` citation
+  anchor and no other HTML-special characters anywhere else in the field
+  (no stray `<`, `>`, `&`, and no pre-existing HTML entities either --
+  literal `"` characters do appear in several entries' prose, e.g. the
+  `"context rot"` aside in the `context window` entry, but a bare `"` in
+  HTML text content needs no escaping in the first place, so this isn't
+  evidence of an entity-escaping convention, just plain prose that
+  happens to quote a phrase). Two blind approaches were rejected: (a)
+  marking the whole field `Markup`-safe as-is would also trust *any*
+  other accidental markup a future backfill/analyst edit introduces
+  into the surrounding prose, not just the one intended anchor; (b)
+  running `html.escape()` over the whole field would mangle the anchor's
+  own `<a>`/`</a>` delimiters into `&lt;a&gt;`/`&lt;/a&gt;`, breaking the
+  citation link entirely. `render_deeper_html()` instead does what
+  `site/lib/linkify.py` already does for card prose: escape every
+  character of the surrounding text via `html.escape`, and reconstruct
+  only the anchor(s) a narrow literal regex (`<a href="...">...</a>`,
+  no nested tags, no other attributes) can actually find, re-escaping the
+  anchor's own extracted `href`/text pieces on the way back out. For
+  today's clean seed content this reconstruction is a no-op (nothing in
+  any real anchor's href/text needs escaping), but it's a real defense
+  against a future entry whose anchor text or href does contain a stray
+  HTML-special character. A `deeper` string with no matching anchor at
+  all falls back to fully-escaped plain text rather than raising, per
+  this build stage's established "handle it, don't crash" convention --
+  not expected for real content (all 30 have one), covered by a
+  dedicated synthetic test.
+- **`seen_in[]` link target (`seen_in_href()`) is a best-effort
+  construction, not a schema-guaranteed one:** `card.schema.json` only
+  documents card ids as `YYYY-MM-DD-slug` by example in its own
+  description field, not as an enforced format. This function parses the
+  leading 10 characters as an ISO date and links to that month's Wire
+  archive page (`site/builders/wire.py`'s own `/wire/<YYYY-MM>/` route),
+  anchored at the card's own headline heading id -- reusing the exact id
+  `site/templates/card.html` already gives every card's `<h2>`
+  (`card-<id>-headline`) without modifying that file. Falls back to the
+  bare `/wire/` route (still a valid, resolvable link, just without the
+  same-page scroll target) if the id's prefix doesn't parse as a date.
+  Since `seen_in[]` is empty for all 30 real seed terms today (no
+  analyst run has happened for real yet), this path is only exercised by
+  synthetic fixtures in `tests/test_lexicon_builder.py` until the
+  analyst's auto-growth rule starts populating it for real -- logged here
+  as a forward-looking, not-yet-load-bearing design choice a future
+  integration turn should re-check once real `seen_in[]` values exist
+  (in particular, whether `card.html`'s heading-id convention is still
+  `card-<id>-headline` by then).
+- **A `related[]` name with no matching lexicon entry renders as plain,
+  unlinked chip text instead of a broken `/lexicon/None/` link** (via
+  `RelatedTermView.slug` being `None` in that case). Not expected in real
+  content -- every one of the 30 seed entries' `related[]` names was
+  verified (via a dedicated sanity test) to exactly match another
+  entry's own `term` -- but handled defensively the same way
+  `site/builders/wire.py`'s `lexicon_fallback_terms` already handles an
+  unresolvable card lexicon term, for consistency across the site.
+- **The Lexicon term page's `<h1>` renders the term exactly as stored**
+  (e.g. `MoE`, `RLHF`, `context window`), not title-cased or
+  capitalized -- unlike the Frontier Board's region headings (which do
+  title-case the schema's lowercase `open-weights` enum value), a
+  lexicon term's stored casing is itself meaningful/canonical (acronyms
+  like `RLHF`/`MoE` would look wrong forced into title case), so this
+  turn renders it verbatim rather than applying any transform.
+- **Primer "connecting prose" is read narrowly, per this turn's explicit
+  instruction to reuse `one_liner` text and not invent new copy:** the
+  only original prose `primer.html` contributes is (a) one fixed intro
+  paragraph explaining *why* the sequence is ordered the way it is (a
+  structural framing statement about the reading order itself, not a
+  definition of any term) and (b) the "Step N of 10" ordinal label per
+  step. No per-term transition/rationale sentences were written; each
+  step's only descriptive text is its own lexicon entry's `one_liner`,
+  verified byte-for-byte equal in `tests/test_primer_builder.py`.
+- **`site/builders/primer.py` raises `KeyError` (naming the offending
+  slug) for a primer slug with no matching lexicon entry**, rather than
+  skipping that step or rendering a broken link -- both
+  `content/primer.json` and `content/lexicon.json` are hand-authored
+  seed content, not user input, so an unresolvable slug is treated as a
+  content-authoring bug to fail loudly on at build time, matching
+  `site/builders/lexicon.py::build_term_context`'s identical choice for
+  an unknown `/lexicon/<slug>/` lookup. All 10 of the real, committed
+  primer slugs resolve today.
+- Verification: `python -m pytest` -- 615 passed, 2 deselected (up from
+  570 before this commit: 45 new tests across
+  `tests/test_lexicon_builder.py`/`tests/test_primer_builder.py`), full
+  suite green. `site/tests/test_build.py` (run explicitly with
+  `site/requirements.txt` installed) also still green (6 passed),
+  unaffected by this commit -- neither new builder is yet called from
+  `site/generate.py`. Both builders manually exercised end-to-end against
+  the real, committed `content/lexicon.json` (30 entries) and
+  `content/primer.json` (10 slugs): all 30 `/lexicon/<slug>/` pages plus
+  the `/lexicon/` index plus `/primer/` were rendered to a scratch
+  `public/` directory, spot-checked for a well-formed citation anchor
+  (`context window`'s Anthropic docs link rendered as a real, clickable
+  `<a>` with correctly-escaped surrounding prose, including its literal
+  `"context rot"` quote marks), correct alphabetical ordering, real
+  related-term links, the "Not yet referenced in a Wire card" empty-state
+  message, and the Primer's ten steps in the exact expected dependency
+  order each linking to its real Lexicon page.
+
+## What's Moving / masthead strip, Method & Audit, Corrections, About (2026-07-09)
+
+- **The thin masthead sparkline strip is wired into `base.html` via a
+  guarded `{% include %}`, not by making every existing builder pass a
+  new context key this turn.** `templates/base.html` now has
+  `{% if masthead_sparklines is defined and masthead_sparklines %}
+  {% include "_masthead_moving_strip.html" %} {% endif %}` immediately
+  after the masthead nav. Jinja's `is defined` test never raises even
+  under this project's `StrictUndefined` (it's implemented as a plain
+  `isinstance` check against the `Undefined` sentinel, not an operation
+  `StrictUndefined` overrides to raise), so every already-committed
+  builder that renders through `base.html` without ever setting
+  `masthead_sparklines` (`board.py`, `lexicon.py`, `primer.py`,
+  `wire.py`) keeps producing byte-for-byte identical output to before
+  this turn -- verified directly in `tests/test_moving_builder.py`
+  (`test_masthead_strip_absent_from_a_sibling_page_that_does_not_opt_in`)
+  rather than only asserted in prose. Only `site/builders/moving.py`'s
+  own `build_moving_context()` sets that key today, so the strip
+  currently only actually renders on `/moving/` itself. Wiring every
+  other builder (and `site/generate.py`'s own render calls) to also pass
+  `masthead_sparklines` -- so the strip genuinely appears site-wide, per
+  the build plan's literal wording -- is left for the future
+  `site/generate.py` integration turn that wires all of Phase 4's
+  builders together in one place; doing it piecemeal, builder-by-builder,
+  from within this turn's own narrower scope (moving/method/
+  corrections/about only) risked touching files outside that scope for
+  no additional test coverage this turn's own acceptance bar requires.
+- **`site/static/css/components.css` gained a small `.masthead-strip*`
+  rule block**, even though this turn's named file scope was
+  `site/builders/moving.py` + `site/templates/moving.html` (plus wiring
+  `base.html`) -- because the masthead strip is genuinely cross-page
+  (rendered from `base.html`, not a single page's own `{% block content
+  %}`), it follows this codebase's own already-established convention
+  (page-specific look lives in a page's own inline `<style>` block --
+  see `board.html`/`primer.html`/`wire_index.html`; shared, multi-page
+  look lives in `components.css`) rather than inventing a third place
+  for shared masthead CSS to live. The addition is minimal (layout only,
+  every color/spacing value already an existing `tokens.css` custom
+  property or a fixed rem value) and includes `overflow-x: auto` on the
+  strip's own `<ul>` so a viewport narrower than nine topics' worth of
+  sparklines scrolls only that list, never the page body -- matching
+  `.board-table-wrap`'s identical established pattern.
+- **`data/whats_moving.json`'s own precomputed
+  `accelerating`/`cooling`/`flat` trend vocabulary is deliberately kept
+  separate from `svg_sparkline.py`'s own independently-computed
+  `rising`/`falling`/`flat` vocabulary, rather than reconciled into one
+  shared label.** Each topic row on `/moving/` shows both, side by side
+  (e.g. "Accelerating" as the row's own heading-level label, "↑ rising"
+  inside the sparkline's own visible text) -- redundant on purpose, per
+  the accessibility rule that a trend must never be conveyed by
+  color/slope alone, and consistent with `svg_sparkline.py`'s own
+  docstring noting its independently-computed labels already happen to
+  agree with the file's precomputed ones for every real topic today.
+  Reconciling the two into a single shared vocabulary (or having
+  `moving.py` pass the file's own `trend` value into `svg_sparkline.py`
+  instead of letting it recompute one) would touch `svg_sparkline.py`,
+  which is out of this turn's scope (already implemented, per the task).
+- **`TOPIC_DISPLAY_NAMES` (`site/builders/moving.py`) is a small
+  hand-written display-name map for `whats_moving.schema.json`'s nine
+  fixed topic-tag enum values**, mirroring `site/builders/board.py`'s
+  own `REGION_HEADINGS` convention for the identical reason: a couple of
+  the raw enum values (`"chips/compute"`, `"open-source"`) read
+  awkwardly as page copy verbatim. Spec-silent, simplest reasonable
+  choice.
+- **`site/builders/method.py` reads `data/verifier_stats.json` in
+  addition to the explicitly-named `data/ledger.json` and
+  `data/audit/latest.json`.** The task named ledger stats and the
+  audit-file graceful-degradation case explicitly; verifier stats are
+  the same kind of "basic pipeline stats" a Method page should show
+  (analyst/verifier run count, overall pass rate) and the file already
+  exists (seeded in Phase 2, `runs: []` today), so including it is a
+  direct, low-risk extension of "basic pipeline stats" rather than a new
+  scope. `build_verifier_summary()` handles the real, current `runs: []`
+  case explicitly (`overall_pass_rate: None`, not a `ZeroDivisionError`)
+  -- exercised in `tests/test_method_builder.py`.
+- **`method.py`'s handling of a hypothetical, future, *present*
+  `data/audit/latest.json` is deliberately defensive rather than
+  fully-featured**: `schemas/audit.schema.json` does not exist yet
+  (confirmed by direct inspection of `schemas/`) since `audit.yml` is
+  unbuilt Phase 5 scope, so this turn cannot know that file's real
+  shape. `build_audit_section()` reads only `generated_at` and a
+  `findings` list length via `.get()` with fallbacks, rather than
+  hard-coding fields a not-yet-written schema might not actually have.
+  This will likely need revisiting once Phase 5 actually defines
+  `schemas/audit.schema.json` and `audit.yml` produces a real file --
+  flagged here rather than silently assumed correct.
+- **`content/corrections.json`'s empty `[]` state is rendered with an
+  honest, fully-original empty-state message
+  (`EMPTY_CORRECTIONS_MESSAGE`)** rather than a bare "none yet" -- it
+  also explains *why* the list is empty (the verifier's own adversarial
+  check, not merely "nothing has happened"), matching this build stage's
+  established convention of every zero-collection empty state carrying a
+  real, informative sentence (`site/builders/board.py`'s zero-rows
+  message, `site/builders/wire.py`'s `EMPTY_WIRE_MESSAGE`).
+- **`site/builders/about.py` is the one Phase 4 builder with no
+  `build_*_context()` at all** -- the About page's content (anonymity
+  mechanics, non-commercial/auto-published framing, the standing
+  disclaimer, MIT/CC BY 4.0 licensing) is entirely static prose reworded
+  from `CLAUDE.md` section 1's hard rules, not derived from any
+  content/data file, so there is nothing to compute; `render_about_page()`
+  takes no data arguments at all, unlike every sibling builder.
+- Verification: `python -m pytest` -- 670 passed, 2 deselected (up from
+  615 before this commit: 55 new tests across
+  `tests/test_moving_builder.py`, `tests/test_method_builder.py`,
+  `tests/test_corrections_builder.py`, `tests/test_about_builder.py`),
+  full suite green. `site/tests/test_build.py` also re-run and still
+  green (6 passed) -- the `base.html` edit is additive/guarded and
+  doesn't touch `generate.py`'s own render call, which never sets
+  `masthead_sparklines`. All four new builders manually exercised
+  end-to-end against real, committed data (`data/whats_moving.json`'s
+  real 9 topics, `data/ledger.json`'s real 104 queued entries,
+  `data/verifier_stats.json`'s real empty `runs`, the real -- confirmed
+  absent -- `data/audit/latest.json`, and the real empty
+  `content/corrections.json`), plus the one explicitly-required edge
+  case (a genuinely missing `data/audit/latest.json`) both at the
+  loader level and all the way through a full page render, never
+  raising `FileNotFoundError`.
+
+## Integration pass: four parallel Phase 4 units wired into `site/generate.py` (2026-07-09)
+
+- **Every Phase 4 builder written so far (`wire.py` from an earlier
+  commit; `board.py`, `lexicon.py`/`primer.py`, and
+  `moving.py`/`method.py`/`corrections.py`/`about.py` from three parallel
+  units in this same working tree) was deliberately built *not* to call
+  back into `site/generate.py` — each exposes its own `write_<page>_page(
+  env, ..., public_dir)` entry point and builds its own standalone Jinja
+  `Environment` if none is passed in, per each module's own explicit
+  "not wired into generate.py yet" docstring note. This pass is exactly
+  that wiring turn: `site/generate.py::render_pages()` now loads every
+  builder module (via the same `_load_module_by_path` convention every
+  builder already uses for its own cross-file references — `site/` is
+  deliberately never an importable package, since it would shadow the
+  stdlib `site` module), builds one shared `Environment`, and calls each
+  builder's `write_*` function with the right slice of the already
+  loaded+validated `content`/`data`. No builder's own logic was changed
+  to make this work, with the two exceptions logged below.
+- **`board.py` was the one builder missing a `write_board_page(env, ...,
+  public_dir)` function** (it only exposed `render_board_page`, returning
+  an HTML string) — every sibling builder already had the
+  `write_<page>_page` convention, since `board.py` was written earliest,
+  concurrently with `wire.py`, before that convention was established
+  elsewhere. Added a two-line `write_board_page` to `board.py` itself
+  (matching every sibling's signature exactly) rather than special-casing
+  the Board page's file-writing logic inline in `generate.py` — keeps
+  "how a page gets written to disk" a property of its own builder module,
+  consistently, for all eight pages.
+- **The build-plan's own wording for What's Moving is "(+ a thin masthead
+  sparkline strip site-wide)."** `moving.py`'s own `build_moving_context`
+  already computes the strip's view models and sets them under a
+  `masthead_sparklines` context key that `base.html` conditionally
+  `{% include %}`s on — but until this pass, only `/moving/`'s own render
+  call ever populated that key, so the strip only appeared on that one
+  page, not "site-wide" as the plan's own words say. Rather than add a
+  new parameter to all seven *other* builders' `build_*_context()`
+  functions (each independently written and tested this session, by
+  design not reaching into `generate.py` or each other), this pass sets
+  `masthead_sparklines` once as a **Jinja environment global**
+  (`env.globals["masthead_sparklines"] = moving.build_masthead_sparklines(...)`)
+  on the one shared `Environment` every builder is now called with.
+  Jinja resolves an undeclared template variable against `env.globals`
+  before falling back to `Undefined`, so `base.html`'s existing
+  `{% if masthead_sparklines is defined and masthead_sparklines %}` guard
+  picks it up on every page automatically; `/moving/`'s own context still
+  sets the identical value locally (a local context key always wins over
+  a same-named global in Jinja, with no value conflict here since both
+  compute it the same way from the same `data/whats_moving.json`
+  snapshot). Verified directly: all 39 pages this build produces today
+  include the `masthead-strip` markup (`site/tests/test_build.py::
+  test_masthead_sparkline_strip_renders_site_wide`).
+- **A single `today = datetime.now(timezone.utc).date()` is computed once
+  in `generate.py::render_pages()`** and passed into both the Wire
+  builder's 14-day window (`wire.write_wire_pages(..., today=today)`) and
+  the Board builder's 7-day pulse-eligibility window
+  (`board.write_board_page(..., today, ...)`) — the one and only place in
+  this pipeline that reads the wall clock. Every individual builder
+  function stays a pure function of an explicitly-passed date (board.py's
+  own `is_pulse_eligible` docstring is explicit that it "never calls
+  `date.today()`/`datetime.now()` itself," for unit-testability); the
+  top-level entrypoint is where that real-world "now" has to enter the
+  system exactly once, by design, so a real deploy's Board pulse dots and
+  Wire windowing both agree on the same "today."
+- **`SITE_BASE_URL` (`https://0xfanbase.github.io/AI-Radar`, `site/
+  generate.py`) is a new hardcoded constant, used only for `sitemap.xml`'s
+  absolute `<loc>` values and `robots.txt`'s `Sitemap:` line** — GitHub
+  Pages' own default project-site URL for this exact repo once Pages is
+  enabled with Source: GitHub Actions and no custom domain (confirmed
+  against this repo's own real identity: `watcher/config.py`'s
+  descriptive user-agent string already names
+  `github.com/0xfanbase/AI-Radar` as this project's location). This does
+  **not** resolve the pre-existing, already-logged root-relative-path gap
+  from this commit's own scaffold-stage entry above ("Root-relative paths
+  throughout... assume the built site is eventually served from its
+  domain root... If GitHub Pages ends up serving this repo from a project
+  subpath (e.g. `/AI-Radar/`)... every one of these would need a base-path
+  prefix") — every internal link/asset href this site renders
+  (`/board/`, `/static/css/tokens.css`, etc.) is still root-relative,
+  generated by the four independently-built builder modules this pass
+  wires together, not by this pass itself. Actually fixing that would mean
+  either (a) a custom domain (a `CNAME` file this pass has no domain name
+  to put in it — not invented here), or (b) threading a configurable base
+  path through every builder's href-generation code, which is well beyond
+  "wire the existing builders together and fix integration glue" and would
+  mean editing files under four other agents' explicit turn-scope for a
+  concern none of them were asked to solve. This pass only re-confirms and
+  restates the gap plainly (in `site/generate.py`'s own `SITE_BASE_URL`
+  comment and here) so it stays visible rather than silently resolved
+  halfway (a working `sitemap.xml`/`robots.txt` with a real domain, next to
+  internal links that may not resolve at that same domain's project
+  subpath) — a genuine, deliberate half-fix, not an oversight.
+- **`site/tests/test_build.py` gained 9 new tests** covering exactly the
+  turn's own explicit accessibility-pass + integration bar: every named
+  route exists (including all 30 real Lexicon term pages by their real
+  `content/lexicon.json` slugs), every generated HTML page has exactly
+  one `<h1>` and exactly one `<main id="main-content">`, the skip-link is
+  the first focusable element in `<body>` on every page, the masthead
+  strip renders site-wide (see above), and `404.html`/`sitemap.xml`/
+  `robots.txt` are real, well-formed, and reference each other correctly.
+  These run against one shared module-scoped `built_site` fixture (a
+  single real `generate()` call, not one per assertion) to keep this
+  file's own runtime fast despite the added coverage.
+- **`.github/workflows/deploy.yml` installs both `requirements-dev.txt`
+  and `site/requirements.txt`**, not only the latter — the task's own
+  wording named just `site/requirements.txt`, but `requirements-dev.txt`
+  (which itself pulls in root `requirements.txt` via `-r`) is what
+  actually provides `pytest` and the runtime deps (`requests`,
+  `feedparser`, `beautifulsoup4`, `jsonschema`) `tests/`'s own suite
+  needs merely to import; without it, the workflow's own "run pytest"
+  step would fail immediately, before ever reaching the site build.
+  Logged as the minimal correct fix to an under-specified instruction,
+  not a scope expansion.
+- **`deploy.yml`'s build job also runs `python -m pytest site/tests`, a
+  second explicit test step beyond the task's named "run pytest."**
+  `pytest.ini`'s `testpaths = tests` (an intentional, already-logged
+  Phase 4 scaffold-stage decision — see this file's own commit-27 entry
+  above) means a bare `python -m pytest` from the repo root never
+  collects `site/tests/` at all. Since this exact job is the one that
+  then builds and publishes the very site `site/tests/` verifies (schema
+  conformance, accessibility landmarks, 404/sitemap/robots), letting a
+  real regression there through to a live deploy would defeat the point
+  of writing those tests in the first place — this is treated as a
+  necessary integration fix, not an unrequested scope addition.
+- **`deploy.yml`'s trigger, permissions, and job shape were not
+  independently reinvented** — `contents: read` / `pages: write` /
+  `id-token: write`, the `concurrency: group: pages` guard, and the
+  `build` → `deploy` (needs, `environment: github-pages`,
+  `actions/deploy-pages`) two-job split all match the standard,
+  widely-documented `actions/deploy-pages` recipe GitHub itself
+  publishes, not a bespoke design — reducing the odds of a subtle
+  permissions/environment mismatch in a workflow that (per this project's
+  own structural constraint) can never be end-to-end verified from any
+  session, only read for correctness.
+- Verification: `python -m pytest` (root) — 670 passed, 2 deselected,
+  unchanged from immediately before this pass (this pass touches no file
+  under `tests/`). `python -m pytest site/tests` — 15 passed (up from 6:
+  9 new tests, see above). The real generator was run twice directly
+  against this repo's actual `content/`/`data/` — once into a scratch
+  directory for inspection, once into the repo's real (gitignored)
+  `public/` — producing all 39 expected pages (`index.html`; no
+  `/wire/<YYYY-MM>/` page, since `content/cards/` is still empty;
+  `board/`, all 30 real `lexicon/<slug>/` pages plus the index, `primer/`,
+  `moving/`, `method/`, `corrections/`, `about/`; `404.html`; `sitemap.xml`;
+  `robots.txt`) with no errors, no crash, and no manual template/path
+  fixes needed beyond the two builder-side additions logged above.
+  `.github/workflows/deploy.yml` parses as valid YAML
+  (`yaml.safe_load`) and matches this repo's own established `on:`-as-
+  boolean quirk already present in every other workflow file here (a
+  PyYAML 1.1 parsing artifact of an unquoted `on:` key, not a new issue).

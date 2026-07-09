@@ -1,0 +1,110 @@
+name: deploy
+
+# Phase 4: builds the static site (site/generate.py) from content/*.json +
+# data/*.json and publishes it to GitHub Pages.
+#
+# *** CANNOT ACTUALLY DEPLOY YET ***
+# This workflow's `deploy` job will fail until the repo owner enables
+# GitHub Pages in repo settings (Settings -> Pages -> Source: "GitHub
+# Actions"). No tool available to any session in this project can toggle
+# that setting itself -- it's a repo-admin-only action. Until it's
+# enabled, `actions/deploy-pages` has no Pages environment to deploy into
+# and errors out; the `build` job (tests + site/generate.py +
+# upload-pages-artifact) runs and can be fully inspected/validated
+# regardless of whether Pages is enabled -- see PROGRESS.md /
+# IMPROVEMENT_BACKLOG.md for the full "what's left for the human" list.
+#
+# Trigger: push to main touching content/, data/, or site/ (the three
+# directories that can actually change what gets published -- a card, a
+# Frontier Board row, a Lexicon term, whats_moving.json, or the generator/
+# templates/CSS themselves), plus workflow_dispatch for a manual rebuild
+# (e.g. after enabling Pages for the first time, or after a content/data
+# change landed via analyze.yml's own auto-commit rather than a direct
+# push to main).
+on:
+  push:
+    branches: [main]
+    paths:
+      - "content/**"
+      - "data/**"
+      - "site/**"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Standard GitHub Pages concurrency guard: never run two deploys at once,
+# but let an in-flight run finish rather than cancelling it mid-publish.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          # Full history, not the default shallow (depth-1) clone -- this
+          # repo's established convention (see watch.yml/ci.yml/
+          # analyze.yml): some tests shell out to real `git diff`/`git
+          # rev-parse` against a prior commit, which doesn't exist in a
+          # depth-1 checkout even though it does in every full-history
+          # local sandbox (a real CI failure this repo already hit once;
+          # see PROGRESS.md).
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # requirements-dev.txt (`-r requirements.txt` plus `pytest`/
+      # `requests-mock`) is what actually makes `python -m pytest` runnable
+      # at all -- the task's own instructions named only
+      # `site/requirements.txt`, but without this the pytest command
+      # itself, and every watcher-side test `tests/` collects, would fail
+      # to import. Installing both is the minimal correct set. Logged in
+      # IMPROVEMENT_BACKLOG.md.
+      - name: Install dev/test dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Install site generator dependencies
+        run: pip install -r site/requirements.txt
+
+      - name: Run tests
+        run: python -m pytest
+
+      # site/tests/ is a separate suite from tests/ (pytest.ini's own
+      # `testpaths = tests` deliberately doesn't collect it -- see
+      # site/tests/test_build.py's own docstring / IMPROVEMENT_BACKLOG.md)
+      # but it's exactly the suite that proves the site this job is about
+      # to build and publish is accessible and well-formed (one <h1>, one
+      # <main id="main-content">, skip-link first, sitemap/robots/404
+      # present) -- run it explicitly here too, before the build step,
+      # so a real accessibility/build regression blocks deploy the same
+      # way a tests/ regression does.
+      - name: Run site generator tests
+        run: python -m pytest site/tests
+
+      - name: Build the site
+        run: python site/generate.py -v
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

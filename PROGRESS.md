@@ -7,6 +7,147 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-09 — Phase 4: builders wired together, end-to-end site build verified, accessibility pass, deploy.yml
+
+This is the Phase 4 **integration** checkpoint: four builder units that
+had been written in parallel in this same working tree since the
+scaffold commit below (`wire.py` from an earlier commit; `board.py`;
+`lexicon.py` + `primer.py`; `moving.py` + `method.py` +
+`corrections.py` + `about.py`, each already independently tested and
+each deliberately *not* wired into `site/generate.py` yet, per every
+one of their own docstrings) are now called from one place, producing
+the real `public/` output the approved build plan's route table names.
+
+**`site/generate.py::render_pages()` now calls every builder**, in this
+order: Wire (home page + monthly archive, none exist yet since
+`content/cards/` is still empty), Board, Lexicon (index + one page per
+of the 30 real terms), Primer, What's Moving, Method, Corrections,
+About, then a new `404.html`. `sitemap.xml` and `robots.txt` are written
+directly by `generate.py` itself. Two small integration fixes were
+needed, both logged in full in `IMPROVEMENT_BACKLOG.md`: (1) `board.py`
+was the one builder missing a `write_board_page(env, ..., public_dir)`
+function matching every sibling's convention — a two-line addition; (2)
+the masthead "what's moving" sparkline strip, which the build plan calls
+for site-wide, only rendered on `/moving/` itself until this pass — now
+set once as a Jinja **environment global** on the one shared
+`Environment` every builder is called with, so `base.html`'s existing
+conditional `{% include %}` picks it up on every page without touching
+any of the seven other builders' own context functions.
+
+**The real generator was actually run** (not just tested) against this
+repo's real `content/`/`data/` directories, twice: once into a scratch
+directory for inspection, once into the repo's own real (gitignored)
+`public/`. Both runs completed with no errors and produced all 39
+expected files: the home page, `board/index.html` (all 13 real Board
+rows, correctly grouped US=6/China=5/open-weights=2, all 13 pulse-dot
+eligible since every row's real `last_verified` is today's date),
+`lexicon/index.html` plus all 30 real term pages, `primer/index.html`
+(all 10 real steps), `moving/index.html`, `method/index.html`,
+`corrections/index.html` (the real, honest empty state — `[]` today),
+`about/index.html`, `404.html`, `sitemap.xml`, `robots.txt`, plus the
+copied `static/` assets. No `/wire/<YYYY-MM>/` archive page exists yet,
+correctly, since `content/cards/` is still empty.
+
+**Accessibility pass performed across the whole generated output**, not
+just spot-checked: every one of the 39 generated HTML pages has exactly
+one `<h1>`, exactly one `<main id="main-content">` landmark, and the
+skip-link (`<a class="skip-link" href="#main-content">`) as the first
+focusable element in `<body>` — verified both by direct inspection this
+turn and by 9 new automated tests added to `site/tests/test_build.py`
+(`test_every_generated_html_page_has_exactly_one_h1`,
+`test_every_generated_html_page_has_one_main_content_landmark`,
+`test_skip_link_is_first_focusable_element_on_every_page`,
+`test_masthead_sparkline_strip_renders_site_wide`,
+`test_every_named_route_in_the_build_plan_is_written`,
+`test_every_real_lexicon_term_gets_its_own_page`,
+`test_404_page_uses_the_shared_shell_and_is_a_real_not_found_page`,
+`test_sitemap_xml_is_well_formed_and_lists_expected_routes`,
+`test_robots_txt_allows_everything_and_references_sitemap`). The Board's
+`@keyframes` pulse animation was independently re-confirmed to live only
+inside `@media (prefers-reduced-motion: no-preference)` (already correct
+from `board.py`'s own commit, re-checked here as part of this pass, not
+changed).
+
+**`public/404.html`** is a real, fully-shelled not-found page (extends
+`base.html`, one `<h1>Page not found</h1>`, links back to every major
+section) — GitHub Pages automatically serves a repo-root `404.html` for
+any unmatched path on a project site once Pages is enabled, no extra
+configuration needed. **`public/sitemap.xml`** lists every real route as
+an absolute URL under `https://0xfanbase.github.io/AI-Radar` (GitHub
+Pages' own default project-site URL for this repo with no custom domain
+— see `IMPROVEMENT_BACKLOG.md` for why that specific value was chosen and
+its limits). **`public/robots.txt`** allows every crawler and points at
+`sitemap.xml`.
+
+**A pre-existing, already-logged gap is re-flagged, not fixed, by this
+checkpoint**: every internal link/asset href this site renders
+(`/board/`, `/static/css/tokens.css`, `/lexicon/<slug>/`, etc.) is
+root-relative, on the assumption the built site is served from its
+domain root. If GitHub Pages ends up serving this repo from its default
+project subpath (`https://0xfanbase.github.io/AI-Radar/`) rather than a
+custom domain mapped to the repo root, every one of those links needs a
+base-path prefix that doesn't exist today. Fixing it would mean editing
+href-generation code inside all four builder units this checkpoint only
+wires together (each independently written and tested this session) —
+out of this integration turn's own scope, and logged again, plainly, in
+`IMPROVEMENT_BACKLOG.md` rather than silently patched around.
+
+**`.github/workflows/deploy.yml`** (new): triggers on push to `main`
+touching `content/**`, `data/**`, or `site/**`, plus
+`workflow_dispatch`; `permissions: pages: write, id-token: write`; a
+`build` job (checkout with `fetch-depth: 0`, matching this repo's
+established convention; `setup-python`; installs both
+`requirements-dev.txt` and `site/requirements.txt` — the former is what
+actually provides `pytest` itself and the root test suite's runtime
+deps, not named explicitly in the task's own wording but required for
+"run pytest" to do anything at all; runs `python -m pytest`, then
+`python -m pytest site/tests` [the site generator's own suite, not
+collected by the root `pytest.ini`'s `testpaths = tests`, but exactly
+the suite that verifies the thing this job is about to build and
+publish]; runs `python site/generate.py -v`; uploads `public/` via
+`actions/upload-pages-artifact`); a `deploy` job (`needs: build`,
+`environment: github-pages`, `actions/deploy-pages`). **Stated plainly,
+in the workflow file's own top comment and here: this cannot actually
+deploy anything until the repo owner enables GitHub Pages in repo
+settings (Settings → Pages → Source: "GitHub Actions") — no tool
+available to any session in this project can toggle that setting
+itself.** The `build` job's own tests + real site build can be validated
+by any session regardless of whether Pages is enabled; the `deploy` job
+will fail with an environment-not-configured error until that one
+manual step happens.
+
+**Verification performed this checkpoint:**
+- `python -m pytest` (root) — **670 passed, 2 deselected**, unchanged
+  from immediately before this checkpoint (no file under `tests/` was
+  touched).
+- `python -m pytest site/tests` — **15 passed** (up from 6: 9 new tests
+  added this checkpoint, see above).
+- The real `site/generate.py` was run directly, twice, against this
+  repo's actual `content/*.json`/`data/*.json` (not fixtures) — see
+  above for the full file-by-file confirmation.
+- `.github/workflows/deploy.yml` parses as valid YAML (`yaml.safe_load`)
+  and matches this repo's own already-established `on:`-parses-as-
+  boolean-`True` quirk shared by every other workflow file here (a
+  PyYAML 1.1 artifact of an unquoted `on:` key, not a new issue
+  introduced by this file).
+
+**What remains for the human (unchanged from every earlier checkpoint,
+restated in full since this is the Phase 4 sign-off point):** add the
+`CLAUDE_CODE_OAUTH_TOKEN` repo secret and set `vars.CLAUDE_MODEL` before
+`analyze.yml` can ever run end-to-end; enable GitHub Pages (Settings →
+Pages → Source: "GitHub Actions") before `deploy.yml`'s own `deploy` job
+can succeed; review and merge this branch to `main` (both `watch.yml`'s
+`analyze.yml` dispatch and `deploy.yml`'s own push trigger target
+`main`, so nothing here fires automatically until then); and — newly
+flagged by this checkpoint specifically — decide whether this project
+will use a custom domain (a `CNAME` file mapped to serve from the
+domain root) or accept the default `github.io/AI-Radar/` project
+subpath, since every internal link this site renders assumes root
+serving and does not yet handle the latter case. None of these four are
+things any session can do or fake from here.
+
+---
+
 ## 2026-07-09 — Phase 4, commit 27: site generator scaffold (base template, design tokens)
 
 First Phase 4 commit. Builds the static-site generator's skeleton per the
