@@ -7,6 +7,59 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-09 — Phase 2 PM checkpoint round 1: citation-field spec-4-vs-spec-5 backlog entry (documentation-only)
+
+The PM's Phase 2 sign-off review independently re-ran the full test suite
+(454 passed, 2 deselected — the same `@pytest.mark.live` acceptance proofs
+`pytest.ini` always excludes; this checkpoint's own stale-but-honest 452
+figure above predates commit `0974df8`, which added 2 regression tests) and
+found the pure-code half of Phase 2 solid across the board — path-allowlist
+CI enforcement, the corroboration decision procedure, ledger dropped-cluster
+permanence (including a real defect the PM caught and this repo already
+fixed in `0974df8`), the degradation ladder's empty-queue override, and four
+of five named spec-silent decisions properly logged. **One real gap was
+found and is fixed by this checkpoint, documentation-only, no code or schema
+change:** the citation-field naming mismatch between spec sec-4's loop
+diagram (`citations[] = {url, supporting_quote ≤15w}`) and spec sec-5's card
+field list (`citations:[{url, outlet, quote}]`) had never been logged as its
+own resolved decision in `IMPROVEMENT_BACKLOG.md`, even though `CLAUDE.md`'s
+own rendering of the sec-4 diagram and `schemas/card.schema.json` both
+already use sec-5's fuller shape, and have since this repo's very first
+commit — the resolution was real and correct, just silent. Logged now, in
+full, under "Phase 2 PM checkpoint, round 1" in `IMPROVEMENT_BACKLOG.md`,
+per the approved build plan's §8 commitment to log every spec-silent
+decision as it's made (in this case, as it's *found* to have already been
+made without a log entry).
+
+Also logged, as a non-blocking backlog candidate rather than implemented
+this round (per the PM's own instruction): a small pure-code test that
+would parse `.github/workflows/analyze.yml` directly and assert the
+VERIFIER step's tool grants and the gate-before-commit step ordering,
+converting today's manual-YAML-inspection facts (see this file's own P2
+acceptance-criteria section, criterion 2, below) into a real regression
+test. Not implemented in this round; see `IMPROVEMENT_BACKLOG.md`.
+
+**Everything else from this PM round carries forward unchanged, exactly as
+the PM's review instructed:** `analyze.yml` has still never executed on
+GitHub Actions (it needs the owner to add the `CLAUDE_CODE_OAUTH_TOKEN`
+secret and set `vars.CLAUDE_MODEL`, neither creatable from any session) —
+the first real `watch.yml` → `analyze.yml` cycle after that remains the only
+true end-to-end proof of the two LLM-judgment acceptance criteria (a
+single-source rumor publishing as REPORTED or not at all; a fabricated
+benchmark number getting stripped by the verifier). This checkpoint entry
+does not, and must not, represent either as verified before that first live
+run — the P2-acceptance-criteria breakdown further below in this file
+already states this correctly and is preserved unchanged.
+
+Verification: `python -m pytest` — 454 passed, 2 deselected, matching the
+PM's own independently-re-run figure exactly. No production code changed
+this round; only `IMPROVEMENT_BACKLOG.md` and this file.
+
+With this entry landed, Phase 2 sign-off directives are addressed in full;
+per the PM's own instruction, Phase 3 (seed content) is next.
+
+---
+
 ## 2026-07-09 — Phase 2 checkpoint: full-suite pytest confirmation + honest analyze.yml/improve.yml verification status
 
 This is a wrap-up checkpoint on top of the Phase 2 work already recorded
