@@ -7,6 +7,103 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-09 — Phase 4, commit 27: site generator scaffold (base template, design tokens)
+
+First Phase 4 commit. Builds the static-site generator's skeleton per the
+approved plan's stack decision (Python + Jinja2, no JS framework, no npm/
+node anywhere) — the plumbing that later commits' page builders
+(`wire`/`board`/`lexicon`/`primer`/`moving`/`method`) will render into, not
+the pages themselves yet.
+
+**Shipped this commit:**
+
+- `site/requirements.txt` — `jinja2`, `jsonschema`, `markupsafe` (the
+  site generator's own dependency set, separate from the watcher's root
+  `requirements.txt`).
+- `site/generate.py` — the entrypoint skeleton: `load_and_validate_content()`
+  dynamically walks every top-level `content/*.json`/`data/*.json` file,
+  jsonschema-validating each against its `schemas/<stem>.schema.json`
+  counterpart when one exists (tolerates the one already-known gap,
+  `primer.schema.json` — logged in Phase 1/2, not new); `load_cards()`
+  loads `content/cards/*.json`, returning `[]` gracefully since that
+  directory doesn't exist yet (no analyst run has happened for real);
+  `build_jinja_env()` sets up autoescaping Jinja2; `render_pages()` renders
+  `templates/base.html` directly as a placeholder `public/index.html`
+  (no page builders exist yet); `copy_static()` copies `site/static/` into
+  `public/static/`; `generate(public_dir=...)` runs the full pipeline and
+  is safely re-runnable into the same directory. CLI: `python
+  site/generate.py [--out public] [-v]`.
+- `site/templates/base.html` — the shared page shell: a "Skip to content"
+  skip-link as the first focusable element, a masthead nav (linking to
+  every route the plan names, most not built yet), a `<main
+  id="main-content">` landmark, a `{% block content %}` child templates
+  will override (with a default fallback — one `<h1>` plus a short
+  placeholder paragraph — so the shell alone is a valid page today), and a
+  footer with the CLAUDE.md disclaimer line ("AI-curated and AI-written;
+  links go to primary sources; see the Method page for how verification
+  works") plus a link to `/corrections/`.
+- `site/static/css/tokens.css` — the exact palette (`--color-bg
+  #0B0E17`, `--color-panel #131829`, `--color-hairline #232B45`
+  border/divider-only, `--color-ink #E9ECF5`, `--color-signal-cyan
+  #43E5C4` for status/live accents/one-liners/the focus ring,
+  `--color-star-white #F4F6FF` for headlines, `--color-reported-amber
+  #D9A036`, `--color-corrected-red #E4574F`) and type custom properties
+  (`--font-display` Space Grotesk, `--font-body` Inter, `--font-data`
+  JetBrains Mono, tight `--tracking-display`) from the approved plan's
+  section 5, with each verified AA contrast ratio recorded in a header
+  comment. System-font fallback stacks are used for all three faces —
+  no font files are self-hosted this commit (logged as a deferred
+  nice-to-have in `IMPROVEMENT_BACKLOG.md`).
+- `site/static/css/components.css` — single-column, 375px-clean base
+  layout (fluid `max-width` container, no fixed-width elements), the
+  skip-link's off-screen-until-focused styling, a `:focus-visible` rule
+  using `--color-signal-cyan` with a visible `outline-offset` (the
+  hairline color is never used for text or focus rings, per tokens.css's
+  own rule), a `.font-data`/`.data` tabular-numeral utility, `.one-liner`
+  styling, and minimal masthead/footer/status-chip styling so the shared
+  shell doesn't look broken standalone.
+- `site/tests/test_build.py` — a smoke test (6 assertions) that runs the
+  real `generate()` against this repo's actual `content/`/`data/` (not
+  fixtures) into a `tmp_path`, asserting it doesn't crash and produces at
+  least `index.html` and `static/css/tokens.css`, plus a dedicated
+  zero-cards-graceful-handling assertion and a rerun-safety assertion.
+  Loads `generate.py` via `importlib.util.spec_from_file_location` rather
+  than importing `site` as a package, to avoid shadowing the Python
+  stdlib's own `site` module (logged).
+
+**Verification:**
+
+- `python -m pytest` (bare, repo root) — **470 passed, 2 deselected**,
+  unchanged from before this commit (root `pytest.ini`'s `testpaths =
+  tests` still only collects `tests/`; this commit's `site/tests` is a
+  separate suite by design — see `IMPROVEMENT_BACKLOG.md` for why no
+  `pytest.ini`/`ci.yml` change was made or needed to prove this commit's
+  own tests green).
+- `python -m pytest site/tests` (after `pip install -r
+  site/requirements.txt`) — **6 passed**, including the smoke test
+  running the real generator against this repo's live `content/*.json`
+  and `data/*.json`.
+- Manually inspected `public/index.html` and `public/static/css/*.css`
+  from a real `generate()` run: skip-link, masthead nav, `<main
+  id="main-content">`, one `<h1>`, and the footer disclaimer + `/corrections/`
+  link are all present as expected; `public/` itself stays gitignored
+  (already was, from Phase 1) and is not committed.
+
+**Known gap, not this commit's to fix:** `content/cards/` still doesn't
+exist at all (zero analyst runs so far), and `schemas/primer.schema.json`
+still doesn't exist (a Phase 1/2 gap). `generate.py` is written to degrade
+gracefully around both rather than crash, but neither absence is resolved
+by this commit.
+
+**Next up (later Phase 4 commits, per the approved plan):** `lib/linkify.py`
++ tests, then the Wire/Board/Lexicon/Primer/What's-Moving/Method page
+builders and their templates, an accessibility pass, the fuller
+`test_build.py` scope, and `.github/workflows/deploy.yml` (which is also
+where `site/requirements.txt` and `site/tests` most naturally get wired
+into automated CI, per this commit's backlog entry).
+
+---
+
 ## 2026-07-09 — Phase 3 PM checkpoint round 2, follow-up: claims-hygiene fix on two board rows
 
 Follow-up to the entry directly below (the >=12-row backfill). A second PM

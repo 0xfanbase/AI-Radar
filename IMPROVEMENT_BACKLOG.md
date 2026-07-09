@@ -1096,3 +1096,128 @@ notes.
   instruction. `python -m pytest` re-run after both edits: 470 passed, 2
   deselected, identical to the pre-fix count (no test depends on the exact
   wording of either row's `significance` string).
+
+## Phase 4, commit 27: site generator scaffold (base template, design tokens) (2026-07-09)
+
+- **No self-hosted font files this turn — Space Grotesk/Inter/JetBrains
+  Mono are named in `tokens.css`'s `--font-display`/`--font-body`/
+  `--font-data` stacks but every stack falls back to system fonts
+  (`ui-sans-serif`/`system-ui`/`ui-monospace` etc.), per this turn's
+  explicit instruction to defer self-hosting as a later nice-to-have.**
+  The site renders correctly today with zero webfont files in the repo;
+  self-hosting (with `font-display: swap` and subsetted `.woff2` files
+  under `site/static/fonts/`, per the plan's own file layout) is a
+  follow-up, not done here.
+- **`site/tests` needs no dedicated pytest config of its own, and root
+  `pytest.ini` was deliberately left unchanged.** Running
+  `python -m pytest site/tests` from the repo root already works today —
+  pytest finds the repo-root `pytest.ini` via its normal upward rootdir
+  search regardless of the explicit path argument, and `testpaths = tests`
+  only constrains *argument-less* invocations, so it doesn't need to
+  "also" list `site/tests` for an explicit-path run to succeed. Verified
+  both ways: bare `python -m pytest` (no args) still collects only
+  `tests/` and passes 470/2-deselected, unchanged from before this commit;
+  `python -m pytest site/tests` separately collects and passes all 6 new
+  smoke tests. **Not yet wired into `ci.yml`'s automatic run** — doing
+  that would also require `ci.yml` to `pip install -r site/requirements.txt`
+  (for `jinja2`/`markupsafe`, neither of which `requirements-dev.txt`
+  installs today), and both `ci.yml` and `requirements-dev.txt` are
+  outside this turn's file scope. Until a later Phase 4 commit wires this
+  up (most naturally when `deploy.yml` is added, per the plan's own commit
+  sequence), `site/tests/test_build.py` must be run explicitly with
+  `site/requirements.txt` installed — it is not exercised by the bare
+  `python -m pytest` / `ci.yml` today. Flagged here rather than silently
+  left for someone to discover the hard way.
+- **`site/generate.py` renders `templates/base.html` directly as a
+  placeholder `public/index.html` this commit, since no page builder
+  (`site/builders/{wire,board,lexicon,primer,moving,method}.py`) exists
+  yet.** `base.html`'s `{% block content %}` ships a default fallback
+  (a single `<h1>` plus a short placeholder paragraph) so the shared shell
+  is a valid, non-broken standalone page today, and so `generate.py`'s
+  full load → validate → render → write pipeline is actually exercised
+  end-to-end by this commit's smoke test rather than deferred untested to
+  a later one. Later builders will each add their own child template
+  extending `base.html` (with a real `<h1>`) and `render_pages()` will grow
+  to call each of them for its own route — this commit only proves the
+  shared plumbing, per its own explicit scope.
+- **Masthead nav links to `/board/`, `/lexicon/`, `/primer/`, `/moving/`,
+  `/method/`, `/about/`, `/corrections/` before any of those pages
+  exist.** These are exactly the routes the build plan's Phase 4 section
+  names; the nav is written forward-looking against that route list so it
+  doesn't need editing again as each page builder lands and each link
+  resolves for real, one at a time.
+- **`generate.py`'s content loader walks all top-level `content/*.json`
+  and `data/*.json` files dynamically (via `glob("*.json")` on each
+  directory, non-recursive)**, rather than a hardcoded filename list, so
+  a future new content/data file is picked up automatically. A file with
+  no matching `schemas/<stem>.schema.json` is loaded unvalidated with a
+  logged warning instead of crashing — today that applies to
+  `content/primer.json` only, which is a pre-existing, already-logged gap
+  (Phase 1/2 deliberately shipped no `primer.schema.json` yet — see
+  `tests/test_validate_changed_schemas.py`'s own no-schema-yet comment for
+  that file), not a new one introduced by this commit. Every other
+  top-level content/data file today (`frontier_board.json`,
+  `lexicon.json`, `corrections.json`, `ledger.json`, `queue.json`,
+  `whats_moving.json`, `verifier_stats.json`, `pending_corrections.json`)
+  does have a schema and is validated against it on every `generate()`
+  run, confirmed by this commit's smoke test running against the real
+  repo content.
+- **`content/cards/` does not exist as a directory at all yet** (not
+  merely empty) — `generate.load_cards()` treats a missing directory and
+  an empty one identically, returning `[]` either way, so the day the
+  analyst creates the directory with its first real card, nothing in the
+  loader needs to change. Every future template/builder that touches
+  cards must handle the same `[]` case gracefully (no crash, no
+  broken-looking empty state) — called out explicitly in this task's own
+  scope and enforced today by
+  `test_load_cards_handles_empty_cards_dir_gracefully`.
+- **`public/` was already present in root `.gitignore`** (added back in
+  Phase 1's original scaffolding commit, in anticipation of this exact
+  build-output directory) — no `.gitignore` change was needed this
+  commit.
+- **`site/tests/test_build.py` loads `site/generate.py` via
+  `importlib.util.spec_from_file_location` rather than adding a
+  `site/__init__.py` and importing it as a package.** `site` is also the
+  name of a real Python stdlib module (`site.py`, involved in
+  `sys.path`/site-packages setup) — turning this directory into an
+  importable top-level package named `site` risks shadowing that stdlib
+  module for any other code sharing the interpreter's `sys.path`. Loading
+  `generate.py` by explicit file path sidesteps the collision entirely
+  rather than relying on import order to avoid it. `site/generate.py`
+  itself stays a plain runnable script (`python site/generate.py` /
+  `python -m site.generate` when invoked as `-m` from the repo root with
+  `site` implicitly resolving via path, not via a package `__init__.py`),
+  matching the plan's own file-layout listing of it as an entrypoint
+  script rather than a package module.
+- **Tabular-figure behavior for the data font lives in `components.css`
+  (a `.font-data`/`.data` utility class setting `font-variant-numeric:
+  tabular-nums`), not in `tokens.css`.** This turn's own instructions split
+  the two files by responsibility (tokens.css = palette + type custom
+  properties only; components.css = layout/behavior), and "tabular
+  figures" is a rendering behavior applied to specific numeric fields
+  (dates, context windows, scores) rather than a property of the font
+  stack itself — so it belongs in the file that already owns applied
+  styling.
+- **Root-relative paths throughout (`/static/css/tokens.css`, `/board/`,
+  `/corrections/`, etc.) assume the built site is eventually served from
+  its domain root**, matching every route the build plan itself writes as
+  an absolute root path. If GitHub Pages ends up serving this repo from a
+  project subpath (e.g. `/AI-Radar/`) rather than a custom domain or
+  user/org root page, every one of these would need a base-path prefix.
+  Not decided or fixed here — GitHub Pages isn't enabled yet (an explicit
+  user follow-up per `PROGRESS.md`) — but flagged now for whoever wires up
+  `deploy.yml` and configures Pages, so it isn't discovered only after the
+  first real deploy renders every internal link and stylesheet 404.
+- **This commit's `site/tests/test_build.py` is a minimal smoke test (6
+  assertions: runs without crashing on real repo content, produces
+  `index.html` and both CSS files, handles zero cards, is safely
+  re-runnable) — not yet the full `test_build.py` scope the build plan
+  describes** (schema conformance per rendered page, board/lexicon count
+  assertions, link-resolution checks, contrast-ratio assertions parsed
+  from `tokens.css` itself, reduced-motion media-query presence,
+  sparkline SVG well-formedness, pulse-class logic). Those arrive
+  incrementally in later Phase 4 commits alongside the specific features
+  each assertion depends on (linkify, the Board builder, the sparkline
+  lib, the pulse CSS, etc.) — encoding them now against features that
+  don't exist yet would just be dead assertions or false-negative-prone
+  guesses about later APIs.

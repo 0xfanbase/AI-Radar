@@ -1,0 +1,55 @@
+/*
+ * AI Frontier Wire -- design tokens (Phase 4, build-plan section 5).
+ *
+ * These are the site's only color and type primitives. Every other
+ * stylesheet (site/static/css/components.css and any later page-specific
+ * CSS) must reference these custom properties rather than hardcoding hex
+ * values or font names, so the palette/type system stays defined in
+ * exactly one place.
+ *
+ * Contrast ratios verified at build-plan time (WCAG AA, normal text):
+ *   --color-signal-cyan on --color-bg    12.16:1
+ *   --color-signal-cyan on --color-panel 11.13:1
+ *   --color-reported-amber on --color-bg  8.29:1
+ *   --color-reported-amber on --color-panel 7.59:1
+ *   --color-corrected-red on --color-bg   5.30:1
+ *   --color-corrected-red on --color-panel 4.85:1
+ *   --color-ink / --color-star-white on both backgrounds: >14:1
+ * All pass AA for normal text; no palette changes needed. A future
+ * automated contrast-ratio test (build plan section 5, "Tests") should
+ * read the hex values below directly rather than re-hardcoding them.
+ *
+ * --color-hairline is a border/divider color ONLY -- never used for text
+ * or focus rings anywhere in this codebase (it fails AA on its own, by
+ * design: 1.26:1 against --color-panel). --color-signal-cyan is the
+ * site's one and only focus-ring color (see components.css).
+ *
+ * Fonts: this commit does NOT self-host font files (Space Grotesk, Inter,
+ * JetBrains Mono) -- that's a later nice-to-have. Each --font-* stack
+ * falls back to system fonts so the site renders correctly without any
+ * webfont in place today. Logged in IMPROVEMENT_BACKLOG.md.
+ */
+
+:root {
+  /* Palette */
+  --color-bg: #0B0E17;             /* page background */
+  --color-panel: #131829;          /* card/panel background */
+  --color-hairline: #232B45;       /* border / divider ONLY -- never text or focus rings */
+  --color-ink: #E9ECF5;            /* body text */
+  --color-signal-cyan: #43E5C4;    /* status + live accents, one-liners, AND the focus-ring color */
+  --color-star-white: #F4F6FF;     /* headlines */
+  --color-reported-amber: #D9A036; /* status: reported */
+  --color-corrected-red: #E4574F;  /* status: corrected */
+
+  /* Type -- system-font fallback stacks; self-hosted webfont files are a
+     later nice-to-have (see IMPROVEMENT_BACKLOG.md). */
+  --font-display: "Space Grotesk", "Space Grotesk Fallback", ui-sans-serif,
+    system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-body: "Inter", "Inter Fallback", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-data: "JetBrains Mono", "JetBrains Mono Fallback", ui-monospace,
+    "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+
+  /* Display type is set tight-tracked per the design spec. */
+  --tracking-display: -0.02em;
+}
