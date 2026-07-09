@@ -7,6 +7,145 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-09 — Phase 2 checkpoint: full-suite pytest confirmation + honest analyze.yml/improve.yml verification status
+
+This is a wrap-up checkpoint on top of the Phase 2 work already recorded
+below (this entry adds no new production code) — it re-runs the complete
+test suite one more time end-to-end and states plainly what is and isn't
+verified about the two LLM-driven workflows.
+
+**What Phase 2 built, in one place** (each already has its own detailed
+entry further down this file and in `IMPROVEMENT_BACKLOG.md`):
+schema extensions (`schemas/ledger.schema.json`'s `verifier_outcome` shape
++ dropped/`card_id`-null invariant; four new schemas —
+`card_index`/`run_plan`/`verifier_stats`/`pending_corrections`); the
+one-time `content/`↔`data/` relocation (`frontier_board.json`/
+`lexicon.json` moved into `content/`, `content/corrections.json` seeded);
+the CI gate scripts (`scripts/check_path_allowlist.py`,
+`scripts/validate_changed_schemas.py`); the degradation ladder
+(`scripts/plan_run.py`, the `QUOTA_DEGRADATION_LEVEL` mechanism); the
+card-index/verifier-stats/reconcile helpers
+(`scripts/update_card_index.py`, `scripts/reconcile_run.py`,
+`scripts/pending_corrections.py`); `CLAUDE.md`'s full corroboration/
+verifier/corrections-workflow procedure and reputable-outlet table; and
+`.github/workflows/analyze.yml` itself (ANALYST + VERIFIER two-step
+pipeline, gated by the two CI scripts above, wired to `watch.yml`'s new
+dispatch step).
+
+**Full-suite re-run performed this checkpoint**: `python -m pytest` —
+**452 passed, 2 deselected** (the 2 deselected are the `@pytest.mark.live`
+acceptance-proof tests, excluded by default per `pytest.ini`'s
+`addopts = -m "not live"`, exactly as designed). This is every test file
+under `tests/` — everything carried over from Phase 1 (fetchers,
+clustering, ranking, ledger, queue writer, velocity, fetch discipline)
+plus every Phase 2 addition (`test_p2_schemas.py`,
+`test_ledger_status_extension.py`, `test_check_path_allowlist.py`,
+`test_validate_changed_schemas.py`, `test_degradation_ladder.py`,
+`test_card_index.py`, `test_verifier_stats.py`,
+`test_corrections_workflow.py`, `test_pending_corrections.py`), collected
+and run together in one invocation. No failures; nothing needed fixing.
+No source files changed in this checkpoint — only this file.
+
+**Stated plainly, as the build plan itself commits to doing (§ Verification,
+item 3): `analyze.yml` cannot be end-to-end verified in this session, and
+that is not something this session can fake or work around.** It has
+never actually executed on GitHub Actions. Running it for real requires,
+at minimum, the `CLAUDE_CODE_OAUTH_TOKEN` repo secret — and **no tool
+available in this session can create a GitHub repo secret** (that action
+isn't exposed by any tool this agent has access to, by design — secrets
+are deliberately not something an automated session should be able to
+provision for itself). It also requires `vars.CLAUDE_MODEL` to be set
+(no fallback is baked into the workflow, deliberately — see the entry
+below and `IMPROVEMENT_BACKLOG.md`). This remains a manual follow-up step
+for the repo owner, exactly as flagged in every earlier checkpoint entry
+in this file; it is restated here, explicitly, so it isn't lost among the
+pure-code verification work above. **`improve.yml` doesn't exist in this
+repo yet at all** — it's Phase 5 scope per the approved build plan
+(§6), not part of Phase 2 — so there is nothing to even attempt to
+verify for it today; flagged here only because when it is built, it will
+depend on the identical `CLAUDE_CODE_OAUTH_TOKEN` secret for the identical
+reason, so it will carry the identical unverified-until-the-owner-acts
+status the day it lands.
+
+**P2 acceptance criteria, and exactly how much of each is provably true
+today vs. deferred to a live run:**
+
+1. **"A single-source rumor publishes as REPORTED, or doesn't publish at
+   all."** The judgment call itself — deciding a given cluster's claim
+   is rumor-strength, discarding it at the claim-quality gate, or landing
+   it at `reported` rather than `confirmed` — is prose executed by the
+   ANALYST LLM step in `analyze.yml`, reasoning over live-fetched pages;
+   no unit test can simulate that judgment, because doing so would just
+   be re-implementing the judgment in Python, which is exactly what the
+   design deliberately does *not* do (see CLAUDE.md's numbered
+   corroboration procedure). **What is pure-code and fully unit-tested
+   today** is the bookkeeping that has to hold correctly no matter what
+   the LLM decides: `schemas/ledger.schema.json`'s `if`/`then` constraint
+   that a `status: "dropped"` entry's `card_id` must be `null`
+   (`tests/test_p2_schemas.py::test_ledger_dropped_valid_fixture_passes`
+   / `test_ledger_dropped_with_nonnull_card_id_fails`);
+   `scripts/reconcile_run.py::reconcile_ledger`'s actual finalization
+   logic — a cluster with no resulting `content/cards/<id>.json` on disk
+   is marked dropped with a permanently-null `card_id`, one that does
+   have a file is marked published
+   (`tests/test_ledger_status_extension.py::test_reconcile_ledger_drops_a_cluster_with_no_resulting_card`,
+   `test_reconcile_ledger_publishes_a_cluster_with_a_resulting_card`,
+   `test_dropped_cluster_hash_card_id_stays_null_across_repeated_reconciliation`);
+   and `card.schema.json`'s `status` enum
+   (`confirmed|reported|corrected`, deliberately no `dropped` value at
+   the card level, since a dropped cluster never gets a card written at
+   all). In short: today's tests prove the plumbing correctly records
+   whatever the analyst decides; whether the analyst's live judgment on
+   a real rumor is *correct* is untested and untestable outside a live
+   run.
+2. **"A fabricated benchmark number in a draft gets stripped by the
+   verifier."** Same structure: the sentence-by-sentence support check
+   and the strip-vs-drop decision (CLAUDE.md's adversarial re-check
+   procedure) is prose executed by the fresh-context VERIFIER LLM step,
+   re-fetching citations live and reading them — nothing in this repo
+   simulates "is this number actually fabricated," nor should it.
+   **What is pure-code and verifiable today** is the structural machinery
+   that makes stripping possible and safe: `analyze.yml`'s VERIFIER step
+   is declared with no `Write` tool in its `allowedTools` (only
+   `Read,Glob,Grep,WebFetch,Edit,Bash(git diff:*),Bash(git
+   status:*),Bash(rm:*)` — confirmed by direct inspection of the
+   committed YAML; there is no dedicated automated test parsing the
+   workflow YAML today, so this is a manual-inspection fact, stated as
+   such rather than folded into the "452 passed" count); `card.schema.json`
+   has no minimum body length beyond `minLength: 1`, so a body the
+   verifier has cut down remains schema-valid
+   (exercised incidentally by every card fixture test in
+   `tests/test_schemas.py`/`tests/test_p2_schemas.py`); and the
+   demotion/drop outcome bookkeeping
+   (`verifier_outcome.demoted_from_confirmed`, `dropped_reason`) is
+   schema-shaped and tested exactly as in point 1 above
+   (`tests/test_p2_schemas.py::test_ledger_verifier_outcome_demoted_from_confirmed_only`).
+   Today's tests prove the data model can faithfully represent "demoted,"
+   "stripped," and "dropped" outcomes; they cannot and do not prove a real
+   fabricated number gets caught.
+3. **"A workflow diff makes CI fail."** This is the one criterion that
+   needs no LLM judgment at all — it's pure code, and it is fully,
+   directly unit-tested today, with no live-run caveat.
+   `scripts/check_path_allowlist.py`'s `is_allowed`/`find_violations` are
+   asserted directly against fixture diffs including
+   `.github/workflows/analyze.yml` itself, `watcher/*.py`, `schemas/*`,
+   and `CLAUDE.md`, all correctly flagged as violations
+   (`tests/test_check_path_allowlist.py`), plus a `main()`-level exit-code/
+   stderr test and one smoke test against this repo's own real `git diff`
+   history. `scripts/validate_changed_schemas.py`'s
+   `schema_name_for_path`/`validate_changed_files` are asserted against
+   every mapped `content/`/`data/` path (valid and invalid fixtures both),
+   confirming unmapped/non-JSON paths are skipped and deleted paths never
+   false-fail (`tests/test_validate_changed_schemas.py`). Both scripts run
+   before the commit step in `analyze.yml` with no
+   `continue-on-error` anywhere in that job, so a real workflow/code diff
+   genuinely blocks the auto-commit in production exactly as these tests
+   already prove in isolation — this is the one of the three criteria
+   where the committed pytest suite *is* the full acceptance proof, start
+   to finish, independent of any live LLM run.
+
+---
+
 ## 2026-07-09 — Phase 2: `analyze.yml` (ANALYST + VERIFIER pipeline) + `watch.yml` dispatch hookup
 
 Per the approved build plan's §3, this checkpoint wires the two
