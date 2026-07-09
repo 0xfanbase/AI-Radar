@@ -19,6 +19,10 @@ on:
 
 permissions:
   contents: write
+  # Needed for the final "gh workflow run analyze.yml" step below --
+  # dispatching a second workflow via the `gh` CLI/API requires the
+  # calling token to carry Actions write scope, not just repo contents.
+  actions: write
 
 jobs:
   watch:
@@ -62,4 +66,28 @@ jobs:
                 -c user.email="bot@users.noreply.github.com" \
                 commit -m "chore(watch): update ledger/queue/whats_moving [skip ci]"
             git push
+          fi
+
+      # Phase 2 hookup: dispatch analyze.yml (the analyst/verifier half of
+      # CLAUDE.md's daily loop) once this run's data/*.json is ready, but
+      # only if there is actually something queued -- CLAUDE.md's
+      # unconditional "empty queue = exit without inventing news" rule
+      # applies here too, one step earlier: no point spinning up the
+      # analyst/verifier LLM steps (and spending their turn budget) against
+      # an empty queue when data/run_plan.json's own run-planner would
+      # immediately decide run_mode "skip" anyway. An explicit
+      # `gh workflow run` dispatch (not `repository_dispatch`, not a second
+      # cron) per the approved plan -- not subject to GITHUB_TOKEN's
+      # push-recursion prevention, no new secret needed beyond the
+      # actions:write permission above.
+      - name: Dispatch analyze.yml if the queue is non-empty
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cluster_count=$(python3 -c "import json; print(len(json.load(open('data/queue.json'))))")
+          echo "data/queue.json has $cluster_count cluster(s) this run."
+          if [ "$cluster_count" -gt 0 ]; then
+            gh workflow run analyze.yml --ref main
+          else
+            echo "Queue is empty -- not dispatching analyze.yml."
           fi

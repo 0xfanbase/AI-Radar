@@ -7,6 +7,89 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-09 — Phase 2: `analyze.yml` (ANALYST + VERIFIER pipeline) + `watch.yml` dispatch hookup
+
+Per the approved build plan's §3, this checkpoint wires the two
+already-built pure-code halves of Phase 2 (`scripts/plan_run.py`,
+`scripts/reconcile_run.py`, `scripts/check_path_allowlist.py`,
+`scripts/validate_changed_schemas.py`) together with the two LLM steps
+into a real `.github/workflows/analyze.yml`, and hooks `watch.yml` up to
+dispatch it.
+
+**`anthropics/claude-code-action@v1`'s interface was looked up live**
+against the action's own `action.yml`, `docs/usage.md`,
+`docs/custom-automations.md`, and `examples/manual-code-analysis.yml` —
+not assumed from training memory. Confirmed real: `prompt`, `claude_args`
+(newline-separated raw CLI flags — `--max-turns`, `--model`,
+`--allowedTools` all appear verbatim in the action's own docs, camelCase
+`allowedTools` confirmed independently in two doc pages), and
+`claude_code_oauth_token` as a real top-level input.
+
+**Could not confirm from the action's own docs whether prompt-mode
+(`workflow_dispatch` + a bare `prompt`, no PR/issue/mention context)
+auto-commits or auto-opens a PR on its own** — the closest real example
+(`examples/manual-code-analysis.yml`) requests only `contents: read` and
+never commits, and `docs/custom-automations.md` inconsistently describes
+`workflow_dispatch` support as "coming soon" despite that very example
+existing. Stated plainly rather than guessed: **`analyze.yml` assumes the
+action does NOT auto-commit** — an explicit `git -c user.name=...
+commit`/`push` step at the end of the job handles it, mirroring
+`watch.yml`'s own already-tested pattern exactly. Logged in
+`IMPROVEMENT_BACKLOG.md`.
+
+**`analyze.yml`** (`workflow_dispatch` only — not a second cron):
+(a) `scripts/plan_run.py` writes `data/run_plan.json`; (b) an ANALYST
+`claude-code-action@v1` step (own 35-turn budget, model from
+`vars.CLAUDE_MODEL`, `allowedTools` restricted to
+`Read,Glob,Grep,WebFetch,Edit,Write,Bash(git diff:*),Bash(git status:*)`)
+drains `data/pending_corrections.json` first, then drafts
+`content/cards/<proposed_card_id>.json` per `data/run_plan.json` cluster,
+growing `content/lexicon.json`/`content/frontier_board.json`; (c) a
+VERIFIER step (fresh context, its own separate 35-turn budget, no `Write`
+tool — `allowedTools` = `Read,Glob,Grep,WebFetch,Edit,Bash(git
+diff:*),Bash(git status:*),Bash(rm:*)`, the last one a narrow logged
+exception so it can physically delete a dropped card's file) re-fetches
+every citation independently and strips/drops, never upgrades; (d)
+`scripts/reconcile_run.py` (pure code) regenerates the ledger/card-index/
+verifier-stats; (e) `scripts/check_path_allowlist.py` +
+`scripts/validate_changed_schemas.py` gate the diff — either failing
+blocks the commit step entirely (default GitHub Actions step-failure
+behavior, no `continue-on-error` anywhere in this workflow); (f) commit +
+push `content/`/`data/` under the bot identity, only if there's something
+to commit.
+
+**`watch.yml` amended**: `permissions.actions: write` added, plus a final
+step that counts `data/queue.json`'s clusters (`python3 -c
+"import json; print(len(json.load(open('data/queue.json'))))"`) and, only
+if non-empty, runs `gh workflow run analyze.yml --ref main` using
+`secrets.GITHUB_TOKEN`.
+
+**Verification performed this checkpoint:**
+- Both workflow files parse as valid YAML (`yaml.safe_load`), and every
+  embedded multi-line `run:` shell block passes `bash -n`.
+- `python -m pytest` — 430 passed, 2 deselected (live tests excluded by
+  default) — unchanged pass count from before this checkpoint, since this
+  turn touches only the two workflow YAML files, nothing under `scripts/`,
+  `watcher/`, or `tests/`.
+- **Not verified, and cannot be from this session**: `analyze.yml` has
+  never actually run on GitHub Actions. It needs the
+  `CLAUDE_CODE_OAUTH_TOKEN` repo secret and the `vars.CLAUDE_MODEL` /
+  `vars.QUOTA_DEGRADATION_LEVEL` repo variables, none of which any session
+  can create — this is stated plainly as a real gap, not claimed as tested.
+  Once those exist and this branch is merged, the first real
+  `watch.yml` → `analyze.yml` cycle is the actual end-to-end proof.
+
+**What remains for the human (added to since Phase 1):** add the
+`CLAUDE_CODE_OAUTH_TOKEN` repo secret; set `vars.CLAUDE_MODEL` (e.g.
+`gh variable set CLAUDE_MODEL --body claude-sonnet-4-5`) — no fallback is
+baked into the workflow YAML, deliberately, since any fallback value would
+itself be a hardcoded model snapshot; optionally set
+`vars.QUOTA_DEGRADATION_LEVEL` (defaults to 0/normal if left unset); enable
+GitHub Pages; review and merge this branch to `main`; then observe
+hands-off operation to confirm the loop actually runs end to end.
+
+---
+
 ## 2026-07-09 — Phase 2, commit 12: ledger schema extension + card_index/run_plan/verifier_stats/pending_corrections schemas
 
 Per the approved build plan's §3 (Phase 2 — Analyst + Verifier), this
