@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/whats_moving.schema.json",
+  "title": "What's Moving",
+  "description": "Spec-silent shape (spec sec-2.5/sec-5 name the artifact but not its fields; decision logged in IMPROVEMENT_BACKLOG.md). data/whats_moving.json is a pure-code, no-AI 7-day topic-velocity snapshot computed from Hacker News mention counts, one entry per card topic tag, each carrying exactly 7 daily counts (oldest first) so the frontend's inline-SVG sparkline (site/lib/svg_sparkline.py) can render it directly, plus a pre-computed trend label so 'accelerating vs cooling' is never inferred client-side from color/slope alone (accessibility rule).",
+  "type": "object",
+  "required": ["generated_at", "window_days", "topics"],
+  "properties": {
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "window_days": {
+      "type": "integer",
+      "const": 7
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["topic", "daily_counts", "trend"],
+        "properties": {
+          "topic": {
+            "type": "string",
+            "enum": [
+              "models",
+              "research",
+              "chips/compute",
+              "policy",
+              "products",
+              "safety",
+              "open-source",
+              "China",
+              "funding"
+            ]
+          },
+          "daily_counts": {
+            "type": "array",
+            "minItems": 7,
+            "maxItems": 7,
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "HN AI-story mention counts for this topic, oldest day first, most recent day last."
+          },
+          "trend": {
+            "type": "string",
+            "enum": ["accelerating", "cooling", "flat"]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

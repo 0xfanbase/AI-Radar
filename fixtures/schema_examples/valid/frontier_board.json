@@ -1,0 +1,26 @@
+[
+  {
+    "lab": "Example Lab",
+    "region": "US",
+    "model": "Example Model 5",
+    "release_date": "2026-07-09",
+    "modality": ["text", "code"],
+    "context_window": 1000000,
+    "access": "api",
+    "significance": "First million-token context window from a US frontier lab.",
+    "source_url": "https://example-lab.test/blog/example-model-5",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "Example Open Lab",
+    "region": "open-weights",
+    "model": "Example Weights 3",
+    "release_date": "2026-06-01",
+    "modality": ["text"],
+    "context_window": null,
+    "access": "open-weights",
+    "significance": "Widely-adopted open-weights baseline for fine-tuning.",
+    "source_url": "https://example-open-lab.test/releases/weights-3",
+    "last_verified": "2026-07-01"
+  }
+]

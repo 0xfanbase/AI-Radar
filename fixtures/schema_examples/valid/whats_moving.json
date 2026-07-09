@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-07-09T07:20:00Z",
+  "window_days": 7,
+  "topics": [
+    {
+      "topic": "chips/compute",
+      "daily_counts": [2, 3, 3, 5, 6, 8, 9],
+      "trend": "accelerating"
+    },
+    {
+      "topic": "policy",
+      "daily_counts": [6, 5, 4, 4, 3, 2, 1],
+      "trend": "cooling"
+    }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/frontier_board.schema.json",
+  "title": "Frontier Board",
+  "description": "Top-level array of frontier-model rows (content/frontier_board.json), spec sec-5 verbatim: [{lab, region, model, release_date, modality[], context_window?, access, significance, source_url, last_verified}]. Phase 1 ships this schema only -- seeding >=12 rows across US/China/open-weights is Phase 3.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "lab",
+      "region",
+      "model",
+      "release_date",
+      "modality",
+      "access",
+      "significance",
+      "source_url",
+      "last_verified"
+    ],
+    "properties": {
+      "lab": {
+        "type": "string",
+        "minLength": 1
+      },
+      "region": {
+        "type": "string",
+        "enum": ["US", "China", "open-weights"]
+      },
+      "model": {
+        "type": "string",
+        "minLength": 1
+      },
+      "release_date": {
+        "type": "string",
+        "format": "date"
+      },
+      "modality": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": "Free-form modality tags, e.g. 'text', 'image', 'audio', 'code'. Spec does not fix an enum here."
+      },
+      "context_window": {
+        "type": ["integer", "null"],
+        "minimum": 1,
+        "description": "Context window in tokens, nullable when not publicly disclosed."
+      },
+      "access": {
+        "type": "string",
+        "enum": ["api", "open-weights", "consumer"]
+      },
+      "significance": {
+        "type": "string",
+        "minLength": 1,
+        "description": "One-line significance note."
+      },
+      "source_url": {
+        "type": "string",
+        "format": "uri"
+      },
+      "last_verified": {
+        "type": "string",
+        "format": "date",
+        "description": "Date this row was last fact-checked against its source_url. Frontend pulse-eligibility (last 7 days) is computed from this field."
+      }
+    },
+    "additionalProperties": false
+  }
+}

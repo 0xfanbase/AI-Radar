@@ -1,0 +1,13 @@
+[
+  {
+    "lab": "Example Lab",
+    "region": "US",
+    "model": "Example Model 5",
+    "release_date": "2026-07-09",
+    "modality": ["text", "code"],
+    "context_window": 1000000,
+    "significance": "First million-token context window from a US frontier lab.",
+    "source_url": "https://example-lab.test/blog/example-model-5",
+    "last_verified": "2026-07-09"
+  }
+]

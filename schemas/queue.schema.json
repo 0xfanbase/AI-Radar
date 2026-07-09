@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/queue.schema.json",
+  "title": "Queue",
+  "description": "Spec-silent shape (spec sec-4 says only 'write data/queue.json (<=8 clusters, each with ALL source URLs)'; decision logged in IMPROVEMENT_BACKLOG.md). data/queue.json is a top-level array, one entry per ranked cluster (watcher/ranking.py), rank 1 = highest score, capped at 8 entries per the selection algorithm's 'top <=8 clusters' rule. Consumed by the Phase 2 analyst (via scripts/plan_run.py) to write cards -- never authored or edited by an LLM itself.",
+  "type": "array",
+  "maxItems": 8,
+  "items": {
+    "type": "object",
+    "required": ["cluster_hash", "rank", "score", "sources"],
+    "properties": {
+      "cluster_hash": {
+        "type": "string",
+        "minLength": 1,
+        "description": "sha256 of sorted normalized member URLs; same value used as the data/ledger.json entries key."
+      },
+      "rank": {
+        "type": "integer",
+        "minimum": 1
+      },
+      "score": {
+        "type": "number",
+        "description": "primary_source_weight x cross_source_count x hn_velocity_score, per watcher/ranking.py."
+      },
+      "sources": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "required": ["url", "source_type", "title"],
+          "properties": {
+            "url": {
+              "type": "string",
+              "format": "uri"
+            },
+            "source_type": {
+              "type": "string",
+              "enum": ["lab", "arxiv", "hn"]
+            },
+            "title": {
+              "type": "string",
+              "minLength": 1
+            },
+            "outlet": {
+              "type": ["string", "null"],
+              "description": "Publisher/outlet name where applicable (e.g. HN's linked domain); null for lab/arxiv sources."
+            },
+            "points": {
+              "type": ["integer", "null"],
+              "description": "HN points at time of fetch, null for non-HN sources."
+            }
+          },
+          "additionalProperties": false
+        }
+      }
+    },
+    "additionalProperties": false
+  }
+}

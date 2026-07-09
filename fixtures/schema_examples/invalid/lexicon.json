@@ -1,0 +1,8 @@
+[
+  {
+    "term": "context window",
+    "deeper": "Context window size is usually measured in tokens, not characters or words.",
+    "related": ["transformer", "attention"],
+    "seen_in": ["2026-07-09-example-model-release"]
+  }
+]
