@@ -403,3 +403,34 @@ Newest entries at the bottom of each section, in commit order.
   (not a coincidentally-matching fallback), top-`MAX_QUEUE_SIZE`
   selection from a larger real-cluster pool, and determinism of the
   combined pipeline across input shuffles.
+- **2026-07-09 — `watcher/ledger.py`'s upsert does *not* persist a
+  `times_seen` counter, even though the task description it was built
+  against mentions one.** `schemas/ledger.schema.json` was already fixed
+  in an earlier commit with `additionalProperties: false` and only
+  `card_id`/`status`/`first_seen`/`last_seen`/`member_urls`/
+  `verifier_outcome` — no counter field — and touching that schema is
+  outside this commit's scope. `first_seen`/`last_seen` (bumped on every
+  re-run, never duplicated) already fully satisfy the actual idempotency
+  guarantee (a second identical run adds zero new ledger keys); a "how
+  many times seen" count isn't needed to prove that, and inventing an
+  unschemad field would break every schema-valid load/save round trip.
+- **2026-07-09 — `watcher/ledger.py` reuses `watcher.clustering.
+  compute_cluster_hash` rather than re-implementing cluster-hash
+  computation.** `schemas/ledger.schema.json`'s own description already
+  names `watcher/clustering.py` as that formula's owner; ledger.py only
+  needs it to recover a hash from a plain `member_urls` list (e.g. this
+  commit's own tests), never as a second, independently-maintained hash.
+- **2026-07-09 — `watcher/ledger.py`'s `apply_run` upserts only the
+  clusters that survive the "already published" filter — an
+  already-published cluster's ledger entry is left completely untouched
+  by a re-run, not even `last_seen`-bumped.** Spec-silent (the plan only
+  says a re-run "adds zero new keys"); this reading keeps
+  `first_seen`/`last_seen` meaningfully scoped to "still being tracked
+  toward publication," and avoids rewriting settled history on every
+  run for no benefit.
+- **2026-07-09 — `watcher/ledger.py`'s `save_ledger` writes
+  indent=2/sort_keys=True/trailing-newline JSON, unlike `watcher/http.py`'s
+  compact `data/.cache/` entries.** `data/ledger.json` is a committed,
+  human-reviewed data artifact (unlike the gitignored HTTP cache), so
+  legible diffs are worth the extra bytes; the transient cache files have
+  no such reason to expand.
