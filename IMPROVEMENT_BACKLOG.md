@@ -264,3 +264,76 @@ Newest entries at the bottom of each section, in commit order.
   commit-hygiene choice, not a functional fix.) `watcher/sources/labs/__init__.py`
   needed no equivalent call: it ships as part of the `labs/` fetchers'
   own commit, which already owns everything under that subpackage.
+- **2026-07-09 — Alibaba Qwen dropped as a Phase 1 lab source, per the
+  approved build plan's own note.** Its legacy blog redirects to a
+  JS-only SPA with no RSS feed and no server-rendered content to scrape
+  or diff. The four labs actually registered
+  (`watcher/sources/labs/registry.py`) — OpenAI, Google DeepMind,
+  Anthropic, DeepSeek — are the full Phase 1 lab set; re-adding Qwen
+  later would need either a headless-browser fetch (out of scope for a
+  pure-code, dependency-light watcher) or discovery of an
+  undocumented feed/API.
+- **2026-07-09 — Anthropic's news-index anchor-scrape
+  (`watcher/sources/labs/html_common.py::extract_news_anchors`) targets
+  any element whose class *contains* the substring "title" (case-
+  insensitive) as the headline, rather than a fixed tag/class.**
+  Confirmed live on 2026-07-09: `https://www.anthropic.com/news` nests a
+  category label, a `<time>`, a headline element, and (for "featured"
+  cards) a body-preview paragraph all inside one `<a>`, and marks the
+  headline with a hashed CSS-module class name ending in `__title` in
+  every card layout seen (an `h4` for the featured grid, a `span` for
+  the plain list) — substring match on hashed-but-still-semantically-
+  named classes is more resilient to a rebuild changing the hash prefix
+  than depending on the exact tag name. Falls back to the anchor's own
+  text (minus any `<time>` descendant) if no title-classed element is
+  found, so a future redesign degrades to a slightly messier title
+  rather than crashing or returning nothing — exercised by the fixture's
+  own plain footer link to the Responsible Scaling Policy story, which
+  has no title-classed child at all.
+- **2026-07-09 — Anthropic anchor dates are parsed from `<time>` text in
+  the exact `"Mon D, YYYY"` format the live page uses (e.g. "Jun 30,
+  2026") into a day-granularity ISO 8601 UTC timestamp at midnight.**
+  The source page gives no time-of-day, so midnight-UTC is the simplest
+  reasonable placeholder; an unparseable or missing `<time>` yields `""`
+  rather than raising or guessing a fabricated date.
+- **2026-07-09 — DeepSeek's "previously-seen sitemap" state
+  (`watcher/sources/labs/deepseek.py`) is a dedicated persisted file
+  (`data/.cache/deepseek_sitemap_seen.json`), not a reuse of
+  `watcher/http.py`'s own ETag response cache.** That cache is keyed by
+  `sha256(url)` and is overwritten with the new body as an inherent part
+  of every successful fetch's own conditional-GET bookkeeping, so by the
+  time a caller could read it back the "previous" sitemap body would
+  already be gone; a dedicated file, read before today's sitemap fetch
+  runs, keeps the diff correct without reaching into another module's
+  private (`_`-prefixed) cache internals.
+- **2026-07-09 — DeepSeek article Items carry `published_at=""`.** The
+  approved plan's DeepSeek technique is explicitly "sitemap-diff plus an
+  h1-extraction of the article page" — neither step yields a
+  publish date (confirmed live: the real captured article page's `<h1>`,
+  `<title>`, and visible body carry no machine-parseable date; only an
+  in-sidebar breadcrumb string embeds one informally, which is not part
+  of the specified extraction technique). Left empty rather than
+  fabricated or guessed from the slug's `newsYYMMDD`-ish convention
+  (confirmed inconsistent across older slugs, e.g. `news0725`,
+  `news1120`, which don't fit that shape).
+- **2026-07-09 — `watcher/sources/labs/registry.py`'s
+  `fetch_all_lab_items` wraps every individual lab fetcher call in a
+  broad `except Exception`, extending the "skip a source cleanly rather
+  than crash the whole run" fetch-discipline rule from robots.txt
+  disallows (already handled per-fetcher) to any unexpected failure** (a
+  genuine network error surviving retries, an upstream response so
+  malformed even the lenient parser chokes). Spec-silent extension,
+  logged here rather than left as an implicit assumption; one lab's
+  outage should never take down the other three.
+- **2026-07-09 — Live-verified during this fixture-recording pass (not
+  reused from an earlier planning pass), 2026-07-09: `openai.com`,
+  `deepmind.google`, and `www.anthropic.com` all currently return
+  allow-all `robots.txt` policies for these fetch paths, and
+  `api-docs.deepseek.com/robots.txt` 404s (treated as allow-all per the
+  existing arXiv/HN convention).** No policy conflicts to flag for any
+  of the four lab sources, unlike `export.arxiv.org`'s blanket disallow
+  noted above. The robots.txt-disallow *skip* behavior itself is still
+  covered for all four lab fetchers using synthetic disallow fixtures in
+  `tests/test_lab_fetch_rss.py`/`tests/test_lab_fetch_html_diff.py`,
+  since the real policies currently allow everything and a test can't
+  exercise a disallow path against real, permissive robots.txt content.
