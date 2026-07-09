@@ -1221,3 +1221,114 @@ notes.
   lib, the pulse CSS, etc.) — encoding them now against features that
   don't exist yet would just be dead assertions or false-negative-prone
   guesses about later APIs.
+
+## Phase 4, commit 28: `site/lib/linkify.py` + `site/lib/svg_sparkline.py` (2026-07-09)
+
+- **`linkify.py`'s slug function (`term.lower().replace(" ", "-")`)
+  deliberately matches `tests/test_seed_content.py`'s own local `_slugify`
+  helper exactly**, rather than a stricter general-purpose slugifier
+  (e.g. stripping punctuation, collapsing repeated hyphens). That test
+  file's own docstring already flagged "site/lib's own slugifier (Phase
+  4, not yet built) should match this convention for lexicon terms to
+  stay linkable from the primer" as an open item; this closes it —
+  confirmed by a new test (`test_slugify_matches_test_seed_content_convention_for_all_real_lexicon_terms`)
+  that every real `content/primer.json` slug resolves against
+  `linkify.build_slug_map(content/lexicon.json)`.
+- **Overlap-handling rule for `linkify()`: when two terms in a card's
+  `lexicon_terms[]` would match overlapping spans in the same prose
+  string** (e.g. `"open weights"` and `"weights"` both listed, and only
+  one occurrence of `"weights"` exists, embedded inside the one
+  occurrence of `"open weights"`), the **earlier-listed term claims the
+  span**; a later term that can't find its own non-overlapping occurrence
+  is reported in `unmatched_terms` rather than producing a nested/invalid
+  `<a>` tag. The spec doesn't address this case at all (a card is only
+  expected to list terms it actually uses, and the analyst's own prompt
+  procedure is what would prevent this from arising in practice); this
+  keeps `linkify()` itself defensive rather than assuming well-behaved
+  input.
+- **`linkify()` HTML-escapes the term text itself (`html.escape(term)`)
+  before building its match regex, in addition to escaping the prose.**
+  Only the prose escaping was explicitly requested; escaping the term too
+  means a hypothetical lexicon term containing an HTML-special character
+  would still match against the already-escaped prose correctly instead
+  of silently failing to match (falling back to `unmatched_terms`, not a
+  crash, either way) — cheap extra robustness, no real lexicon term today
+  needs it (none of the 30 seeded terms contain `&`, `<`, `>`, or quote
+  characters).
+- **A term listed in a card's `lexicon_terms[]` but absent from the
+  lexicon slug map entirely (not merely absent from this prose) is folded
+  into the same `unmatched_terms` list**, rather than being a distinct
+  error class or a raised exception. The build plan's own wording for the
+  fallback ("Terms:" chip row) only describes the "substring matching
+  fails" case explicitly, but treating a missing-from-lexicon term as
+  fatal would contradict this task's own resilience requirement ("do not
+  fail or silently drop it") — and in practice this case should not arise
+  once the analyst's lexicon auto-growth rule (Phase 2) is exercised live,
+  since a card's `lexicon_terms[]` is only ever populated from real
+  lexicon entries.
+- **`svg_sparkline.py`'s trend classification (`classify_trend`) is an
+  independent, simple half-series-average comparison** ("rising" /
+  "falling" / "flat"), not a reuse of `data/whats_moving.json`'s own
+  precomputed `trend` field (`"accelerating"` / `"cooling"` / `"flat"`).
+  This task's own instructions specify the sparkline component's trend
+  vocabulary as "rising/falling/flat" (different words from
+  `whats_moving.schema.json`'s enum), and `svg_sparkline.py` is written as
+  a general-purpose, reusable component that only takes a raw
+  `daily_counts` series as input — not a `whats_moving.json`-specific
+  renderer — so it computes its own label rather than assuming a caller
+  always has the precomputed field on hand. Mapping/reconciling the two
+  vocabularies (if the future `/moving/` page builder wants to reuse
+  `whats_moving.json`'s own precomputed trend instead of recomputing it)
+  is left to that later builder, not decided here. Sanity-checked: this
+  method reproduces every one of the 9 real topics' precomputed
+  `"accelerating"` → rising / `"flat"` → flat labels in today's live
+  `data/whats_moving.json` snapshot (frozen as a hardcoded fixture in
+  `tests/test_svg_sparkline.py::test_classify_trend_matches_frozen_whats_moving_snapshot`,
+  deliberately not read live from the file so a future legitimate
+  `watch.yml` data update can never break this unrelated test).
+- **`svg_sparkline.py` hardcodes `SIGNAL_CYAN = "#43E5C4"` rather than
+  reading `tokens.css`'s `--color-signal-cyan` custom property at
+  render time.** This module emits plain, standalone SVG markup with no
+  access to the CSS cascade or a templating context; duplicating the
+  known-correct hex value (verified WCAG-AA in `tokens.css`'s own header
+  comment) is simpler than plumbing a color value through every call
+  site. If `tokens.css`'s palette ever changes, this constant must be
+  updated to match by hand — flagged here as the one place that could
+  silently drift out of sync with `tokens.css`.
+- **`site/lib/` has no `__init__.py`**, and both new test files load their
+  module under test via `importlib.util.spec_from_file_location` (the same
+  technique `site/tests/test_build.py` already uses for `generate.py`),
+  rather than `import site.lib.linkify` as a package. This matches the
+  existing project convention of never turning the `site/` directory into
+  an importable package (it would shadow the stdlib `site` module for any
+  other code sharing the interpreter's `sys.path` — see the Phase 4
+  scaffold commit's own backlog entry) and keeps `site/lib`'s package-vs-
+  namespace-package status an open question for whoever wires these
+  modules into `site/generate.py`'s real builders, rather than deciding it
+  now for a directory this commit doesn't otherwise touch.
+- **Per-module test loaders register the freshly created module object in
+  `sys.modules` before calling `exec_module`** (`sys.modules[spec.name] =
+  module`), not just after. Both `linkify.py` and `svg_sparkline.py` use
+  `@dataclass` together with `from __future__ import annotations`
+  (postponed evaluation); `dataclasses._process_class` resolves annotation
+  strings by looking up `sys.modules[cls.__module__]`, which raises
+  `AttributeError: 'NoneType' object has no attribute '__dict__'` at
+  import time if the module isn't registered yet. `site/tests/test_build.py`
+  never hit this because `generate.py` has no dataclasses; both new test
+  files needed the extra registration line to load at all.
+- **Per this task's own explicit instruction, `tests/test_linkify.py` and
+  `tests/test_svg_sparkline.py` live under the repo-root `tests/`
+  directory** (covered by `pytest.ini`'s `testpaths = tests` and therefore
+  exercised by a bare `python -m pytest` / `ci.yml`), rather than under
+  `site/tests/` alongside `test_build.py` (which — per this same file's
+  Phase 4 scaffold entry — is *not* yet wired into the default `pytest`
+  run or `requirements-dev.txt`). This is a deliberate asymmetry: it means
+  `linkify.py`/`svg_sparkline.py` get full CI coverage today even though
+  `site/tests/test_build.py` still needs its own separate
+  `site/requirements.txt` install to run, which remains true and unchanged
+  by this commit.
+- Verification: `python -m pytest` — 512 passed, 2 deselected (up from 470
+  before this commit: 42 new tests across the two new files), full suite
+  green. `site/tests/test_build.py` (run explicitly with
+  `site/requirements.txt` installed, per its own known gap) also still
+  green (6 passed), unaffected by this commit.
