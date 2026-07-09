@@ -363,3 +363,43 @@ Newest entries at the bottom of each section, in commit order.
   joined, UTF-8 encoded before hashing) is itself a spec-silent pick —
   the plan states "sha256 of sorted normalized member URLs" without
   specifying how a list becomes hashable bytes.
+- **2026-07-09 — `watcher/ranking.py`'s cluster interface is duck-typed
+  (an `.items` iterable), not an import of `watcher.clustering.Cluster`.**
+  Built in parallel with `watcher/clustering.py`; rather than block on
+  that module's exact shape, ranking.py only assumes a cluster exposes
+  `.items` (Item-alikes with `source_type`/`source_name`/`published_at`/
+  `points`/`url`). Verified after the fact (both modules landed in the
+  same tree) that real `Cluster` instances from `watcher/clustering.py`
+  work with `watcher/ranking.py`'s `rank_clusters()` unmodified.
+- **2026-07-09 — `watcher/ranking.py`'s tie-break prefers a cluster's own
+  `.cluster_hash` attribute when present, else computes the identical
+  `sha256`-of-sorted-normalized-member-URLs formula itself from
+  `cluster.items`.** Keeps ranking.py's own tie-break/`RankedCluster.
+  cluster_hash` correct and fully deterministic without a hard import of
+  `watcher.clustering`, while exactly matching (confirmed via a live
+  smoke test against real `Cluster` instances) the canonical
+  `Cluster.cluster_hash` that module now computes — no second, silently-
+  diverging hash implementation.
+- **2026-07-09 — `RankedCluster` (ranking.py's return type) is a small
+  `{rank, score, cluster_hash, cluster}` wrapper, not bare clusters.**
+  `queue.schema.json` requires `cluster_hash`/`rank`/`score` per queue
+  entry; wrapping lets a later `queue_writer.py` (out of this commit's
+  scope) write those fields straight from `rank_clusters()`'s output
+  without recomputing anything.
+- **2026-07-09 — Ranking's `hn_velocity_score` age floor (`max(age_hours,
+  1)`, per the approved formula verbatim) is a distinct constant from
+  `watcher/sources/hn.py`'s own fetch-time age floor (1/60 hour).** The
+  two floors serve different stages (HN's own points-vs-velocity
+  candidacy filter at fetch time, vs. this ranking-stage score formula)
+  and are deliberately not shared, to avoid one stage's tuning silently
+  changing the other's behavior.
+- **2026-07-09 — Added `tests/test_clustering_ranking_integration.py`, an
+  explicit end-to-end proof that `watcher.clustering.cluster_items()`
+  output feeds directly into `watcher.ranking.rank_clusters()` (and its
+  per-cluster scoring helpers) with no adaptation layer.** Formalizes,
+  beyond a one-off manual check, the claim in the duck-typing bullet
+  above: covers merged/exact-URL-matched clusters, `RankedCluster.
+  cluster_hash` coming from the real `Cluster.cluster_hash` attribute
+  (not a coincidentally-matching fallback), top-`MAX_QUEUE_SIZE`
+  selection from a larger real-cluster pool, and determinism of the
+  combined pipeline across input shuffles.
