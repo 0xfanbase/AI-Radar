@@ -51,6 +51,22 @@ RETRY_STATUS_FORCELIST = (429, 500, 502, 503, 504)
 # fetch state, never a committed artifact.
 CACHE_DIR = REPO_ROOT / "data" / ".cache"
 
+# Hosts exempted from the robots.txt gate because they are a provider's own
+# documented public REST API with published terms of use governing
+# programmatic access -- per CLAUDE.md's "Sources & selection algorithm"
+# fetch-discipline exception (deliberately narrow). robots.txt is a crawl
+# directive aimed at page-indexing crawlers; API hosts commonly
+# blanket-disallow it to keep search engines out of raw API responses, which
+# is not the same thing as prohibiting the documented API usage the host
+# exists to serve. Today exactly one: export.arxiv.org (arXiv's Atom API,
+# ToU at arxiv.org/help/api/tou). This is a central, auditable allowlist
+# rather than a per-call boolean, precisely so it stays narrow -- any future
+# addition must be named in CLAUDE.md and logged in
+# IMPROVEMENT_BACKLOG.md, not silently passed at a call site. Applies only
+# to this host's API endpoint; HTML/website fetching (including any HTML
+# page on arxiv.org itself) remains fully robots.txt-gated.
+ROBOTS_EXEMPT_API_HOSTS = frozenset({"export.arxiv.org"})
+
 # --------------------------------------------------------------------------
 # HN Algolia source (watcher/sources/hn.py)
 # --------------------------------------------------------------------------

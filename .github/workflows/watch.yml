@@ -5,14 +5,16 @@ name: watch
 # data/whats_moving.json. No LLM involved -- this workflow only ever runs
 # watcher/ code and commits the resulting data/*.json artifacts.
 #
-# Cron is deliberately an off-hour minute (06:17 UTC), not top-of-hour, to
-# avoid GitHub Actions' well-documented top-of-hour scheduling congestion;
-# logged in IMPROVEMENT_BACKLOG.md as a Phase 1 approximation of CLAUDE.md's
-# documented "daily 07:00 HKT" target (Phase 2 can tighten this once
-# analyze.yml needs to chain off of it).
+# Cron targets CLAUDE.md's documented "daily 07:00 HKT" run exactly: Hong
+# Kong is UTC+8 with no DST, so 07:00 HKT = 23:00 UTC the previous day --
+# "0 23 * * *" fires once every day at 23:00 UTC, which is 07:00 HKT the
+# following day. (Phase 1's original placeholder, "17 6 * * *"/06:17 UTC,
+# was an off-hour-minute approximation that never actually matched the
+# documented target hour; corrected at the Phase 1 PM checkpoint -- see
+# PROGRESS.md.)
 on:
   schedule:
-    - cron: "17 6 * * *"
+    - cron: "0 23 * * *"
   workflow_dispatch: {}
 
 permissions:

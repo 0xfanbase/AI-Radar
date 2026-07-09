@@ -202,28 +202,46 @@ def test_whitespace_normalization_collapses_newlines_and_indentation_in_title():
 # --------------------------------------------------------------------------
 
 
-def test_fetch_arxiv_items_returns_empty_list_when_robots_disallows(requests_mock, tmp_path):
+def test_fetch_arxiv_items_proceeds_despite_robots_disallow_per_documented_api_exemption(
+    requests_mock, tmp_path
+):
     # This is the REAL robots.txt content live-fetched from
-    # https://export.arxiv.org/robots.txt on 2026-07-09 -- it currently
-    # disallows every path for every user agent. Per CLAUDE.md's "never
-    # circumvent a disallow" rule, the fetcher must skip cleanly (see
-    # IMPROVEMENT_BACKLOG.md for the policy conflict this surfaces).
+    # https://export.arxiv.org/robots.txt on 2026-07-09 -- it disallows
+    # every path for every user agent. Per the Phase 1 PM checkpoint's
+    # resolved decision (CLAUDE.md's narrow documented-API exception,
+    # `watcher.config.ROBOTS_EXEMPT_API_HOSTS`), `export.arxiv.org` is
+    # centrally exempted from the robots.txt gate because arXiv's own
+    # published API Terms of Use -- not this crawl directive -- governs
+    # this documented, keyless API endpoint. The fetcher must now proceed
+    # and return parsed items even against this exact disallow body; no
+    # request to this mocked robots.txt URL should even be made, since the
+    # exemption short-circuits before it's ever fetched.
     requests_mock.get(
         "https://export.arxiv.org/robots.txt",
         text="User-agent: * \nDisallow: /\n",
     )
+    query_url = arxiv.build_query_url()
+    requests_mock.get(query_url, text=_load_fixture_text())
 
     session = http.build_session()
     items = arxiv.fetch_arxiv_items(session, cache_dir=tmp_path)
 
-    assert items == []
-    # No query request should have even been attempted once robots.txt
-    # disallowed the fetch.
+    assert len(items) == 12
+    assert items[0].source_type == "arxiv"
+
+    # The exemption short-circuits inside check_robots_allowed() before any
+    # HTTP call -- confirm robots.txt itself was never actually fetched.
+    robots_calls = [
+        req for req in requests_mock.request_history
+        if req.url.startswith("https://export.arxiv.org/robots.txt")
+    ]
+    assert robots_calls == []
+
     query_calls = [
         req for req in requests_mock.request_history
         if req.url.startswith(arxiv.ARXIV_API_BASE_URL)
     ]
-    assert query_calls == []
+    assert len(query_calls) == 1
 
 
 def test_fetch_arxiv_items_parses_real_fixture_through_shared_http_layer(

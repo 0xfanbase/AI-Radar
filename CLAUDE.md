@@ -150,6 +150,19 @@ polling; ETag caching under `data/.cache/` (gitignored). Respect
 `robots.txt` — if a source blocks fetching, drop that source; never
 circumvent a disallow.
 
+Exception, deliberately narrow: a provider's own documented public REST
+API with published terms of use governing programmatic access — today
+exactly one: arXiv's API at `export.arxiv.org/api` (ToU:
+`arxiv.org/help/api/tou`) — is accessed under those published API terms
+(rate limits, attribution, UA), not gated by the host's `robots.txt`,
+which is a crawl directive aimed at page-indexing crawlers and is
+commonly blanket-disallowed by API hosts to keep search engines out of
+raw API responses. This exception never applies to HTML/website fetching
+(lab pages, outlet pages, any HTML page on arxiv.org itself), where
+`robots.txt` remains in full force and is never circumvented; any future
+source invoking this exception must be explicitly named here and logged
+in `IMPROVEMENT_BACKLOG.md`.
+
 **Selection algorithm (watcher, pure code):** candidate pool = lab-primary
 items (auto-shortlist) + HN AI stories above a points threshold + arXiv
 papers with unusual velocity → dedupe/cluster by topic → rank by

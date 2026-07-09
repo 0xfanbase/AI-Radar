@@ -185,3 +185,54 @@ def test_robots_network_error_causes_clean_skip_not_raise(requests_mock):
     )
 
     assert allowed is False
+
+
+# --------------------------------------------------------------------------
+# Documented-API exemption (CLAUDE.md's narrow fetch-discipline exception,
+# resolved at the Phase 1 PM checkpoint): a central allowlist
+# (`watcher.config.ROBOTS_EXEMPT_API_HOSTS`) lets a provider's own
+# documented public API bypass the robots.txt gate entirely, without
+# weakening that gate for every other host.
+# --------------------------------------------------------------------------
+
+
+def test_robots_exempt_host_is_allowed_without_fetching_robots_txt(requests_mock):
+    # export.arxiv.org is the one host in ROBOTS_EXEMPT_API_HOSTS today.
+    # Deliberately register NO robots.txt mock at all for this host -- if
+    # check_robots_allowed() tried to fetch it, requests_mock would raise
+    # a NoMockAddress error, so a passing test proves the exemption
+    # short-circuits before any HTTP call is made.
+    allowed = http.check_robots_allowed(
+        "https://export.arxiv.org/api/query?search_query=cat:cs.AI",
+        user_agent="TestBot/1.0",
+    )
+
+    assert allowed is True
+    assert requests_mock.request_history == []
+
+
+def test_robots_exemption_does_not_apply_to_non_allowlisted_host_with_same_disallow_body(
+    requests_mock,
+):
+    # The exact disallow body real export.arxiv.org/robots.txt serves,
+    # re-served here for a DIFFERENT, non-allowlisted host -- proves the
+    # exemption is host-specific (an allowlist keyed on netloc), not a
+    # blanket "any host serving this body" special case.
+    requests_mock.get(
+        "https://not-an-exempt-api-host.test/robots.txt",
+        text="User-agent: * \nDisallow: /\n",
+    )
+
+    allowed = http.check_robots_allowed(
+        "https://not-an-exempt-api-host.test/api/query",
+        user_agent="TestBot/1.0",
+    )
+
+    assert allowed is False
+
+
+def test_robots_exempt_hosts_allowlist_contains_exactly_arxiv_today():
+    # Pins the narrow-exception scope CLAUDE.md documents ("today exactly
+    # one") -- any future addition must be an explicit, logged decision,
+    # not a silent expansion this test would then need to notice.
+    assert config.ROBOTS_EXEMPT_API_HOSTS == frozenset({"export.arxiv.org"})

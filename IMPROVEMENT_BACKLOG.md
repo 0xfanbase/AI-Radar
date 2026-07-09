@@ -649,3 +649,104 @@ PM's own instruction to carry it forward as an explicit owner decision.
   fetch-discipline rule to distinguish a documented, ToU-governed API
   from website crawling are both live options) -- no code or policy
   change was made for this item in this round, by design.
+
+## Phase 1 PM checkpoint, round 2 (2026-07-09)
+
+- **2026-07-09 — arXiv `robots.txt` question resolved: decision is
+  `amend_fetch_discipline_for_documented_apis`, not
+  `accept_dead_source`.** Resolves the item carried forward from round 1
+  (the two entries directly above: the original "IMPORTANT DISCOVERY" and
+  round 1's "carried forward ... deliberately not resolved here"). Four
+  reasons, in full:
+  1. **The project charter itself mandates this source.** CLAUDE.md's
+     source table (spec sec-3) lists "arXiv API -- cs.AI, cs.CL, cs.LG" as
+     a tier-1 Primary (research) source with "Free API, no key" access,
+     and the ranking formula assigns arXiv a plan-specified primary-source
+     weight of 2.0 (`PRIMARY_SOURCE_WEIGHTS["arxiv"]`). Accepting a
+     permanently-dead arXiv source would silently delete an entire tier of
+     the approved architecture and distort the specified ranking formula --
+     HN+lab corroboration covers news, but nothing else supplies the
+     research-paper leg the daily wire is chartered to carry.
+  2. **The two rules were never in genuine conflict -- the generic rule
+     was simply misfiring.** `robots.txt` (the Robots Exclusion Protocol)
+     is a directive to web crawlers about indexing/crawling pages. arXiv
+     separately publishes documented Terms of Use for its API
+     (arxiv.org/help/api/tou) that explicitly invite and govern exactly
+     this kind of programmatic access (rate limits, single connection,
+     attribution). API hosts commonly blanket-disallow `robots.txt`
+     precisely to keep generic search crawlers from indexing raw API
+     responses, not to prohibit the documented API usage the host exists
+     to serve -- honoring the disallow here misread a crawl directive as
+     an access-control policy that contradicts arXiv's actual published
+     policy. "Never circumvent" is about not scraping what a publisher
+     doesn't want scraped; arXiv affirmatively wants this access, on terms
+     this fetcher already satisfies (one combined request per
+     once/twice-daily run, descriptive UA, vastly under the arXiv ToU's
+     1-request-per-3-seconds limit).
+  3. **The carve-out is narrow enough to preserve the rule's protective
+     intent.** It names the arXiv API endpoint specifically
+     (`export.arxiv.org`, via a central `ROBOTS_EXEMPT_API_HOSTS`
+     allowlist in `watcher/config.py`, not a per-call boolean), requires
+     published ToU compliance as the governing contract, requires any
+     future source invoking the exception to be explicitly added to
+     CLAUDE.md and logged here, and leaves `robots.txt` in full,
+     never-circumvented force for all HTML/website fetching -- Anthropic's
+     news scrape, DeepSeek's sitemap-diff, outlet pages, and any HTML page
+     on arxiv.org itself.
+  4. **Governance is proper.** Fetch discipline sits in CLAUDE.md's
+     Sources section, not among the seven numbered HARD RULES; the
+     backlog explicitly reserved this as an owner/PM-checkpoint decision
+     with amendment named as a live option (see the two entries directly
+     above), so deciding it at this checkpoint is exactly the escalation
+     path the project defined, not a unilateral mid-build
+     reinterpretation.
+
+  **Implementation**: `CLAUDE.md`'s fetch-discipline paragraph
+  ("Sources & selection algorithm") gained the narrow exception, worded to
+  name arXiv specifically and state it never applies to HTML/website
+  fetching. `watcher/config.py` adds
+  `ROBOTS_EXEMPT_API_HOSTS = frozenset({"export.arxiv.org"})`.
+  `watcher/http.py::check_robots_allowed` short-circuits to `True` (with
+  an info-level log citing the CLAUDE.md exception) when a URL's host is
+  in that set, *before* ever fetching that host's `robots.txt` -- every
+  other host's gate is unchanged. `watcher/sources/arxiv.py`'s module and
+  `fetch_arxiv_items` docstrings are updated to state the operative
+  constraint is now arXiv's own ToU rate limit rather than `robots.txt`;
+  the `check_robots_allowed` call itself is left in place unchanged (the
+  exemption short-circuits centrally, not via a special case in this
+  fetcher). `tests/test_arxiv_fetch.py`'s disallow-skip test is
+  repurposed to assert the fetcher now proceeds and returns parsed items
+  against the exact real disallow body previously captured live from
+  `export.arxiv.org/robots.txt`, confirming `robots.txt` itself is never
+  even fetched. `tests/test_fetch_discipline.py` gains three new tests:
+  the exemption applies without a `robots.txt` fetch for the allowlisted
+  host, the identical disallow body still returns `False` for a
+  non-allowlisted host (the exemption is host-scoped, not a blanket
+  special case), and the allowlist is pinned to exactly
+  `{"export.arxiv.org"}` today. All lab-fetcher disallow-skip tests
+  (`tests/test_lab_fetch_rss.py`, `tests/test_lab_fetch_html_diff.py`) are
+  untouched -- they verify the rule that remains in force for every
+  non-exempt host.
+  **HN Algolia is deliberately left unchanged**: `hn.algolia.com/robots.txt`
+  currently 404s (allow-all, already logged above), so there is no
+  conflict to resolve for that source, and `hn.algolia.com` is *not*
+  preemptively added to `ROBOTS_EXEMPT_API_HOSTS` -- CLAUDE.md's "today
+  exactly one" wording plus this file's logging requirement means any
+  future extension is a separate, explicit, logged decision, not an
+  automatic consequence of this one.
+  **Re-verified live**: `python scripts/run_watcher_live.py --runs 2`
+  now reports `arxiv=50` on both runs (previously `arxiv=0`), with the
+  idempotency bar still holding (run 2 adds zero new ledger keys); full
+  output and schema-revalidation recorded in `PROGRESS.md`'s round 2
+  checkpoint entry.
+- **2026-07-09 — `.github/workflows/watch.yml` cron corrected from the
+  Phase 1 placeholder `17 6 * * *` (06:17 UTC) to `0 23 * * *` (23:00
+  UTC), to actually match CLAUDE.md's documented "daily 07:00 HKT"
+  target.** Hong Kong is UTC+8 with no DST, so 07:00 HKT = 23:00 UTC the
+  previous day; a daily-at-23:00-UTC cron therefore fires at 07:00 HKT
+  the following day, every day -- the intended cadence, exactly. The
+  original placeholder (logged earlier in this file, in the Decisions
+  section) was chosen only to dodge GitHub Actions' top-of-hour
+  scheduling congestion and was never meant to be the final hour; this
+  entry is the promised tightening, done at this checkpoint rather than
+  left open indefinitely.

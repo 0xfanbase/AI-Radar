@@ -2,7 +2,7 @@
   {
     "cluster_hash": "3fb14968493dc68260e4892ed338c85e26c34d1f5bd0189f7fdc8ddef48ad531",
     "rank": 1,
-    "score": 318.58867695651475,
+    "score": 313.1225259955168,
     "sources": [
       {
         "outlet": null,
@@ -13,7 +13,7 @@
       },
       {
         "outlet": "openai.com",
-        "points": 651,
+        "points": 656,
         "source_type": "hn",
         "title": "GPT\u2011Live",
         "url": "https://openai.com/index/introducing-gpt-live/"
@@ -23,11 +23,11 @@
   {
     "cluster_hash": "fca8a3981e7fce1f0d5153a691e2ef8e2675c1d36e5af760675c54e39ea70a00",
     "rank": 2,
-    "score": 71.418212101192,
+    "score": 67.31217844510377,
     "sources": [
       {
         "outlet": "alecscollon.com",
-        "points": 241,
+        "points": 248,
         "source_type": "hn",
         "title": "I think I have LLM burnout",
         "url": "https://www.alecscollon.com/blog/llm-burnout/"
@@ -37,11 +37,11 @@
   {
     "cluster_hash": "cafc9d3c3da053e9739d61b137ae7a0eb001544e8ca90e0502d85a30c62c131e",
     "rank": 3,
-    "score": 29.417820747515034,
+    "score": 29.022576343435055,
     "sources": [
       {
         "outlet": "mistral.ai",
-        "points": 446,
+        "points": 449,
         "source_type": "hn",
         "title": "Mistral's Robostral Navigate: a state of the art robotics navigation model",
         "url": "https://mistral.ai/news/robostral-navigate/"
@@ -51,11 +51,11 @@
   {
     "cluster_hash": "af236497e3cd3b716e777defa47bd42ca1398d0075f80c8bac731c0bed05d910",
     "rank": 4,
-    "score": 22.84561100163101,
+    "score": 22.165162538830067,
     "sources": [
       {
         "outlet": "combine-lab.github.io",
-        "points": 197,
+        "points": 198,
         "source_type": "hn",
         "title": "The classifiers Anthropic puts in front of Fable are too zealous",
         "url": "https://combine-lab.github.io/blog/2026/07/07/fable-is-not-a-useful-model.html"
@@ -65,7 +65,7 @@
   {
     "cluster_hash": "dcb832a0eb498c456b97b2dc3de310ff50242df86db5fb0b4b92e5fd4d7136bd",
     "rank": 5,
-    "score": 21.432268590832283,
+    "score": 21.157857043718145,
     "sources": [
       {
         "outlet": "noma.security",
@@ -79,11 +79,11 @@
   {
     "cluster_hash": "b7534fef03b25a7f4c5d8924f988d1dd26d99733161f9edf042c2a9f9ce1dcd7",
     "rank": 6,
-    "score": 20.52729952732978,
+    "score": 20.159526848650806,
     "sources": [
       {
         "outlet": "microsoft.github.io",
-        "points": 237,
+        "points": 239,
         "source_type": "hn",
         "title": "Show HN: Microsoft releases Flint, a visualization language for AI agents",
         "url": "https://microsoft.github.io/flint-chart/#/"
@@ -93,11 +93,11 @@
   {
     "cluster_hash": "2a4094da082c3f1c1ffa21c976ed4b661883c249b3ec2a8163ffcf1a80e08e85",
     "rank": 7,
-    "score": 20.301237519818084,
+    "score": 19.768135692656667,
     "sources": [
       {
         "outlet": "tryai.dev",
-        "points": 119,
+        "points": 122,
         "source_type": "hn",
         "title": "We made Grok 4.5, GPT-5.5, and Claude build the same apps",
         "url": "https://www.tryai.dev/blog/grok-4.5-vs-gpt-5.5-vs-claude-build-off"
@@ -107,7 +107,7 @@
   {
     "cluster_hash": "0d1dcf4ab4f0ca6008c7d60b149a762f3a2370c0c0dd234b073abaa04f6ae9db",
     "rank": 8,
-    "score": 20.017039352910512,
+    "score": 19.550679797595848,
     "sources": [
       {
         "outlet": "cognition.com",

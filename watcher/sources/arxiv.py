@@ -14,11 +14,23 @@ plan's own note); logged in IMPROVEMENT_BACKLOG.md.
 Goes through the shared fetch-discipline layer (``watcher/http.py``): a
 single combined OR-query across all three categories (one polite request
 per run rather than three), the shared ``requests.Session``, and the
-``robots.txt`` gate -- never circumvented, even though (as discovered and
-logged during this commit) ``export.arxiv.org``'s ``robots.txt`` currently
-disallows all paths for every user agent, which means this fetcher
-presently returns an empty list against the real network until that
-policy conflict is explicitly resolved (see IMPROVEMENT_BACKLOG.md).
+``robots.txt`` gate. ``export.arxiv.org``'s ``robots.txt`` itself
+blanket-disallows every path for every user agent, but that gate is a
+crawl directive aimed at page-indexing crawlers, not arXiv's actual
+policy toward this documented API -- so per the narrow, explicitly-logged
+exception in CLAUDE.md's "Sources & selection algorithm" fetch-discipline
+section (mechanism: ``watcher.config.ROBOTS_EXEMPT_API_HOSTS``,
+consulted centrally by ``watcher.http.check_robots_allowed``),
+``export.arxiv.org`` is exempted from that gate and this fetcher proceeds.
+The ``check_robots_allowed`` call below remains in place unchanged
+(the exemption short-circuits inside it, centrally, rather than being a
+special case here) -- what actually governs this fetcher's access is
+arXiv's own published Terms of Use (arxiv.org/help/api/tou): no more than
+one request per 3 seconds from a single connection, a descriptive
+User-Agent, and attribution. This fetcher makes exactly one combined
+request (all three categories OR-ed together) per once/twice-daily
+``watch.yml`` run -- vastly under that limit. Resolved and logged in
+IMPROVEMENT_BACKLOG.md.
 """
 from __future__ import annotations
 
@@ -171,9 +183,19 @@ def fetch_arxiv_items(
 ) -> list[Item]:
     """Fetch and normalize the latest cs.AI/cs.CL/cs.LG papers from arXiv.
 
-    Returns ``[]`` (never raises) if ``robots.txt`` disallows the fetch --
-    "drop that source, never circumvent a disallow" per CLAUDE.md, applied
-    uniformly here exactly as it is for every other fetcher.
+    Calls ``check_robots_allowed`` exactly like every other fetcher, but
+    ``export.arxiv.org`` is centrally exempted from that gate (see
+    ``watcher.config.ROBOTS_EXEMPT_API_HOSTS`` and this module's own
+    docstring) per CLAUDE.md's narrow documented-API exception, so this
+    call now returns ``True`` and the fetch proceeds. The operative
+    constraint on this fetcher is instead arXiv's published API Terms of
+    Use (arxiv.org/help/api/tou): no more than one request per 3 seconds
+    from a single connection -- comfortably satisfied, since this function
+    makes exactly one combined request per once/twice-daily run. Would
+    still return ``[]`` (never raise) if some other, non-exempt failure
+    made ``check_robots_allowed`` return ``False`` -- "drop that source,
+    never circumvent a disallow" per CLAUDE.md, applied uniformly here
+    exactly as it is for every other fetcher.
     """
     query_url = build_query_url(categories=categories, max_results=max_results)
 
