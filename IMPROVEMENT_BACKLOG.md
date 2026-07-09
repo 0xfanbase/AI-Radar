@@ -337,3 +337,29 @@ Newest entries at the bottom of each section, in commit order.
   `tests/test_lab_fetch_rss.py`/`tests/test_lab_fetch_html_diff.py`,
   since the real policies currently allow everything and a test can't
   exercise a disallow path against real, permissive robots.txt content.
+- **2026-07-09 — `watcher/clustering.py`: a candidate item's Jaccard
+  similarity is checked only against each existing cluster's *seed*
+  (earliest-sorted) member, not every member.** The plan says only
+  "Jaccard similarity >= 0.35 over ... title tokens", not which item in
+  a multi-member cluster to compare a new candidate against. Comparing
+  against the seed keeps the pass genuinely single-pass
+  (O(items x clusters), not O(items x cluster_size)) and deterministic
+  (the seed never depends on join order within a run); a later pass
+  could revisit this to compare against every member (max similarity)
+  if seed-only comparison proves too strict in practice.
+- **2026-07-09 — `watcher/clustering.py` computes `cluster_hash` on
+  each `Cluster` (`sha256` of its sorted normalized member URLs,
+  newline-joined) rather than leaving that to `watcher/ledger.py`.**
+  `schemas/ledger.schema.json`'s own description already states
+  "sha256 of sorted normalized member URLs, per watcher/clustering.py",
+  and `watcher/ranking.py` (built concurrently) duck-types every
+  cluster it scores as already exposing a `.cluster_hash` string
+  attribute — so this module is the natural, already-implied owner.
+  It's a pure function of a cluster's own membership (no ledger state
+  needed), exposed both as `Cluster.cluster_hash` and as a standalone
+  `compute_cluster_hash()` so `watcher/ledger.py` can re-derive the same
+  hash from a persisted `member_urls` list without needing a live
+  `Cluster` instance. The exact serialization (sorted list, newline-
+  joined, UTF-8 encoded before hashing) is itself a spec-silent pick —
+  the plan states "sha256 of sorted normalized member URLs" without
+  specifying how a list becomes hashable bytes.
