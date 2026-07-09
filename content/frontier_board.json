@@ -10,7 +10,7 @@
     ],
     "context_window": 1000000,
     "access": "api",
-    "significance": "Anthropic's current widely-available flagship, positioned for the most demanding long-horizon agentic and reasoning workloads, with always-on adaptive thinking and a 1M-token context window as the default. Generally available since June 9, 2026 across the Claude API, Claude Platform on AWS, Amazon Bedrock, Google Cloud, and Microsoft Foundry, alongside its Project-Glasswing-only sibling Claude Mythos 5. Anthropic's own documentation now points users needing the highest available capability to Fable 5 rather than the previously-flagship Claude Opus 4.8, making Fable 5 -- not Opus 4.8 -- Anthropic's most capable widely-released model as of this verification.",
+    "significance": "Anthropic's current top-tier release, aimed at heavy-duty agentic coding and extended reasoning tasks, ships with adaptive thinking on by default (it can't be switched off) and a 1M-token context window out of the box. It became generally available on June 9, 2026 across the Claude API, Claude Platform on AWS, Amazon Bedrock, Google Cloud, and Microsoft Foundry, alongside a Project-Glasswing-restricted sibling, Claude Mythos 5. Anthropic's own models-overview guidance now directs developers who need the ceiling of available capability toward Fable 5 rather than Opus 4.8 -- a signal that Fable 5, not Opus 4.8, now sits atop Anthropic's publicly available lineup.",
     "source_url": "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5",
     "last_verified": "2026-07-09"
   },
@@ -38,7 +38,7 @@
     ],
     "context_window": 65536,
     "access": "open-weights",
-    "significance": "Ai2 reports that the Olmo 3.1 update (an extended-RL refresh of the Olmo 3 family first released Nov 20, 2025) yields Ai2's strongest fully open 32B-scale reasoning and instruct checkpoints, with Ai2-reported gains of 5+ points on AIME and 20+ points on IFBench over the original Olmo 3 32B models.",
+    "significance": "Ai2 describes Olmo 3.1 -- an extended reinforcement-learning follow-up to the Olmo 3 family it first shipped on Nov 20, 2025 -- as its best-performing fully open 32B checkpoints to date for both reasoning (Think) and instruction-following (Instruct) use, citing internal evaluation gains over the original Olmo 3 32B models of over 5 points on AIME and over 20 points on IFBench.",
     "source_url": "https://allenai.org/blog/olmo3",
     "last_verified": "2026-07-09"
   },
@@ -52,7 +52,7 @@
     ],
     "context_window": 1000000,
     "access": "open-weights",
-    "significance": "NVIDIA's newest and largest Nemotron 3 release, Ultra is a 550-billion-parameter (55B active) Mixture-of-Experts hybrid Mamba-Transformer model built for long-running agentic workloads, and NVIDIA reports it reaches roughly 5x the inference throughput of comparable open models while matching their accuracy, including strong long-context retrieval at its 1M-token window.",
+    "significance": "NVIDIA's newest and largest Nemotron 3 release, Ultra is a 550-billion-parameter (55 billion active) Mixture-of-Experts hybrid Mamba-Attention model built for long-running agentic workloads. NVIDIA's own benchmarks put its inference throughput at 1.6x to 5.9x that of three comparably-sized open models, varying by which one it's measured against, at matching accuracy, plus strong long-context retrieval at its 1M-token window.",
     "source_url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
     "last_verified": "2026-07-09"
   }
