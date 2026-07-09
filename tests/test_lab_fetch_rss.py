@@ -15,6 +15,7 @@ autouse guard would raise on any real network call here regardless.
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 
 from watcher import http
@@ -263,7 +264,11 @@ def test_fetch_all_lab_items_aggregates_every_registered_fetcher(monkeypatch):
     fake_registry = {name: fake_fetch(name) for name in registry.LAB_FETCHERS}
     monkeypatch.setattr(registry, "LAB_FETCHERS", fake_registry)
 
-    items = registry.fetch_all_lab_items(object(), cache_dir=Path("/unused"))
+    items = registry.fetch_all_lab_items(
+        object(),
+        cache_dir=Path("/unused"),
+        now=datetime(2026, 7, 9, 6, 0, 0, tzinfo=timezone.utc),
+    )
 
     assert {item.source_name for item in items} == {
         "openai", "deepmind", "anthropic", "deepseek",
@@ -292,7 +297,94 @@ def test_fetch_all_lab_items_skips_a_failing_lab_without_crashing(monkeypatch):
         {"openai": ok_fetch, "deepmind": raising_fetch},
     )
 
-    items = registry.fetch_all_lab_items(object(), cache_dir=Path("/unused"))
+    items = registry.fetch_all_lab_items(
+        object(),
+        cache_dir=Path("/unused"),
+        now=datetime(2026, 7, 9, 6, 0, 0, tzinfo=timezone.utc),
+    )
 
     assert len(items) == 1
     assert items[0].source_name == "openai"
+
+
+# --------------------------------------------------------------------------
+# fetch_all_lab_items -- recency window (Phase 1 PM checkpoint fix): a
+# parseable published_at older than config.LAB_RECENCY_WINDOW_DAYS is
+# dropped from the aggregated pool; an unparseable/empty one always
+# survives (DeepSeek's undated items are newness-gated by its own
+# sitemap-diff, not by this filter).
+# --------------------------------------------------------------------------
+
+
+def test_fetch_all_lab_items_drops_items_older_than_the_recency_window(monkeypatch):
+    now = datetime(2026, 7, 9, 0, 0, 0, tzinfo=timezone.utc)
+
+    def fake_fetch(session, *, cache_dir):
+        return [
+            Item(
+                source_type="lab",
+                source_name="openai",
+                title="Old archive item",
+                url="https://example.test/old",
+                published_at="2024-01-15T00:00:00Z",  # far older than 14 days
+            ),
+            Item(
+                source_type="lab",
+                source_name="openai",
+                title="Recent item",
+                url="https://example.test/recent",
+                published_at="2026-07-01T00:00:00Z",  # within 14 days of `now`
+            ),
+        ]
+
+    monkeypatch.setattr(registry, "LAB_FETCHERS", {"openai": fake_fetch})
+
+    items = registry.fetch_all_lab_items(object(), cache_dir=Path("/unused"), now=now)
+
+    assert [item.url for item in items] == ["https://example.test/recent"]
+
+
+def test_fetch_all_lab_items_keeps_items_with_unparseable_published_at(monkeypatch):
+    # DeepSeek's own Items always carry published_at="" (sitemap-diff +
+    # h1-extraction yields no date, per watcher/sources/labs/deepseek.py) --
+    # the recency window must never drop these just for lacking a date.
+    now = datetime(2026, 7, 9, 0, 0, 0, tzinfo=timezone.utc)
+
+    def fake_fetch(session, *, cache_dir):
+        return [
+            Item(
+                source_type="lab",
+                source_name="deepseek",
+                title="Undated DeepSeek article",
+                url="https://example.test/deepseek-article",
+                published_at="",
+            )
+        ]
+
+    monkeypatch.setattr(registry, "LAB_FETCHERS", {"deepseek": fake_fetch})
+
+    items = registry.fetch_all_lab_items(object(), cache_dir=Path("/unused"), now=now)
+
+    assert len(items) == 1
+    assert items[0].url == "https://example.test/deepseek-article"
+
+
+def test_fetch_all_lab_items_keeps_item_exactly_at_the_window_boundary(monkeypatch):
+    now = datetime(2026, 7, 9, 0, 0, 0, tzinfo=timezone.utc)
+
+    def fake_fetch(session, *, cache_dir):
+        return [
+            Item(
+                source_type="lab",
+                source_name="openai",
+                title="Exactly 14 days old",
+                url="https://example.test/boundary",
+                published_at="2026-06-25T00:00:00Z",  # exactly 14 days before now
+            )
+        ]
+
+    monkeypatch.setattr(registry, "LAB_FETCHERS", {"openai": fake_fetch})
+
+    items = registry.fetch_all_lab_items(object(), cache_dir=Path("/unused"), now=now)
+
+    assert len(items) == 1

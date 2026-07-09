@@ -31,7 +31,14 @@ Algorithm:
       (``watcher.models.tokenize_title``) against each existing
       cluster's *seed item* -- its earliest (first, by the sort key
       above) member. Join the first (earliest-created) cluster whose
-      similarity is >= ``config.JACCARD_SIMILARITY_THRESHOLD``.
+      similarity is >= the applicable threshold: ``config.
+      LAB_LAB_JACCARD_SIMILARITY_THRESHOLD`` (0.65) when *both* the
+      candidate item and that cluster's seed are ``source_type ==
+      "lab"``, else the general ``config.JACCARD_SIMILARITY_THRESHOLD``
+      (0.35). See :func:`_merge_threshold`'s docstring for why lab-lab
+      pairs get a stricter bar -- Phase 1 PM checkpoint fix for the
+      "Introducing GPT-..." mega-cluster defect, logged in
+      IMPROVEMENT_BACKLOG.md.
    c. Otherwise: start a new cluster containing just this item; it
       becomes that cluster's seed for future comparisons.
 
@@ -61,7 +68,7 @@ from __future__ import annotations
 import hashlib
 from dataclasses import dataclass, field
 
-from watcher.config import JACCARD_SIMILARITY_THRESHOLD
+from watcher.config import JACCARD_SIMILARITY_THRESHOLD, LAB_LAB_JACCARD_SIMILARITY_THRESHOLD
 from watcher.models import Item, normalize_url, tokenize_title
 
 
@@ -117,6 +124,32 @@ def _sort_key(item: Item) -> tuple[str, str, str]:
     return (item.published_at, item.source_name, item.url)
 
 
+def _merge_threshold(item: Item, seed: Item) -> float:
+    """The Jaccard bar ``item`` must clear against ``seed`` to merge.
+
+    ``LAB_LAB_JACCARD_SIMILARITY_THRESHOLD`` (0.65) when both are
+    ``source_type == "lab"``, else the general ``JACCARD_SIMILARITY_
+    THRESHOLD`` (0.35). Phase 1 PM checkpoint fix: lab announcement
+    titles are short and heavily templated ("Introducing GPT-5.4",
+    "Introducing GPT-5.5", "Introducing gpt-oss-safeguard", ...), so two
+    or three shared boilerplate tokens are already enough to clear 0.35
+    even between titles about genuinely different releases -- this is
+    what chained the real "Introducing GPT-..." mega-cluster reported at
+    the Phase 1 PM checkpoint (17 members spanning 2.5 years, later also
+    bounded by ``config.LAB_RECENCY_WINDOW_DAYS``). A lab item compared
+    against a non-lab seed (or vice versa) keeps the general 0.35 bar
+    unchanged -- cross-source corroboration is exactly what that
+    comparison exists to catch, and a non-lab title isn't templated the
+    same way. Logged in IMPROVEMENT_BACKLOG.md, including why this was
+    chosen over switching seed-only comparison to max-over-members (that
+    alternative only ever makes merging *more* permissive, never less --
+    it cannot fix an over-merging defect on its own).
+    """
+    if item.source_type == "lab" and seed.source_type == "lab":
+        return LAB_LAB_JACCARD_SIMILARITY_THRESHOLD
+    return JACCARD_SIMILARITY_THRESHOLD
+
+
 def _jaccard(a: frozenset[str], b: frozenset[str]) -> float:
     """Jaccard similarity of two token sets.
 
@@ -159,7 +192,7 @@ def cluster_items(items: list[Item]) -> list[Cluster]:
                     cluster
                     for cluster in clusters
                     if _jaccard(item_tokens, tokenize_title(cluster.seed.title))
-                    >= JACCARD_SIMILARITY_THRESHOLD
+                    >= _merge_threshold(item, cluster.seed)
                 ),
                 None,
             )

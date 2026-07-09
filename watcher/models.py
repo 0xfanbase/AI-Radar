@@ -105,7 +105,21 @@ _STOPWORDS = frozenset(
     }
 )
 
-_WORD_RE = re.compile(r"[a-z0-9]+")
+# Matches a run of alphanumerics, optionally extended by ``.``-joined
+# further alphanumeric runs (e.g. "5.5", "4.1", "5.3") as a *single* token,
+# rather than splitting at the dot. Phase 1 PM checkpoint fix: the
+# original `[a-z0-9]+` pattern split a dotted point-release number like
+# "5.5" into two separate tokens ("5", "5"), which a `frozenset` then
+# collapses into the *same single token* "5" already produced by a plain
+# "GPT-5" title -- making "Introducing GPT-5" and "Introducing GPT-5.5"
+# tokenize to *identical* sets (Jaccard 1.0) despite being about different
+# releases. Confirmed against the real captured OpenAI RSS fixture, where
+# this collapse was directly implicated in the reported "Introducing
+# GPT-..." mega-cluster (every "GPT-5.x" chained together). Keeping the
+# dot inside the token ("5.5" as one token, distinct from "5" or "4.1")
+# fixes this at the source; logged in IMPROVEMENT_BACKLOG.md alongside the
+# clustering.py lab-lab Jaccard bar raised for the same underlying defect.
+_WORD_RE = re.compile(r"[a-z0-9]+(?:\.[a-z0-9]+)*")
 
 
 def tokenize_title(title: str) -> frozenset[str]:
@@ -127,6 +141,9 @@ def tokenize_title(title: str) -> frozenset[str]:
     can only raise the union size (never the intersection, since distinct
     version numbers never match each other), so it strictly improves
     precision and never causes a genuinely-matching pair to stop matching.
+    Dotted version numbers ("5.5", "4.1") are matched by ``_WORD_RE`` as
+    one token apiece (see its own comment) rather than splitting at the
+    dot, for the same reason -- so they stay distinct tokens too.
     """
     tokens = _WORD_RE.findall(title.lower())
     return frozenset(

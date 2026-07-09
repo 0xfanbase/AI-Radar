@@ -521,3 +521,131 @@ Newest entries at the bottom of each section, in commit order.
   should always re-save (an exact key hit skips the post-job save step,
   which would otherwise freeze `data/.cache/`'s ETag store at its first
   successful run forever).
+
+## Phase 1 PM checkpoint, round 1 (2026-07-09)
+
+The PM review found one real acceptance-criterion defect (queue sanity) and
+one backlog-completeness gap. Both are addressed below; a third item (the
+arXiv robots.txt question) is deliberately *not* resolved here per the
+PM's own instruction to carry it forward as an explicit owner decision.
+
+- **2026-07-09 — `LAB_RECENCY_WINDOW_DAYS = 14` (`watcher/config.py`), a
+  new recency window applied to the combined lab-item pool in
+  `watcher/sources/labs/registry.py::fetch_all_lab_items`.** Fixes the
+  queue-sanity defect the PM checkpoint flagged: `openai.com/news/rss.xml`
+  serves its entire historical archive (1033 `<item>`s confirmed live,
+  spanning back to 2023) rather than just recent releases, so an
+  un-windowed run fed clustering.py's Jaccard pass a 2.5-year span of
+  boilerplate "Introducing GPT-..." titles that chained into a single
+  17-member mega-cluster occupying queue rank 1 (`cross_source_count=17`
+  inflating its score to the top spot on *every* future run, since
+  `queue_writer.py` only excludes already-carded clusters, never
+  already-seen-but-garbage ones). Any lab Item with a *parseable*
+  `published_at` older than 14 days is dropped before clustering ever
+  sees it; an unparseable/empty one (DeepSeek's own Items always carry
+  `published_at=""`, per its own entry above) is never dropped by this
+  filter, since DeepSeek's sitemap-diff already gates newness structurally
+  -- there is nothing further for a date-based window to check, and
+  dropping on a missing date it was never going to have would silently
+  zero out that entire source. 14 days is a spec-silent choice (the
+  approved plan names no lab-side recency window at all): comfortably
+  wider than the real observed publication cadence of the three dated lab
+  sources (confirmed against the real captured RSS/HTML fixtures) so a
+  single slow news week can't empty the lab candidate pool, while being
+  far too short for a stale multi-year archive entry to ever qualify.
+  `~14 days` was the PM's own suggested figure; adopted as-is rather than
+  independently re-derived, since no sharper number is implied by any
+  other Phase 1 constant.
+- **2026-07-09 — Verified (see the live re-run captured in `PROGRESS.md`)
+  that windowing alone collapses the reported mega-cluster from 17 members
+  down to none of that shape** -- the OpenAI RSS pool drops from 1033
+  archive items to whatever a 14-day window actually contains (15 in the
+  real fixture snapshot used to design this fix), which structurally
+  cannot span 2.5 years of "Introducing GPT-..." titles anymore.
+- **2026-07-09 — Residual risk analyzed: even *within* one 14-day window,
+  short/templated lab titles can still boilerplate-chain, so a second,
+  independent fix was made** (both changes together, not either alone):
+  1. **`LAB_LAB_JACCARD_SIMILARITY_THRESHOLD = 0.65`
+     (`watcher/config.py`), applied in `watcher/clustering.py` via a new
+     `_merge_threshold(item, seed)` helper** -- when *both* the candidate
+     item and the existing cluster's seed are `source_type == "lab"`, the
+     merge bar is 0.65 instead of the general 0.35; a lab-vs-non-lab
+     comparison is unaffected. Chosen (not, e.g., 0.5 or 0.6) as the
+     smallest value that, checked against the real captured OpenAI RSS
+     fixture's ~100 "Introducing ..." titles, excludes every observed
+     distinct-release pair (score range 0.4-0.6, e.g. "Introducing
+     GPT-5.3-Codex" vs. "Introducing GPT-5.2-Codex" at 0.6) while still
+     admitting genuinely-same-version companion articles (0.75-0.8, e.g.
+     "Introducing GPT-5.2" vs. "Introducing GPT-5.2-Codex"). Known
+     tradeoff, accepted: this also stops two real same-day companion
+     posts sharing no version number from merging (e.g. the real fixture
+     pair "Inside GeneBench-Pro" / "Introducing GeneBench-Pro", Jaccard
+     0.5) -- a precision-over-recall choice, favoring not resurrecting the
+     mega-cluster defect over catching every same-story companion piece.
+  2. **`watcher/models.py::tokenize_title`'s `_WORD_RE` now keeps a
+     dotted point-release number ("5.5", "4.1", "5.3") as one token
+     instead of splitting at the dot.** This was **not** one of the two
+     options the PM checkpoint named (raise the lab-lab bar / switch
+     seed-only to max-over-members) -- it's logged here as a scope
+     addition made because analysis showed the two named options *alone*
+     cannot fix the worst case: the old regex split "5.5" into two "5"
+     tokens that a `frozenset` collapses into the same single "5" token
+     "GPT-5" already produces, so "Introducing GPT-5" and "Introducing
+     GPT-5.5" tokenized to *identical* sets -- Jaccard 1.0, un-fixable by
+     any merge-bar threshold (a threshold can only ever reject a bar
+     lower than 1.0). Fixing the tokenizer to keep "5.5" distinct from
+     "5" brings that pair down to Jaccard 0.5 -- excluded by the new 0.65
+     lab-lab bar. Verified against the real fixture data (see
+     `tests/test_models.py`); does not change any Phase 1 test's already-
+     documented expected Jaccard value (none of the existing fixtures use
+     dotted version numbers).
+  3. **Why "seed-only vs. max-over-members" was *not* the chosen fix, and
+     was not implemented:** analysis showed switching the comparison from
+     "candidate vs. cluster's seed only" to "candidate vs. the max
+     similarity over all existing members" can only make merging *more*
+     permissive, never less -- the seed is itself always one of "all
+     members," so anything that already matched under seed-only still
+     matches under max-over-members, plus now anything that matches any
+     *other* member too. It therefore cannot be a fix for an over-merging
+     defect on its own, and was explicitly not implemented; this
+     reasoning itself is the logged decision the PM checkpoint asked for.
+- **2026-07-09 — Ranking weight/threshold constants' provenance, logged
+  per the approved plan's own §8 commitment ("constants are logged"),
+  which a prior pass omitted:**
+  - `PRIMARY_SOURCE_WEIGHTS = {"lab": 3.0, "arxiv": 2.0, "hn": 1.0}`
+    (`watcher/ranking.py`'s scoring formula, `watcher/config.py`) --
+    values taken verbatim from the approved build plan's ranking formula;
+    not independently chosen by this project, transcribed as specified.
+  - `HN_VELOCITY_SCORE_FLOOR = 0.05` (`watcher/config.py`, used by
+    `watcher/ranking.py::hn_velocity_score` for a cluster with no HN
+    item) -- taken verbatim from the approved plan's ranking formula
+    ("else `HN_VELOCITY_SCORE_FLOOR`"); the plan states the constant's
+    *name* and role, and this is the exact value specified.
+  - `JACCARD_SIMILARITY_THRESHOLD = 0.35` (`watcher/clustering.py`) --
+    taken verbatim from the approved plan's clustering bullet ("Jaccard
+    similarity >= 0.35 over ... title tokens"), already logged in
+    `watcher/clustering.py`'s own docstring/comments but not previously
+    given its own entry in this file; recorded here for completeness per
+    plan §8.
+  - `HN_POINTS_THRESHOLD = 50`, `HN_VELOCITY_THRESHOLD_PTS_PER_HOUR = 5.0`,
+    `HN_LOOKBACK_HOURS = 48` (`watcher/config.py`, `watcher/sources/hn.py`'s
+    candidacy filter) -- taken verbatim from the approved plan's HN
+    source bullet (points>=50 OR velocity>=5.0 pts/hr, 48h lookback);
+    likewise already implicit in `watcher/sources/hn.py`'s own comments
+    but not previously given a standalone entry here.
+  - All five values above are plan-stated, not spec-silent judgment
+    calls this project invented -- they are logged here purely for
+    discoverability/completeness per plan §8's own commitment, not
+    because their derivation was ambiguous.
+- **2026-07-09 — arXiv `robots.txt` blanket-disallow: carried forward to
+  the Phase 2 checkpoint as an explicit owner decision, per the PM
+  checkpoint's own instruction, and deliberately *not* resolved here.**
+  The finding (`export.arxiv.org/robots.txt` disallows every path;
+  `watcher/sources/arxiv.py` correctly honors it and returns `[]` against
+  the live network) was already logged in this file before this
+  checkpoint round; this entry only records that the PM's round-1
+  directives explicitly instructed against resolving it unilaterally
+  mid-build (accept arXiv as a dead source vs. amend CLAUDE.md's
+  fetch-discipline rule to distinguish a documented, ToU-governed API
+  from website crawling are both live options) -- no code or policy
+  change was made for this item in this round, by design.

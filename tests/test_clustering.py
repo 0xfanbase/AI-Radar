@@ -457,6 +457,94 @@ def test_cluster_hash_independent_of_member_join_order():
     assert forward[0].cluster_hash == backward[0].cluster_hash
 
 
+# --------------------------------------------------------------------------
+# Lab-lab Jaccard bar (Phase 1 PM checkpoint fix): two lab items compared
+# against each other must clear config.LAB_LAB_JACCARD_SIMILARITY_THRESHOLD
+# (0.65), not the general 0.35 -- prevents short, boilerplate-templated
+# lab-announcement titles ("Introducing GPT-...") from chaining together
+# into a mega-cluster purely on shared boilerplate tokens. A lab item
+# compared against a non-lab seed (or vice versa) still uses the general
+# 0.35 bar unchanged.
+# --------------------------------------------------------------------------
+
+
+def test_two_lab_items_below_lab_lab_bar_stay_separate():
+    # tokenize("Introducing GPT-5") = {introducing, gpt, 5}
+    # tokenize("Introducing GPT-5.4") = {introducing, gpt, 5.4}
+    # Jaccard = |{introducing, gpt}| / |{introducing, gpt, 5, 5.4}| = 2/4 = 0.5
+    # >= the general 0.35 bar, but < the 0.65 lab-lab bar -- must NOT merge.
+    item_a = make_item(
+        title="Introducing GPT-5",
+        url="https://openai.com/index/introducing-gpt-5",
+        published_at="2026-07-01T00:00:00Z",
+        source_name="openai",
+        source_type="lab",
+    )
+    item_b = make_item(
+        title="Introducing GPT-5.4",
+        url="https://openai.com/index/introducing-gpt-5-4",
+        published_at="2026-07-05T00:00:00Z",
+        source_name="openai",
+        source_type="lab",
+    )
+
+    clusters = cluster_items([item_a, item_b])
+
+    assert len(clusters) == 2
+    assert _member_urls(clusters) == [[item_a.url], [item_b.url]]
+
+
+def test_two_lab_items_above_lab_lab_bar_still_merge():
+    # tokenize("Introducing GPT-5.2") = {introducing, gpt, 5.2}
+    # tokenize("Introducing GPT-5.2-Codex") = {introducing, gpt, 5.2, codex}
+    # Jaccard = 3/4 = 0.75 >= the 0.65 lab-lab bar -- must still merge (a
+    # companion article about the same release).
+    item_a = make_item(
+        title="Introducing GPT-5.2",
+        url="https://openai.com/index/introducing-gpt-5-2",
+        published_at="2026-07-01T00:00:00Z",
+        source_name="openai",
+        source_type="lab",
+    )
+    item_b = make_item(
+        title="Introducing GPT-5.2-Codex",
+        url="https://openai.com/index/introducing-gpt-5-2-codex",
+        published_at="2026-07-01T01:00:00Z",
+        source_name="openai",
+        source_type="lab",
+    )
+
+    clusters = cluster_items([item_a, item_b])
+
+    assert len(clusters) == 1
+    assert clusters[0].items == [item_a, item_b]
+
+
+def test_lab_and_non_lab_item_still_use_the_general_bar():
+    # Same 0.5 Jaccard pairing as the "stay separate" test above, but with
+    # item_b's source_type changed to "hn" -- the general 0.35 bar applies
+    # (not the stricter lab-lab one), so this pair still merges.
+    item_a = make_item(
+        title="Introducing GPT-5",
+        url="https://openai.com/index/introducing-gpt-5",
+        published_at="2026-07-01T00:00:00Z",
+        source_name="openai",
+        source_type="lab",
+    )
+    item_b = make_item(
+        title="Introducing GPT-5.4",
+        url="https://news-outlet.test/introducing-gpt-5-4",
+        published_at="2026-07-05T00:00:00Z",
+        source_name="news-outlet",
+        source_type="hn",
+    )
+
+    clusters = cluster_items([item_a, item_b])
+
+    assert len(clusters) == 1
+    assert clusters[0].items == [item_a, item_b]
+
+
 def test_cluster_hash_differs_for_different_membership():
     item_a = make_item(
         title="OpenAI Releases GPT-5 With Major Upgrades",

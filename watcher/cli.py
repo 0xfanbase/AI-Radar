@@ -82,7 +82,11 @@ def run(
        Each fetcher already degrades to ``[]`` rather than raising on a
        ``robots.txt`` disallow or an unexpected per-lab failure (see their
        own docstrings) -- this function does not add a second safety net
-       around fetching, only around the pipeline stages after it.
+       around fetching, only around the pipeline stages after it. Lab
+       items are also windowed to ``config.LAB_RECENCY_WINDOW_DAYS`` here
+       (``fetch_all_lab_items(session, now=now)`` -- Phase 1 PM checkpoint
+       fix so an un-windowed archive-serving lab RSS feed can't flood the
+       candidate pool; see ``watcher/sources/labs/registry.py``).
     2. Cluster every fetched item (``watcher.clustering.cluster_items``).
     3. Rank the *full* cluster pool -- deliberately uncapped
        (``limit=len(clusters)``), not ``MAX_QUEUE_SIZE``. Capping here
@@ -110,7 +114,7 @@ def run(
 
     hn_items: list[Item] = fetch_hn_items(session, now=now)
     arxiv_items: list[Item] = fetch_arxiv_items(session)
-    lab_items: list[Item] = fetch_all_lab_items(session)
+    lab_items: list[Item] = fetch_all_lab_items(session, now=now)
     all_items: list[Item] = [*hn_items, *arxiv_items, *lab_items]
 
     clusters = cluster_items(all_items)

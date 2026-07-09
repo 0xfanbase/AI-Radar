@@ -7,86 +7,148 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
-## 2026-07-09 — Phase 1 live acceptance proof + `watch.yml`/`ci.yml`
+## 2026-07-09 — Phase 1 PM checkpoint round 1: queue-sanity fix + re-verified live acceptance proof
 
-Ran the Phase 1 live acceptance criterion for real: `python
+The Phase 1 PM checkpoint review found a real acceptance-criterion defect
+in the live proof captured below (superseded by this entry): the
+committed queue's rank-1 entry was a 17-member mega-cluster merging 16
+unrelated OpenAI announcements spanning ~2.5 years ("Introducing the GPT
+Store" (Jan 2024) through every "Introducing GPT-5.x" up to "Introducing
+GPT-Live"), chained purely by Jaccard similarity on shared "Introducing
+GPT-..." title boilerplate, with `cross_source_count=17` inflating it to
+the top score slot on every future run. Root causes and fixes, in full
+detail in `IMPROVEMENT_BACKLOG.md`'s "Phase 1 PM checkpoint, round 1"
+section:
+
+1. **`LAB_RECENCY_WINDOW_DAYS = 14`** (`watcher/config.py`, applied in
+   `watcher/sources/labs/registry.py::fetch_all_lab_items`) — drops any
+   lab Item with a parseable `published_at` older than 14 days before
+   clustering ever sees it, so OpenAI's archive-serving RSS feed (1033
+   `<item>`s, back to 2023) can no longer flood the candidate pool.
+   DeepSeek's undated Items (`published_at=""`) are never dropped by this
+   filter — its sitemap-diff already gates newness structurally.
+2. **`LAB_LAB_JACCARD_SIMILARITY_THRESHOLD = 0.65`** (`watcher/config.py`,
+   applied in `watcher/clustering.py`) — a stricter merge bar than the
+   general 0.35 specifically when *both* compared items are
+   `source_type == "lab"`, since short/templated lab-announcement titles
+   can still boilerplate-chain even within one 14-day window.
+3. **`watcher/models.py::tokenize_title` bug fix** — the tokenizer split
+   a dotted point-release number like "5.5" into two "5" tokens that a
+   `frozenset` collapsed into the same single token "GPT-5" already
+   produces, making "Introducing GPT-5" and "Introducing GPT-5.5"
+   tokenize identically (Jaccard 1.0, un-fixable by any merge-bar
+   threshold). Fixed to keep dotted version numbers as one token, so
+   distinct point releases stay distinct. This one is a scope addition
+   beyond the two options the PM checkpoint named (raise the lab-lab bar
+   / seed-only vs. max-over-members) — logged as such, with the reasoning
+   for why "max-over-members" was analyzed and *not* chosen (it can only
+   make merging more permissive, never less, so it cannot fix an
+   over-merging defect on its own).
+
+Because windowing changes which items ever reach clustering, cluster
+membership (and therefore every `cluster_hash`) changes too — the
+previously-committed 931-entry `data/ledger.json` no longer corresponds to
+this pipeline's actual output, so it was regenerated from scratch (reset
+to `{"version": 1, "entries": {}}`, then rebuilt by the live re-run below)
+rather than left to accumulate stale entries alongside new ones.
+
+**Re-ran the Phase 1 live acceptance criterion after the fix**: `python
 scripts/run_watcher_live.py --runs 2`, invoked from a shell with real
 outbound network access, against the actual live endpoints — HN Algolia's
 search API, arXiv's Atom API, and all four registered lab sources
 (`openai.com/news/rss.xml`, `deepmind.google/blog/rss.xml`,
 `anthropic.com/news` HTML anchor-scrape, DeepSeek's `sitemap.xml` diff).
 Nothing here is mocked, simulated, or paraphrased — the block below is the
-actual captured stdout of that run, verbatim.
+actual captured stdout of that run, verbatim (this replaces the stale,
+pre-fix proof this section previously showed).
 
 ```
 robots.txt disallows https://export.arxiv.org/api/query?search_query=cat%3Acs.AI+OR+cat%3Acs.CL+OR+cat%3Acs.LG&sortBy=submittedDate&sortOrder=descending&start=0&max_results=50 for UA 'AIFrontierWireBot/1.0 (+https://github.com/0xfanbase/AI-Radar; bot@users.noreply.github.com)' -- skipping source for this run.
 robots.txt disallows the arXiv API query -- skipping arXiv source for this run.
-robots.txt fetch failed for https://api-docs.deepseek.com/robots.txt (HTTPSConnectionPool(host='api-docs.deepseek.com', port=443): Read timed out. (read timeout=10)) -- skipping source for this run.
-robots.txt disallows https://api-docs.deepseek.com/news/news1120 -- skipping this DeepSeek article.
 --- Run 1 ---
-  Sources fetched:  hn=20  arxiv=0  lab=1158
-  Clusters formed:  931
+  Sources fetched:  hn=20  arxiv=0  lab=36
+  Clusters formed:  54
   Queue size:       8
-  Ledger entries:   0 -> 931  (+931 new)
+  Ledger entries:   0 -> 54  (+54 new)
 robots.txt disallows https://export.arxiv.org/api/query?search_query=cat%3Acs.AI+OR+cat%3Acs.CL+OR+cat%3Acs.LG&sortBy=submittedDate&sortOrder=descending&start=0&max_results=50 for UA 'AIFrontierWireBot/1.0 (+https://github.com/0xfanbase/AI-Radar; bot@users.noreply.github.com)' -- skipping source for this run.
 robots.txt disallows the arXiv API query -- skipping arXiv source for this run.
 --- Run 2 ---
-  Sources fetched:  hn=20  arxiv=0  lab=1144
-  Clusters formed:  925
+  Sources fetched:  hn=20  arxiv=0  lab=21
+  Clusters formed:  40
   Queue size:       8
-  Ledger entries:   931 -> 931  (+0 new)
+  Ledger entries:   54 -> 54  (+0 new)
   New items per source (vs. previous run): hn=+0 arxiv=+0 lab=+0
 --- Summary across all runs ---
-  Ledger entries:  0 -> 931  (+931 total new)
+  Ledger entries:  0 -> 54  (+54 total new)
   Queue size (final run): 8
 ```
 
 **Reading these numbers correctly:**
 
-- **arXiv returned 0 both runs.** This is not a bug: `export.arxiv.org`'s
-  own `robots.txt` currently disallows every path for every user agent
-  (`User-agent: * / Disallow: /`), confirmed live and already logged in
-  `IMPROVEMENT_BACKLOG.md` before this run. Per CLAUDE.md's fetch-discipline
-  rule ("drop that source, never circumvent a disallow"), the fetcher
-  correctly returns `[]` rather than fetching anyway.
-- **`lab` count (1158 → 1144) is large because OpenAI's live RSS feed
-  (`openai.com/news/rss.xml`) is not windowed** — it currently serves its
-  entire historical news archive as `<item>` entries (1033 confirmed by a
-  raw `curl`/grep of the feed at the time of this run: `grep -c "<item>"`
-  → 1033), not just recent releases. Breaking down the 1144 total for run 2
-  by lab (verified with a direct per-fetcher call immediately after):
-  `openai=1033, deepmind=100, anthropic=11, deepseek=0`. The 14-item drop
-  between run 1 (1158) and run 2 (1144) is entirely DeepSeek: run 1 had no
-  prior `data/.cache/deepseek_sitemap_seen.json` state file, so every
-  `/news/` URL in DeepSeek's ~60-URL sitemap was "new" (14 of them); run 2
-  ran against the state file run 1 had just written, correctly found 0 new
-  `/news/` URLs, and every other lab source's fetch was byte-for-byte
-  reproducible between the two runs seconds apart. This is the sitemap-diff
-  mechanism working exactly as designed, not a discrepancy to be
-  concerned about — arithmetic checks out: `1033 + 100 + 11 + 0 = 1144`.
-- **Cluster count differs slightly between runs (931 vs 925) only because
-  the input pool differs by those same 14 DeepSeek items** (each of which
-  clustered into its own or an existing cluster on run 1, but wasn't
-  re-fetched at all on run 2 since the sitemap-diff correctly suppressed
-  already-seen URLs) — not because clustering is non-deterministic.
+- **arXiv returned 0 both runs**, for the same already-logged reason as
+  before: `export.arxiv.org`'s own `robots.txt` currently disallows every
+  path for every user agent, and the fetcher correctly honors it. This
+  question is carried forward to the Phase 2 checkpoint as an explicit
+  owner decision per the PM checkpoint's own instruction (accept arXiv as
+  a dead source vs. amend CLAUDE.md's fetch-discipline rule to distinguish
+  a documented, ToU-governed API from website crawling) — not resolved
+  here.
+- **`lab` count (36 → 21) is now two orders of magnitude smaller than the
+  pre-fix run's 1158 → 1144**, because the 14-day recency window is doing
+  its job: a direct per-fetcher call immediately after this run, windowed
+  the same way, breaks down to `openai=13, deepmind=2, anthropic=6,
+  deepseek=0` (21 total, matching run 2 exactly). The 15-item drop between
+  run 1 (36) and run 2 (21) is entirely DeepSeek, for the same
+  sitemap-diff reason logged in the pre-fix run above: run 1 had no prior
+  `data/.cache/deepseek_sitemap_seen.json` state file (this session's
+  cache was cleared before re-running, to capture a clean fresh-checkout
+  proof), so every currently-listed DeepSeek `/news/` URL was "new" once;
+  run 2 ran against the state file run 1 had just written and correctly
+  found 0 new URLs. Every non-DeepSeek lab source's fetch was reproducible
+  between the two runs seconds apart.
+- **The mega-cluster no longer forms.** A direct post-run check of the
+  full (uncapped) cluster pool from this same live data found a largest
+  cluster size of **2** (OpenAI's own "Introducing GPT-Live" RSS item
+  joined by a same-story HN submission, `cross_source_count=2`) — every
+  other cluster is a single item. `data/queue.json`'s rank-1 entry is that
+  2-member cluster (score 318.59, both sources a real, current, 2026-07-08
+  OpenAI release corroborated by a live 651-point HN thread); ranks 2-8
+  are all distinct, current, plausible HN stories (an LLM-burnout essay, a
+  Mistral robotics-navigation release, a Fable/Anthropic classifier
+  critique, a GitHub-agent security writeup, a Microsoft agent-viz tool, a
+  model-comparison build-off, and a coding-agent benchmark post) — every
+  top-8 entry is a real, followable, current story, not a chained
+  boilerplate artifact.
+- **Cluster count differs between runs (54 vs 40) only because the input
+  pool differs by the same 15 DeepSeek items described above** (each
+  clustered on run 1 but not re-fetched at all on run 2, since the
+  sitemap-diff correctly suppressed already-seen URLs) — not because
+  clustering is non-deterministic.
 
 **The acceptance bar is "run 2 adds zero new ledger keys," not
-"byte-identical files."** `data/ledger.json` went `0 → 931` on run 1 and
-`931 → 931 (+0 new)` on run 2 — exactly the required outcome. Existing
-ledger entries do get their `last_seen` timestamp/date bumped on a re-run
-that still sees a cluster's member URLs (that's `watcher/ledger.py`'s
-`apply_run` doing its job — a story is still live, not stale), and
-`times_seen`-style bookkeeping fields are expected to change value on
-every run that re-observes a cluster. None of that is a violation of
-idempotency; the only thing that would be a violation is a *new key*
-(a new `cluster_hash`) appearing for a cluster whose member-URL set was
-already present in the ledger before the run — and that did not happen.
-`data/queue.json` and `data/whats_moving.json` were also both regenerated
-by this real run and are committed as-is; all three were re-validated
-against their schemas (`schemas/ledger.schema.json`,
-`schemas/queue.schema.json`, `schemas/whats_moving.schema.json`) via
-`watcher.schema_validate.validate` immediately after the run, with no
-errors.
+"byte-identical files."** `data/ledger.json` went `0 → 54` on run 1 and
+`54 → 54 (+0 new)` on run 2 — exactly the required outcome, on the freshly
+regenerated ledger. Existing ledger entries do get their `last_seen`
+timestamp/date bumped on a re-run that still sees a cluster's member URLs
+(that's `watcher/ledger.py`'s `apply_run` doing its job — a story is
+still live, not stale), and that is not a violation of idempotency; the
+only thing that would be a violation is a *new key* (a new `cluster_hash`)
+appearing for a cluster whose member-URL set was already present in the
+ledger before the run — and that did not happen. `data/queue.json` and
+`data/whats_moving.json` were also both regenerated by this real run and
+are committed as-is; all three were re-validated against their schemas
+(`schemas/ledger.schema.json`, `schemas/queue.schema.json`,
+`schemas/whats_moving.schema.json`) via `watcher.schema_validate.validate`
+immediately after the run, with no errors.
+
+**Known residual risk (not fully eliminated, flagged for the future
+`audit.yml`):** the 0.65 lab-lab Jaccard bar is a threshold, not a
+semantic fix — two genuinely different lab releases that happen to share
+more boilerplate than that (e.g. two same-day variant announcements) could
+still merge, and two genuine companion pieces that share less than that
+(e.g. the real fixture pair "Inside GeneBench-Pro" / "Introducing
+GeneBench-Pro", Jaccard 0.5) will no longer merge. This tradeoff is
+logged, not silently accepted, in `IMPROVEMENT_BACKLOG.md`.
 
 **Known risks (structural, not fixed by more code — flagged for the
 future `audit.yml`'s link-rot/missed-story checks and for whoever next
@@ -111,13 +173,14 @@ touches these two fetchers):**
   degrades to `[]` (robots.txt-disallow-shaped failure mode, same as
   arXiv above) with only a log line — no test in this repo can catch a
   live upstream restructure ahead of time, only after-the-fact via the
-  future audit's missed-story check. Also observed live during this very
-  run: `api-docs.deepseek.com/robots.txt` itself timed out on one fetch
-  attempt (`Read timed out. (read timeout=10)`), which the fetcher
-  correctly treated as "skip this source for this run" rather than
-  retrying past its 3-attempt budget or crashing — worth knowing this
-  lab's infrastructure is occasionally slow/flaky in production, not just
-  in theory.
+  future audit's missed-story check. Also previously observed live (the
+  pre-fix run captured in this same section's earlier revision):
+  `api-docs.deepseek.com/robots.txt` itself timed out on one fetch attempt
+  (`Read timed out. (read timeout=10)`), which the fetcher correctly
+  treated as "skip this source for this run" rather than retrying past
+  its 3-attempt budget or crashing — worth knowing this lab's
+  infrastructure is occasionally slow/flaky in production, not just in
+  theory, even though this round's re-run didn't happen to reproduce it.
 
 **`.github/workflows/watch.yml` and `.github/workflows/ci.yml` added this
 commit** — `watch.yml` runs the cron above (`17 6 * * *`, an off-hour
@@ -132,8 +195,19 @@ to be merged/pushed and a run to actually fire) — logged here as the next
 thing to observe once this lands, not claimed as already verified end to
 end.
 
-Verification: `python -m pytest` — 207 passed, 2 deselected (live tests
-excluded by default), green before this commit.
+**Round 1 status:** the four PM checkpoint directives requiring code/doc
+changes (queue-sanity windowing fix, mega-cluster verification + Jaccard
+decision, re-run + regenerated `data/*.json`, missing constant-provenance
+backlog entries) are addressed above and in `IMPROVEMENT_BACKLOG.md`. The
+fifth directive (arXiv `robots.txt`) is deliberately left unresolved and
+carried forward to the Phase 2 checkpoint, per the PM's own instruction.
+Resubmitted for Phase 1 sign-off.
+
+Verification: `python -m pytest` — 220 passed, 2 deselected (live tests
+excluded by default), green after this round's fix (13 new tests added:
+`tests/test_models.py`'s tokenizer coverage, plus new lab-lab Jaccard and
+recency-window cases in `tests/test_clustering.py` /
+`tests/test_lab_fetch_rss.py`).
 
 ---
 
