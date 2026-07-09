@@ -98,7 +98,7 @@
     ],
     "context_window": null,
     "access": "consumer",
-    "significance": "Muse Spark, unveiled April 8, 2026, is Meta Superintelligence Labs' first major model since chief AI officer Alexandr Wang joined the company, built to reason over text, images, and live camera or video input while answering in text, images, or code. Meta says it matches its older midsize Llama 4 model's capability using an order of magnitude less compute, and it is rolling out primarily through consumer surfaces -- the Meta AI app, WhatsApp, Instagram, Facebook, Messenger, and Ray-Ban Meta glasses -- with only a private, partner-only API preview so far rather than a broad developer API. Meta says it hopes to open-source future Muse-series models, though Spark itself remains proprietary.",
+    "significance": "Muse Spark, unveiled April 8, 2026, is the first model in a new series built by Meta Superintelligence Labs, capping a nine-month, ground-up rebuild of Meta's AI stack, and is built to reason over text, images, and live camera or video input while answering in text, images, or code. It is rolling out primarily through consumer surfaces -- the Meta AI app, WhatsApp, Instagram, Facebook, Messenger, and Ray-Ban Meta glasses -- with only a private API preview open to select partners so far rather than a broad developer API. Meta says it hopes to open-source future Muse-series models, though Spark itself remains proprietary.",
     "source_url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/",
     "last_verified": "2026-07-09"
   },
@@ -112,7 +112,7 @@
     ],
     "context_window": 500000,
     "access": "api",
-    "significance": "Grok 4.5, released July 8, 2026, is the first model shipped under the SpaceXAI brand following xAI's merger into SpaceX, and xAI's own developer documentation positions it as the company's most capable and fastest model yet, built for coding, agentic tasks, and knowledge work rather than general chat. It was trained alongside Cursor, carries a 500,000-token context window, and is priced at $2/$6 per million input/output tokens. Elon Musk described it as \"an Opus-class model, but faster, more token-efficient and lower cost,\" positioning it as a cheaper rival to Anthropic's and OpenAI's flagship models.",
+    "significance": "Grok 4.5, released July 8, 2026, is the first model shipped under the SpaceXAI brand following xAI's merger into SpaceX, and xAI's own developer documentation positions it as the company's most capable and fastest model yet, built for coding, agentic tasks, and knowledge work rather than general chat. It was trained jointly with Cursor -- incorporating a large volume of Cursor's real-world coding and agent-interaction data -- carries a 500,000-token context window, and is priced at $2/$6 per million input/output tokens. Elon Musk described it as \"an Opus-class model, but faster, more token-efficient and lower cost,\" positioning it as a cheaper rival to Anthropic's and OpenAI's flagship models.",
     "source_url": "https://docs.x.ai/developers/models",
     "last_verified": "2026-07-09"
   },

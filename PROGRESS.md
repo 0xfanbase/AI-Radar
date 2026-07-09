@@ -7,6 +7,54 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-09 — Phase 3 PM checkpoint round 2, follow-up: claims-hygiene fix on two board rows
+
+Follow-up to the entry directly below (the >=12-row backfill). A second PM
+review of that backfill re-fetched the row-count fix's own sources and
+flagged two remaining claims-hygiene defects under Hard Rule 3 (every claim
+must trace to a cited, live source) — both fixed this round, content-only,
+no schema/test/row-count changes:
+
+- **Meta Muse Spark row**: the sentence "Meta says it matches its older
+  midsize Llama 4 model's capability using an order of magnitude less
+  compute" and the framing "first major model since chief AI officer
+  Alexandr Wang joined the company" were both untraceable to the row's
+  cited `about.fb.com` source — re-confirmed by a fresh live re-fetch this
+  round (zero occurrences of "order of magnitude" or "Wang" on that page).
+  Both were dropped. The Wang framing was replaced with a claim the same
+  `about.fb.com` citation does support (also re-verified live this round):
+  Muse Spark is the first model in a new series from Meta Superintelligence
+  Labs, capping a nine-month, ground-up rebuild of Meta's AI stack.
+  `source_url` is unchanged (`about.fb.com` remains the correct PRIMARY
+  citation for everything else in the row, all independently re-checked
+  live in the prior round's PM review). Full reasoning, including which
+  alternate sources (`ai.meta.com`, CNBC) were live-fetched and considered
+  but not used as the row's `source_url`, is logged in
+  `IMPROVEMENT_BACKLOG.md`.
+- **xAI Grok 4.5 row**: "It was trained alongside Cursor" was untraceable
+  to either of the row's two recorded `docs.x.ai` sources — re-confirmed
+  live this round (no non-CSS "Cursor" mention on either page). Rather than
+  drop the claim, live-fetched `https://cursor.com/blog/grok-4-5` (Cursor's
+  own announcement of this same release), which confirms it directly:
+  Grok 4.5 was "trained jointly with SpaceXAI" using "trillions of tokens
+  of Cursor data." The sentence is kept, reworded in this repo's own words
+  and grounded in that citation; `source_url` stays `docs.x.ai/developers/models`
+  (unchanged), matching the same corroborating-citation pattern already
+  used elsewhere in this same row for the Musk quote and exact release
+  date (sourced from TechCrunch, not `docs.x.ai`).
+
+**Verification**: `python -m pytest` re-run after both edits — **470
+passed, 2 deselected**, identical to the pre-fix count (no test asserts on
+the exact wording of either row's `significance` field). No schema, test,
+or row-count changes were needed or made — this was a two-row prose fix
+only, per the PM checkpoint's own explicit scope.
+
+**Carried forward, unchanged:** everything listed at the end of the entry
+directly below (the `CLAUDE_CODE_OAUTH_TOKEN` secret, GitHub Pages, branch
+merge) still applies exactly as stated there.
+
+---
+
 ## 2026-07-09 — Phase 3 PM checkpoint round 2: Frontier Board backfill closes the >=12-row gap
 
 Follow-up to the PM checkpoint review of the entry directly below. That

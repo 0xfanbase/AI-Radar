@@ -1043,3 +1043,56 @@ notes.
   only reintroduce citation-spot-check risk for no benefit. `git status`
   after this round's work confirms only `content/frontier_board.json` and
   `tests/test_seed_content.py` changed.
+
+## Phase 3 PM checkpoint, round 2 (claims-hygiene fix, 2026-07-09)
+
+- **Meta Muse Spark row: dropped both flagged untraceable clauses rather
+  than switching `source_url`.** Re-fetched the row's already-cited
+  `about.fb.com` page live this round and confirmed the PM's finding
+  exactly — zero occurrences of "order of magnitude" or "Wang" anywhere in
+  the page. Also live-fetched `https://ai.meta.com/blog/introducing-muse-spark-msl/`
+  (Meta's own technical blog, linked from the about.fb.com piece) and a
+  CNBC article, both of which *do* state the compute-vs-Llama-4-Maverick
+  claim, and CNBC additionally states the Alexandr Wang/chief-AI-officer
+  framing. Chose not to switch `source_url` to either: `ai.meta.com` alone
+  would leave the Wang clause still untraceable (it never mentions Wang),
+  and CNBC is not on CLAUDE.md's reputable-outlet table, so it's a weaker
+  choice than the already-cited PRIMARY `about.fb.com` source per the Board
+  upsert rule's own stated preference ("only from a PRIMARY source, or —
+  absent one — the corroborating OUTLET sources"). Since the schema's
+  `source_url` is a single field (no way to cite two URLs on one row), the
+  simplest fix consistent with both flagged directives' own "or drop the
+  clause" option was to strip the order-of-magnitude/Llama-4-Maverick
+  sentence entirely and replace the Wang framing with a claim the *existing*
+  `about.fb.com` citation does support verbatim in spirit — the same page
+  states Muse Spark is "the first in a new series of large language models
+  built by Meta Superintelligence Labs" and that "Meta Superintelligence
+  Labs rebuilt our AI stack from the ground up" over "the last nine months"
+  — re-verified live this round, not carried over from the original seed
+  pass. `source_url` itself is unchanged.
+- **xAI Grok 4.5 row: kept "trained ... with Cursor," re-sourced in spirit
+  rather than dropped.** Re-fetched both of the row's already-recorded
+  `docs.x.ai` pages (`/developers/models`, `/developers/release-notes`)
+  live this round and confirmed the PM's finding — neither mentions Cursor
+  anywhere outside unrelated CSS class names (`cursor-pointer`). Live-
+  fetched `https://cursor.com/blog/grok-4-5` (Cursor's own announcement of
+  the same release, a direct counterparty to the joint-training claim, not
+  a bystander outlet) and confirmed it states, in Cursor's own words:
+  "Grok 4.5 is a mixture-of-experts model that we trained jointly with
+  SpaceXAI... Training included trillions of tokens of Cursor data." Kept
+  `source_url` as `docs.x.ai/developers/models` (the row's structural
+  PRIMARY source for context window/pricing/positioning, unchanged from
+  round 1) and treated `cursor.com/blog/grok-4-5` as a corroborating
+  citation for this one sentence only — the same established pattern round
+  1 already used for this identical row (the Musk quote and exact release
+  date are sourced from a live-fetched TechCrunch article, not from
+  `docs.x.ai`, and that was accepted by the PM's own review). Reworded the
+  sentence in the repo's own words ("trained jointly with Cursor --
+  incorporating a large volume of Cursor's real-world coding and
+  agent-interaction data") rather than reproducing Cursor's phrasing
+  verbatim.
+- **No schema, test, or row-count change made this round** — this was a
+  scoped, two-row prose fix only, per the PM directive's own explicit
+  instruction. `python -m pytest` re-run after both edits: 470 passed, 2
+  deselected, identical to the pre-fix count (no test depends on the exact
+  wording of either row's `significance` string).
