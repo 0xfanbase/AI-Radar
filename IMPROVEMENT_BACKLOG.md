@@ -198,3 +198,69 @@ Newest entries at the bottom of each section, in commit order.
   `fetch_<source>_items(session, ...)` shape already used by
   `watcher/sources/arxiv.py`'s `fetch_arxiv_items` for a consistent
   per-source-module interface.
+- **2026-07-09 — `watcher/sources/arxiv.py`: "daily top papers" has no
+  popularity signal on arXiv itself, so it's interpreted as "most recently
+  submitted"** — one combined query OR-ing cs.AI/cs.CL/cs.LG, sorted by
+  `submittedDate` descending, capped at `ARXIV_MAX_RESULTS = 50`. Matches
+  the plan's own note that arXiv's "unusual velocity" is instead captured
+  via cross-source corroboration at the ranking stage, not by this
+  fetcher. A single combined OR-query (rather than one request per
+  category) is also politer per the fetch-discipline rules and needs no
+  client-side merge/dedupe, since arXiv itself returns a cross-listed
+  paper only once. `ARXIV_MAX_RESULTS` is kept local to `arxiv.py` rather
+  than added to `watcher/config.py`, since this commit's file scope was
+  limited to the arXiv fetcher itself; worth consolidating into
+  `config.py` alongside the existing `ARXIV_CATEGORIES` in a later pass.
+- **2026-07-09 — `watcher/sources/arxiv.py` item URL is the Atom entry's
+  `<link rel="alternate">` (the `https://arxiv.org/abs/...vN` page),
+  falling back to `<id>` only if no alternate link is present** — kept
+  with its version suffix as arXiv provides it, rather than stripped to a
+  version-less canonical form; the plan is silent on this and stripping
+  would diverge from what the source actually returned for no clear
+  benefit at this stage.
+- **2026-07-09 — IMPORTANT DISCOVERY, needs an explicit owner/next-phase
+  decision: `https://export.arxiv.org/robots.txt` (the arXiv Atom API
+  host) currently returns `User-agent: *\nDisallow: /` — a blanket
+  disallow of every path for every user agent — confirmed via a real,
+  live fetch on 2026-07-09 (not assumed).** Per CLAUDE.md's fetch-
+  discipline rule, applied uniformly ("if a source blocks fetching, drop
+  that source; never circumvent a disallow"), `watcher/sources/arxiv.py`
+  calls `watcher.http.check_robots_allowed()` before every query exactly
+  like every other fetcher, and — because this subagent's scope was
+  limited to `watcher/sources/arxiv.py` and its tests/fixture only, with
+  no authority to reinterpret or amend CLAUDE.md's stated policy — it
+  honors that disallow rather than special-casing it. **The practical
+  consequence: as implemented, this fetcher returns `[]` when run against
+  the real network today**, even though `export.arxiv.org` is arXiv's own
+  documented, keyless, rate-limited public API endpoint (governed by its
+  own published Terms of Use at arxiv.org/help/api/tou, a separate
+  contract from robots.txt) rather than a crawlable website — many API
+  hosts blanket-disallow `robots.txt` specifically to keep generic search
+  crawlers from indexing raw API responses, not to prohibit the
+  documented API usage the host exists to serve. This fetcher's own tests
+  (`tests/test_arxiv_fetch.py`) cover both the real disallow-skip behavior
+  (using the exact live-fetched robots.txt content) and the parsing/
+  normalization logic under a mocked allow, so the code itself is fully
+  correct either way — but whoever integrates this fetcher into the
+  watcher CLI / `watch.yml` should explicitly decide, and log: (a) accept
+  that arXiv is currently a non-functional source under this policy as
+  written, (b) amend CLAUDE.md's fetch-discipline rule to distinguish
+  "crawling a website" from "calling a documented, ToU-governed public
+  API" (and apply that distinction consistently to any other API-only
+  sources, e.g. HN Algolia), or (c) some other explicit resolution — not
+  something this commit should decide unilaterally given the "never
+  circumvent a disallow" rule is stated as project-wide, load-bearing
+  policy.
+- **2026-07-09 — Integration pass across the three parallel fetcher
+  commits: `watcher/sources/__init__.py` (the shared package marker for
+  both `hn.py` and `arxiv.py`, siblings under `watcher/sources/`) is
+  committed alongside the arXiv fetcher rather than the HN fetcher.**
+  Neither sibling commit's designated file set named it explicitly;
+  picked the arXiv commit since it's the second of the two root-level
+  `watcher/sources/*.py` modules to land, so the package marker arrives
+  no later than any code that needs it importable. (`python -m pytest`
+  stayed green throughout regardless, since Python 3 treats a directory
+  with no `__init__.py` as an implicit namespace package -- this is a
+  commit-hygiene choice, not a functional fix.) `watcher/sources/labs/__init__.py`
+  needed no equivalent call: it ships as part of the `labs/` fetchers'
+  own commit, which already owns everything under that subpackage.
