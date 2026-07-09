@@ -937,3 +937,109 @@ PM's own instruction to carry it forward as an explicit owner decision.
 - **Lexicon: all 30 of 30 target terms verified and shipped -- no shortfall.** Every `related[]` reference resolves to another entry's `term` in the same file, and every entry's `deeper` field carries at least one live-cited `<a href>` anchor (both mechanically checked by `tests/test_seed_content.py`). No missing-term backlog entry needed for the lexicon this round.
 - **Primer: all 10 of 10 intended dependency-ordered slugs resolved against the shipped lexicon -- no shortfall.** `content/primer.json`'s `terms[]` is exactly `PRIMER_ORDER` (foundation model -> transformer -> attention -> parameter count -> context window -> pretraining -> fine-tuning -> RLHF -> hallucination -> open weights), each lowercased+hyphenated into its slug form (e.g. `"RLHF" -> "rlhf"`, `"parameter count" -> "parameter-count"`). This lowercase+hyphenate transform is a spec-silent judgment call in its own right: no `schemas/primer.schema.json` exists yet (Phase 1/2 deliberately left it unbuilt -- see `tests/test_validate_changed_schemas.py`'s own `"content/primer.json"` no-schema-yet comment) and no lexicon-term-to-slug function exists anywhere in the codebase yet either (`scripts/plan_run.py::kebab_slug` is a *card-title* slugifier, alnum-stripping, built for a different field). Whichever Phase 4 site generator eventually builds `/lexicon/<slug>/` routes and links the primer to them **must** use this same simple lowercase+hyphenate transform for lexicon terms (not `kebab_slug`'s alnum-stripping variant, which would already agree for every term here but could silently diverge on a future term containing punctuation `kebab_slug` strips and this transform doesn't) -- flagged here so Phase 4 doesn't invent a second, incompatible convention.
 - **`content/primer.json`'s `generated_at` field is a bare ISO date (`"2026-07-09"`), not a full timestamp.** No schema exists yet to pin this down (see above), and the task's own literal spec for this file gives `"<today ISO>"` -- read as the plan's existing date-only convention (`last_verified`/`release_date`/card `date` fields elsewhere in this repo are all bare `YYYY-MM-DD`, never a full datetime), so a bare date was chosen for consistency rather than adding a time-of-day component nothing else in this repo carries.
+
+## Phase 3 PM checkpoint round 2: Frontier Board backfill closes the row-count gap (2026-07-09)
+
+Follow-up to the PM checkpoint review that re-fetched all 4 then-existing
+Frontier Board rows and all 30 Lexicon entries live, found every claim
+genuinely supported, and directed a follow-up backfill turn to close the
+row-count gap rather than accepting it as final. See `PROGRESS.md`'s
+"Phase 3 PM checkpoint round 2" entry for the full list of the 9 new rows
+and their source URLs; this entry covers the judgment calls and process
+notes.
+
+- **`openai.com`, `help.openai.com`, `x.ai`, and `www.axios.com` all
+  returned HTTP 403 to `WebFetch` on every attempt this turn, including a
+  direct `curl` retry with a standard browser User-Agent string, confirming
+  it's those sites' own bot-management rejecting the fetch rather than a
+  local proxy/tooling artifact.** Rather than fabricate or recall a fetch
+  of the blocked pages, or skip OpenAI/xAI entirely, the simplest reasonable
+  resolution was to find a **different, reachable subdomain of the same
+  primary source**: `deploymentsafety.openai.com/gpt-5-6-preview` (OpenAI's
+  own preview system card) for OpenAI, and `docs.x.ai/developers/models` /
+  `docs.x.ai/developers/release-notes` (xAI's own developer docs) for xAI
+  — both fetched live successfully and used as each row's `source_url`,
+  corroborated by a live-fetched TechCrunch article (on CLAUDE.md's
+  reputable-outlet table) in both cases for release-date precision. No
+  fallback to an un-fetched URL, an archive/cache mirror (also tried and
+  unreachable via this session's tools — `web.archive.org` and
+  `r.jina.ai` were both attempted and failed, logged for completeness),
+  or a training-memory recollection was used anywhere in this backfill.
+- **`Meta`'s Muse Spark row is tagged `access: "consumer"`, breaking from
+  the pattern of every other proprietary-model row on the Board using
+  `"api"` (Anthropic Fable 5, OpenAI GPT-5.6 Sol, Google Gemini 3.5 Flash,
+  xAI Grok 4.5, Alibaba Qwen3.7-Max, ByteDance Seed 2.1 Pro all use
+  `"api"` despite most also being consumer-reachable).** `frontier_board.schema.json`'s
+  `access` enum (`api`/`open-weights`/`consumer`) forces a single tag per
+  row, and the established convention from Phase 3's first pass (and
+  reaffirmed by every US-lab row added this round) is "if a real developer
+  API exists at all, tag `api`, even alongside a consumer front-end" — this
+  is the one row this turn where that convention would misrepresent the
+  actual access shape: Meta's own primary announcement
+  (`about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/`)
+  states the API exists only as a "private preview... to select partners,"
+  while the broad, immediate rollout is entirely through Meta's own
+  consumer surfaces (Meta AI app, WhatsApp, Instagram, Facebook, Messenger,
+  Ray-Ban Meta glasses) — the reverse of the "API is the primary channel,
+  consumer app is also there" shape every other `"api"`-tagged row actually
+  has. Tagging it `"api"` anyway would silently imply a level of third-party
+  developer access Meta's own announcement explicitly does not offer today.
+  Flagged here since this is the first row on the Board where `access`
+  needed a genuinely different tag from the established pattern, not a
+  mechanical repeat of it — a future analyst upserting this row (e.g. once
+  a broader Muse Spark API ships) should re-tag it `"api"` at that point,
+  per the normal Frontier Board upsert rule.
+- **xAI's `lab` field is written as `"xAI (SpaceXAI)"`, not the bare
+  `"xAI"` the approved plan's own candidate list names.** This turn's live
+  web research (outside this session's training-data knowledge, since the
+  event postdates it) turned up a real, independently multiply-corroborated
+  corporate rebrand: xAI's merger into SpaceX closed February 2, 2026, and
+  the combined company completed its public rebrand from "xAI" to
+  "SpaceXAI" on July 6-7, 2026 — days before this backfill turn, and
+  reported identically across roughly a dozen independent outlets found via
+  `WebSearch` (not all reputable-table outlets, but consistent enough in
+  the specifics -- deal size, closing date, FCC satellite filing -- to treat
+  as solid). `docs.x.ai` (the developer-docs domain actually fetched this
+  turn) and the live-fetched TechCrunch coverage both use "SpaceXAI" as the
+  operating brand while the underlying API/docs domain remains `x.ai`.
+  Writing the lab field as `"xAI (SpaceXAI)"` keeps the row findable under
+  the name this project's own CLAUDE.md source table and the approved
+  plan's candidate list both use, while not silently erasing a real,
+  freshly-verified rename. A future analyst upsert touching this row
+  should decide whether to complete the rename to bare `"SpaceXAI"`
+  (matching the row to its `(lab, model)` upsert key exactly as the brand
+  now presents itself) or continue carrying both names — left open rather
+  than decided unilaterally here, since CLAUDE.md's own source table
+  (`| Primary (labs) | ... xAI ...`) would also need a matching update at
+  that point and that table is out of this turn's `content/`-only scope.
+- **`Moonshot AI`'s Kimi K2.6 release date (`2026-04-20`) is corroborated
+  by a live-fetched SiliconANGLE article, an outlet not on CLAUDE.md's
+  14-entry reputable-outlet table.** The row's actual `source_url` is
+  Moonshot's own Hugging Face model card (a PRIMARY source, sufficient
+  alone for `confirmed`-equivalent sourcing per the corroboration rule),
+  so SiliconANGLE was used only as an extra, non-load-bearing corroborating
+  detail for the exact calendar date (the model card itself didn't state
+  one) — not as the sole or primary basis for any claim in the row. Noted
+  here rather than silently treated as an OUTLET-tier source, since it
+  isn't one under this project's own named table.
+- **`tests/test_seed_content.py::test_frontier_board_meets_phase_3_target_row_count`
+  flipped from `@pytest.mark.xfail(strict=False)` to a hard assertion, and
+  a new `test_frontier_board_china_region_has_more_than_one_row` regression
+  test was added** (not originally scoped in the Phase 3 plan's own
+  commit-26 test list, but a direct, mechanical encoding of the specific
+  neutrality-adjacent gap the PM's review flagged by name) so a future
+  accidental deletion of China-region rows is caught even if the total
+  count doesn't drop below 12. `FRONTIER_BOARD_ACTUAL_ROWS` (the separate,
+  weaker "hasn't regressed below what shipped" floor test) was bumped from
+  4 to 13 to match the real current count, per this repo's own established
+  convention of keeping that floor at the real shipped number rather than
+  leaving it stale.
+- **`content/lexicon.json` and `content/primer.json` were not opened,
+  re-validated, or re-cited this round, per this turn's explicit scope.**
+  The PM's own review already re-fetched 10 of the Lexicon's 30 citations
+  live and found zero dead or mismatched links, and mechanically confirmed
+  every Primer slug resolves — both files already fully meet their Phase 3
+  acceptance bars, and touching either file without a specific reason would
+  only reintroduce citation-spot-check risk for no benefit. `git status`
+  after this round's work confirms only `content/frontier_board.json` and
+  `tests/test_seed_content.py` changed.

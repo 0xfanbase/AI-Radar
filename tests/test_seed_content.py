@@ -7,18 +7,20 @@ small synthetic fixtures under ``fixtures/schema_examples/``), this module
 validates the *real, committed* Phase 3 seed artifacts directly -- the
 actual content this backfill wrote, not a stand-in.
 
-Per this turn's task scope, the acceptance bar for each file is "meets the
-target, or documents why not" rather than a hard failure on a shortfall:
-this backfill's own ``IMPROVEMENT_BACKLOG.md``/``PROGRESS.md`` entries
-already log that only 4 of the intended >=12 Frontier Board rows were
-verified this run (see "Phase 3 seed-content backfill" in both files). The
-tests below therefore assert a floor matching what was actually shipped
-(so a real regression -- e.g. a future edit that empties the file --still
-fails loudly) plus one explicit, non-blocking ``xfail`` that tracks the
->=12 target so it's visible in test output without turning the suite red,
-matching this repo's existing convention of asserting a floor rather than
-an exact count against real (organically-growing) data
-(``tests/test_p2_schemas.py``'s ``len(real_ledger["entries"]) > 0``).
+**Frontier Board row-count history:** the first backfill pass shipped only
+4 of the intended >=12 rows and this file originally encoded that shortfall
+as a non-blocking, non-strict ``xfail`` on
+``test_frontier_board_meets_phase_3_target_row_count`` (see git history and
+``IMPROVEMENT_BACKLOG.md``'s "Phase 3: seed-content backfill" entry for the
+full account). A follow-up backfill turn independently live-fetched and
+verified 9 more rows -- OpenAI, Google DeepMind, Meta, xAI, Mistral (US
+section, per the plan's own logged Mistral-bucketing quirk), Alibaba Qwen,
+Moonshot AI, Zhipu AI, and ByteDance -- bringing the real total to 13,
+past the >=12 target and giving China 5 rows instead of 1. The former
+``xfail`` is now a hard assertion (see
+"Phase 3 PM checkpoint round 2" in ``PROGRESS.md``/``IMPROVEMENT_BACKLOG.md``
+for the closure record); a future accidental regression back below 12 rows
+must fail the suite, not quietly report XFAIL/XPASS.
 """
 from __future__ import annotations
 
@@ -38,11 +40,13 @@ FRONTIER_BOARD_PATH = CONTENT_DIR / "frontier_board.json"
 LEXICON_PATH = CONTENT_DIR / "lexicon.json"
 PRIMER_PATH = CONTENT_DIR / "primer.json"
 
-# Phase 3's stated targets (approved build plan, section 4) vs. what this
-# backfill run actually verified live -- see IMPROVEMENT_BACKLOG.md for the
-# full shortfall explanation.
+# Phase 3's stated target (approved build plan, section 4), now met -- see
+# IMPROVEMENT_BACKLOG.md/PROGRESS.md's "Phase 3 PM checkpoint round 2" entries
+# for the closure record. FRONTIER_BOARD_ACTUAL_ROWS is a floor at the real
+# shipped count (not the bare >=12 target) so a future accidental deletion of
+# rows is still caught even if it doesn't drop all the way below 12.
 FRONTIER_BOARD_TARGET_MIN_ROWS = 12
-FRONTIER_BOARD_ACTUAL_ROWS = 4
+FRONTIER_BOARD_ACTUAL_ROWS = 13
 LEXICON_TARGET_COUNT = 30
 
 _HREF_RE = re.compile(r"<a\s+href=", re.IGNORECASE)
@@ -68,20 +72,9 @@ def test_frontier_board_has_at_least_the_rows_this_backfill_actually_shipped():
     assert len(board) >= FRONTIER_BOARD_ACTUAL_ROWS
 
 
-@pytest.mark.xfail(
-    reason=(
-        "Phase 3 target is >=12 Frontier Board rows spanning US/China/"
-        "open-weights; this backfill run only live-verified 4 distinct "
-        "(lab, model) rows before running out of scope for this turn. "
-        "Logged in IMPROVEMENT_BACKLOG.md with the specific labs/models "
-        "still needed to close the gap. Not marked strict: if a future "
-        "analyst run or backfill grows content/frontier_board.json past "
-        "12 rows, this test starts passing (reported as XPASS) instead of "
-        "needing to be deleted."
-    ),
-    strict=False,
-)
 def test_frontier_board_meets_phase_3_target_row_count():
+    # No longer xfail: the follow-up backfill turn closed the gap (see
+    # module docstring). A regression below 12 rows is now a real failure.
     board = _load(FRONTIER_BOARD_PATH)
     assert len(board) >= FRONTIER_BOARD_TARGET_MIN_ROWS
 
@@ -93,6 +86,18 @@ def test_frontier_board_rows_span_more_than_one_region():
     board = _load(FRONTIER_BOARD_PATH)
     regions = {row["region"] for row in board}
     assert len(regions) > 1
+
+
+def test_frontier_board_china_region_has_more_than_one_row():
+    # The first backfill pass left China represented by a single row
+    # (DeepSeek only) -- a real neutrality-adjacent gap (CLAUDE.md's Hard
+    # Rule 4 requires the same evidentiary bar and, implicitly, the same
+    # coverage effort for Chinese labs as US ones). The follow-up backfill
+    # turn added Alibaba Qwen, Moonshot AI, Zhipu AI, and ByteDance. This
+    # regression test locks that in going forward.
+    board = _load(FRONTIER_BOARD_PATH)
+    china_rows = [row for row in board if row["region"] == "China"]
+    assert len(china_rows) > 1, "China region collapsed back to a single row"
 
 
 def test_frontier_board_has_no_duplicate_lab_model_pairs():

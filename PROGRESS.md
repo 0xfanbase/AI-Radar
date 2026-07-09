@@ -7,6 +7,122 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-09 — Phase 3 PM checkpoint round 2: Frontier Board backfill closes the >=12-row gap
+
+Follow-up to the PM checkpoint review of the entry directly below. That
+review re-fetched all 4 of the then-existing Frontier Board rows and all
+30 Lexicon entries' citations live, found every claim genuinely supported
+by its cited source, confirmed the Primer's 10 slugs all resolve, and
+confirmed the shortfall was honestly (not silently) documented — but it
+still flagged the Frontier Board's row count as a real, unmet acceptance
+bar: 4 rows against the plan's own >=12-row target, US missing OpenAI,
+Google DeepMind, Meta, xAI, and Mistral entirely, and China represented by
+a single row (DeepSeek). This entry is the follow-up backfill turn the PM's
+review called for.
+
+**9 new Frontier Board rows, each independently live-fetched and verified
+this turn (never recalled from training memory)** — `content/frontier_board.json`
+now ships **13 rows total**, past the plan's >=12-row target:
+
+- `OpenAI` — GPT-5.6 Sol (US) — primary source
+  `https://deploymentsafety.openai.com/gpt-5-6-preview` (OpenAI's own
+  preview system card, on a subdomain reachable directly; `openai.com` and
+  `help.openai.com` both returned HTTP 403 to every fetch attempt this
+  turn — logged below), corroborated by a live-fetched TechCrunch article
+  (`https://techcrunch.com/2026/06/26/openai-limits-gpt-5-6-rollout-after-government-request-says-restrictions-shouldnt-be-the-norm/`).
+- `Google DeepMind` — Gemini 3.5 Flash (US) — primary source
+  `https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/`.
+- `Meta` — Muse Spark (US) — primary source
+  `https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/`.
+- `xAI (SpaceXAI)` — Grok 4.5 (US) — primary source
+  `https://docs.x.ai/developers/models`, corroborated by a live-fetched
+  TechCrunch article
+  (`https://techcrunch.com/2026/07/08/spacexai-releases-grok-4-5-which-elon-describes-as-an-opus-class-model/`)
+  for the exact release date and the one Musk quote used (10 words,
+  attributed). `x.ai`'s own marketing pages (`x.ai/news`, `x.ai/news/grok-4-5`)
+  returned HTTP 403 to every fetch attempt; `docs.x.ai` (a different
+  subdomain) was reachable and used instead — see the judgment-call log
+  below.
+- `Mistral` — Mistral Large 3 (**US section**, per the approved build
+  plan's own already-logged Mistral-bucketing quirk — Mistral is an EU lab,
+  not a US one, but the plan's Board taxonomy has only US/China/open-weights
+  lanes) — primary source `https://mistral.ai/news/mistral-3/`.
+- `Alibaba Qwen` — Qwen3.7-Max (China) — primary source
+  `https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154`.
+- `Moonshot AI` — Kimi K2.6 (China) — primary source
+  `https://huggingface.co/moonshotai/Kimi-K2.6` (Moonshot's own model card
+  on Hugging Face), corroborated by a live-fetched SiliconANGLE article for
+  the exact release date
+  (`https://siliconangle.com/2026/04/20/moonshot-ai-releases-kimi-k2-6-model-1t-parameters-attention-optimizations/`;
+  not on CLAUDE.md's reputable-outlet table, used only as corroborating
+  detail alongside the primary source, not as the sole basis for
+  `confirmed`-equivalent sourcing).
+- `Zhipu AI` — GLM-5.2 (China) — primary source
+  `https://huggingface.co/blog/zai-org/glm-52-blog` (Zhipu/Z.ai's own
+  Hugging Face blog post).
+- `ByteDance` — Seed 2.1 Pro (China) — primary source
+  `https://seed.bytedance.com/en/blog/seed2-1-officially-released-advancing-ai-productivity`.
+
+**Region tally after this round:** US 6 (Anthropic, OpenAI, Google
+DeepMind, Meta, xAI, Mistral), China 5 (DeepSeek, Alibaba Qwen, Moonshot
+AI, Zhipu AI, ByteDance), open-weights 2 (Ai2, NVIDIA) — China is now
+represented by 5 rows, not 1, directly closing the neutrality-adjacent gap
+the PM's review flagged. `tests/test_seed_content.py` gained a dedicated
+regression test for this (`test_frontier_board_china_region_has_more_than_one_row`).
+
+**`tests/test_frontier_board_meets_phase_3_target_row_count` flipped from a
+non-strict `xfail` to a hard assertion**, per this checkpoint's own
+instruction — `content/frontier_board.json` now has 13 rows, past the
+`>=12` bar, so the test asserts it unconditionally; a future accidental
+regression below 12 rows now fails the suite instead of quietly reporting
+XFAIL. `FRONTIER_BOARD_ACTUAL_ROWS` (the separate, weaker floor test) was
+bumped from 4 to 13 to match. Full explanation in the module's own
+docstring.
+
+**Two spec-silent judgment calls made this round, both logged in full in
+`IMPROVEMENT_BACKLOG.md`:** (1) Meta's Muse Spark is tagged
+`access: "consumer"` rather than `"api"`, breaking from the pattern
+established by every other row (Anthropic/OpenAI/Google/xAI all use
+`"api"` despite also being consumer-reachable) because Muse Spark's API is
+explicitly a partner-only private preview while its broad, primary release
+channel is Meta's own consumer apps — the reverse of the other rows' actual
+availability shape. (2) xAI's `lab` field is written as `"xAI (SpaceXAI)"`,
+not bare `"xAI"` as the approved plan's candidate list names it, because
+this turn's live research turned up a real, multiply-corroborated
+corporate event outside training-data knowledge: xAI's merger into SpaceX
+(closed February 2026) completed its public rebrand to "SpaceXAI" on
+July 6-7, 2026, days before this backfill turn. Both `content/lexicon.json`
+and `content/primer.json` were **not touched** this round, per this
+checkpoint's explicit scope — both already fully meet their Phase 3
+acceptance bars and every sampled citation was independently re-confirmed
+live by the PM's own review, so no re-run of the citation spot-checks was
+warranted.
+
+**Fetch-access note:** `openai.com`, `help.openai.com`, `x.ai`, and
+`www.axios.com` all returned HTTP 403 to every fetch attempt this turn
+(consistent with those sites' bot-management, not a proxy/tooling fault —
+confirmed by retrying with a browser user-agent via a direct `curl` as
+well). Every OpenAI and xAI board-row claim below is instead sourced from a
+different, reachable subdomain of the same lab's own domain
+(`deploymentsafety.openai.com`, `docs.x.ai`) or from reputable-outlet
+coverage (TechCrunch) that was itself successfully live-fetched — no board
+row in this backfill relies on an un-fetched or training-memory-recalled
+claim.
+
+**Verification:** `python -m pytest` — 470 passed, 2 deselected (the
+`@pytest.mark.live` acceptance-proof tests, excluded by default), 0
+xfailed/xpassed — full suite green, and the former xfail is gone entirely
+rather than merely passing incidentally.
+
+**Carried forward, unchanged:** `analyze.yml` still needs the owner's
+`CLAUDE_CODE_OAUTH_TOKEN` secret and `vars.CLAUDE_MODEL`; GitHub Pages
+still needs enabling; this branch still needs review and merge to `main`.
+Per the PM's own directive, Phase 4 (frontend) may now proceed on a future
+turn — the Frontier Board backfill this entry records is what was blocking
+it.
+
+---
+
 ## 2026-07-09 — Phase 3: seed-content backfill (Frontier Board, Lexicon, Primer)
 
 One-time interactive seed-content backfill per the approved build plan's
