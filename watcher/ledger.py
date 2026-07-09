@@ -13,9 +13,13 @@ Two moving parts:
 
 - **Filtering** (:func:`unpublished_clusters`): a cluster already
   carrying a ledger entry whose ``card_id`` is non-null has already been
-  published -- drop it. Everything else (a hash never seen before, or
-  one seen before but still awaiting a Phase 2 card) survives for this
-  run.
+  published -- drop it. A cluster whose entry has ``status: "dropped"``
+  (Phase 2's verifier-drop terminal state -- ``card_id`` null by
+  definition there too) is also dropped, so a permanently-rejected
+  cluster_hash can never be silently re-queued just because its
+  ``card_id`` happens to be null like a genuinely fresh one's. Everything
+  else (a hash never seen before, or one seen before but still awaiting a
+  Phase 2 card) survives for this run.
 - **Upserting** (:func:`upsert_entries`): for each surviving cluster,
   either create a fresh ``queued``/``card_id: null`` entry (``first_seen
   == last_seen == today``) or, if the hash already has an entry, only
@@ -160,15 +164,30 @@ def save_ledger(ledger: dict[str, Any], path: Path | str = LEDGER_PATH) -> None:
 def unpublished_clusters(
     ranked_clusters: Iterable[Any], ledger: dict[str, Any]
 ) -> list[Any]:
-    """Drop clusters whose ledger entry already carries a non-null
-    ``card_id`` (already published); keep everything else -- a hash
-    never seen before, or one seen before but still awaiting a card.
+    """Drop clusters whose ledger entry is already finalized -- either
+    already published (non-null ``card_id``) or permanently ``"dropped"``
+    (Phase 2's verifier-drop terminal state, whose ``card_id`` is itself
+    schema-enforced to stay ``null`` -- see ``schemas/ledger.schema.json``)
+    -- keeping everything else: a hash never seen before, or one seen
+    before but still awaiting a card (``status: "queued"``).
+
+    The explicit ``status == "dropped"`` check is required *in addition
+    to* the ``card_id is not None`` check: a dropped entry's ``card_id``
+    is null by definition, so relying on ``card_id`` alone would treat a
+    permanently-dropped cluster_hash as still "unpublished" and re-queue
+    it (into ``data/queue.json`` and then ``data/run_plan.json``) the
+    next time its exact member URLs resurface in a fetch -- silently
+    reviving a cluster the verifier already permanently rejected, in
+    direct contradiction of ``schemas/ledger.schema.json``'s own
+    "stays permanently null for clusters the verifier drops" guarantee.
     """
     entries = ledger.get("entries", {})
     survivors = []
     for ranked_cluster in ranked_clusters:
         entry = entries.get(ranked_cluster.cluster_hash)
-        if entry is not None and entry.get("card_id") is not None:
+        if entry is not None and (
+            entry.get("card_id") is not None or entry.get("status") == "dropped"
+        ):
             continue
         survivors.append(ranked_cluster)
     return survivors

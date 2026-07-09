@@ -19,11 +19,42 @@ import pytest
 from jsonschema import ValidationError
 
 from scripts.reconcile_run import DROPPED_REASON_NO_CARD, reconcile_ledger
-from watcher.ledger import empty_ledger, load_ledger, save_ledger
+from watcher.ledger import (
+    apply_run,
+    empty_ledger,
+    load_ledger,
+    save_ledger,
+    unpublished_clusters,
+)
+from watcher.models import Item
+from watcher.ranking import rank_clusters
+from watcher.clustering import cluster_items
 from watcher.schema_validate import validate
 
 NOW = datetime(2026, 7, 9, 12, 0, 0, tzinfo=timezone.utc)
 LATER = datetime(2026, 7, 10, 9, 30, 0, tzinfo=timezone.utc)
+FIXED_NOW = datetime(2026, 7, 9, 4, 0, 0, tzinfo=timezone.utc)
+
+
+def _ranked(cluster_hash: str, url: str = "https://example.test/x"):
+    """Same fixture-building helper as tests/test_ledger.py's own
+    ``_ranked``: a real ``RankedCluster`` with its ``cluster_hash``
+    overwritten to a caller-chosen value, so a test can target a specific
+    ledger key without fighting real hash derivation."""
+    items = [
+        Item(
+            source_type="arxiv",
+            source_name="arxiv",
+            title="Some Paper",
+            url=url,
+            published_at="2026-07-08T09:00:00Z",
+        )
+    ]
+    clusters = cluster_items(items)
+    ranked = rank_clusters(clusters, now=FIXED_NOW)[0]
+    return ranked.__class__(
+        rank=ranked.rank, score=ranked.score, cluster_hash=cluster_hash, cluster=ranked.cluster
+    )
 
 CLUSTER_HASH = "a" * 64
 CARD_ID = "2026-07-09-example-release-abc123"
@@ -280,3 +311,73 @@ def test_reconcile_ledger_end_to_end_via_save_and_load_round_trip(tmp_path):
     assert loaded["entries"][published_hash]["card_id"] == "card-one"
     assert loaded["entries"][dropped_hash]["status"] == "dropped"
     assert loaded["entries"][dropped_hash]["card_id"] is None
+
+
+# --------------------------------------------------------------------------
+# unpublished_clusters / apply_run: a "dropped" cluster_hash's null
+# card_id must never be mistaken for a fresh, still-unpublished one.
+# --------------------------------------------------------------------------
+
+
+def _dropped_entry(**overrides) -> dict:
+    entry = {
+        "card_id": None,
+        "status": "dropped",
+        "first_seen": "2026-07-01",
+        "last_seen": "2026-07-02",
+        "member_urls": ["https://example-news.test/2026/07/01/rumored-model"],
+        "verifier_outcome": {
+            "last_attempted_at": "2026-07-02T10:00:00Z",
+            "dropped_reason": "no citation survived re-fetch; hollowed-out card",
+        },
+    }
+    entry.update(overrides)
+    return entry
+
+
+def test_unpublished_clusters_excludes_dropped_entries_despite_null_card_id():
+    """A dropped entry's card_id is null by definition (same as a
+    genuinely fresh, never-seen cluster's) -- unpublished_clusters must
+    key off status, not card_id alone, or a permanently-dropped
+    cluster_hash would silently resurrect the moment its exact member
+    URLs reappear in a later fetch."""
+    dropped = _ranked("hash-dropped", "https://example-news.test/2026/07/01/rumored-model")
+    fresh = _ranked("hash-fresh", "https://example.test/brand-new")
+
+    ledger = {
+        "version": 1,
+        "entries": {"hash-dropped": _dropped_entry()},
+    }
+
+    survivors = unpublished_clusters([dropped, fresh], ledger)
+
+    assert survivors == [fresh]
+
+
+def test_apply_run_never_requeues_a_dropped_cluster_hash_that_resurfaces():
+    """End-to-end: the exact same cluster_hash that was previously
+    dropped resurfaces in a later run's ranked_clusters (e.g. a feed
+    still lists the same items) -- apply_run must not resurrect it into
+    the surviving/queued set, and upsert_entries must leave its
+    status/card_id exactly as they were (dropped/null), never reverting
+    to "queued"."""
+    cluster_hash = "hash-dropped"
+    resurfaced = _ranked(cluster_hash, "https://example-news.test/2026/07/01/rumored-model")
+
+    ledger = {
+        "version": 1,
+        "entries": {cluster_hash: _dropped_entry()},
+    }
+
+    survivors, new_ledger = apply_run([resurfaced], ledger, now=LATER)
+
+    assert survivors == []
+    entry = new_ledger["entries"][cluster_hash]
+    assert entry["status"] == "dropped"
+    assert entry["card_id"] is None
+    # apply_run only upserts survivors -- a dropped entry that was
+    # correctly excluded from the survivor set must be left completely
+    # untouched (not even last_seen-bumped), matching the module's own
+    # "already-published entry left completely untouched" convention for
+    # any other finalized/terminal entry.
+    assert entry == ledger["entries"][cluster_hash]
