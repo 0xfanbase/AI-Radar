@@ -1332,3 +1332,135 @@ notes.
   green. `site/tests/test_build.py` (run explicitly with
   `site/requirements.txt` installed, per its own known gap) also still
   green (6 passed), unaffected by this commit.
+
+## Phase 4: `site/builders/wire.py` + templates (The Wire) (2026-07-09)
+
+- **This turn's scope was explicitly `site/builders/wire.py` +
+  `site/templates/{wire_index,card,wire_month}.html` (+
+  `tests/test_wire_builder.py`) only** — `site/generate.py` is
+  deliberately *not* modified to call this builder or to give the Wire a
+  real `public/index.html`/`public/wire/<YYYY-MM>/index.html` route; that
+  integration is left to a later commit. `wire.py` exposes a small,
+  dependency-injected function surface instead (`prepare_card_view` ->
+  `build_wire_context`/`build_month_context` -> `render_wire_index`/
+  `render_wire_month` -> `write_wire_pages`), so a future integration can
+  call `write_wire_pages(env, cards, lexicon_entries, public_dir)`
+  directly rather than needing to know this module's internals. Like the
+  concurrently-built Frontier Board builder, `wire.py` builds its own
+  minimal Jinja `Environment` (`build_env()`, mirroring `generate.py`'s
+  own `build_jinja_env()` field-for-field) rather than importing one from
+  `generate.py`, since `generate.py` is out of this turn's file scope and
+  `site/` is deliberately never an importable package (loading it by
+  `importlib.util.spec_from_file_location` would be the only option
+  anyway, per the established Phase 4 convention).
+- **Concurrency note: at the start of this turn, `site/templates/board.html`
+  and `tests/test_board_builder.py` already existed uncommitted in this
+  same working tree** (a concurrently-run Frontier Board builder turn),
+  and this turn's own `site/templates/{wire_index,card,wire_month}.html`
+  appeared mid-session from a parallel Wire effort by the time the Board
+  turn's own backlog entry (immediately above this one) was written. This
+  turn's commit stages only its own scoped files plus only this backlog
+  section — explicitly not `board.html`/`test_board_builder.py`/the Board
+  turn's own backlog entry above, which are left untouched and uncommitted
+  in the working tree for that turn to commit itself.
+- **Page-specific CSS (the card panel look, the top-right status-chip
+  header row, list/chip spacing, the archive-nav lists) lives inline in a
+  `<style>` block inside `wire_index.html` and `wire_month.html`
+  (duplicated verbatim across both, since each is a self-contained page
+  template), not in `site/static/css/components.css`.** Matches the
+  Frontier Board builder's own concurrently-made precedent: this turn's
+  scope named only the three template files above, so `components.css`
+  was left untouched rather than extended with new Wire-specific
+  selectors; a `<style>` element is valid flow content inside `<body>`/
+  `<main>` in the current HTML Living Standard, so no change to
+  `base.html` was needed either. Everything the *card* itself needs was
+  already available with zero new CSS at all: the status chip reuses the
+  exact `.chip`/`.chip--confirmed|reported|corrected` classes the Phase 4
+  scaffold commit already shipped, and the one-liner reuses that same
+  commit's existing `.one-liner` class verbatim — this turn's only new
+  CSS is layout (flex/spacing/panel-background), not any new color, and
+  every color it does reference is one of `tokens.css`'s existing custom
+  properties (`--color-panel`/`--color-hairline`), never a new hardcoded
+  hex value.
+- **`one_liner` is deliberately excluded from `linkify.py`'s lexicon
+  auto-link pass** (only `what_happened` and `why_it_matters` are run
+  through `linkify()`), even though `linkify.py`'s own docstring lists
+  prose fields only as an open-ended "e.g." example. Build-plan section
+  5's stated goal for the one-liner is that "the eye should be able to
+  skim only the one-liners" — inline anchors (and the underline/color
+  shift they bring) would work against that skimmability goal for the one
+  field the design deliberately wants distraction-free. Spec-silent call,
+  logged rather than left as an unstated assumption.
+- **A lexicon term only lands in the card-footer "Terms:" fallback chip
+  row if `linkify()` reports it unmatched in *every* field this builder
+  does run it against** (`what_happened` AND `why_it_matters`), computed
+  as a set-intersection of each field's own `unmatched_terms` list, not a
+  union. A term linked inline in `what_happened` alone must not also
+  produce an orphaned duplicate fallback chip merely because it doesn't
+  separately reappear in `why_it_matters` — the fallback row exists for
+  terms that got no inline mention anywhere in the card, not per-field.
+- **Each fallback chip still resolves to a real `/lexicon/<slug>/` link
+  when the term has a lexicon entry** (only a term entirely absent from
+  the lexicon slug map — i.e. not even in `content/lexicon.json` — falls
+  back to a plain, unlinked chip). This keeps the P4 acceptance bar
+  ("define any linked term in one tap") holding on the fallback path too,
+  not only the inline-linked path, per `linkify.py`'s own stated
+  resilience goal.
+- **The Wire home page's window is a literal, calendar-day-inclusive "last
+  14 days"** (`DEFAULT_WINDOW_DAYS = 14`, `cutoff = today - 13 days`,
+  both ends inclusive), computed from the real UTC "today" by default
+  (`datetime.now(timezone.utc).date()`), not from the newest card's own
+  date — overridable via an explicit `today` parameter for deterministic
+  tests. This means the empty-`content/cards/` case needs no special
+  handling at all: an empty (or entirely-out-of-window) list of cards
+  just naturally produces an empty windowed list, which
+  `wire_index.html`'s own `{% if cards %}`/`{% else %}` branch renders as
+  the honest empty-state message
+  (`wire.EMPTY_WIRE_MESSAGE`) rather than a broken-looking blank page.
+- **The `/wire/<YYYY-MM>/` archive covers every month any card exists in
+  at all, not just months that fall inside the home page's 14-day
+  window** (`write_wire_pages` calls `available_months(cards)` — the full,
+  un-windowed card list — to decide which month pages to write). Without
+  this, older months' cards would become permanently unreachable once
+  they aged out of the home page — the build plan names this route but
+  doesn't say how it's discovered/linked, so both `wire_index.html` (a
+  "Browse by month" nav) and `wire_month.html` (an "Other months" nav,
+  excluding its own current month to avoid a redundant self-link) render
+  a plain text-linked list of every month, keeping every generated archive
+  page actually reachable via a click from the Wire rather than only a
+  guessed URL.
+- **A card's optional `correction_note` (present only when `status ==
+  "corrected"`, per `card.schema.json`) is rendered as a plain visible
+  line under the card's prose when present**, reusing the existing
+  `.chip--corrected` text-color utility class rather than a new one — not
+  explicitly requested by this turn's instructions, but consistent with
+  the corroboration rule's own meaning for a "corrected" card (a concrete
+  correction happened) and cheap to surface honestly once the field is
+  already on hand. Logged as an additive judgment call, not a silent
+  extra.
+- **Each citation renders its `quote` field alongside the outlet link**
+  (`<a href="...">Outlet</a> -- "the <=15-word supporting quote"`), not
+  just the bare outlet-named link this turn's instructions literally
+  asked for ("sources as a real list of link elements with outlet
+  names"). The quote is already present on every citation
+  (`card.schema.json` requires it) and reinforces the "checkable
+  sourcing" framing the Wire's own intro paragraph claims; logged as an
+  additive judgment call rather than a silent scope expansion.
+- **`tests/test_wire_builder.py` lives at the repo-root `tests/`
+  directory** (covered by `pytest.ini`'s `testpaths = tests`, so a bare
+  `python -m pytest` / `ci.yml` exercises it), per this turn's explicit
+  instruction and matching the same precedent `tests/test_linkify.py` /
+  `tests/test_svg_sparkline.py` already established for Phase 4 library
+  code — distinct from `site/tests/test_build.py`, which remains on its
+  own separate, not-yet-wired-into-`ci.yml` track (see the Phase 4
+  scaffold commit's own backlog entry).
+- Verification: `python -m pytest` — 570 passed, 2 deselected (up from
+  543 immediately before this turn's own 27 new tests in
+  `tests/test_wire_builder.py`; the Board builder's own concurrent 31
+  tests are included in both the before and after counts here since they
+  were already present, uncommitted, in this same working tree at the
+  start of this turn). `site/builders/wire.py` manually exercised against
+  the real, committed `content/lexicon.json` with an empty `cards` list
+  (matching this environment's real, empty `content/cards/` directory),
+  producing a well-formed home page with the honest
+  "No cards published yet" empty-state message and no crash.
