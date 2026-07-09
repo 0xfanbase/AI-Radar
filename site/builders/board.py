@@ -95,8 +95,21 @@ def is_pulse_eligible(
     data) is never pulse-eligible -- only genuinely-recent past
     verification lights the dot; a negative delta is clamped to
     ineligible rather than wrapping around via `abs()`.
+
+    A missing (empty/`None`) or unparseable `last_verified` -- content
+    that should already have been rejected by schema validation upstream,
+    but this module never assumes a caller went through that gate (its
+    own tests call it directly with synthetic dicts) -- is likewise never
+    pulse-eligible rather than raising: one row's bad data must not crash
+    the whole Board page, same "bad seed data" tolerance already applied
+    to a future-dated `last_verified` above.
     """
-    verified = parse_iso_date(last_verified)
+    if not last_verified:
+        return False
+    try:
+        verified = parse_iso_date(last_verified)
+    except ValueError:
+        return False
     delta_days = (today - verified).days
     return 0 <= delta_days <= window_days
 
@@ -167,7 +180,14 @@ def _row_region(raw: Mapping[str, Any]) -> str:
 
 
 def _to_board_row(raw: Mapping[str, Any], today: date) -> BoardRow:
-    last_verified = str(raw["last_verified"])
+    # `.get(...)` rather than `raw["last_verified"]`: a row missing this
+    # required field entirely should already have been rejected by
+    # schema validation upstream, but this module is deliberately
+    # self-sufficient (see module docstring) and must not crash on bad
+    # input either way -- an absent value becomes `""`, which
+    # `is_pulse_eligible` already treats as never-eligible.
+    last_verified_raw = raw.get("last_verified")
+    last_verified = str(last_verified_raw) if last_verified_raw is not None else ""
     return BoardRow(
         lab=str(raw["lab"]),
         model=str(raw["model"]),

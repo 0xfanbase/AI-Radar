@@ -155,7 +155,8 @@ def linkify(
     result = escaped
     for start, end, slug in sorted(claims, key=lambda c: c[0], reverse=True):
         matched_text = result[start:end]
-        anchor = f'<a href="{LEXICON_TERM_URL_TEMPLATE.format(slug=slug)}">{matched_text}</a>'
+        href = LEXICON_TERM_URL_TEMPLATE.format(slug=html.escape(slug, quote=True))
+        anchor = f'<a href="{href}">{matched_text}</a>'
         result = result[:start] + anchor + result[end:]
 
     return LinkifyResult(html=Markup(result), unmatched_terms=unmatched)

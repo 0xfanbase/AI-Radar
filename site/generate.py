@@ -150,15 +150,38 @@ def load_cards() -> list[dict]:
     is empty -- true as of this build stage, since no analyst run has
     happened for real yet. Every template/builder touching cards must
     handle the empty-list case gracefully rather than crash or render a
-    broken-looking page."""
+    broken-looking page.
+
+    Each card is jsonschema-validated against schemas/card.schema.json
+    (when present) before being returned -- matching this function's own
+    caller's docstring (`load_and_validate_content`, which has always
+    claimed cards are validated "when a schema exists") and this repo's
+    established principle (see scripts/update_card_index.py,
+    IMPROVEMENT_BACKLOG.md): a card that fails its schema at build time
+    is a real, loud bug worth surfacing immediately, not something to
+    quietly publish or skip. `content/cards/<id>.json`'s filename stem is
+    the card's own id, not "card", so `schema_for()`'s filename-stem
+    convention can't locate this schema automatically the way it does for
+    top-level content/data files -- this looks it up by its own known
+    name instead.
+    """
     cards_dir = CONTENT_DIR / "cards"
     if not cards_dir.is_dir():
         return []
+    card_schema_path = SCHEMAS_DIR / "card.schema.json"
+    card_schema = load_json(card_schema_path) if card_schema_path.exists() else None
+    if card_schema is None:
+        log.warning(
+            "no schema found at schemas/card.schema.json -- cards loaded unvalidated"
+        )
     cards = []
     for path in sorted(cards_dir.glob("*.json")):
         if path.name == "index.json":
             continue
-        cards.append(load_json(path))
+        card = load_json(path)
+        if card_schema is not None:
+            jsonschema.validate(card, card_schema, format_checker=jsonschema.FormatChecker())
+        cards.append(card)
     return cards
 
 
@@ -186,7 +209,18 @@ def load_and_validate_content() -> dict[str, Any]:
             )
         else:
             schema = load_json(schema_path)
-            jsonschema.validate(payload, schema)
+            # format_checker=jsonschema.FormatChecker(): jsonschema.validate()
+            # silently *ignores* every "format" keyword (format: date,
+            # date-time, uri, ...) unless a FormatChecker is explicitly
+            # passed in -- without one, a schema's "format": "date" is a
+            # no-op annotation, not a constraint, so e.g. a malformed
+            # last_verified/release_date string would sail through
+            # validation here and only blow up later, deep inside a page
+            # builder's own date parsing (see site/builders/board.py's
+            # is_pulse_eligible), rather than failing loudly and clearly
+            # at this validation step the way every other schema
+            # violation already does.
+            jsonschema.validate(payload, schema, format_checker=jsonschema.FormatChecker())
         loaded[path.stem] = payload
     loaded["cards"] = load_cards()
     return loaded

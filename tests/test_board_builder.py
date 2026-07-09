@@ -88,6 +88,50 @@ def test_is_pulse_eligible_false_for_a_future_last_verified_date():
     assert board.is_pulse_eligible("2026-07-20", today=date(2026, 7, 9)) is False
 
 
+def test_is_pulse_eligible_false_for_malformed_last_verified_without_raising():
+    # A `last_verified` that isn't a parseable ISO date (schema validation
+    # should catch this upstream, but this function must not assume that
+    # happened -- see its own docstring) must degrade to "not eligible",
+    # never raise.
+    assert board.is_pulse_eligible("not-a-date", today=date(2026, 7, 9)) is False
+
+
+def test_is_pulse_eligible_false_for_missing_last_verified_without_raising():
+    assert board.is_pulse_eligible("", today=date(2026, 7, 9)) is False
+
+
+def test_build_regions_does_not_crash_on_a_row_with_malformed_last_verified():
+    raw_row = {
+        "lab": "Synthlab",
+        "region": "US",
+        "model": "Synthbench",
+        "release_date": "2026-01-01",
+        "modality": ["text"],
+        "access": "api",
+        "significance": "sig",
+        "source_url": "https://example.com",
+        "last_verified": "not-a-date",
+    }
+    regions = board.build_regions([raw_row], today=date(2026, 7, 9))
+    assert regions[0].rows[0].pulse_eligible is False
+
+
+def test_build_regions_does_not_crash_on_a_row_with_missing_last_verified():
+    raw_row = {
+        "lab": "Synthlab",
+        "region": "US",
+        "model": "Synthbench",
+        "release_date": "2026-01-01",
+        "modality": ["text"],
+        "access": "api",
+        "significance": "sig",
+        "source_url": "https://example.com",
+        # last_verified deliberately absent
+    }
+    regions = board.build_regions([raw_row], today=date(2026, 7, 9))
+    assert regions[0].rows[0].pulse_eligible is False
+
+
 # ---------------------------------------------------------------------------
 # Formatting helpers
 # ---------------------------------------------------------------------------

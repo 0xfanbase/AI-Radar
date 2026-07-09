@@ -256,6 +256,31 @@ def test_escaping_happens_around_a_linked_term_too():
     assert '<a href="/lexicon/transformer/">transformer</a>' in html_str
 
 
+def test_anchor_href_escapes_a_slug_containing_html_special_characters():
+    # `slug_map` values are derived from lexicon `term` strings, which
+    # schemas/lexicon.schema.json does not character-restrict -- a term
+    # containing a `"` must not be able to break out of the anchor's
+    # `href="..."` attribute and inject markup/attributes of its own.
+    # Ends in a word character deliberately -- linkify()'s own matching is
+    # `\b`-bounded, so a term ending in a non-word character (e.g. a
+    # trailing `)`) would never match at all regardless of escaping.
+    hostile_term = 'evil" onmouseover="bad'
+    slug_map = linkify_mod.build_slug_map(
+        SYNTHETIC_LEXICON + [{"term": hostile_term, "one_liner": "...", "deeper": "...", "related": [], "seen_in": []}]
+    )
+    result = linkify_mod.linkify(f"A {hostile_term} appears here.", [hostile_term], slug_map)
+    html_str = str(result.html)
+    # slugify() only lowercases + hyphenates spaces -- it does not strip
+    # other HTML-special characters, so the `"` reaches the anchor
+    # construction and must be escaped there.
+    assert '<a href="/lexicon/evil&quot;-onmouseover=&quot;bad/">' in html_str
+    # The href attribute's own value must contain no literal `"` -- one
+    # would close the attribute early and turn `onmouseover=...` into a
+    # second, real, executable attribute rather than inert text.
+    href_value = html_str.split('href="', 1)[1].split('">', 1)[0]
+    assert '"' not in href_value
+
+
 def test_result_html_is_markup_safe_instance():
     slug_map = linkify_mod.build_slug_map(SYNTHETIC_LEXICON)
     result = linkify_mod.linkify("A transformer story.", ["transformer"], slug_map)

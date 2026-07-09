@@ -32,10 +32,12 @@ scaffold-stage precedent -- there is no analyst run yet, so `cards ==
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+import jsonschema
 import pytest
 
 SITE_DIR = Path(__file__).resolve().parent.parent
@@ -96,6 +98,53 @@ def test_load_cards_handles_empty_cards_dir_gracefully():
     # must return an empty list rather than None or raise.
     cards = generate.load_cards()
     assert cards == []
+
+
+def test_load_cards_fails_loudly_on_a_card_that_fails_schema_validation(tmp_path, monkeypatch):
+    # A card missing required fields (card.schema.json) must be a loud,
+    # immediate build failure -- not silently published or skipped. This
+    # matches update_card_index.py's own established principle: by the
+    # time a file exists at content/cards/<id>.json it should already be
+    # schema-valid, so a failure here is a real bug worth surfacing now.
+    cards_dir = tmp_path / "cards"
+    cards_dir.mkdir()
+    (cards_dir / "bad-card.json").write_text(
+        json.dumps({"id": "not-a-real-card"}), encoding="utf-8"
+    )
+    monkeypatch.setattr(generate, "CONTENT_DIR", tmp_path)
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        generate.load_cards()
+
+
+def test_load_and_validate_content_fails_loudly_on_a_malformed_date_field(tmp_path, monkeypatch):
+    # jsonschema.validate() silently ignores "format" keywords (format:
+    # date/date-time/uri) unless a FormatChecker is passed explicitly --
+    # without one, a malformed last_verified/release_date string would
+    # pass this validation step and only surface later as a raw crash
+    # deep inside a builder's own date parsing. A schema-declared
+    # "format": "date" violation must fail loudly right here instead.
+    content_dir = tmp_path / "content"
+    content_dir.mkdir()
+    data_dir = tmp_path / "data"
+    data_dir.mkdir()
+    bad_row = {
+        "lab": "Synthlab",
+        "region": "US",
+        "model": "Synthbench",
+        "release_date": "2026-01-01",
+        "modality": ["text"],
+        "access": "api",
+        "significance": "sig",
+        "source_url": "https://example.com",
+        "last_verified": "not-a-date",
+    }
+    (content_dir / "frontier_board.json").write_text(
+        json.dumps([bad_row]), encoding="utf-8"
+    )
+    monkeypatch.setattr(generate, "CONTENT_DIR", content_dir)
+    monkeypatch.setattr(generate, "DATA_DIR", data_dir)
+    with pytest.raises(jsonschema.exceptions.ValidationError):
+        generate.load_and_validate_content()
 
 
 def test_generate_is_rerunnable_into_the_same_directory(tmp_path):
