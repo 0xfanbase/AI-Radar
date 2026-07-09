@@ -9,6 +9,7 @@ deletes. A couple of `main()`-level tests (with `get_changed_files`
 monkeypatched) confirm the exit code and stderr wiring, and one smoke test
 exercises the real `git diff` invocation against this repo's own history.
 """
+import subprocess
 import sys
 from pathlib import Path
 
@@ -202,7 +203,21 @@ def test_main_empty_diff_passes(monkeypatch):
 def test_get_changed_files_returns_list_of_strings():
     # Smoke test against this repo's own last real commit (rather than the
     # live working tree) so the test's outcome doesn't depend on whatever
-    # local edits happen to be pending when it runs.
+    # local edits happen to be pending when it runs. Skipped, not failed,
+    # when only one commit is reachable (e.g. a shallow `actions/checkout`
+    # with fetch-depth: 1, or any other truncated-history checkout) --
+    # HEAD~1 simply doesn't exist there, and that's an environment fact,
+    # not a bug in get_changed_files itself.
+    has_prior_commit = (
+        subprocess.run(
+            ["git", "rev-parse", "--verify", "-q", "HEAD~1"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+        ).returncode
+        == 0
+    )
+    if not has_prior_commit:
+        pytest.skip("HEAD~1 not reachable in this checkout (shallow clone?)")
     changed = get_changed_files(ref="HEAD~1")
     assert isinstance(changed, list)
     assert all(isinstance(p, str) and p for p in changed)

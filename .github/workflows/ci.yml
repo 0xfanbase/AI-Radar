@@ -13,6 +13,14 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          # Full history, not the default shallow (depth-1) clone: some
+          # tests shell out to real `git diff`/`git rev-parse` against a
+          # prior commit (e.g. HEAD~1), which doesn't exist in a depth-1
+          # checkout even though it does in every full-history local
+          # sandbox -- that mismatch caused real CI failures here despite
+          # `pytest` passing locally (see PROGRESS.md).
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5

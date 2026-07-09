@@ -44,6 +44,16 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          # Full history rather than the default shallow (depth-1) clone --
+          # a depth-1 checkout bit ci.yml's test suite in exactly this repo
+          # (real `git diff ... HEAD~1` failing in CI despite passing
+          # locally; see PROGRESS.md), so every workflow here checks out
+          # full history uniformly rather than relying on each script's
+          # exact git-history needs staying shallow-clone-safe forever --
+          # including the VERIFIER step's own `git diff --name-only HEAD --
+          # content/` worklist command above.
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
