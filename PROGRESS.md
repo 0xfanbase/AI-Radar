@@ -7,6 +7,58 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-09 — Phase 2, commit 12: ledger schema extension + card_index/run_plan/verifier_stats/pending_corrections schemas
+
+Per the approved build plan's §3 (Phase 2 — Analyst + Verifier), this
+commit lays the schema groundwork the rest of Phase 2 builds on, before any
+analyst/verifier/planner code lands.
+
+**`schemas/ledger.schema.json` extended, additively:**
+`verifier_outcome` (already an optional, free-form field since Phase 1) now
+has a defined shape — `{last_attempted_at, dropped_reason?,
+demoted_from_confirmed?}` — and a new `if`/`then` enforces that a
+`status: "dropped"` entry's `card_id` stays `null`. The pre-existing
+`status` enum (`queued|published|dropped`) is unchanged (see
+`IMPROVEMENT_BACKLOG.md` for why a differently-worded `active|dropped`
+enum was considered and rejected — it would have invalidated every real
+entry). Both changes are additive/tightening only: the real, committed
+`data/ledger.json` (104 entries, all `status: "queued"`, none using
+`verifier_outcome`) still validates unchanged against the extended schema
+— checked directly in `tests/test_p2_schemas.py`.
+
+**Four new schemas added** (`schemas/card_index.schema.json`,
+`schemas/run_plan.schema.json`, `schemas/verifier_stats.schema.json`,
+`schemas/pending_corrections.schema.json`), shapes per the plan's §3 field
+lists, spec-silent field-naming choices logged in
+`IMPROVEMENT_BACKLOG.md`. `watcher/schema_validate.py` needed no change —
+it has no schema-name mapping table, only a direct
+`schemas/<name>.schema.json` path convention the four new names already
+fit.
+
+**Seeded** `data/verifier_stats.json = {"version":1,"runs":[]}` and
+`data/pending_corrections.json = {"version":1,"pending":[]}`. No
+`data/run_plan.json` seed was created, per this turn's explicit scope —
+`scripts/plan_run.py` (a later Phase 2 commit) produces real ones.
+
+**Tests**: new `tests/test_p2_schemas.py` covers, for each of the four new
+schemas, self-validation (Draft 2020-12), a valid fixture passing, and an
+invalid fixture failing; plus ledger-extension-specific cases (a dropped
+entry with structured `verifier_outcome` validates; a dropped entry with a
+non-null `card_id` fails the new conditional; `verifier_outcome` missing
+its required `last_attempted_at` fails; `verifier_outcome` absent entirely
+still validates; and the real committed `data/ledger.json` validates
+unchanged). New fixtures under `fixtures/schema_examples/{valid,invalid}/`
+for `card_index`, `run_plan`, `verifier_stats`, `pending_corrections`, and
+a dedicated `ledger_dropped.json` valid/invalid pair (kept separate from
+the pre-existing `ledger.json` fixture pair, which `tests/test_schemas.py`
+already covers and which this commit leaves untouched).
+
+Verification: `python -m pytest` — 246 passed, 2 deselected (live tests
+excluded by default; 23 net new tests added this commit in
+`tests/test_p2_schemas.py`).
+
+---
+
 ## 2026-07-09 — Phase 1 PM checkpoint round 2: arXiv fetch-discipline exception resolved, cron corrected to true 07:00 HKT
 
 Three carried-forward PM checkpoint items resolved this round:

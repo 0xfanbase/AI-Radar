@@ -522,6 +522,77 @@ Newest entries at the bottom of each section, in commit order.
   which would otherwise freeze `data/.cache/`'s ETag store at its first
   successful run forever).
 
+## Phase 2, commit 12: ledger extension + new schemas (2026-07-09)
+
+- **`schemas/ledger.schema.json`'s `status` enum is kept exactly as Phase 1
+  already built it (`queued|published|dropped`), not replaced with a new
+  `active|dropped` two-value enum.** This turn's task framing (written from
+  the plan's generic description) asked for an *added* optional
+  `status: active|dropped` field, but Phase 1 already shipped a *required*
+  `status` field under this same key with a three-value enum whose
+  `dropped` value already matches the plan's own literal ledger-drop
+  wording (`status: "dropped"`) verbatim. A schema can only define one
+  `status` property per object, and swapping the enum to `active|dropped`
+  would invalidate every one of the real, committed `data/ledger.json`'s
+  104 entries (all `status: "queued"`, not in `{active, dropped}`) —
+  directly violating this turn's own hard requirement that the existing
+  ledger keep validating unchanged. Resolved by treating `queued`/
+  `published` as the two flavors of "active" (not permanently dropped) and
+  leaving the enum untouched; logged here rather than silently ignoring
+  the task text's literal wording.
+- **`verifier_outcome` (already an optional, fully free-form
+  `["object","null"]` field since Phase 1) now has a defined structure**:
+  `last_attempted_at` (required within the object, `date-time`),
+  `dropped_reason` (optional string), `demoted_from_confirmed` (optional
+  boolean) — matching this turn's task spec verbatim. Still optional at
+  the entry level (absent on every pre-Phase-2 entry) and still nullable,
+  so no existing entry (none of which set this key) is affected.
+- **Added an `if`/`then` to `ledger.schema.json`'s entry schema: `status ==
+  "dropped"` implies `card_id` must be `null`.** This is the schema-level
+  enforcement of the plan's stated invariant ("card_id stays null
+  permanently for a dropped cluster_hash") rather than leaving it as an
+  unenforced convention; safe to add now since no real entry is currently
+  `dropped`.
+- **`schemas/card_index.schema.json`'s top-level list key is named
+  `cards`** (plan says only "a version + list of {...} entries," no field
+  name given) — matches the artifact's own purpose
+  (`content/cards/index.json`, one entry per published card) and the
+  existing repo convention of naming a top-level array field after what it
+  contains (cf. `whats_moving.schema.json`'s `topics`,
+  `run_plan.schema.json`'s `clusters` below).
+- **`card_index.schema.json`'s `status` enum reuses `card.schema.json`'s
+  three values (`confirmed|reported|corrected`) verbatim, not a fourth
+  `dropped` value.** A verifier-dropped cluster never gets a card in the
+  first place (per `schemas/ledger.schema.json`'s own design), so this
+  index — which only ever lists cards that were actually published — has
+  no `dropped` case to represent; that state lives exclusively in
+  `data/ledger.json`.
+- **`schemas/run_plan.schema.json`'s `cards_cap` allows `0`** (not just
+  `>=1`), since a `run_mode: "skip"`/empty-queue run still needs a
+  representable "zero cards this run" value distinct from `null`
+  (`null` is used when the field is simply not meaningful, e.g. paired
+  with an empty `clusters[]`); the schema doesn't force a specific
+  null-vs-zero convention between the two, leaving that to whichever
+  commit builds `scripts/plan_run.py`.
+- **No `data/run_plan.json` seed file is created**, per this turn's
+  explicit instruction — `scripts/plan_run.py` (a later Phase 2 commit)
+  is what will produce real ones; a placeholder null-equivalent file
+  would just be dead weight until that script exists to write/validate
+  against it.
+- **`data/verifier_stats.json` = `{"version":1,"runs":[]}` and
+  `data/pending_corrections.json` = `{"version":1,"pending":[]}`** seeded
+  exactly as specified, written with the same `indent=2, sort_keys=True`
+  + trailing-newline convention `watcher/ledger.py::save_ledger` already
+  established for every other committed `data/*.json` artifact.
+- **New schema tests live in a new `tests/test_p2_schemas.py`** (the
+  instruction offered either extending `tests/test_schemas.py` or adding a
+  new file) rather than folding into the existing file, so this turn's
+  ledger-extension-specific fixtures/tests (`ledger_dropped.json` valid/
+  invalid pairs, the real-committed-ledger-still-validates check) sit
+  together with the four new schemas' own tests, without growing
+  `test_schemas.py`'s already-established `SCHEMA_NAMES` parametrize list
+  for a schema (`ledger`) it already covers.
+
 ## Phase 1 PM checkpoint, round 1 (2026-07-09)
 
 The PM review found one real acceptance-criterion defect (queue sanity) and

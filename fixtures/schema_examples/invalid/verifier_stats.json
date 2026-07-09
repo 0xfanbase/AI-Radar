@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "runs": [
+    {
+      "date": "2026-07-09",
+      "cards_drafted": 8,
+      "confirmed": 5,
+      "reported": 2,
+      "dropped": 1
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "cards": [
+    {
+      "id": "2026-07-09-example-model-release",
+      "date": "2026-07-09",
+      "headline": "Example Lab ships Example Model 5",
+      "topics": ["models", "products"],
+      "lexicon_terms": ["context window", "fine-tuning"],
+      "status": "confirmed"
+    },
+    {
+      "id": "2026-07-08-example-benchmark-paper",
+      "date": "2026-07-08",
+      "headline": "New benchmark probes reasoning under distribution shift",
+      "topics": ["research"],
+      "lexicon_terms": [],
+      "status": "reported"
+    }
+  ]
+}

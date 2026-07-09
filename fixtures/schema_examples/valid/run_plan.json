@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "generated_at": "2026-07-09T22:05:00Z",
+  "degradation_level": 0,
+  "run_mode": "normal",
+  "cards_cap": 8,
+  "clusters": [
+    {
+      "cluster_hash": "9f2c1e4d7a6b5c3e8f1a0d9b2c4e6f8a1b3d5c7e9f0a2b4c6d8e0f1a3b5c7d9e",
+      "proposed_card_id": "2026-07-09-example-model-release",
+      "rank": 1
+    }
+  ],
+  "reason": "normal run, 1 cluster available"
+}

@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "cards": [
+    {
+      "id": "2026-07-09-example-model-release",
+      "headline": "Example Lab ships Example Model 5",
+      "topics": ["models", "products"],
+      "lexicon_terms": ["context window", "fine-tuning"],
+      "status": "confirmed"
+    }
+  ]
+}

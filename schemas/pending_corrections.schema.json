@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/pending_corrections.schema.json",
+  "title": "Pending Corrections",
+  "description": "Spec-silent shape (the approved build plan's Phase 2 section names 'data/pending_corrections.json' -- fed by audit.yml's findings or manual owner edits, drained first by the analyst each run -- without fixing fields; decision logged in IMPROVEMENT_BACKLOG.md). Top-level object: a version plus a queue of correction candidates awaiting the analyst's evidence check. A confirmed pending item becomes a content/corrections.json entry (schemas/corrections.schema.json) and its card's status is set to 'corrected'; an entry here is removed once actioned (not schema-tracked -- reconcile_run.py's own job). Phase 2 seeds data/pending_corrections.json = {\"version\": 1, \"pending\": []}.",
+  "type": "object",
+  "required": ["version", "pending"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "pending": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "card_id",
+          "issue_description",
+          "evidence_url",
+          "flagged_at",
+          "source"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "card_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "content/cards/<id>.json this candidate correction targets."
+          },
+          "issue_description": {
+            "type": "string",
+            "minLength": 1,
+            "description": "What might be wrong with the card, in plain language."
+          },
+          "evidence_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "A source the analyst should fetch and weigh when checking this candidate."
+          },
+          "flagged_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "source": {
+            "type": "string",
+            "enum": ["audit", "manual"],
+            "description": "Whether audit.yml's own checks (e.g. link rot, missed-story) or a manual owner edit raised this candidate."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

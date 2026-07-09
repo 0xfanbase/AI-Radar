@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "pending": [
+    {
+      "id": "2026-07-09-pending-1",
+      "card_id": "2026-07-08-example-benchmark-paper",
+      "issue_description": "Audit's link-rot check found the primary citation now 404s.",
+      "evidence_url": "https://example-lab.test/blog/example-model-5",
+      "flagged_at": "2026-07-09T08:00:00Z",
+      "source": "audit"
+    }
+  ]
+}
