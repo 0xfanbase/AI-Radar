@@ -111,8 +111,25 @@ _WORD_RE = re.compile(r"[a-z0-9]+")
 def tokenize_title(title: str) -> frozenset[str]:
     """Lowercase, strip punctuation, and drop stopwords from a title.
 
-    Returns a ``frozenset`` of remaining tokens (length > 1) so callers can
-    compute Jaccard similarity via simple set operations.
+    Returns a ``frozenset`` of remaining tokens so callers can compute
+    Jaccard similarity via simple set operations. Tokens are dropped if
+    they're a stopword, or if they're a single non-digit character (stray
+    punctuation-adjacent noise, e.g. a lone "s" split off an apostrophe).
+
+    Single-digit tokens are deliberately *kept* despite being length-1:
+    AI news titles routinely differ only in a model's version number
+    ("Llama 2" vs. "Llama 3", "Claude 3" vs. "Claude 4", "GPT-4" vs.
+    "GPT-5"). An earlier ``len(tok) > 1`` filter dropped these digits
+    entirely, which made two titles about *different* model releases that
+    otherwise share the same boilerplate wording ("<Lab> Releases <Model>
+    <N> With Major Upgrades") tokenize to identical sets -- Jaccard 1.0 --
+    and incorrectly merge into a single cluster. Keeping digit tokens
+    can only raise the union size (never the intersection, since distinct
+    version numbers never match each other), so it strictly improves
+    precision and never causes a genuinely-matching pair to stop matching.
     """
     tokens = _WORD_RE.findall(title.lower())
-    return frozenset(tok for tok in tokens if tok not in _STOPWORDS and len(tok) > 1)
+    return frozenset(
+        tok for tok in tokens
+        if tok not in _STOPWORDS and (len(tok) > 1 or tok.isdigit())
+    )
