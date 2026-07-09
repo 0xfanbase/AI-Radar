@@ -90,3 +90,54 @@ Newest entries at the bottom of each section, in commit order.
   granularity, not `date-time`) since model releases and fact-check passes
   are naturally day-granular events and the Board's "pulse in last 7 days"
   rule only needs day resolution.
+- **2026-07-09 — `tests/conftest.py` network-block seam moved from
+  `Session.request` to `Session.send` (correction of the 2026-07-09 entry
+  above).** Building `watcher/http.py`'s requests-mock test suite surfaced
+  that patching `Session.request` shadows `requests-mock` itself:
+  `requests-mock` works by patching `Session.send`/`Session.get_adapter`,
+  which `Session.request` never reaches if something upstream already
+  raises before calling it. Verified empirically (a probe test hung on the
+  original seam even for a fully mocked, non-live call). Moved the guard to
+  `Session.send` — the same choke point every fetcher still funnels
+  through, but one layer lower, so `requests-mock`'s own patch (applied
+  after this autouse fixture's, since it's the fixture the test function
+  explicitly requests) composes correctly: a genuine outbound call still
+  raises immediately unless `@pytest.mark.live`, but a `requests-mock`
+  mocked call now returns its canned response as intended. No test files
+  outside `tests/conftest.py` needed to change.
+- **2026-07-09 — `watcher/http.py`'s retry/backoff is an explicit loop in
+  `fetch()`, not solely a `Retry` object handed to `HTTPAdapter(max_retries=)`.**
+  The task's shape ("a requests.Session with a urllib3 Retry adapter") is
+  the standard idiom, but `requests-mock` replaces `Session.send`/
+  `get_adapter` wholesale, so a Retry object embedded in a *mounted
+  adapter* never actually runs against a mocked response — confirmed by a
+  failing probe (a `[503, 503, 200]` mock sequence returned only the first
+  503, with zero automatic retries, since requests-mock's adapter fully
+  substitutes for ours). Resolution: the mounted `HTTPAdapter`'s `Retry`
+  still guards genuine connection-level failures (DNS, dropped
+  connections, read timeouts) via `total`/`connect`/`read`, with
+  `status_forcelist=()` so it never double-retries on HTTP status; status-
+  based retries (429/5xx) are instead an explicit loop in `fetch()` using
+  urllib3's own exponential-backoff formula
+  (`backoff_base * 2**(attempt-1)`). This keeps retries genuinely
+  urllib3-flavored while being deterministically testable with
+  requests-mock, which the task specifies as the test tool.
+- **2026-07-09 — `USER_AGENT` string.** No exact wording specified beyond
+  "naming the bot + a contact." Chose
+  `AIFrontierWireBot/1.0 (+https://github.com/0xfanbase/AI-Radar; bot@users.noreply.github.com)`
+  — repo URL + the same bot noreply address already used for commit
+  identity, consistent with the anonymity rule (no personal identifiers).
+- **2026-07-09 — `HN_KEYWORDS` list, `normalize_url()`'s stripped tracking
+  params, and `tokenize_title()`'s stopword list (`watcher/config.py`,
+  `watcher/models.py`).** The spec says HN is "keyword-filtered" and
+  clustering is "exact-URL-normalization match, else Jaccard ≥0.35 over
+  stopword-stripped title tokens" but gives no exact word lists. Picked
+  simple, obviously-reasonable sets (common AI/lab/product terms; common
+  URL tracking params like `utm_*`/`fbclid`/`gclid`; a short common English
+  stopword list) rather than leaving them ambiguous — easy to extend later
+  once real HN/lab titles are seen in Phase 1's live-verification runs.
+- **2026-07-09 — Retry count semantics: `MAX_RETRIES=3` means 3 total GET
+  attempts (1 initial + up to 2 retries), not 3 retries after an initial
+  attempt.** Matches the plan's literal wording ("`urllib3.Retry` (3
+  attempts, exponential backoff)") and the test scenario ("simulated
+  503->503->200 sequence" = exactly 3 calls).
