@@ -593,6 +593,50 @@ Newest entries at the bottom of each section, in commit order.
   `test_schemas.py`'s already-established `SCHEMA_NAMES` parametrize list
   for a schema (`ledger`) it already covers.
 
+## Phase 2, commit 13: relocate content/ artifacts (2026-07-09)
+
+- **`data/lexicon.json` moved to `content/lexicon.json` (`git mv`), and
+  `content/frontier_board.json`/`content/corrections.json` seeded fresh
+  directly in `content/`, per the plan's §1 `/content` vs `/data` boundary
+  rule and §3's explicit "relocate from `data/` to `content/`" instruction.**
+  Phase 1 put `lexicon.json` in `data/` only because it was inert
+  schema-only scaffolding before an analyst existed to make it real,
+  LLM-authored, CC-BY-licensed editorial output; now that Phase 2 is
+  underway, the boundary rule (content = LLM-authored editorial output;
+  data = pure-code pipeline state) puts it, `frontier_board.json`, and
+  `corrections.json` in `content/` where the analyst will actually write
+  to them. `frontier_board.json` never had a `data/` instance in Phase 1
+  (schema-only until this commit); `corrections.json` is seeded here for
+  the same reason. All three still validate against their existing
+  schemas (`schemas/lexicon.schema.json`, `schemas/frontier_board.schema.json`,
+  `schemas/corrections.schema.json`) unchanged -- no seeding of real
+  content happens yet, that's Phase 3. `schemas/lexicon.schema.json`'s
+  description field (the only stale `data/lexicon.json` prose reference
+  found repo-wide) is updated to name the new path and this migration;
+  no code, test, or other doc referenced the old `data/lexicon.json` or
+  `data/frontier_board.json` paths directly (confirmed via a repo-wide
+  grep), so no other file needed a change.
+- **`content/corrections.json` is seeded as a plain empty array (`[]`),
+  not the `{"version":1,"corrections":[]}` object form this turn's task
+  description named.** `schemas/corrections.schema.json` -- already
+  built and merged in Phase 1, matching the approved plan's own §2
+  minimal shape (`[{id, card_id, original_claim, corrected_claim,
+  reason, source_url, corrected_at}]`) -- fixes this artifact's top level
+  as `"type": "array"`, not an object with a `version`/`corrections`
+  wrapper; the real fixture pair
+  (`fixtures/schema_examples/{valid,invalid}/corrections.json`) confirms
+  the same. An object-wrapped seed would fail `validate(instance,
+  "corrections")` outright. Since this turn's hard rule requires the
+  seed file to actually validate against the real schema, and changing
+  the schema itself is outside this turn's scope, the array form is used
+  instead -- the simplest resolution that satisfies both "seed
+  `content/corrections.json`" and "validate against
+  `schemas/corrections.schema.json`" without touching the schema.
+- **Both new seed files use the same `json.dump(..., indent=2,
+  sort_keys=True)` + trailing-newline convention** already established by
+  `watcher/ledger.py::save_ledger` and the other committed `data/*.json`/
+  `content/lexicon.json` artifacts, for consistent, legible diffs.
+
 ## Phase 1 PM checkpoint, round 1 (2026-07-09)
 
 The PM review found one real acceptance-criterion defect (queue sanity) and
