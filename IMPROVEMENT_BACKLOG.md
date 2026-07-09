@@ -434,3 +434,71 @@ Newest entries at the bottom of each section, in commit order.
   human-reviewed data artifact (unlike the gitignored HTTP cache), so
   legible diffs are worth the extra bytes; the transient cache files have
   no such reason to expand.
+- **2026-07-09 — `watcher/cli.py`'s `run()` calls `rank_clusters(...,
+  limit=len(clusters))` (effectively uncapped), not the default
+  `MAX_QUEUE_SIZE`.** The plan's own daily-loop ordering is "rank -> diff
+  vs ledger -> write queue.json (<=8)" — capping at 8 *before* the ledger
+  diff would let an already-published cluster occupying a top-8 score
+  slot crowd out a fresh, still-unpublished story from that day's queue.
+  `watcher/queue_writer.py` applies the real `MAX_QUEUE_SIZE` cap itself,
+  after excluding already-carded clusters.
+- **2026-07-09 — `watcher/cli.py`'s `run()` upserts ledger entries
+  (`watcher.ledger.apply_run`) for *every* surviving unpublished cluster,
+  not just the <=8 written to `data/queue.json`.** A story that doesn't
+  make today's cut still gets its `first_seen` tracked, so a later run
+  where it resurfaces (or gains cross-source corroboration) isn't
+  mistaken for brand-new. `watcher/queue_writer.py`'s own cap only bounds
+  what the analyst sees each day, not what the ledger remembers.
+- **2026-07-09 — `watcher/queue_writer.py`'s `sources[].url` is the raw,
+  un-normalized URL each fetcher captured, not `normalize_url`'s
+  clustering/ledger dedup key.** The analyst needs a real, followable
+  link (tracking params and all); normalization is an internal-only
+  dedup detail.
+- **2026-07-09 — `watcher/queue_writer.py`'s `sources[].outlet` is derived
+  as the URL's own domain (netloc, lowercased, leading "www." stripped)
+  for `source_type == "hn"` entries only, and `null` for `lab`/`arxiv`.**
+  Matches `queue.schema.json`'s own field description ("e.g. HN's linked
+  domain; null for lab/arxiv sources") read literally — a lab/arXiv item's
+  URL already *is* the primary source, so there's no separate outlet name
+  to surface.
+- **2026-07-09 — `watcher/queue_writer.py` re-numbers each queue entry's
+  `rank` 1..N *after* excluding already-carded clusters and applying the
+  <=8 cap**, rather than keeping `RankedCluster.rank`'s original pre-filter
+  position. A queue the analyst reads top-to-bottom should have a
+  contiguous, meaningful rank within *that* queue, not gaps left behind by
+  clusters that were filtered out.
+- **2026-07-09 — `watcher/velocity.py`'s topic classifier
+  (`TOPIC_KEYWORDS`) is a closed-set, whole-word/phrase keyword match**
+  (same regex-word-boundary technique `watcher/sources/hn.py` already uses
+  for its own AI-relevance gate), bucketing each HN item's title into zero
+  or more of the nine `card.schema.json`/`whats_moving.schema.json` topic
+  tags. The plan names the nine tags but never defines how a pure-code,
+  no-AI pass should assign them to a headline; the exact keyword lists
+  chosen are the simplest reasonable set covering each tag's obvious
+  vocabulary (e.g. "gpu"/"tpu"/"nvidia" for chips/compute, "china"/
+  "deepseek"/"alibaba" for China).
+- **2026-07-09 — `watcher/velocity.py`'s trend classification
+  (accelerating/cooling/flat) compares the sum of the most recent 3 days
+  against the sum of the oldest 3 days of a topic's 7-day window,
+  excluding the middle day from either side; an exact tie (including the
+  common all-zero case) is "flat."** The spec/schema name the three
+  labels (as "rising/falling/flat" in prose, `accelerating/cooling/flat`
+  in the schema's actual enum, which is what's used verbatim) but never
+  define a threshold; this is the simplest reasonable rule that isn't
+  swayed by a single mid-week spike alone.
+- **2026-07-09 — `data/whats_moving.json` always contains all nine
+  canonical topics, zero-filled where there were no HN mentions that
+  week, rather than only the topics with any activity.** Matches
+  `whats_moving.schema.json`'s own description ("one entry per card topic
+  tag") read literally: it's a fixed nine-row weekly strip, not a
+  data-dependent subset — simpler for the frontend's masthead sparkline
+  strip to render consistently every day.
+- **2026-07-09 — `scripts/run_watcher_live.py`'s "new items per source"
+  reporting is an in-process URL-set diff between consecutive `run()`
+  calls in the same process** (via new `hn_urls`/`arxiv_urls`/`lab_urls`
+  fields on `watcher.cli.RunResult`), not a second independent fetch or
+  persisted "seen before" state. No fetcher exposes a "new since last
+  call" concept of its own beyond the ETag cache/ledger, so comparing this
+  run's fetched URL set against the previous run's (held in memory across
+  the script's `--runs N` loop) is the simplest way to report a per-source
+  delta without fetching twice.
