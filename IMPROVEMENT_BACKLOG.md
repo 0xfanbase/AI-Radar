@@ -3235,3 +3235,20 @@ convention noted in the entry directly above), not retroactively edited.
   `tests/`) would still have passed CI silently; with the reorder, every
   CI run structurally proves `tests/` needs only `requirements-dev.txt`.
   See `PROGRESS.md`'s matching addendum for the verification details.
+
+- **Base-path fix decision (2026-07-11, after the real live site 404'd on
+  every internal link/asset): derive `BASE_PATH` from `SITE_BASE_URL`
+  rather than a separate env var or CLI flag.** Considered adding a new
+  `SITE_BASE_PATH` env var (set by `deploy.yml`) as a second source of
+  truth, independent of the existing `SITE_BASE_URL` constant already used
+  for `sitemap.xml`/`robots.txt`. Rejected: two values that both encode
+  "where is this site actually served from" can drift out of sync (e.g. an
+  owner updates one for a custom-domain move and forgets the other).
+  Instead `BASE_PATH = urlparse(SITE_BASE_URL).path.rstrip("/")` — a pure
+  function of the one constant that already has to be correct for the
+  sitemap to be correct. Also considered a Jinja `{% block %}`/global
+  `url()` helper threaded through every template and builder instead of a
+  post-render string rewrite; rejected as a much larger, riskier diff
+  touching all seven already-tested page builders' internals and existing
+  test assertions, for no behavioral difference in the output. See
+  `PROGRESS.md`'s matching entry for the full incident and verification.
