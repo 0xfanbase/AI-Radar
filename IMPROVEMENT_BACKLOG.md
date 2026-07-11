@@ -3913,3 +3913,67 @@ pattern outright is strictly stronger than pinning one specific stale
 value, and it also catches a *different* future hardcoded color someone
 might introduce for an unrelated reason, not just a reintroduction of
 this exact one.
+
+## T7: case-sensitive/hyphen-only grep let two stale `signal-cyan` strings survive T1 and T6; zero-stale-references check hardened (2026-07-11)
+
+A further independent verification pass on the Matrix-theme workstream
+found two old-name survivors neither T1's own rename commit nor T6's
+from-scratch re-verification caught, despite both explicitly claiming
+`grep -rn "signal-cyan" site/` returned nothing: `components.css`'s
+`:focus-visible` comment still read "Signal-cyan is the site's one and
+only focus-ring color" (the rule itself already correctly used
+`var(--color-signal-green)` -- only the prose above it lagged), and
+`site/tests/test_svg_sparkline.py::test_svg_has_polyline_using_signal_cyan`
+(the test body already correctly asserted `spark.SIGNAL_GREEN` -- only
+the function's own name lagged).
+
+**Root cause: the grep, not the rename.** T1's and T6's own verification
+command, `grep -rn "signal-cyan" site/`, is case-sensitive and matches
+only the literal hyphen-joined lowercase spelling. "Signal-cyan"
+(capitalized, inside a comment sentence) and "signal_cyan"
+(underscore-joined, inside a Python identifier) are the same stale name
+under a different case/punctuation convention than what the pattern was
+built to find, so the grep structurally could not see them -- it wasn't
+lying when it reported "nothing found," it just wasn't broad enough to
+be a true zero-stale-references gate. Both prior entries' "returns
+nothing" claims were accurate reports of what they actually ran; neither
+is being called wrong here, and neither is being retroactively edited
+(see the judgment call below).
+
+**Fixes, one commit each, `python -m pytest` verified green after each
+(709 passed / 2 deselected both times -- unchanged, since the test fix
+is a rename of an existing test, not an add or removal):**
+1. `site/static/css/components.css`'s comment: "Signal-cyan" ->
+   "Signal-green" (a two-word fix; the CSS rule below it was never
+   incorrect).
+2. `site/tests/test_svg_sparkline.py`: renamed
+   `test_svg_has_polyline_using_signal_cyan` to
+   `test_svg_has_polyline_using_signal_green` (function body already
+   correct, unchanged).
+
+**The gate itself, hardened:** replaced the verification command with
+`grep -rni 'signal[-_]cyan' site/` -- case-insensitive, and a character
+class matching either the hyphen or underscore separator in one pass, so
+a future rename's own completeness check can't repeat this exact class
+of miss (a differently-cased comment, or an underscore-joined
+identifier, anywhere a rename touches both prose and code). Re-run
+against every git-tracked file under `site/` after both fixes: zero
+matches. The one remaining hit found mid-pass, before ruling it
+irrelevant, was a stale compiled `test_svg_sparkline.cpython-*.pyc`
+inside `site/tests/__pycache__/` predating the rename above -- confirmed
+gitignored (`.gitignore`'s own first line, `__pycache__/`), not a
+tracked source file, and it is regenerated correctly (with the new name)
+by the next `pytest` invocation, so it isn't a real survivor of anything.
+
+**Judgment call, spec-silent:** whether to retroactively edit T1's and
+T6's own already-logged claims (in this file and in `PROGRESS.md`) to
+describe the wider grep, versus leaving them as-is and logging the fix
+as its own new entry. Chose the latter, for the same reason T1's own
+entry above already gives for not rewriting history elsewhere in this
+file: a build log's job is to record what was true and what was checked
+*at the time* each entry was written, and quietly editing a past entry's
+claims to match a later, better check would itself be exactly the kind
+of undocumented drift this project's own audits exist to catch. T1's and
+T6's entries are left exactly as written -- both are honest records of a
+real grep that genuinely came back clean against its own (too narrow)
+pattern -- and this entry is the correction of record.

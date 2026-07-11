@@ -7,6 +7,68 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — T7: two case-sensitive-grep survivors from the T1 rename fixed; zero-stale-references check hardened
+
+A further, independent verification pass on the T1-T6 Matrix-theme
+workstream found two old-name strings that had survived every prior
+pass's "no lingering `signal-cyan`" claim (T1's own rename commit and
+T6's from-scratch re-verification both asserted this and both were
+correct about what they actually checked): `site/static/css/components.css`'s
+`:focus-visible` comment still read "Signal-cyan is the site's one and
+only focus-ring color" (capitalized, mid-sentence -- the rule itself
+already correctly used `var(--color-signal-green)`, only the prose above
+it lagged), and `site/tests/test_svg_sparkline.py` had a test named
+`test_svg_has_polyline_using_signal_cyan` (underscore-joined -- its body
+already correctly asserted `spark.SIGNAL_GREEN`).
+
+**Root cause, not just the two fixes:** every prior verification grep in
+this workstream (T1's own rename pass and T6's independent re-check) ran
+`grep -rn "signal-cyan" site/` -- case-sensitive, hyphen-only. That
+pattern structurally cannot match a capitalized "Signal-cyan" inside a
+comment sentence, nor an underscore-joined "signal_cyan" inside a Python
+identifier -- both are the *same* stale name, just cased or punctuated
+differently than the literal token the grep was built to find. The prior
+"returns nothing" claims were true statements about what that grep
+checked; the grep itself just wasn't broad enough to be a real
+zero-stale-references gate.
+
+**Fixes applied, one commit each, `python -m pytest` green (709 passed,
+2 deselected -- unchanged, since one test was renamed rather than
+added/removed) after every commit:**
+1. `components.css`'s comment: "Signal-cyan" -> "Signal-green" (two-word
+   change; the rule below it was never wrong).
+2. `test_svg_sparkline.py`'s function renamed
+   `test_svg_has_polyline_using_signal_cyan` ->
+   `test_svg_has_polyline_using_signal_green` (body unchanged; it already
+   asserted the right constant).
+
+**The check itself, hardened for any future rename in this repo:** the
+zero-stale-references gate now reads `grep -rni 'signal[-_]cyan' site/`
+-- case-insensitive, and matching both the hyphen and underscore
+spelling in one pass. Re-run against every file tracked by git under
+`site/` after both fixes above: zero matches (the only remaining hit
+found during this pass was a stale compiled `__pycache__/*.pyc` from
+before the test rename -- a gitignored build artifact, not source, and
+it disappears on the next `pytest` run that recompiles it).
+
+**Judgment call, spec-silent:** whether to also retroactively edit T1's
+and T6's own logged claims above (and in `IMPROVEMENT_BACKLOG.md`) to
+describe the broader grep. Decided not to, consistent with this
+project's own already-established rule (first stated in T1's
+`IMPROVEMENT_BACKLOG.md` entry): a reverse-chronological build log
+records what was true and what was checked *at the time* each entry was
+written, and silently rewriting past entries to match the present would
+itself be exactly the kind of undocumented drift this project's audits
+exist to catch. This entry is the correction; T1's and T6's entries
+stand as an accurate record of a real, if narrower-than-intended, grep
+that genuinely returned clean against its own (case-sensitive,
+hyphen-only) pattern.
+
+Full reasoning and the exact command history are logged in
+`IMPROVEMENT_BACKLOG.md`.
+
+---
+
 ## 2026-07-11 — T6: independent end-to-end verification of the Matrix theme workstream (one real bug found and fixed)
 
 Verified the T1-T5 Matrix-theme workstream from scratch, trusting none of
