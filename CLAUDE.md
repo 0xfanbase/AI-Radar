@@ -66,6 +66,26 @@ actually built today versus what is diagrammed here as the destination.
   merge, capped turns) — structurally incapable of merging its own PR
 ```
 
+**Actual execution mechanism for the LLM steps (analyze.yml / improve.yml):**
+the diagram above and the `analyze.yml`/`improve.yml` workflow files
+themselves describe the LLM steps as `anthropics/claude-code-action@v1`
+running inside GitHub Actions, gated by a `claude_code_oauth_token` repo
+secret. That is a valid, complete implementation, but this project's
+owner has chosen not to create or manage that secret. Instead, both the
+daily analyst+verifier run and the fortnightly improve loop execute via a
+**Claude Code Remote Routine** — a scheduled session, external to GitHub
+Actions, that reads the exact ANALYST/VERIFIER (and, once built,
+improve-loop) prompt text directly out of the corresponding workflow
+file, runs each as a fresh subagent via the Agent tool (preserving the
+verifier's "fresh context, no shared memory with the analyst" property),
+runs the same pure-code reconcile/gate scripts, and commits+pushes under
+the bot identity — with no GitHub secret anywhere in that path.
+`watch.yml` no longer dispatches `analyze.yml` (its dispatch step was
+removed once the Routine took over); `analyze.yml`/`improve.yml` remain
+in the repo as the authoritative reference for what the Routine actually
+runs, not as dead code. See `PROGRESS.md` for when this switch was made
+and why.
+
 ---
 
 ## Hard rules (spec §1, stated in full — load-bearing)

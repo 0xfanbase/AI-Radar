@@ -1,10 +1,30 @@
 name: analyze
 
+# NOT THE ACTIVE MECHANISM -- kept as reference documentation only.
+#
+# This workflow needs a CLAUDE_CODE_OAUTH_TOKEN GitHub secret to run at
+# all, and the repo owner has chosen not to manage one. watch.yml no
+# longer dispatches this workflow (see its own comment) and no trigger in
+# this repo ever invokes it. The daily analyst/verifier run instead
+# happens via a scheduled Claude Code Remote Routine ("AI Frontier Wire --
+# daily analyst+verifier refresh") that reads the exact ANALYST/VERIFIER
+# `prompt:` blocks below and runs them directly as fresh subagents inside
+# a live session, with no GitHub secret anywhere in that path -- see
+# CLAUDE.md's "Daily self-learning loop" section. This file is left in
+# place, unmodified otherwise, because it's the single source of truth
+# for that prompt text (the Routine's own instructions point back at it
+# rather than duplicating it) and because it documents a real, valid
+# alternative implementation the owner could switch back to later.
+#
+# Everything below this point describes the workflow as if it were live;
+# read it as "this is the procedure," not "this is what's running."
+#
 # Phase 2 daily analyst/verifier half of the loop (CLAUDE.md's diagram).
 #
 # Trigger: workflow_dispatch ONLY -- this is deliberately not a second cron.
-# watch.yml's own final step calls `gh workflow run analyze.yml --ref main`
-# once its run finishes, gated on data/queue.json actually being non-empty.
+# watch.yml's own final step used to call `gh workflow run analyze.yml
+# --ref main` once its run finished, gated on data/queue.json actually
+# being non-empty, before the Routine replaced that dispatch (see above).
 # An explicit `gh workflow run` dispatch (rather than `repository_dispatch`
 # or a lookalike cron) means this is not subject to GITHUB_TOKEN's own
 # push-recursion prevention and needs no new secret beyond the OAuth token

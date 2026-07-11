@@ -2046,3 +2046,27 @@ documentation/test-coverage only.
   tests in `test_contrast_ratios.py`). `python site/generate.py -v`
   re-run against this repo's real `content/`/`data/` — unaffected, still a
   clean build.
+
+- **Architecture decision: no `CLAUDE_CODE_OAUTH_TOKEN` GitHub secret —
+  Claude Code Remote Routines run the LLM steps instead.** The owner
+  stated they don't have this secret and don't want to manage one.
+  `analyze.yml`'s ANALYST/VERIFIER steps and the upcoming `improve.yml`
+  both need it as written. Rather than block on a secret the owner won't
+  provide, or silently leave `watch.yml` dispatching a workflow that would
+  fail every time it fired (which is exactly the kind of failed-run email
+  spam that prompted this decision), the daily analyst+verifier run (and,
+  once built, the fortnightly improve loop) now executes via a scheduled
+  Claude Code Remote Routine: a session, external to GitHub Actions, that
+  reads the exact prompt text out of the corresponding workflow file and
+  runs it directly as fresh subagents via the Agent tool, then commits
+  under the bot identity — no GitHub secret anywhere in that path.
+  `watch.yml`'s "Dispatch analyze.yml" step and its `actions: write`
+  permission (only needed for that dispatch) were removed accordingly.
+  `analyze.yml`/`improve.yml` are kept in the repo, annotated as
+  reference/inactive rather than deleted, since they remain the single
+  source of truth for the exact procedure the Routine runs, and because
+  they document a real, valid alternative the owner could switch back to
+  later (e.g. if they later do want the fully-GitHub-native path). Logged
+  here rather than left as an undocumented judgment call; see
+  `CLAUDE.md`'s "Daily self-learning loop" section and `PROGRESS.md` for
+  the corresponding narrative entry.

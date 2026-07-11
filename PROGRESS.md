@@ -7,6 +7,51 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Architecture change: daily analyst run moves from `analyze.yml`/GitHub secret to a Claude Code Remote Routine
+
+The owner does not have, and does not want to manage, a
+`CLAUDE_CODE_OAUTH_TOKEN` GitHub secret. `analyze.yml` (and the not-yet-built
+`improve.yml`) needs exactly that secret to run its `anthropics/claude-code-action@v1`
+steps. Rather than leave `watch.yml` dispatching a workflow that would
+fail on every single invocation once merged — precisely the kind of
+failed-run notification spam that prompted this conversation — the real
+execution mechanism for both the daily analyst+verifier run and the
+(upcoming) fortnightly improve loop is now a **Claude Code Remote
+Routine**: a scheduled session, external to GitHub Actions entirely, that
+reads the exact ANALYST/VERIFIER prompt text directly out of
+`analyze.yml`, runs each as its own fresh subagent via the Agent tool
+(preserving the verifier's fresh-context/no-shared-memory property just
+as faithfully as the two-separate-GitHub-Actions-steps design did), runs
+the same pure-code `scripts/plan_run.py` → `scripts/reconcile_run.py` →
+`scripts/check_path_allowlist.py` → `scripts/validate_changed_schemas.py`
+sequence, and commits+pushes under the bot identity — no GitHub secret
+anywhere in this path. A Routine ("AI Frontier Wire — daily
+analyst+verifier refresh," daily at 23:30 UTC, 30 minutes after
+`watch.yml`'s own cron) is already created and enabled.
+
+Concrete changes this entry covers:
+- `watch.yml`: removed the "Dispatch analyze.yml if the queue is non-empty"
+  step and the `actions: write` permission it alone required (the job's
+  `contents: write` permission is unaffected and still needed for its own
+  commit-and-push step). Replaced with a comment pointing at the Routine.
+- `analyze.yml`: not deleted — annotated at the top of the file as
+  reference/inactive documentation of the exact procedure the Routine
+  runs, since duplicating that prompt text in two places would let them
+  drift out of sync. No workflow-logic lines inside it were changed.
+- `CLAUDE.md`: the "Daily self-learning loop" section gained a paragraph
+  stating this mechanism plainly, immediately after the architecture
+  diagram, so a reader doesn't take the diagram's `claude_code_oauth_token`
+  mention at face value.
+- `IMPROVEMENT_BACKLOG.md`: the decision itself logged in full.
+
+**Verification:** `python -m pytest` — 675 passed, 2 deselected, unchanged
+(no test referenced the removed dispatch step or permission). Both
+modified workflow YAML files re-validated with `yaml.safe_load`.
+`improve.yml` (Phase 5, not yet built) will follow the same pattern —
+a second Routine, not a second secret — when it's written.
+
+---
+
 ## 2026-07-11 — Correction: the Phase 4 PM checkpoint round-1 "no browser binary" claim was false; a real Lighthouse run and score already existed
 
 The round-1 entry directly below states plainly, twice, that "no Chrome,
