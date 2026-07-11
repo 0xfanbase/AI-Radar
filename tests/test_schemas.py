@@ -37,6 +37,7 @@ SCHEMA_NAMES = [
     "ledger",
     "queue",
     "corrections",
+    "primer",
 ]
 
 

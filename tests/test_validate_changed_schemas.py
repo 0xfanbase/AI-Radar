@@ -36,6 +36,7 @@ MAPPED_PATHS = {
     "content/frontier_board.json": ("frontier_board", "frontier_board"),
     "content/lexicon.json": ("lexicon", "lexicon"),
     "content/corrections.json": ("corrections", "corrections"),
+    "content/primer.json": ("primer", "primer"),
     "data/ledger.json": ("ledger", "ledger"),
     "data/queue.json": ("queue", "queue"),
     "data/run_plan.json": ("run_plan", "run_plan"),
@@ -61,7 +62,6 @@ def test_schema_name_for_path_maps_known_paths(path, expected):
     "path",
     [
         "content/cards/README.md",  # cards dir, but not .json
-        "content/primer.json",  # not in the mapping table (no schema exists yet)
         "watcher/config.py",
         "schemas/card.schema.json",
         ".github/workflows/analyze.yml",

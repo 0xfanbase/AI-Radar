@@ -3388,3 +3388,43 @@ Also updated `site/builders/method.py`'s own top-of-file docstring
 `NO_AUDIT_MESSAGE` text verbatim, since a docstring that echoes stale copy
 verbatim is exactly the kind of drift this task exists to prevent from
 recurring.
+
+## CI-gate blind spot closed: `schemas/primer.schema.json` (T5, 2026-07-11)
+
+`content/primer.json` had no schema under `schemas/`, so
+`scripts/validate_changed_schemas.py`'s `EXACT_PATH_SCHEMAS` table had no
+entry for it and `site/generate.py::load_and_validate_content` loaded it
+unvalidated with a logged warning -- a real CI blind spot, since the daily
+analyst Routine is allowed to touch `content/primer.json` (it's under
+`content/`) but nothing would have caught a malformed rewrite of it before
+commit. Added `schemas/primer.schema.json` (object, `required:
+[generated_at, terms]`, `additionalProperties: false`, `generated_at` as
+`format: date`, `terms` as a non-empty array of unique lowercase-hyphenated
+slug strings), mapped `"content/primer.json": "primer"` into
+`EXACT_PATH_SCHEMAS`, added `fixtures/schema_examples/{valid,invalid}/primer.json`
+following the existing one-pair-per-schema convention, and extended
+`tests/test_schemas.py`'s `SCHEMA_NAMES` list and
+`tests/test_validate_changed_schemas.py`'s `MAPPED_PATHS` table so the new
+schema gets the same self-validation / valid-fixture / invalid-fixture /
+CI-mapping coverage every other schema already has.
+
+Judgment call, spec-silent: the task's target-files list named
+`tests/test_schemas.py` but not `tests/test_seed_content.py`, while the
+task's own step 4 explicitly said to check `test_seed_content.py` for "a
+convention that enumerates schemas or validates seed content against
+them" and extend it. That file already had three primer-shape assertions
+(`generated_at`/`terms` present, slugs resolve to real lexicon entries,
+the fixed 10-term order) but, unlike its sibling
+`test_frontier_board_validates_against_schema`/
+`test_lexicon_validates_against_schema` tests, never actually called
+`validate(primer, "primer")` against the real committed
+`content/primer.json` -- because no such schema existed to validate
+against. Added `test_primer_validates_against_schema` and
+`test_primer_schema_rejects_a_primer_missing_a_required_field` there,
+mirroring the frontier-board/lexicon pattern, so the real seed file (not
+just a synthetic fixture) is now schema-checked in the test suite too.
+Treated the step-4 instruction text as authoritative over the shorter
+target-files list, since leaving the real content/primer.json's own
+schema-validation gap unclosed in `test_seed_content.py` would have left
+this task's stated goal -- "no malformed primer.json silently passes" --
+only half-verified.

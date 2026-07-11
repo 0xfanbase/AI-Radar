@@ -42,6 +42,7 @@ EXACT_PATH_SCHEMAS = {
     "content/frontier_board.json": "frontier_board",
     "content/lexicon.json": "lexicon",
     "content/corrections.json": "corrections",
+    "content/primer.json": "primer",
     "data/ledger.json": "ledger",
     "data/queue.json": "queue",
     "data/run_plan.json": "run_plan",

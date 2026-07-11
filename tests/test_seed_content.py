@@ -166,6 +166,11 @@ def _slugify(term: str) -> str:
     return term.lower().replace(" ", "-")
 
 
+def test_primer_validates_against_schema():
+    primer = _load(PRIMER_PATH)
+    validate(primer, "primer")  # must not raise
+
+
 def test_primer_has_generated_at_and_terms_fields():
     primer = _load(PRIMER_PATH)
     assert "generated_at" in primer
@@ -221,3 +226,11 @@ def test_lexicon_schema_rejects_an_entry_missing_a_required_field():
     del broken[0]["related"]
     with pytest.raises(ValidationError):
         validate(broken, "lexicon")
+
+
+def test_primer_schema_rejects_a_primer_missing_a_required_field():
+    primer = _load(PRIMER_PATH)
+    broken = dict(primer)
+    del broken["generated_at"]
+    with pytest.raises(ValidationError):
+        validate(broken, "primer")
