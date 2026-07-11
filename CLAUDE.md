@@ -66,25 +66,65 @@ actually built today versus what is diagrammed here as the destination.
   merge, capped turns) — structurally incapable of merging its own PR
 ```
 
-**Actual execution mechanism for the LLM steps (analyze.yml / improve.yml):**
-the diagram above and the `analyze.yml`/`improve.yml` workflow files
-themselves describe the LLM steps as `anthropics/claude-code-action@v1`
-running inside GitHub Actions, gated by a `claude_code_oauth_token` repo
-secret. That is a valid, complete implementation, but this project's
-owner has chosen not to create or manage that secret. Instead, both the
-daily analyst+verifier run and the fortnightly improve loop execute via a
-**Claude Code Remote Routine** — a scheduled session, external to GitHub
-Actions, that reads the exact ANALYST/VERIFIER (and, once built,
-improve-loop) prompt text directly out of the corresponding workflow
-file, runs each as a fresh subagent via the Agent tool (preserving the
-verifier's "fresh context, no shared memory with the analyst" property),
-runs the same pure-code reconcile/gate scripts, and commits+pushes under
-the bot identity — with no GitHub secret anywhere in that path.
-`watch.yml` no longer dispatches `analyze.yml` (its dispatch step was
-removed once the Routine took over); `analyze.yml`/`improve.yml` remain
-in the repo as the authoritative reference for what the Routine actually
-runs, not as dead code. See `PROGRESS.md` for when this switch was made
-and why.
+**Actual execution mechanism for the LLM steps (analyze.yml / improve.yml)
+— current status, stated precisely, since the two loops are NOT in the
+same state:** the diagram above and the `analyze.yml`/`improve.yml`
+workflow files themselves describe the LLM steps as
+`anthropics/claude-code-action@v1` running inside GitHub Actions, gated by
+a `claude_code_oauth_token` repo secret. That is a valid, complete
+implementation, but this project's owner has chosen not to create or
+manage that secret, for either loop.
+
+- **Daily analyst+verifier run — ACTIVE.** This loop already executes via
+  a **Claude Code Remote Routine** ("AI Frontier Wire — daily
+  analyst+verifier refresh," firing daily, 30 minutes after `watch.yml`'s
+  own cron): a scheduled session, external to GitHub Actions, that reads
+  the exact ANALYST/VERIFIER `prompt:` text directly out of `analyze.yml`,
+  runs each half as a fresh subagent via the Agent tool (preserving the
+  verifier's "fresh context, no shared memory with the analyst"
+  property), runs the same pure-code `plan_run.py` →
+  `reconcile_run.py` → `check_path_allowlist.py` →
+  `validate_changed_schemas.py` sequence, and commits+pushes under the bot
+  identity — no GitHub secret anywhere in that path. `watch.yml` no longer
+  dispatches `analyze.yml` (its dispatch step was removed once the
+  Routine took over); `analyze.yml` remains in the repo unmodified, as the
+  authoritative reference for exactly what the Routine runs, not as dead
+  code.
+- **Fortnightly improve loop — designed and fully documented, NOT yet
+  activated.** `scripts/fortnight_guard.py` (the ISO-week-parity guard
+  approximating a fortnightly cadence from a weekly firing) and
+  `improve.yml` (the reference procedure: guard → `pick_backlog_item.py`
+  → the IMPROVE prompt, own `--max-turns 25`, allowed to `Edit`/`Write`
+  anywhere in the repo unlike the daily analyst → `pytest` → PR via
+  `peter-evans/create-pull-request`, no merge step anywhere) both exist
+  and are tested, but **no live trigger of any kind has been created for
+  this loop** — no second Routine, no GitHub Actions `schedule:`. This is
+  a deliberate, separate withholding of authority, not merely "not built
+  yet": a Routine for this loop would be authorized to `Edit`/`Write`
+  *any* file in the repo — workflows, `watcher/`/`scripts/` pipeline code,
+  `schemas/`, this file itself — whereas the daily analyst Routine's own
+  authority is scoped to `content/` and `data/` only (the same
+  path-allowlist boundary described below). That is a materially bigger
+  capability than the daily Routine already granted, and activating it
+  requires the owner's own explicit, separate approval and an explicit
+  action to actually create the trigger — never assumed or taken on by
+  an agent as a natural extension of the daily Routine's own approval.
+  See `PROGRESS.md`'s final Phase 5 entry for the full "what remains"
+  list.
+- **`audit.yml` — a third, independent case: real, active GitHub Actions
+  YAML, no secret and no Routine needed at all.** It has no LLM step
+  anywhere (pure-code `auditor/` package: link rot, lexicon
+  coverage/orphans, verifier pass-rate trend, missed-story check,
+  duplicate-topic detection), so the `CLAUDE_CODE_OAUTH_TOKEN` question
+  that gates the other two loops never applies to it. It already runs as
+  literal committed GitHub Actions YAML with a real weekly cron — it will
+  fire for real, automatically, as soon as this branch is merged to `main`
+  (GitHub Actions only evaluates a workflow's `schedule:` trigger on the
+  repository's default branch).
+
+See `PROGRESS.md` for when the daily switch was made and why, and its
+final Phase 5 entry for the fortnightly loop's own build/non-activation
+record.
 
 ---
 

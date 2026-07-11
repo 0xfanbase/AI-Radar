@@ -3112,3 +3112,47 @@ read-the-workflow-file-directly pattern the daily analyst Routine
 already uses for `analyze.yml`'s ANALYST/VERIFIER prompts, applied to
 this file instead. Nothing about that mechanism is undesigned; it is
 simply not switched on.
+
+## Phase 5 final consolidation: `CLAUDE.md`/`PROGRESS.md` documentation pass (2026-07-11)
+
+Two documentation-only judgment calls made while writing the final,
+closing Phase 5 entry (`PROGRESS.md`'s "Phase 5 complete" entry) — no
+code, schema, or workflow file changed this turn, so nothing here affects
+`python -m pytest`'s 906-passed count.
+
+- **`PROGRESS.md`'s several earlier "what remains for the human"
+  paragraphs (Phase 2's, and Phase 4 sign-off's) are left exactly as
+  originally written, not retroactively rewritten to match the current
+  architecture**, even though both name a `CLAUDE_CODE_OAUTH_TOKEN` secret
+  and a `vars.CLAUDE_MODEL` variable as outstanding requirements that the
+  later architecture-change entry (moving the daily run to a Claude Code
+  Remote Routine) makes no longer accurate. `PROGRESS.md`'s own header
+  describes it as a historical build log, not a living doc — the existing
+  precedent for handling a since-superseded claim in this file is the
+  dedicated "Correction: ... was false" entry pattern (see the Phase 4
+  Lighthouse correction above), which fixes a claim that was *wrong when
+  written*; these two "what remains" paragraphs were *correct when
+  written*; they simply predate a later architecture decision, exactly
+  like `analyze.yml`'s own file (kept in the repo, unmodified, annotated
+  as reference-only rather than deleted or silently edited). Resolved by
+  adding one single new, current, authoritative "what remains" list in
+  the new closing entry, with an explicit note pointing at these older
+  paragraphs and stating plainly that they're superseded — rather than
+  either leaving the contradiction unexplained or reaching back into
+  earlier entries to change what they say.
+- **`CLAUDE.md`'s "Daily self-learning loop" execution-mechanism
+  paragraph is rewritten from one blended claim into three explicitly
+  separate, differently-tracked cases** (daily analyst Routine: active;
+  fortnightly improve loop: designed and tested, not activated; `audit.yml`:
+  independent pure-code GitHub Actions YAML needing no secret or Routine
+  at all). The paragraph this replaces read, in substance, "both the daily
+  analyst+verifier run and the fortnightly improve loop execute via a
+  Claude Code Remote Routine" — accurate for the daily loop, but written
+  before `improve.yml`/`fortnight_guard.py` existed, and left unqualified
+  it now reads as though the fortnightly loop's own Routine already
+  exists too, which it deliberately does not (see the entry directly
+  above this one). This is a documentation-accuracy fix only — no
+  workflow, script, or trigger changed — but it is exactly the kind of
+  spec-silent "does this sentence still say what's actually true"
+  judgment call this file exists to log, so it's recorded here rather
+  than silently corrected.

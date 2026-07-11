@@ -7,6 +7,162 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Phase 5 complete: final consolidation across all 5 phases; single "what remains for the human" list
+
+This is the final Phase 5 checkpoint and the closing entry for the whole
+P1–P5 build described in the approved build plan. It does not add new
+pipeline code — it consolidates `CLAUDE.md` and this file so both
+accurately describe the finished, as-built system in one place, and it
+replaces the several partial/scattered "what remains" lists elsewhere in
+this file's own history (some of them now stale — see below) with one
+single, current, authoritative list.
+
+**What Phase 5 built, in full (across the entries directly below this
+one, all dated the same day):**
+
+- `auditor/lexicon_audit.py`, `linkrot.py`, `duplicates.py`, `trend.py`,
+  `missed_story.py` — the five pure-code, no-LLM weekly checks CLAUDE.md's
+  `audit.yml` bullet names verbatim (link rot; lexicon orphan/coverage;
+  verifier pass-rate trend; missed-story vs. top-20 weekly HN AI stories;
+  duplicate-topic detection), each reusing existing watcher/reconciler
+  logic (`watcher.clustering`, `watcher.models`, `watcher.http`,
+  `scripts.reconcile_run.rolling_pass_rate`) rather than reimplementing
+  it, per every entry's own "reuse, not reimplementation" note.
+- `auditor/report.py` + `auditor/cli.py` + `schemas/audit.schema.json` —
+  assembles the five checkers into one schema-valid
+  `data/audit/latest.json`, exposed as `python -m auditor.cli run`.
+- `scripts/append_backlog_findings.py` — derives severity-tagged findings
+  from that report and appends them to `IMPROVEMENT_BACKLOG.md` as
+  checkbox lines (falling verifier trend = high; missed story or
+  duplicate pair = medium; dead link or lexicon gap = low; lexicon
+  orphans suppressed from the backlog specifically while zero cards are
+  published, to avoid flagging all 30 pre-launch seed terms as noise on
+  day one).
+- `.github/workflows/audit.yml` — real, active, committed GitHub Actions
+  YAML (weekly cron, `permissions: contents: write`, no LLM step, no
+  secret of any kind) wiring `python -m auditor.cli run` +
+  a bot-identity commit. This one needs no Routine and no secret — it
+  will fire for real, automatically, the first Sunday after this branch
+  is on `main` (GitHub Actions only evaluates `schedule:` on the default
+  branch).
+- `scripts/pick_backlog_item.py` — the deterministic (highest-severity,
+  oldest-on-ties) selection rule the fortnightly improve loop uses to
+  pick its one target item, parsing the real checkbox format
+  `append_backlog_findings.py` actually emits.
+- `scripts/fortnight_guard.py` — a pure-code ISO-week-parity guard
+  (`decide_fortnight_mode`) approximating a fortnightly cadence from a
+  weekly firing, verified against two real ISO-year-boundary edge cases
+  (2026→2027's genuine 53-week year, and the ordinary 2027→2028
+  boundary), never reading the real clock except through an explicit,
+  monkeypatchable seam.
+- `.github/workflows/improve.yml` — the reference procedure for the
+  fortnightly self-improvement loop (guard → `pick_backlog_item.py` → one
+  `claude-code-action@v1` IMPROVE step, own `--max-turns 25`, allowed to
+  touch any file unlike the daily analyst → `python -m pytest` as an
+  independent backstop → `peter-evans/create-pull-request` opens a PR).
+  **Structurally incapable of merging its own PR** — no merge step
+  appears anywhere in the file. Built and documented in full; **its
+  Routine was deliberately not created this phase** — see "What remains
+  for the human" below.
+- This turn's own consolidation: the `CLAUDE.md` "Daily self-learning
+  loop" section's execution-mechanism paragraph is rewritten to state, as
+  three separately-tracked cases rather than one blended claim: the daily
+  analyst+verifier Routine is **active**; the fortnightly improve loop is
+  **designed and fully documented but not activated**, pending the
+  owner's own separate, explicit approval (spelled out below, in
+  `CLAUDE.md`, and in `IMPROVEMENT_BACKLOG.md`); and `audit.yml` is real,
+  independent, already-committed GitHub Actions YAML needing no secret
+  and no Routine of any kind, since it has no LLM step to gate on either.
+
+**Verification performed this turn:** `python -m pytest` (root,
+`testpaths = tests`) — **906 passed, 2 deselected**, unchanged from the
+count already recorded in the entry directly below (this turn added no
+new code and no new tests, only documentation edits to `CLAUDE.md` and
+this file, so an unchanged count is the expected, correct result, not a
+regression). `python -m pytest site/tests` — **22 passed**, likewise
+unchanged. Both root and `site/` suites confirmed green together before
+committing. No file outside `CLAUDE.md`, `PROGRESS.md`, and
+`IMPROVEMENT_BACKLOG.md` was touched this turn.
+
+### What remains for the human — single, final, consolidated list
+
+Every "what remains" item scattered across this file's own history,
+across all five phases, consolidated into one current list. (Several
+earlier entries below — e.g. the Phase 2/Phase 4 sign-off entries'
+own "what remains" paragraphs — still say things like "add the
+`CLAUDE_CODE_OAUTH_TOKEN` repo secret" or "set `vars.CLAUDE_MODEL`."
+Those were accurate *at the time they were written*, before the
+architecture change documented earlier in this file moved the daily
+analyst run off GitHub Actions entirely. They are left as-written,
+since this file is a historical build log, not a living doc to be
+retroactively edited — but they are superseded by this list, which
+reflects the system exactly as it stands today.)
+
+1. **Enable GitHub Pages** — repo Settings → Pages → Source: "GitHub
+   Actions." `deploy.yml`'s `deploy` job cannot succeed until this is
+   set; nothing in this codebase can toggle a repo setting.
+2. **Review and merge this branch (`claude/phase-1-watcher-build-fsc12w`)
+   to `main`.** Every scheduled mechanism in this repo — `watch.yml`'s
+   daily cron, `audit.yml`'s weekly cron, `deploy.yml`'s push trigger —
+   targets/fires relative to `main`, and GitHub Actions only evaluates a
+   workflow's `schedule:` trigger on the repository's default branch.
+   Nothing here runs automatically, on any cadence, until this merge
+   happens.
+3. **The base-path/custom-domain decision.** Decide whether this project
+   serves from a custom domain (add a `CNAME` file, serves from the
+   domain root) or accepts the default `github.io/AI-Radar/` project
+   subpath — every internal link the site generator renders today assumes
+   root serving and does not yet handle a subpath prefix. This is a
+   one-time content/config decision, not a code defect, but it must be
+   made before or shortly after Pages is enabled.
+4. **Explicit approval, and the actual act of creating, a second Claude
+   Code Remote Routine for the fortnightly improve loop.** This is stated
+   plainly as a deliberate, separate ask from the daily analyst Routine
+   already running — not a formality, not implied by the daily Routine's
+   own existing approval. The daily Routine's authority is scoped to
+   reading `content/`/`data/`-relevant inputs and writing only inside
+   `content/` and `data/` (the same boundary the path-allowlist gate
+   enforces for the GitHub-native path). A Routine for the fortnightly
+   loop would be authorized to `Edit`/`Write` *any* file in the repo —
+   workflows, `watcher/`/`scripts/`/`auditor/` pipeline code, `schemas/`,
+   even `CLAUDE.md` itself — gated only by a human PR review after the
+   fact, not a pre-commit path allowlist. That is a materially larger
+   grant of autonomous authority than "let it refresh the news," and this
+   build deliberately does not take that step on the owner's behalf.
+   `scripts/fortnight_guard.py` and `improve.yml` are fully built and
+   tested and are ready the moment the owner decides to authorize this;
+   until then they remain designed-but-inactive, exactly as intended.
+   (The alternative path — adding a `CLAUDE_CODE_OAUTH_TOKEN` secret and a
+   real `schedule:` to `improve.yml` itself — remains available too, and
+   is equally an explicit, owner-initiated action; see the point directly
+   below.)
+5. **`CLAUDE_CODE_OAUTH_TOKEN` is NOT needed at all under the current,
+   as-built architecture — stated plainly, since several earlier entries
+   in this same file (written before the architecture change) said the
+   opposite.** Both the active daily analyst/verifier Routine and the
+   designed-but-inactive fortnightly improve loop are built to run as
+   Claude Code Remote Routines, not as `claude-code-action@v1` GitHub
+   Actions steps — neither needs this secret, and the owner does not need
+   to create or manage one for this project to run as designed.
+   `analyze.yml`/`improve.yml` remain in the repo only as reference
+   documentation of the exact prompt text each Routine runs; they are not
+   live workflows and are not waiting on this secret to become live. The
+   *only* scenario where this secret would ever be needed is if the owner
+   later decides to switch either loop's execution back to the
+   GitHub-native `claude-code-action@v1` path instead of a Routine — a
+   possible future choice, not a current gap.
+6. **Phase 5's own acceptance criterion: 14 days of hands-off autonomous
+   operation.** This can only be observed in real time, after the branch
+   is merged and the daily Routine (already active) and, if/when
+   authorized, the fortnightly Routine have had a real two-week window to
+   run on their own schedule — not something any build session can do,
+   simulate, or certify in advance. Once merged, this is a matter of
+   waiting and then checking `data/ledger.json`, `content/cards/`,
+   `data/audit/latest.json`, and `IMPROVEMENT_BACKLOG.md`'s own audit
+   findings for two weeks of real, unattended activity.
+
+---
+
 ## 2026-07-11 — Phase 5: `scripts/fortnight_guard.py` + `.github/workflows/improve.yml` (reference only) -- improve-loop Routine NOT yet activated, pending owner approval
 
 Designs and documents the fortnightly self-improvement loop's mechanism in
