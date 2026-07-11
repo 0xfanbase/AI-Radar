@@ -7,6 +7,65 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Fix: canvas rain fell too fast -- ported the reference site's actual stepped-speed algorithm
+
+Immediately after the canvas rain (below) shipped, the owner reported the
+speed "seems much faster" than their reference site and asked for it to
+match exactly. The reference's real `rain.js` wasn't captured in the
+.mhtml snapshot used to build the first canvas version -- only its CSS
+custom properties were -- so the first implementation's timing was an
+independent guess (every column advancing one glyph every single frame at
+40ms/tick). Fetched the reference site's actual `assets/rain.js` directly
+(same site the owner already pointed to) to get the ground truth rather
+than guessing again.
+
+**Root cause, concretely:** the reference's rain is deliberately *stepped*,
+not continuous -- each column is assigned a random "speed tier" (1, 2, or 3
+frames per step, weighted roughly 50/35/15) and only advances when its own
+tick counter reaches that tier, so at any given frame most columns aren't
+moving at all. It also runs at a slower 50ms/frame (20fps) cap, uses wider
+20px columns (vs. 16px), and keeps only ~90% of columns active at once
+(the rest dormant, occasionally reactivating). My first implementation had
+none of this: every column stepped one glyph on every single 40ms tick,
+unconditionally -- roughly double the effective fall rate with zero
+per-column variation, which reads as both "faster" and "too uniform."
+
+**Fix:** ported the reference's actual algorithm into
+`site/static/js/matrix-rain.js`, keeping this project's own constraints
+intact:
+- Per-column speed tiers, dormant/reactivating columns, 50ms frame cap,
+  20px columns -- matches the reference's felt pace and per-column speed
+  variety directly.
+- Settled trail glyphs occasionally flicker to a different character in
+  place (a "shimmer," not just a falling frozen string) and a brief
+  brighter "hot" flash on some column respawns -- both ported faithfully,
+  since they're part of what makes the reference read the way it does,
+  not just its raw speed.
+- Two adaptations, not straight copies: the reference's "surge" (a
+  temporary density/brightness ramp triggered by a live Bitcoin-block
+  arrival event specific to that site) has no equivalent here -- this is a
+  static site with no live client-side event stream -- so it's simply
+  omitted, not stubbed out. And the reference hardcodes pure white for its
+  brightest tier; this version reads every color from `tokens.css` at
+  runtime instead (the same rule every stylesheet here already follows),
+  producing the mid-bright "neck" tone via a runtime `color-mix()` of the
+  existing signal-green and star-white tokens (matching this project's own
+  established precedent for an in-between tone -- board.html's pulse-dot
+  glow) rather than hardcoding a third color or adding a new token.
+
+Verification: `python -m pytest` (709 passed, 2 deselected) and
+`python -m pytest site/tests` (296 passed -- the existing
+"no hardcoded color literal in matrix-rain.js" regression test required
+one comment-wording fix, since the docstring's own prose describing what
+the reference hardcodes tripped the same hex-literal regex the test uses;
+fixed by spelling the hex out without its leading punctuation) both green.
+Rebuilt and watched two Playwright screenshots ~600ms apart: columns now
+advance visibly less far per interval, with real variation in how far
+different columns move, matching the reference's calmer, more organic
+pace instead of the previous uniform, faster fall. No console errors.
+
+---
+
 ## 2026-07-11 — Architecture exception: canvas + JavaScript rain, replacing the static CSS/SVG tiles as the primary effect
 
 The owner shared a reference site of theirs (a live Bitcoin dashboard) whose
