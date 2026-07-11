@@ -7,6 +7,109 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Matrix digital-rain theme (zero-JS site-wide reskin)
+
+Prompted by the owner asking to "turn this into a matrix theme so that it
+exactly like the one in the movie where the green japanese words etc
+rains... for all pages involved." Implemented as a real, working,
+zero-JavaScript visual reskin across every generated page -- not a mockup
+and not a partial page -- in four sequential tasks (T1-T4), each committed
+under the `frontier-wire-bot` identity.
+
+**T1 -- palette swap + token rename.** Replaced every hex value in
+`site/static/css/tokens.css`'s `:root` block with a pre-verified
+Matrix-green palette and refreshed the header comment's own
+contrast-ratio table in the same commit (no doc drift): `ink` 13.72:1 vs
+`bg` / 12.52:1 vs `panel`; `signal-green` (renamed from `signal-cyan`,
+below) 15.70:1 / 14.33:1; `star-white` 19.34:1 / 17.65:1;
+`reported-amber` 10.87:1 / 9.91:1; `corrected-red` 6.89:1 / 6.29:1;
+`hairline` 1.51:1 / 1.38:1 (correctly stays sub-AA -- border/divider only,
+never text, never the focus ring). `site/tests/test_contrast_ratios.py`
+re-grades whatever palette is present by parsing `tokens.css` live, so
+none of these numbers are hardcoded a second time in a test.
+
+Also decided and executed, in the same commit: renaming
+`--color-signal-cyan` to `--color-signal-green`, since its value is now
+unambiguously green and this project already treats a token
+name/meaning mismatch as a real bug. Grepped the full usage spread first
+to size the blast radius -- a small, fully enumerated footprint (five
+`var()` references in `components.css`, one inline style in `board.html`,
+a hardcoded duplicate constant in `site/lib/svg_sparkline.py`, and
+prose-only mentions in `tokens.css`'s header comment, `card.html`'s
+template comments, `matrix_rain.py`'s docstring, and
+`test_contrast_ratios.py`/`test_build.py`) -- then renamed every one of
+those references atomically in the same pass, confirmed by a
+zero-stale-references grep gate (`grep -rn "signal-cyan" site/` returns
+nothing). The token's role (link/accent color, one-liner color,
+`.chip--confirmed`, and -- unchanged -- the site's one and only
+focus-ring color) is untouched; only its name and hex value changed. The
+already-logged hardcoded-hex duplicate in `svg_sparkline.py` was fixed in
+the same pass (`SIGNAL_CYAN` -> `SIGNAL_GREEN`, new hex), and a full
+`grep -rnoE "#[0-9A-Fa-f]{6}" site/` sweep (excluding `tokens.css` itself)
+confirmed no other module carries a similar undocumented duplicate --
+only that one now-fixed constant and the test files' own literal
+expected-value assertions (also updated to the new hex, e.g.
+`test_build.py`'s `--color-bg: #000000` / `--color-signal-green: #39FF6E`
+string checks).
+
+**T2 -- opaque chrome backgrounds.** Added `background: var(--color-bg)`
+to `.masthead`, `.site-footer`, and `main` in
+`site/static/css/components.css` so the upcoming fixed rain layer (which
+paints above the body background but below any in-flow element with its
+own background) never shows through behind masthead/footer/reading-column
+text. Every card/board/lexicon/primer/method/corrections/moving panel
+already set its own `--color-panel` background, so nothing else needed
+touching.
+
+**T3 -- wiring the rain layer into every page.** `site/lib/matrix_rain.py`
+(pre-existing, untouched, already deterministic and tested) is now wired
+into `site/generate.py` via two new functions: `read_color_token()`
+(parses the live `--color-signal-green` hex straight out of `tokens.css`
+-- the only place a token hex is read outside `tokens.css` itself) and
+`write_matrix_tiles_css()`, which emits the 10 unique seeded SVG
+data-URI tiles once into a build-generated `public/static/css/matrix-tiles.css`
+(one cached ~75KB file, not duplicated inline per page). A new
+`site/templates/_matrix_rain.html` partial renders 72 empty,
+`aria-hidden="true"`, `pointer-events: none` divs (one per column, no
+per-glyph DOM) right after the skip-link and before the masthead in
+`base.html`; each column's falling motion comes from a
+`background-position` CSS `@keyframes` tiling `background-repeat: repeat-y`
+against its assigned tile, at `z-index: -1` and `opacity: 0.15` so the
+layer is strictly decorative and behind every reading surface. Matching
+the Board's pulse-dot convention exactly, the animation exists only
+inside `@media (prefers-reduced-motion: no-preference)` with zero
+fallback animation outside it. `matrix.css` itself contains zero color
+literals of its own.
+
+**T4 -- regression tests.** Added `site/tests/test_matrix_rain.py`
+(determinism, seed sensitivity, delay/duration/left_pct bounds, safe
+percent-encoded tile URIs, column/tile/glyph-count overrides, the passed
+color landing percent-encoded in every tile) and extended
+`site/tests/test_build.py` with whole-site coverage: the rain wrapper
+renders on every generated page with `class="matrix-rain"` and
+`aria-hidden="true"` together and no focusable element inside it; a
+site-wide zero-`<script>` invariant; `matrix.css`'s
+`pointer-events`/negative-`z-index`/reduced-motion-gating properties;
+`matrix-tiles.css` sourcing the live `signal-green` token; the opaque
+masthead/footer/main backgrounds and components.css's own
+no-hardcoded-hex invariant; and a from-scratch byte-idempotence check
+across two independent build directories.
+
+**Verification, run fresh in this task, from a clean working tree:**
+- `python -m pytest -q` -- 709 passed, 2 deselected.
+- `python -m pytest -q site/tests` -- 290 passed.
+- `python site/generate.py` -- `Built site to /home/user/AI-Radar/public`, no
+  warnings.
+- `grep -r "<script" /home/user/AI-Radar/public/` -- empty (exit 1, no
+  matches).
+
+Full judgment-call reasoning (the rename decision, the rain-tuning
+choices, the mobile opaque-chrome trade-off, and why
+`matrix-tiles.css` is a build-generated static asset rather than an
+inline per-page block) is logged in `IMPROVEMENT_BACKLOG.md`.
+
+---
+
 ## 2026-07-11 — UI/UX + editorial-compliance audit and fix pass (Fable-directed)
 
 Prompted by the owner looking at the live Frontier Board page and reporting

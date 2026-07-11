@@ -3744,3 +3744,98 @@ sys.modules-registration pattern instead, since that is the actual
 precedent this repo uses whenever the loaded-by-path module needs it --
 confirmed by re-running `python -m pytest site/tests`, which fails to even
 collect without the registration line and passes cleanly with it.
+
+## Documenting the Matrix theme: PROGRESS.md top entry + this log (T5, 2026-07-11)
+
+Docs-only task, no code touched. Wrote the reverse-chronological
+`PROGRESS.md` top entry summarizing T1-T4 and re-ran all four
+verification commands fresh rather than copying the numbers T1-T4's own
+commits already reported (`python -m pytest` 709 passed / 2 deselected;
+`python -m pytest site/tests` 290 passed; `python site/generate.py` clean
+build; `grep -r "<script" public/` empty) -- they matched, which is itself
+worth recording as a confirmation that nothing drifted between T4's
+commit and this one. Five judgment calls, logged individually per the task
+brief even though most of them just restate decisions already made and
+reasoned through in T1-T2's own entries above:
+
+- **(a) The `signal-cyan` -> `signal-green` rename, restated with its
+  measured blast radius.** Reaffirming T1's decision: before renaming,
+  grepped the live footprint and found it small and fully enumerable --
+  five `var()` references in `components.css`, one inline style in
+  `board.html`, one hardcoded hex duplicate in `svg_sparkline.py`, and a
+  handful of prose-only mentions in `tokens.css`'s header comment,
+  `card.html`'s template comments, `matrix_rain.py`'s docstring, and two
+  test files. That size (not "many dozens of call sites scattered across
+  the templates") is what made an atomic rename-everywhere-at-once the
+  right call instead of a deprecate-then-migrate approach. Historical
+  mentions of the old `signal-cyan` name inside `PROGRESS.md` and this
+  file's own earlier entries (e.g. the Phase 4 palette-selection entry,
+  and `test_contrast_ratios.py`'s own docstrings quoted verbatim in past
+  entries) were deliberately left untouched -- they describe what was true
+  *at the time those entries were written*, and rewriting history in a
+  reverse-chronological build log to match the present would itself be
+  the kind of silent drift this project's audits exist to catch. Only
+  live code/CSS/template/test references were renamed; the paper trail
+  documenting the old name was not.
+- **(b) Rain tuning choices, restated for the doc record.** `opacity: 0.15`
+  on `.matrix-rain` was chosen inside the deliberate 0.12-0.18 "ambient"
+  band -- high enough to actually read as a Matrix-style rain effect in
+  the desktop gutters, low enough that it can never compete with
+  foreground text contrast (the opaque chrome backgrounds from T2 are the
+  hard guarantee; this opacity choice is the softer, purely aesthetic
+  second layer of the same "never fight the reader" principle). Every one
+  of `site/lib/matrix_rain.py`'s own defaults was kept as-is (`seed=1337`,
+  `tile_count=10`, `glyphs_per_tile=44`, `column_count=72`,
+  `min_duration_s=9.0`, `max_duration_s=23.0`) -- that module was already
+  built, tested, and explicitly called out as complete in the task brief,
+  so re-tuning any of those numbers here would have been scope creep with
+  no reported problem to justify it.
+- **(c) The mobile trade-off, restated for the doc record.** Because
+  `.masthead`, `.site-footer`, and `main` are all opaque (T2) and `main`'s
+  `.container` is full viewport width at the site's 375px-clean baseline,
+  the rain is effectively invisible on phones -- visible only in the
+  gutters either side of the reading column on wider viewports. This is
+  the deliberate outcome T2 already chose (readability over ambience, on
+  every viewport, always) rather than a defect discovered here. Logging a
+  future candidate: a narrower-viewport tuning pass (e.g. a thin
+  translucent margin strip on mobile, or a very-low-opacity rain hint
+  bleeding through `main` itself below some minimum contrast floor) could
+  bring some ambience to phone readers without touching the opaque
+  guarantee for the actual text columns -- not attempted here, no reported
+  need for it, and any such change would need its own contrast
+  re-verification against `test_contrast_ratios.py`.
+- **(d) `matrix-tiles.css` as a build-generated static asset, not an
+  inline per-page `<style>` block.** Two reasons, both already implicit in
+  T3's own design but worth stating explicitly for the doc record: (1) the
+  10 unique SVG data-URI tiles are sizeable (the full generated file is
+  roughly 75KB); emitting them once into a single cached, browser-cachable
+  stylesheet that every one of the site's 39 generated pages links to
+  costs far less total bytes-over-the-wire across a real visit than
+  duplicating all 10 tiles inline into every single page's own `<head>`
+  (which would multiply that ~75KB by 39). (2) `generate.py`'s existing
+  `apply_base_path()` pass only ever rewrites literal `href="/`/`src="/`
+  prefixes in rendered HTML output -- it has no reason to, and does not,
+  reach into embedded `data:` URIs, so keeping the tiles in their own
+  linked stylesheet (referenced via a normal `href`) means they ride along
+  with every other static asset's existing base-path handling for free,
+  rather than requiring a new carve-out inside `apply_base_path()` to avoid
+  it accidentally mangling a `data:` URI it was never meant to touch.
+- **(e) Updating the standing `svg_sparkline.py` hardcoded-hex entry
+  above (originally logged around the Phase 4 sparkline commit, now
+  around line 1289 of this file).** That entry's constant is the same one
+  T1's rename swept: `SIGNAL_CYAN = "#43E5C4"` is now `SIGNAL_GREEN =
+  "#39FF6E"`, still hand-maintained in lockstep with `tokens.css` for the
+  same reason that original entry gave (this module emits raw SVG with no
+  CSS cascade access). What's new since that entry was written:
+  `site/generate.py` now has `read_color_token()`, a small,
+  already-tested function that parses a named `--color-*` custom property
+  straight out of the live `tokens.css` (built for `matrix_rain.py`'s own
+  color input in T3). That function lives in `site/generate.py`, not
+  `site/lib/`, and `svg_sparkline.py` is called from builder code that
+  runs independently of `generate.py`'s own module-level state in several
+  of its existing tests, so wiring `svg_sparkline.py` to call it directly
+  isn't a trivial one-line change today. Logging as a candidate follow-up,
+  not doing it now: a future pass could relocate `read_color_token()` (or
+  an equivalent) to `site/lib/` so both `matrix_rain.py` and
+  `svg_sparkline.py` share one real tokens.css parser instead of the
+  latter keeping a hand-maintained duplicate constant.
