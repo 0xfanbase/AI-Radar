@@ -3662,3 +3662,55 @@ new regression test (`site/tests/test_build.py`,
 `components.css` to hold both of those invariants going forward instead
 of relying on manual review alone.
 palette-and-rename sweep.
+
+## Wiring the digital-rain layer into every page (T3, 2026-07-11)
+
+Wired `site/lib/matrix_rain.py` (already complete, untouched) into
+`site/generate.py`, a new `site/templates/_matrix_rain.html` partial, and a
+new `site/static/css/matrix.css`, hooked into `base.html` right after the
+skip-link. Two judgment calls, spec-silent in the letter of the task brief
+but flagged there to be logged either way:
+
+1. **`env.globals` for the rain data, not a parameter threaded through
+   `render_pages()`/every builder.** The task brief itself already argues
+   for this (a site-wide visual theme is a genuinely global concern, unlike
+   the since-revisited `masthead_sparklines` global scoped to one page), so
+   this isn't really a fresh judgment call so much as confirmation: verified
+   by inspection that every one of the seven page builders
+   (`site/builders/*.py`) constructs its own standalone `StrictUndefined`
+   Jinja environment for its own tests, with no `site/generate.py` globals
+   present at all -- so the `{% if matrix_rain_columns is defined and
+   matrix_rain_columns %}` guard in `base.html` (mirroring the existing
+   `masthead_sparklines` guard) is load-bearing, not decorative: it is the
+   only reason all 263+ builder-level tests stay green without any of them
+   needing to fake this global in. Confirmed this holds after the change --
+   `python -m pytest site/tests` is green with zero builder-test edits.
+
+2. **`write_matrix_tiles_css()` writes into `public_dir` directly (a build
+   output path), not into `site/static/css/` (a source path).** The task
+   brief specifies this ordering explicitly (after `copy_static()`, which
+   `rmtree()`s and recopies `public/static/` from `site/static/`, so writing
+   the generated tiles file into the source tree first would just get
+   copied over needlessly and -- worse -- would leave a build artifact
+   sitting in version control if ever accidentally `git add`ed). Chose to
+   also *not* add `public/static/css/matrix-tiles.css` to `.gitignore`
+   explicitly, since `public/` as a whole is already gitignored wholesale
+   (confirmed via `git status --short` showing no `public/` entries
+   throughout this task) -- a redundant explicit ignore rule would be dead
+   weight.
+
+No new hardcoded hex values anywhere in this task: `site/generate.py`'s new
+`read_color_token()` is the only place a token hex is read, straight out of
+the real `tokens.css`, and `matrix.css` is verified (new regression test,
+`site/tests/test_build.py::test_matrix_css_has_no_hardcoded_hex_colors`) to
+contain zero color literals of its own -- the glyph color lives only inside
+the SVG tiles `matrix_rain.py` already builds from that same read value.
+Also added a regression test asserting `matrix.css`'s only `animation`/
+`@keyframes` declarations live inside
+`@media (prefers-reduced-motion: no-preference)`, matching `board.html`'s
+pulse-dot convention exactly, plus whole-site integration tests (via the
+existing `built_site` fixture) that the rain layer's `aria-hidden="true"`
+wrapper renders on every one of the site's 39 generated pages, right after
+the skip-link and before the masthead, with no inline `animation:` or
+inlined `data:` URI in the per-page HTML itself (those live in
+`matrix.css` / `matrix-tiles.css` respectively, not duplicated per-page).

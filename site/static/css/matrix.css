@@ -1,0 +1,60 @@
+/*
+ * AI Frontier Wire -- Matrix-theme digital-rain decorative layer.
+ *
+ * Decorative only: this stylesheet contains ZERO color values. The glyph
+ * color lives inside the SVG tiles themselves (baked at build time from
+ * the live tokens.css --color-signal-green value -- see
+ * site/generate.py::read_color_token / site/lib/matrix_rain.py), and this
+ * file only ever positions/sizes/animates those tiles. Do not add a
+ * hardcoded hex value here; if this layer ever needs a color of its own
+ * (e.g. a scrim), source it from a tokens.css custom property like every
+ * other stylesheet in this codebase must.
+ *
+ * The ONLY animation on this layer lives inside
+ * `@media (prefers-reduced-motion: no-preference)`, with no fallback
+ * animation outside it -- matching board.html's pulse-dot convention
+ * exactly (see components.css). Under reduced motion, `.matrix-rain__col`
+ * still renders (a static tiled backdrop at its fixed background-position)
+ * but never animates.
+ *
+ * .matrix-rain itself is `position: fixed; inset: 0; z-index: -1;
+ * pointer-events: none;` -- strictly behind every in-flow element,
+ * including the opaque `background: var(--color-bg)` chrome panels
+ * (.masthead, .site-footer, main; see components.css) that keep it from
+ * ever showing behind actual reading text. `aria-hidden="true"` (set in
+ * the _matrix_rain.html partial, not here) removes it from the
+ * accessibility tree entirely.
+ */
+
+.matrix-rain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.15; /* ambient only -- must never compete with foreground contrast */
+}
+
+.matrix-rain__col {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--rain-tile-w);
+  background-repeat: repeat-y;
+  background-position: 0 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .matrix-rain__col {
+    animation: matrix-rain-fall var(--rain-duration) linear var(--rain-delay) infinite;
+  }
+
+  @keyframes matrix-rain-fall {
+    from {
+      background-position-y: 0;
+    }
+    to {
+      background-position-y: var(--rain-tile-h);
+    }
+  }
+}

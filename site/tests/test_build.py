@@ -91,6 +91,88 @@ def test_generate_produces_components_css(tmp_path):
     assert components.is_file()
 
 
+# --- Matrix-theme digital-rain layer (T3): generate.py wiring --------------
+#
+# site/generate.py::read_color_token() is the single sanctioned way to pull
+# a token's real hex value out of tokens.css into Python, for exactly the
+# reason site/lib/svg_sparkline.py's hardcoded SIGNAL_GREEN constant is
+# logged as a duplicate to avoid repeating (IMPROVEMENT_BACKLOG.md). These
+# tests exercise that function directly, plus write_matrix_tiles_css()'s own
+# output shape, before the broader page-integration checks further below.
+
+
+def test_read_color_token_reads_the_real_signal_green_value():
+    value = generate.read_color_token("signal-green")
+    assert value == "#39FF6E"
+    # Cross-check against the same regex convention
+    # site/tests/test_contrast_ratios.py independently uses, so this test
+    # doesn't just re-assert a hardcoded literal against itself.
+    css = (generate.STATIC_DIR / "css" / "tokens.css").read_text(encoding="utf-8")
+    assert f"--color-signal-green: {value}" in css
+
+
+def test_read_color_token_raises_loudly_on_a_missing_token(tmp_path):
+    fake_tokens = tmp_path / "tokens.css"
+    fake_tokens.write_text(":root { --color-bg: #000000; }", encoding="utf-8")
+    with pytest.raises(ValueError):
+        generate.read_color_token("signal-green", tokens_css_path=fake_tokens)
+
+
+def test_write_matrix_tiles_css_writes_one_custom_property_per_unique_tile(tmp_path):
+    tiles = ["data:image/svg+xml,%3Csvg%3E1%3C%2Fsvg%3E", "data:image/svg+xml,%3Csvg%3E2%3C%2Fsvg%3E"]
+    path = generate.write_matrix_tiles_css(tiles, tmp_path)
+    assert path == tmp_path / "static" / "css" / "matrix-tiles.css"
+    css = path.read_text(encoding="utf-8")
+    assert ".matrix-rain {" in css
+    assert f'--rain-tile-0: url("{tiles[0]}");' in css
+    assert f'--rain-tile-1: url("{tiles[1]}");' in css
+    assert "do not hand-edit" in css
+
+
+# --- Matrix-theme digital-rain layer (T3): whole-site integration ----------
+
+
+def test_matrix_css_and_matrix_tiles_css_are_copied_to_every_build(tmp_path):
+    generate.generate(public_dir=tmp_path)
+    assert (tmp_path / "static" / "css" / "matrix.css").is_file()
+    assert (tmp_path / "static" / "css" / "matrix-tiles.css").is_file()
+
+
+def test_matrix_tiles_css_contains_the_live_signal_green_hex_percent_encoded(tmp_path):
+    generate.generate(public_dir=tmp_path)
+    css = (tmp_path / "static" / "css" / "matrix-tiles.css").read_text(encoding="utf-8")
+    color = generate.read_color_token("signal-green")
+    encoded_hex = "%23" + color.lstrip("#")
+    assert encoded_hex in css
+    assert "data:image/svg+xml" in css
+
+
+def test_matrix_css_has_no_hardcoded_hex_colors(tmp_path):
+    generate.generate(public_dir=tmp_path)
+    css = (tmp_path / "static" / "css" / "matrix.css").read_text(encoding="utf-8")
+    hex_literals = re.findall(r"#[0-9A-Fa-f]{3,8}\b", css)
+    assert hex_literals == [], (
+        f"matrix.css must contain zero color values (glyph color lives inside "
+        f"the SVG tiles), found hardcoded hex literal(s): {hex_literals}"
+    )
+
+
+def test_matrix_css_animation_only_declared_inside_reduced_motion_media_query():
+    # Only the CSS *outside* any comment may declare an animation -- the
+    # header comment's own prose ("The ONLY animation on this layer lives
+    # inside...") legitimately contains the word, so strip comments first
+    # rather than substring-matching the raw file.
+    css = (generate.STATIC_DIR / "css" / "matrix.css").read_text(encoding="utf-8")
+    css_no_comments = re.sub(r"/\*.*?\*/", "", css, flags=re.DOTALL)
+    media_start = css_no_comments.index("@media (prefers-reduced-motion: no-preference)")
+    before_media = css_no_comments[:media_start]
+    assert not re.search(r"\banimation\s*:", before_media)
+    assert "@keyframes" not in before_media
+    after_media = css_no_comments[media_start:]
+    assert re.search(r"\banimation\s*:", after_media)
+    assert "@keyframes matrix-rain-fall" in after_media
+
+
 # --- Opaque chrome-background invariant (Matrix-theme rain layer, T2) ------
 #
 # The decorative fixed rain layer (site/static/css/matrix.css) is
@@ -383,6 +465,49 @@ def test_masthead_sparkline_strip_absent_from_every_other_page(built_site):
         assert "masthead-strip" not in html, (
             f"{page.relative_to(built_site)} unexpectedly has the home-page-only masthead sparkline strip"
         )
+
+
+# --- Matrix-theme digital-rain layer (T3): rendered on every page ----------
+#
+# Unlike the masthead sparkline strip above (Wire-home-page-only), the rain
+# layer is a genuinely site-wide concern -- it must render on every page.
+
+
+def test_matrix_rain_layer_renders_on_every_generated_page(built_site):
+    pages = _all_html_files(built_site)
+    assert pages, "expected at least one generated HTML page"
+    for page in pages:
+        html = page.read_text(encoding="utf-8")
+        assert 'class="matrix-rain"' in html, (
+            f"{page.relative_to(built_site)} is missing the matrix-rain layer"
+        )
+        assert 'aria-hidden="true"' in html
+
+
+def test_matrix_rain_layer_has_the_full_default_column_count_on_every_page(built_site):
+    html = (built_site / "index.html").read_text(encoding="utf-8")
+    assert html.count('class="matrix-rain__col"') == generate.matrix_rain.DEFAULT_COLUMN_COUNT
+
+
+def test_matrix_rain_layer_comes_after_the_skip_link_and_before_the_masthead(built_site):
+    html = (built_site / "index.html").read_text(encoding="utf-8")
+    skip_link_pos = html.index('class="skip-link"')
+    rain_pos = html.index('class="matrix-rain"')
+    masthead_pos = html.index('class="masthead"')
+    assert skip_link_pos < rain_pos < masthead_pos
+
+
+def test_matrix_rain_layer_has_no_inline_animation_or_data_uri(built_site):
+    # The rendered partial itself must carry only inert custom properties
+    # (--rain-duration/--rain-delay/tile-height/tile-width) -- no literal
+    # "animation" property and no inlined data: URI -- both belong in
+    # matrix.css / matrix-tiles.css respectively, not in the per-page HTML.
+    html = (built_site / "index.html").read_text(encoding="utf-8")
+    rain_start = html.index('class="matrix-rain"')
+    rain_end = html.index("</div>", html.index('class="matrix-rain__col"', rain_start))
+    rain_markup = html[rain_start:rain_end]
+    assert "animation:" not in rain_markup
+    assert "data:image/svg+xml" not in rain_markup
 
 
 # --- 404 / sitemap.xml / robots.txt ----------------------------------------
