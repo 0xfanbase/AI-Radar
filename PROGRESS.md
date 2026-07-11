@@ -7,6 +7,137 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Phase 5: `scripts/fortnight_guard.py` + `.github/workflows/improve.yml` (reference only) -- improve-loop Routine NOT yet activated, pending owner approval
+
+Designs and documents the fortnightly self-improvement loop's mechanism in
+full -- the last unbuilt piece of Phase 5's own file layout -- **without**
+creating any live trigger for it, per this turn's own explicit, binding
+scope. The daily analyst refresh already runs as a Claude Code Remote
+Routine (see the architecture-change entry below); a second Routine for
+this loop would be authorized to touch *any* file in the repo, not just
+`content/`/`data/`, and the repo owner has not been asked for, and has not
+given, that broader go-ahead. See
+`IMPROVEMENT_BACKLOG.md`'s own matching, more detailed entry ("Phase 5:
+improve-loop Routine NOT yet activated -- requires explicit owner
+approval") for the full reasoning; this entry covers what was actually
+built and tested.
+
+**`scripts/fortnight_guard.py`** (new): a pure-code ISO-week-parity guard
+-- `decide_fortnight_mode(today: date)` takes an explicit date (never
+`date.today()`/`datetime.now()` internally; only `main()`'s own
+`_default_today()` seam ever reads the real clock, and only when `--date`
+isn't passed) and returns `{date, iso_year, iso_week, iso_weekday, parity,
+mode, reason}`, where `mode` is `"run"` if `today`'s ISO week number
+(`date.isocalendar()[1]`) is odd, else `"skip"` -- approximating a
+fortnightly cadence from a weekly firing exactly the way
+`scripts/plan_run.py`'s own degradation-ladder level 2 approximates
+every-other-day from a daily one, but with ISO-week parity instead of
+day-of-year parity (the correct fit for halving a *weekly*, not *daily*,
+cadence -- see the module's own docstring for the full reasoning).
+`write_github_output()` appends `mode`/`iso_year`/`iso_week`/`parity` as
+GitHub Actions step outputs when `$GITHUB_OUTPUT` is set in the
+environment (a real, always-present env var inside any GitHub Actions
+step; the script just reads it, no shell redirection needed in the
+workflow itself), so `improve.yml`'s own subsequent steps can gate on
+`steps.guard.outputs.mode` directly. No persisted `data/*.json` artifact
+is written -- the approved plan names none for this guard, unlike
+`plan_run.py`'s `data/run_plan.json`.
+
+**The year-boundary quirk, verified against two real boundaries, not
+assumed:** an ISO year has 53 weeks (instead of 52) in roughly one year of
+five; at that boundary, week 53 (odd) is immediately followed by week 1 of
+the next year (also odd, since ISO week numbers always start at 1) --
+two consecutive "run" weeks in a row rather than a strict alternation.
+`date(2026, 12, 28).isocalendar()[1] == 53` was confirmed live (Python's
+own standard library, not assumed) to make 2026 a genuine 53-ISO-week
+year, and `tests/test_fortnight_guard.py` walks eight real consecutive
+Sundays straight through the actual 2026-to-2027 boundary, asserting the
+documented back-to-back "run" pair (2027-01-03, then 2027-01-10) occurs
+and that it's the *only* adjacent same-mode pair in that whole sequence.
+A second real boundary, 2027-to-2028 (2027 is an ordinary 52-ISO-week
+year, also confirmed live), is walked the same way to prove clean
+alternation with zero exceptions in the common case. This is the "real
+year boundary" proof this turn's own instruction asked for.
+
+**New test file `tests/test_fortnight_guard.py`** (20 tests):
+`iso_week_parity` correctness against hand-checked real dates, including
+the "ISO week 1 is always odd, across different calendar years" case
+(each of the three sample dates independently confirmed via
+`date.isocalendar()` before being asserted, per this turn's own
+"verify before writing a claim down" instruction, after an earlier draft
+of this same test picked dates that turned out *not* to actually be ISO
+week 1 and was corrected before being written to disk);
+`decide_fortnight_mode`'s exact full-dict shape for both a run week and a
+skip week; ordinary week-to-week alternation; the two real-year-boundary
+proofs described above; `write_github_output`'s exact emitted lines and
+its append-not-overwrite behavior (via `tmp_path`); and `main()`'s CLI
+plumbing (`--date` parsing, stdout content, `GITHUB_OUTPUT` written only
+when the env var is actually set, and the real-clock default-date path
+proven via a monkeypatched `_default_today` seam rather than depending on
+whatever the real ISO week parity happens to be on the day this suite
+runs).
+
+**`.github/workflows/improve.yml`** (new; reference-only, same
+annotated-inactive pattern as `analyze.yml`, plus a second, stronger point
+its own header spells out: even beyond needing a `CLAUDE_CODE_OAUTH_TOKEN`
+secret this project doesn't manage, no live trigger of *any* kind --
+GitHub Actions schedule or a second Routine -- has been created for this
+specific job, and that is a deliberate, separate withholding of authority,
+not merely "not built yet"). Describes, in order: `workflow_dispatch`
+trigger only (no `schedule:` block -- the real cadence would live in
+whichever future Routine calls this procedure); a guard step
+(`python scripts/fortnight_guard.py`, `id: guard`); a backlog-item-picking
+step (`python scripts/pick_backlog_item.py`, `id: pick`, gated on
+`steps.guard.outputs.mode == 'run'`, capturing that already-shipped
+script's stdout into a step output itself rather than modifying that
+script); a single `claude-code-action@v1` step (`--max-turns 25`, own
+`--allowedTools` that -- unlike the daily ANALYST/VERIFIER -- may
+`Edit`/`Write` anywhere in the repo, since this step's whole output is an
+unmerged PR, not an auto-commit) whose prompt names the one picked item
+verbatim and instructs it to implement only that item, run
+`python -m pytest` itself, and check off that item's box in
+`IMPROVEMENT_BACKLOG.md`; a second, independent `python -m pytest` step
+as a structural backstop (logged as a deliberate scope addition beyond
+the plan's literal text, in the same spirit as Phase 1's PM-checkpoint
+tokenizer-fix addition); and a `peter-evans/create-pull-request@v6` step
+that stages, commits (bot identity via that action's own
+`author`/`committer` inputs), pushes a fresh branch, and opens the PR.
+**Structural no-merge guarantee**: no merge step of any kind appears
+anywhere in the file -- the job's last step opens a PR and stops.
+
+**Verification:** `python -m pytest` -- **906 passed, 2 deselected** (up
+from 886 immediately before this turn; +20 new tests, exactly
+`tests/test_fortnight_guard.py`'s own count; nothing else changed or
+broke). Both workflow YAML files touched or referenced this turn
+(`improve.yml`, freshly written) were re-validated with `yaml.safe_load`
+after writing -- confirmed to parse with the identical `{"on": True, ...}`
+PyYAML quirk every other workflow file in this repo already exhibits
+(YAML 1.1 treats the bare word `on` as a boolean; this is a PyYAML/YAML-1.1
+artifact, not a GitHub Actions parsing issue, and is pre-existing across
+`analyze.yml`/`audit.yml`/`watch.yml`/`ci.yml` too -- checked directly,
+not assumed, before concluding it wasn't a new problem introduced by this
+turn's own file). No file outside `scripts/fortnight_guard.py`,
+`tests/test_fortnight_guard.py`, and `.github/workflows/improve.yml` was
+touched by this turn's own code changes (`PROGRESS.md` and
+`IMPROVEMENT_BACKLOG.md` are documentation-only, and
+`scripts/pick_backlog_item.py` was read but deliberately not modified, per
+this turn's own instruction that it's already built).
+
+**What remains, stated plainly, for the user:** activating the
+fortnightly loop for real means the repo owner explicitly authorizing and
+creating a second Claude Code Remote Routine (firing weekly, running
+`fortnight_guard.py` then, on a "run" week,
+`pick_backlog_item.py` then the IMPROVE prompt then `pytest` then opening
+a PR -- never merging it) -- or, alternatively, adding the
+`CLAUDE_CODE_OAUTH_TOKEN` secret and a real `schedule:` cron to
+`improve.yml` itself and running it as literal GitHub Actions YAML. Either
+path is a deliberate, informed, owner-initiated action this session does
+not take on its own, exactly mirroring the daily analyst Routine's own
+activation history (designed and documented first, activated by explicit
+owner request second).
+
+---
+
 ## 2026-07-11 — Phase 5: `.github/workflows/audit.yml` (weekly, no LLM) + `scripts/pick_backlog_item.py` (fortnightly-improve-loop backlog-item picker)
 
 Wires the auditor package built across the five entries directly below
