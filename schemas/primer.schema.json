@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/primer.schema.json",
+  "title": "Primer",
+  "description": "The Primer's ordered term list (content/primer.json): {generated_at, terms[]}. `terms` is a fixed, dependency-ordered list of lexicon slugs (lowercase-hyphenated, matching each lexicon entry's term run through the term -> slug transform in site/builders/primer.py) -- e.g. a newcomer must meet 'foundation-model' before 'fine-tuning' makes sense, so order is load-bearing, not incidental. Phase 3 seeds this file with the 10-slug on-ramp; site/builders/primer.py renders it as the /primer/ page.",
+  "type": "object",
+  "required": ["generated_at", "terms"],
+  "properties": {
+    "generated_at": {
+      "type": "string",
+      "format": "date",
+      "description": "Calendar day (YYYY-MM-DD) this primer's term list was last generated/reviewed."
+    },
+    "terms": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+      },
+      "description": "Dependency-ordered lexicon slugs (lowercase-hyphenated), each resolvable to a content/lexicon.json entry, rendered in this order by site/builders/primer.py."
+    }
+  },
+  "additionalProperties": false
+}

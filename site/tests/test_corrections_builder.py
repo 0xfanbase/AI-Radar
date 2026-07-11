@@ -156,3 +156,49 @@ def test_render_corrections_page_orders_newest_correction_first_in_markup():
     newer_pos = html.index("The lab is based in Paris.")
     older_pos = html.index("The model has a 10 million token context window.")
     assert newer_pos < older_pos
+
+
+# ---------------------------------------------------------------------------
+# card_href -- cross-link back to the original card (T6, CLAUDE.md Hard
+# Rule 5: corrections must link back to the card they correct).
+# ---------------------------------------------------------------------------
+
+
+def test_card_href_for_computes_month_archive_anchor():
+    assert (
+        corrections.card_href_for("2026-07-09-example-story")
+        == "/wire/2026-07/#card-2026-07-09-example-story"
+    )
+
+
+def test_build_correction_view_sets_card_href():
+    view = corrections.build_correction_view(
+        {
+            "id": "corr-x",
+            "card_id": "2026-07-09-example-story",
+            "original_claim": "a",
+            "corrected_claim": "b",
+            "reason": "c",
+            "source_url": "https://example.com",
+            "corrected_at": "2026-07-09T00:00:00Z",
+        }
+    )
+    assert view.card_href == "/wire/2026-07/#card-2026-07-09-example-story"
+
+
+def test_render_corrections_page_links_back_to_the_original_card():
+    fixture = [
+        {
+            "id": "corr-2026-07-09-a",
+            "card_id": "2026-07-09-example-story",
+            "original_claim": "The model has 10B parameters.",
+            "corrected_claim": "The model has 100B parameters.",
+            "reason": "Misread the primary source.",
+            "source_url": "https://example.com/spec",
+            "corrected_at": "2026-07-09T12:00:00Z",
+        }
+    ]
+    html = corrections.render_corrections_page(fixture)
+    assert 'href="/wire/2026-07/#card-2026-07-09-example-story">read the original story</a>' in html
+    # The raw card_id slug is never surfaced to readers as visible text.
+    assert ">2026-07-09-example-story<" not in html

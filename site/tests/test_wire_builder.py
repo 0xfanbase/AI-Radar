@@ -216,6 +216,17 @@ def test_prepare_card_view_fallback_terms_for_unmatched_and_unlisted():
     assert fallback_by_term["unlisted term"] is None
 
 
+def test_prepare_card_view_topics_use_shared_display_names():
+    # T7: card topic chips must go through the exact same
+    # site/lib/topics.py::display_name mapping site/builders/moving.py's
+    # /moving/ page rows use, so a raw enum value like "chips/compute"
+    # never leaks onto the rendered page verbatim.
+    slug_map = wire.linkify.build_slug_map(SYNTHETIC_LEXICON)
+    card = {**CARD_CONFIRMED, "topics": ["chips/compute", "open-source", "models"]}
+    view = wire.prepare_card_view(card, slug_map)
+    assert view["topics"] == ["Chips / Compute", "Open Source", "Models"]
+
+
 def test_prepare_card_view_no_lexicon_terms_yields_no_fallback():
     slug_map = wire.linkify.build_slug_map(SYNTHETIC_LEXICON)
     view = wire.prepare_card_view(CARD_REPORTED, slug_map)
@@ -227,6 +238,20 @@ def test_prepare_card_view_correction_note_passthrough():
     view = wire.prepare_card_view(CARD_CORRECTED_OLD_MONTH, slug_map)
     assert view["correction_note"] == CARD_CORRECTED_OLD_MONTH["correction_note"]
     assert wire.prepare_card_view(CARD_CONFIRMED, slug_map)["correction_note"] is None
+
+
+def test_prepare_card_view_generated_at_and_model_passthrough():
+    # Hard Rule 5 (CLAUDE.md): every card must visibly carry its generated
+    # timestamp and model. prepare_card_view must actually copy these two
+    # schema-required fields into the view model, not just the date/status.
+    slug_map = wire.linkify.build_slug_map(SYNTHETIC_LEXICON)
+    view = wire.prepare_card_view(CARD_CONFIRMED, slug_map)
+    assert view["generated_at"] == CARD_CONFIRMED["generated_at"]
+    assert view["model"] == CARD_CONFIRMED["model"]
+
+    view_reported = wire.prepare_card_view(CARD_REPORTED, slug_map)
+    assert view_reported["generated_at"] == CARD_REPORTED["generated_at"]
+    assert view_reported["model"] == CARD_REPORTED["model"]
 
 
 # ---------------------------------------------------------------------------
@@ -268,9 +293,12 @@ def test_render_wire_index_sources_are_a_real_link_list_with_outlet_names(env):
 
 
 def test_render_wire_index_topic_chips_are_text_labeled(env):
+    # T7: chips render the shared friendly display name (site/lib/topics.py),
+    # never the raw card.schema.json enum value verbatim.
     html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
     for topic in CARD_CONFIRMED["topics"]:
-        assert f'<span class="chip">{topic}</span>' in html
+        display_name = wire.topics_lib.display_name(topic)
+        assert f'<span class="chip">{display_name}</span>' in html
 
 
 def test_render_wire_index_lexicon_fallback_chip_rendered(env):
@@ -279,6 +307,80 @@ def test_render_wire_index_lexicon_fallback_chip_rendered(env):
     assert '<a href="/lexicon/rlhf/">RLHF</a>' in html
     # Unresolvable fallback term still renders as a (plain, unlinked) chip.
     assert "unlisted term" in html
+
+
+def test_render_wire_index_lexicon_fallback_chip_marks_inert_vs_clickable(env):
+    # T8: a fallback chip with no resolvable lexicon slug must be visually
+    # (and accessibly) distinguishable from a clickable one -- readers
+    # can't tell a plain-text chip from a link chip otherwise, since both
+    # render inside the identical `.chip` pill.
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+
+    # "RLHF" resolves to a real lexicon page -- its chip is clickable and
+    # must NOT carry the inert marker.
+    assert '<span class="chip"><a href="/lexicon/rlhf/">RLHF</a></span>' in html
+
+    # "unlisted term" has no lexicon entry at all -- its chip must carry
+    # the inert class plus a visible-to-assistive-tech `title` explaining
+    # why it isn't a link.
+    assert (
+        '<span class="chip chip--inert" title="Not yet defined in the Lexicon">unlisted term</span>'
+        in html
+    )
+
+
+def test_render_wire_index_generated_at_and_model_disclosed_in_meta_element(env):
+    # Hard Rule 5 (CLAUDE.md): generated timestamp + model must be visibly
+    # rendered per card, in a dedicated disclosure line -- not merely
+    # available in the view model.
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+    import re
+
+    meta_matches = re.findall(r'<p class="wire-card__meta[^"]*">.*?</p>', html, flags=re.DOTALL)
+    assert meta_matches, "expected at least one wire-card__meta element"
+    joined_meta = "\n".join(meta_matches)
+    assert CARD_CONFIRMED["model"] in joined_meta
+    assert CARD_CONFIRMED["generated_at"] in joined_meta
+    assert CARD_REPORTED["model"] in joined_meta
+    assert CARD_REPORTED["generated_at"] in joined_meta
+
+
+def test_render_wire_index_card_article_carries_stable_id_anchor(env):
+    # CLAUDE.md Hard Rule 5 cross-link (T6): the Corrections page links
+    # back to the exact card via `/wire/<YYYY-MM>/#card-<id>`, which only
+    # resolves if the rendered card article itself carries a matching
+    # `id="card-<id>"` anchor.
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+    assert f'id="card-{CARD_CONFIRMED["id"]}"' in html
+    assert f'id="card-{CARD_REPORTED["id"]}"' in html
+
+
+def test_render_wire_index_every_card_footer_links_to_corrections_page(env):
+    # Hard Rule 5: "The Corrections page is public and linked from every
+    # card footer." Both in-window cards' `.wire-card__meta` footer line
+    # must each carry a `/corrections/` link -- not just the shared
+    # site-wide footer.
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+    import re
+
+    meta_matches = re.findall(r'<p class="wire-card__meta[^"]*">.*?</p>', html, flags=re.DOTALL)
+    assert len(meta_matches) == 2
+    for meta in meta_matches:
+        assert 'href="/corrections/"' in meta
+
+
+def test_render_wire_month_correction_note_links_to_corrections_page(env):
+    html = wire.render_wire_month(env, ALL_CARDS, SYNTHETIC_LEXICON, "2026-05")
+    assert CARD_CORRECTED_OLD_MONTH["correction_note"] in html
+    assert 'href="/corrections/">see the full correction</a>' in html
+
+
+def test_render_wire_index_why_it_matters_label_once_per_card(env):
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+    # Within the 14-day window there are exactly two cards (CARD_CONFIRMED,
+    # CARD_REPORTED) -- the label must appear exactly once per card, as a
+    # distinct visual block, not zero or duplicated.
+    assert html.count('<p class="wire-card__why-label">Why it matters</p>') == 2
 
 
 def test_render_wire_index_excludes_cards_outside_the_window(env):
@@ -292,6 +394,27 @@ def test_render_wire_index_links_archive_months(env):
     html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
     assert '<a href="/wire/2026-07/">July 2026</a>' in html
     assert '<a href="/wire/2026-05/">May 2026</a>' in html
+
+
+def test_render_wire_index_masthead_sparklines_present_when_passed(env):
+    # The masthead sparkline strip is scoped to the Wire home page only
+    # (nav-condense pass, see IMPROVEMENT_BACKLOG.md) -- render_wire_index
+    # includes it exactly when a caller (site/generate.py, in real use)
+    # passes a non-empty masthead_sparklines list.
+    from markupsafe import Markup
+
+    fake_sparklines = [
+        {"topic": "models", "display_name": "Models", "sparkline_svg": Markup("<svg>fake</svg>")}
+    ]
+    html = wire.render_wire_index(
+        env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY, masthead_sparklines=fake_sparklines
+    )
+    assert "masthead-strip" in html
+
+
+def test_render_wire_index_masthead_sparklines_absent_when_not_passed(env):
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+    assert "masthead-strip" not in html
 
 
 def test_render_wire_index_empty_state_when_no_cards_renders_sensibly(env):

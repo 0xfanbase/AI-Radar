@@ -19,9 +19,9 @@ Reads three data files:
   this build stage -- ``audit.yml`` is Phase 5 scope and hasn't been
   built or run yet. This is the one required graceful-degradation path
   this module is explicitly built and tested against: a missing file
-  renders an honest placeholder ("No audit has run yet -- audit.yml is
-  part of Phase 5") rather than raising ``FileNotFoundError`` or crashing
-  the whole page build. See :func:`load_audit_latest` /
+  renders an honest, reader-facing placeholder (see ``NO_AUDIT_MESSAGE``)
+  rather than raising ``FileNotFoundError`` or crashing the whole page
+  build. See :func:`load_audit_latest` /
   :func:`build_audit_section`.
 
 Two-step build usage (mirrors ``site/builders/board.py``'s own
@@ -58,12 +58,10 @@ AUDIT_LATEST_PATH = DATA_DIR / "audit" / "latest.json"
 # The honest placeholder shown when data/audit/latest.json doesn't exist
 # yet -- true today, since audit.yml is Phase 5 scope and hasn't run.
 NO_AUDIT_MESSAGE = (
-    "No audit has run yet -- audit.yml is part of Phase 5, which hasn't "
-    "executed in this environment. Once it runs (weekly, pure code, no "
-    "LLM involved), this section will show its findings directly: link "
-    "rot on every citation, Lexicon coverage/orphan terms, the "
-    "verifier's pass-rate trend, a missed-story check against that "
-    "week's top Hacker News AI stories, and duplicate-topic detection."
+    "No self-audit has been published yet. The site checks itself "
+    "weekly -- dead links in citations, glossary coverage, fact-check "
+    "pass rates, and stories it may have missed -- and this section "
+    "will show the latest findings once the first audit completes."
 )
 
 

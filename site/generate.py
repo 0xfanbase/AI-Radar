@@ -370,30 +370,28 @@ def render_pages(env: Environment, content: dict[str, Any], public_dir: Path) ->
     # docstring for why that matters for testability).
     today = datetime.now(timezone.utc).date()
 
-    # Build-plan section 5: "a thin masthead sparkline strip site-wide."
-    # site/builders/moving.py already computes this exact view model
-    # (`build_masthead_sparklines`) and `base.html` already includes the
-    # partial whenever its render context carries a non-empty
-    # `masthead_sparklines` -- rather than have every other builder's
-    # own `build_*_context()` grow a new parameter to pass this through
-    # (touching seven already-tested, independently-scoped modules for a
-    # cross-cutting concern that belongs to the shared shell, not any one
-    # page), this integration sets it once as a Jinja *environment
-    # global*: every template rendered through this one shared `env`
-    # picks it up automatically (Jinja resolves an undeclared template
-    # variable against `env.globals` before falling back to
-    # `Undefined`), and `/moving/`'s own context still sets the identical
-    # value locally (local context wins over a same-named global with no
-    # conflict in value). Logged as a judgment call in
-    # IMPROVEMENT_BACKLOG.md.
-    env.globals["masthead_sparklines"] = moving.build_masthead_sparklines(
-        list(whats_moving.get("topics", []))
-    )
+    # Nav-condense pass (see IMPROVEMENT_BACKLOG.md): the masthead
+    # sparkline strip is now scoped to the Wire home page only, not
+    # site-wide -- so it's computed once here and passed explicitly to
+    # `wire.write_wire_pages()` below, rather than injected as a Jinja
+    # environment global every template picked up automatically. Capped
+    # to the top `moving.MASTHEAD_TOPIC_LIMIT` topics by 7-day mention
+    # total (`build_masthead_sparklines`'s own job) so the strip fits a
+    # narrow mobile viewport.
+    strip_views = moving.build_masthead_sparklines(list(whats_moving.get("topics", [])))
 
     written: list[Path] = []
-    written += wire.write_wire_pages(env, cards, lexicon_entries, public_dir, today=today)
-    written.append(board.write_board_page(env, frontier_board_rows, today, public_dir))
-    written += lexicon_builder.write_lexicon_pages(env, lexicon_entries, public_dir)
+    written += wire.write_wire_pages(
+        env, cards, lexicon_entries, public_dir, today=today, masthead_sparklines=strip_views
+    )
+    written.append(
+        board.write_board_page(
+            env, frontier_board_rows, today, public_dir, lexicon_entries=lexicon_entries
+        )
+    )
+    written += lexicon_builder.write_lexicon_pages(
+        env, lexicon_entries, public_dir, cards=cards
+    )
     written.append(
         primer_builder.write_primer_page(env, primer, lexicon_entries, public_dir)
     )

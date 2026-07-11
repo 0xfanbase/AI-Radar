@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% set active_nav = "board" %}
 
 {% block title %}Frontier Board — AI Frontier Wire{% endblock %}
 
@@ -9,14 +10,24 @@
 <style>
   /*
    * Page-specific styling for the Frontier Board's "observatory status
-   * wall" tables. Scoped to this page only (this <style> block is only
-   * ever emitted inside the rendered board.html document, never shared
-   * across pages), and built entirely from site/static/css/tokens.css's
-   * existing custom properties plus the already-established
-   * `.data`/`.font-data` utility from components.css -- no new
-   * site-wide stylesheet rules are introduced here. See
-   * IMPROVEMENT_BACKLOG.md for why this lives inline in the template
-   * rather than in components.css.
+   * wall". Scoped to this page only (this <style> block is only ever
+   * emitted inside the rendered board.html document, never shared across
+   * pages), and built entirely from site/static/css/tokens.css's existing
+   * custom properties -- no new site-wide stylesheet rules are introduced
+   * here. See IMPROVEMENT_BACKLOG.md for why this lives inline in the
+   * template rather than in components.css.
+   *
+   * Redesign note: this page used to render one 8-column table per
+   * region, with components.css's whole-table monospace utility applied
+   * across every cell. That utility forces the *entire* table into
+   * JetBrains Mono, which turned long (36-124 word) Significance prose
+   * into unreadable monospace paragraphs, and the table's 44rem
+   * min-width hid columns off-screen on a phone with no affordance to
+   * reveal them. It's now a list of native disclosure (details/summary)
+   * "row-cards" per region -- one per model -- with monospace reserved
+   * for the two genuinely tabular fields (Released, Context) and every
+   * prose field (lab, model, access, significance) in the body font. See
+   * IMPROVEMENT_BACKLOG.md for the full redesign rationale.
    */
   .board-intro {
     max-width: 38rem;
@@ -30,41 +41,73 @@
     margin-block-end: 0.5rem;
   }
 
-  .board-table-wrap {
-    overflow-x: auto;
+  .board-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
-  .board-table {
-    width: 100%;
-    min-width: 44rem;
-    border-collapse: collapse;
-    font-size: 0.9rem;
+  .board-row {
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.5rem;
+    background: var(--color-panel);
   }
 
-  .board-table caption {
-    text-align: left;
+  .board-row__summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1rem;
+    padding: 0.85rem 1.1rem;
+    cursor: pointer;
   }
 
-  .board-table th,
-  .board-table td {
-    text-align: left;
-    vertical-align: top;
-    padding: 0.5em 0.75em;
-    border-bottom: 1px solid var(--color-hairline);
-  }
-
-  .board-table thead th {
+  .board-row__lab {
     font-family: var(--font-display);
     color: var(--color-star-white);
+    min-width: 8rem;
+  }
+
+  .board-row__model {
+    flex: 1 1 12rem;
+  }
+
+  .board-row__released,
+  .board-row__access {
     white-space: nowrap;
+    opacity: 0.9;
   }
 
-  .board-table tbody th[scope="row"] {
-    font-weight: 400;
+  .board-row__body {
+    padding: 0 1.1rem 1rem;
   }
 
-  .board-table td.board-cell--significance {
-    min-width: 18rem;
+  .board-row__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin: 0 0 0.75rem;
+  }
+
+  .board-row__facts > div {
+    margin: 0;
+  }
+
+  .board-row__facts dt {
+    font-size: 0.8rem;
+    opacity: 0.75;
+  }
+
+  .board-row__facts dd {
+    margin-inline-start: 0;
+  }
+
+  .board-row__significance {
+    max-width: 42rem;
+    margin: 0;
   }
 
   /*
@@ -122,49 +165,28 @@
   {% for region in regions %}
   <section class="board-region" aria-labelledby="{{ region.heading_id }}">
     <h2 id="{{ region.heading_id }}">{{ region.heading }}</h2>
-    <div class="board-table-wrap">
-      <table
-        id="{{ region.table_id }}"
-        class="board-table data"
-        aria-labelledby="{{ region.heading_id }}"
-      >
-        <thead>
-          <tr>
-            <th scope="col">Lab</th>
-            <th scope="col">Model</th>
-            <th scope="col">Released</th>
-            <th scope="col">Modality</th>
-            <th scope="col">Context</th>
-            <th scope="col">Access</th>
-            <th scope="col">Significance</th>
-            <th scope="col">Source</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in region.rows %}
-          <tr>
-            <th scope="row">{{ row.lab }}</th>
-            <td>
-              {{ row.model }}
-              {% if row.pulse_eligible %}
-              <span
-                class="board-pulse-dot"
-                aria-hidden="true"
-                title="Verified in the last {{ pulse_window_days }} days"
-              ></span>
-              {% endif %}
-            </td>
-            <td>{{ row.release_date }}</td>
-            <td>{{ row.modality_display }}</td>
-            <td>{{ row.context_window_display }}</td>
-            <td>{{ row.access }}</td>
-            <td class="board-cell--significance">{{ row.significance }}</td>
-            <td><a href="{{ row.source_url }}">{{ row.source_host }}</a></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+    <ul class="board-list" aria-labelledby="{{ region.heading_id }}">
+      {% for row in region.rows %}
+      <li>
+        <details class="board-row">
+          <summary class="board-row__summary">
+            <span class="board-row__lab">{{ row.lab }}</span>
+            <span class="board-row__model">{{ row.model }}{% if row.pulse_eligible %}<span class="board-pulse-dot" aria-hidden="true" title="Verified in the last {{ pulse_window_days }} days"></span>{% endif %}</span>
+            <span class="board-row__released font-data"><time datetime="{{ row.release_date }}">{{ row.release_date }}</time></span>
+            <span class="board-row__access">{{ row.access }}</span>
+          </summary>
+          <div class="board-row__body">
+            <dl class="board-row__facts">
+              <div><dt>Modality</dt><dd>{{ row.modality_display }}</dd></div>
+              <div><dt>Context window</dt><dd class="font-data">{{ row.context_window_display }}</dd></div>
+              <div><dt>Source</dt><dd><a href="{{ row.source_url }}">{{ row.source_host }}</a></dd></div>
+            </dl>
+            <p class="board-row__significance">{{ row.significance_html }}</p>
+          </div>
+        </details>
+      </li>
+      {% endfor %}
+    </ul>
   </section>
   {% endfor %}
 {% else %}

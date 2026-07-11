@@ -16,12 +16,10 @@ file now covers, in addition to the original scaffold-stage smoke tests:
   scaffold-stage placeholder);
 * `public/404.html`, `public/sitemap.xml`, and `public/robots.txt` are
   real, well-formed files reachable the way GitHub Pages expects; and
-* the site-wide masthead sparkline strip (build plan section 5's "+ a
-  thin masthead sparkline strip site-wide") actually renders on every
-  page, not just `/moving/` itself -- see this commit's own
-  `IMPROVEMENT_BACKLOG.md` entry for the `env.globals` mechanism that
-  makes this hold without touching any of the seven other already-tested
-  builder modules.
+* the masthead sparkline strip is scoped to the Wire home page only (the
+  nav-condense pass narrowed this from an earlier "site-wide" design --
+  see `IMPROVEMENT_BACKLOG.md`): present on `public/index.html`, absent
+  from every other generated page.
 
 All of this runs against this repo's *real* `content/*.json` and
 `data/*.json` (not fixtures), per this file's own established
@@ -323,14 +321,21 @@ def test_skip_link_is_first_focusable_element_on_every_page(built_site):
         )
 
 
-def test_masthead_sparkline_strip_renders_site_wide(built_site):
-    # Build-plan section 5: "+ a thin masthead sparkline strip
-    # site-wide" -- every generated page, not just /moving/ itself,
-    # should include the masthead strip partial.
-    for page in _all_html_files(built_site):
+def test_masthead_sparkline_strip_renders_on_the_wire_home_page(built_site):
+    # Nav-condense pass (see IMPROVEMENT_BACKLOG.md): the masthead
+    # sparkline strip is scoped to the Wire home page -- the site's own
+    # front page -- only.
+    html = (built_site / "index.html").read_text(encoding="utf-8")
+    assert "masthead-strip" in html, "public/index.html is missing the masthead sparkline strip"
+
+
+def test_masthead_sparkline_strip_absent_from_every_other_page(built_site):
+    non_home_pages = [p for p in _all_html_files(built_site) if p != built_site / "index.html"]
+    assert non_home_pages, "expected at least one non-home generated page"
+    for page in non_home_pages:
         html = page.read_text(encoding="utf-8")
-        assert "masthead-strip" in html, (
-            f"{page.relative_to(built_site)} is missing the site-wide masthead sparkline strip"
+        assert "masthead-strip" not in html, (
+            f"{page.relative_to(built_site)} unexpectedly has the home-page-only masthead sparkline strip"
         )
 
 

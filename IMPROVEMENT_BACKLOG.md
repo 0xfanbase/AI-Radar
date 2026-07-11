@@ -3252,3 +3252,325 @@ convention noted in the entry directly above), not retroactively edited.
   touching all seven already-tested page builders' internals and existing
   test assertions, for no behavioral difference in the output. See
   `PROGRESS.md`'s matching entry for the full incident and verification.
+
+- **Frontier Board redesign: `<table class="board-table data">` ->
+  per-model `<details>` row-cards (2026-07-11, owner-reported readability
+  failure).** The owner flagged that `/board/` was unreadable in
+  practice: `components.css`'s `.data` utility (reused from the Wire's
+  numeric-field styling) was applied to the *whole* `<table>`, so every
+  cell -- including the Significance column's 36-124-word prose
+  paragraphs -- rendered in JetBrains Mono, and
+  `td.board-cell--significance{min-width:18rem}` combined with the
+  table's 44rem min-width to break those paragraphs into unreadable
+  monospace fragments; on a phone the table also just hid four columns
+  off-screen with no affordance to reveal them. Target reader is an
+  interested non-expert, not someone who reads data tables for a living,
+  so "technically all the data is there, just scroll/squint" wasn't an
+  acceptable fix. Replaced the table with one `<ul>` of native
+  `<details>`/`<summary>` "row-cards" per region -- Lab/Model/Released/
+  Access always visible in the summary line, Modality/Context
+  window/Source/Significance revealed on tap -- with monospace now
+  scoped narrowly to the two genuinely tabular fields (Released,
+  Context) via the existing `.font-data` utility, and every prose field
+  (including Significance) in the body font at a readable measure. This
+  also closed a real gap: `board.py` never called
+  `site/lib/linkify.py`, so Significance jargon (e.g. "context window",
+  "multimodal") went unlinked even though the Wire's card bodies already
+  got this via `wire.py`; `board.py` now threads `lexicon_entries`
+  through `build_regions`/`build_context`/`render_board_page`/
+  `write_board_page` (all as defaulted params, so every pre-existing
+  caller/test with no lexicon argument keeps rendering identical
+  raw-prose output) and computes `significance_html` once per row via
+  the same `linkify.linkify()` call `wire.py` already uses for card
+  prose. No new JavaScript was introduced -- `<details>` is a native,
+  zero-JS disclosure widget, consistent with this site's "no hydration,
+  no JS-driven widgets" rule. Considered a CSS-only fix (keep the table,
+  just stop applying `.data` to the Significance cell, add
+  `overflow-x: auto`) instead of a structural markup change; rejected
+  because an 8-column table still doesn't fit a 375px viewport without
+  either horizontal scrolling (the reader cannot see Lab and
+  Significance for the same row at once) or drastically truncating
+  columns, whereas per-row disclosure cards are legible at any viewport
+  width with zero overflow anywhere.
+
+- **Masthead nav condensed to 4 items, meta pages moved to a footer nav,
+  masthead sparkline strip scoped to the Wire home page only, capped to
+  the top 5 topics (2026-07-11, owner-reported "too many tabs;
+  condense/reduce").** `base.html`'s masthead had grown to 7 nav items
+  (Wire/Board/Lexicon/Primer/What's Moving/Method/About) plus, on every
+  page, the 9-topic masthead sparkline strip -- roughly 16 chrome
+  elements above any actual content on a 390px phone screen, for a
+  target reader who is not a technical expert and just wants the news.
+  Supersedes this file's own earlier "site-wide" judgment call (the
+  `env.globals["masthead_sparklines"]` entry from the Phase 4
+  integration commit): that call was reasonable read against build-plan
+  section 5's literal "+ a thin masthead sparkline strip site-wide"
+  text, but the owner's own readability complaint takes precedence over
+  the plan's literal wording per this repo's target-reader standard.
+  Kept: exactly 4 masthead nav items (Wire/Board/Lexicon/Primer -- the
+  reader's actual content destinations), each now carrying a real
+  `aria-current="page"` on the active page (computed from a per-template
+  `{% set active_nav = "..." %}` Jinja variable, guarded with
+  `| default('')` for `StrictUndefined` pages like `404.html` that never
+  set it). Moved: What's Moving/Method/About/Corrections into a new
+  `<nav class="site-footer__nav">` in the footer, below the content
+  instead of above it -- still one tap from every page, just no longer
+  competing with the 4 primary destinations for above-the-fold space.
+  Narrowed: the masthead sparkline strip now renders only on the Wire
+  home page (`site/builders/wire.py::build_wire_context`, wired through
+  `site/generate.py` -> `wire.write_wire_pages(..., masthead_sparklines=
+  ...)` as an explicit keyword argument, not a Jinja environment global
+  any more -- the global was a reasonable mechanism for a site-wide
+  strip, but an explicit per-page parameter is the more honest shape
+  once only one page opts in) and capped to the
+  `moving.MASTHEAD_TOPIC_LIMIT` (5) topics with the highest 7-day
+  mention totals (`site/builders/moving.py::build_masthead_sparklines`,
+  stable sort so tied topics keep the schema's own fixed nine-topic file
+  order) -- 9 topics' worth of sparklines never fit a 390px viewport
+  without silent horizontal cutoff, so the cap matters as much as the
+  page-scoping does. `/moving/`'s own page no longer sets
+  `masthead_sparklines` either (`build_moving_context`'s return no
+  longer includes that key) -- it was rendering the same nine
+  sparklines twice on the one page that needs the shortcut least (its
+  own main list already shows every topic at full size). Judgment call,
+  spec-silent: the exact 5-topic cap number and the choice to rank by
+  raw 7-day total (rather than, say, the precomputed
+  accelerating/cooling/flat trend label) -- a raw total is simpler to
+  explain to a non-expert reader ("the 5 busiest topics this week") than
+  a rate-of-change ranking would be, and keeps the strip's own ordering
+  legible without a second, competing sort concept.
+
+## Reader-copy fix: dev-facing empty-state messages + copy-lint test (T3, 2026-07-11)
+
+Rewrote three reader-facing empty-state constants that leaked internal
+build/ops vocabulary to real readers: `site/builders/wire.py`'s
+`EMPTY_WIRE_MESSAGE` (named "the daily analyst" and "this environment"),
+`site/builders/moving.py`'s `EMPTY_MOVING_MESSAGE` (named `watch.yml` and
+`data/whats_moving.json`), and `site/builders/method.py`'s
+`NO_AUDIT_MESSAGE` (named `audit.yml`, "Phase 5", and "this environment").
+All three now read like `corrections.py`'s own already-correct
+`EMPTY_CORRECTIONS_MESSAGE` -- honest about the empty state, silent about
+internal file/workflow names or build-phase numbering, since the target
+reader is explicitly someone with a keen interest in AI news who is not a
+technical expert (per CLAUDE.md), not a contributor to this repo.
+
+Added `site/tests/test_reader_copy.py` to make this class of regression a
+test failure instead of a silent re-introduction. Two spec-silent judgment
+calls made in that test, logged here:
+
+- **Which modules/constants count as "reader-facing."** The task named
+  `{wire,moving,method,corrections,board,lexicon,primer,about}.py` and
+  "every module-level constant whose name ends in `_MESSAGE`." I scan
+  exactly those eight modules and select constants by `name.isupper() and
+  name.endswith("_MESSAGE") and isinstance(value, str)` -- i.e. any
+  future `..._MESSAGE` constant in any of these eight files is
+  automatically covered without the test needing an update, rather than
+  hard-coding today's four known constant names
+  (`EMPTY_WIRE_MESSAGE`/`EMPTY_MOVING_MESSAGE`/`NO_AUDIT_MESSAGE`/
+  `EMPTY_CORRECTIONS_MESSAGE`/`EMPTY_SEEN_IN_MESSAGE`). `board.py`,
+  `primer.py`, and `about.py` currently export no such constant, which is
+  fine -- the test asserts only that the *combined* scan across all eight
+  modules finds at least one, not that every individual module does, so
+  it can't quietly start scanning nothing without failing.
+- **Token matching is a plain case-sensitive substring check**, exactly as
+  the five banned tokens were specified (`environment`, `.yml`, `.json`,
+  `Phase ` (capital P, trailing space -- deliberately distinct from the
+  ordinary English word "phase"), `analyst has not run`). This will not
+  catch a differently-capitalized dev-language leak (e.g. "Environment")
+  that isn't one of the five listed tokens; broadening the token list or
+  case-folding it is a candidate for a future pass if a new leak shape
+  shows up, but the five tokens named in this task are the ones known to
+  have actually leaked, so I matched the spec literally rather than
+  guessing at a broader net now.
+
+Also updated `site/builders/method.py`'s own top-of-file docstring
+(developer-facing, not reader-facing) to stop quoting the old literal
+`NO_AUDIT_MESSAGE` text verbatim, since a docstring that echoes stale copy
+verbatim is exactly the kind of drift this task exists to prevent from
+recurring.
+
+## CI-gate blind spot closed: `schemas/primer.schema.json` (T5, 2026-07-11)
+
+`content/primer.json` had no schema under `schemas/`, so
+`scripts/validate_changed_schemas.py`'s `EXACT_PATH_SCHEMAS` table had no
+entry for it and `site/generate.py::load_and_validate_content` loaded it
+unvalidated with a logged warning -- a real CI blind spot, since the daily
+analyst Routine is allowed to touch `content/primer.json` (it's under
+`content/`) but nothing would have caught a malformed rewrite of it before
+commit. Added `schemas/primer.schema.json` (object, `required:
+[generated_at, terms]`, `additionalProperties: false`, `generated_at` as
+`format: date`, `terms` as a non-empty array of unique lowercase-hyphenated
+slug strings), mapped `"content/primer.json": "primer"` into
+`EXACT_PATH_SCHEMAS`, added `fixtures/schema_examples/{valid,invalid}/primer.json`
+following the existing one-pair-per-schema convention, and extended
+`tests/test_schemas.py`'s `SCHEMA_NAMES` list and
+`tests/test_validate_changed_schemas.py`'s `MAPPED_PATHS` table so the new
+schema gets the same self-validation / valid-fixture / invalid-fixture /
+CI-mapping coverage every other schema already has.
+
+Judgment call, spec-silent: the task's target-files list named
+`tests/test_schemas.py` but not `tests/test_seed_content.py`, while the
+task's own step 4 explicitly said to check `test_seed_content.py` for "a
+convention that enumerates schemas or validates seed content against
+them" and extend it. That file already had three primer-shape assertions
+(`generated_at`/`terms` present, slugs resolve to real lexicon entries,
+the fixed 10-term order) but, unlike its sibling
+`test_frontier_board_validates_against_schema`/
+`test_lexicon_validates_against_schema` tests, never actually called
+`validate(primer, "primer")` against the real committed
+`content/primer.json` -- because no such schema existed to validate
+against. Added `test_primer_validates_against_schema` and
+`test_primer_schema_rejects_a_primer_missing_a_required_field` there,
+mirroring the frontier-board/lexicon pattern, so the real seed file (not
+just a synthetic fixture) is now schema-checked in the test suite too.
+Treated the step-4 instruction text as authoritative over the shorter
+target-files list, since leaving the real content/primer.json's own
+schema-validation gap unclosed in `test_seed_content.py` would have left
+this task's stated goal -- "no malformed primer.json silently passes" --
+only half-verified.
+
+## Corrections cross-linking, both directions (T6, 2026-07-11)
+
+Hard Rule 5 says "The Corrections page is public and linked from every
+card footer" but, until now, a corrected card's own footer note was
+unlinked plain text and `/corrections/` itself loaded each entry's
+`card_id` into `CorrectionView` without ever rendering a way back to that
+card. Fixed both directions: `site/templates/card.html` now (a) gives
+every rendered card `<article>` a stable `id="card-<card id>"` anchor, (b)
+links a `correction_note`'s own inline text straight to `/corrections/`
+("see the full correction"), and (c) appends a `/corrections/` link to
+the existing `.wire-card__meta` footer line on *every* card, not only
+corrected ones -- satisfying "every card footer" literally rather than
+only the corrected-card case. `site/builders/corrections.py` gains a
+`card_href_for(card_id)` helper (`/wire/<card_id[:7]>/#card-<card_id>`)
+and a new `CorrectionView.card_href` field computed from it;
+`corrections.html` renders that as "read the original story" -- plain
+link text, never the raw `card_id` slug -- alongside the existing
+`source_url` link.
+
+Judgment call, spec-silent: the task instructions said to append the
+`/corrections/` link "inside the card's existing footer date/meta
+paragraph" without pinning down whether that means literally every card
+or only corrected ones; Hard Rule 5's own wording ("every card footer")
+settled it in favor of every card, confirmed and reused everywhere in the
+one `.wire-card__meta` line rather than adding a second conditional
+element only for corrected cards. Also confirmed `card_href_for` is safe
+to compute unconditionally off `card_id[:7]` for every real corrections
+entry, since `card.schema.json`'s `id` field is always `YYYY-MM-DD-slug`
+and `write_wire_pages` always emits one `/wire/<YYYY-MM>/` archive page
+per month any card exists in -- there is no card whose month page could
+be missing.
+
+## Shared topic display names + mentions/7d pluralization (T7, 2026-07-11)
+
+Two dormant-but-launch-visible defects: `site/builders/moving.py` already
+had its own `TOPIC_DISPLAY_NAMES` (raw `card.schema.json`/
+`whats_moving.schema.json` topic enum -> friendly label, e.g.
+`"chips/compute"` -> `"Chips / Compute"`) but `site/builders/wire.py`'s
+`prepare_card_view` passed a card's raw `topics[]` straight through to
+`card.html`'s chip loop, so any card ever tagged `chips/compute` or
+`open-source` would render a chip reading the raw enum value verbatim;
+and `moving.html`'s `{{ row.total_mentions }} mentions / 7d` was
+unconditional, so a topic with exactly one 7-day mention read the
+ungrammatical "1 mentions / 7d" (the live Products row, before any card
+content exists).
+
+Fixed by extracting the mapping to a new `site/lib/topics.py`
+(`TOPIC_DISPLAY_NAMES` + `display_name()`), loaded by both builders via
+the existing `_load_module_by_path` convention rather than either
+importing the other -- `moving.py` and `wire.py` are siblings under
+`site/builders/`, and this repo's established pattern (documented in both
+files' own docstrings) is that nothing under `site/` imports another
+`site/` module directly, everything loads by explicit file path, so a
+shared mapping belongs in `site/lib/`, not owned by whichever builder
+found the bug first. `moving.py` keeps its own `_display_name` as a thin
+delegate so none of its existing callers (or `site/tests/test_moving_builder.py`,
+which calls `moving._display_name` directly) needed to change.
+`TopicRowView` gained a precomputed `mentions_label` field
+(`f"{n} mention{'s' if n != 1 else ''} / 7d"`) rather than pushing the
+pluralization branch into the Jinja template, matching this builder's own
+established "all Jinja logic lives in Python" convention.
+
+Judgment call, spec-silent: the task's fix plan didn't say whether the
+existing `test_render_wire_index_topic_chips_are_text_labeled` test
+(which asserted a raw topic value like `"models"` renders verbatim as
+chip text) should be treated as the old, now-incorrect behavior or left
+untouched since it wasn't explicitly named alongside the new test the
+plan did ask for. Treated it as the old behavior this task explicitly
+changes -- per this repo's own testing rule ("fix your change, not the
+test, unless the test asserts the old, wrong behavior your task is
+explicitly changing") -- and updated it to assert the shared display name
+instead.
+
+## Lexicon "Seen in" real headlines + inert-chip styling (T8, 2026-07-11)
+
+`site/templates/lexicon_term.html`'s "Seen in" list rendered a raw card-id
+machine slug (e.g. `2026-07-09-gpt-5-5-release`) as the visible link
+text -- meaningless to the non-technical reader this site is written for.
+Separately, both `lexicon_term.html`'s related-terms chips and
+`card.html`'s lexicon-fallback chips rendered an unresolvable (no-slug)
+term inside the exact same `.chip` pill as a clickable one, with nothing
+to tell a reader which chips are actually links.
+
+Fixed by giving `site/builders/lexicon.py`'s `SeenInView` a `label` field
+(`resolve_seen_in(card_ids, headline_by_id=None)` resolves each id against
+a `card_id -> headline` map, falling back to the bare id only when
+unresolvable), threaded down from a new defaulted `cards=()` parameter on
+`write_lexicon_pages`/`render_lexicon_term`/`build_term_context` so every
+existing call site keeps working unchanged; `site/generate.py` now passes
+`cards=cards` at its one real call site. Both templates' no-slug chip
+branch now renders `class="chip chip--inert" title="Not yet defined in
+the Lexicon"`, and `components.css` gained a `.chip--inert { opacity:
+0.65; cursor: default; }` rule reusing existing tokens (no new colors, no
+JS) -- dimmed + default cursor, with the reason still carried as real
+text via `title` rather than color alone.
+
+Judgment call, spec-silent: the fix plan didn't specify what a
+`seen_in[]` id should render as when `cards=` is supplied but the id
+still isn't found in it (a stale reference to a card that no longer
+exists, as opposed to the "no mapping supplied at all" case the plan did
+call out). Treated it the same as the no-mapping case -- fall back to the
+bare card id as the label -- rather than dropping the reference or
+raising, since a stale link is still better than a crash or a silently
+vanished "Seen in" entry, and this mirrors how `RelatedTermView`/`rel.slug
+is None` already handles an unresolvable related-term name elsewhere in
+this same file.
+
+## Lexicon citation anchors rewritten to plain language (T9, 2026-07-11)
+
+Twelve of `content/lexicon.json`'s 30 entries (RLHF, MoE, RAG, scaling
+laws, tokenization, chain-of-thought, multimodal, compute, foundation
+model, red teaming, test-time compute, frontier model) closed their
+`deeper` field's single inline `<a>` citation with a bare academic
+in-text-citation as the anchor's visible text (`Ouyang et al., 2022`,
+`Kaplan et al., 2020`, `Sennrich et al.`, `Anderljung et al.`, etc.) --
+opaque to this site's stated non-expert reader, who has no way to know
+who "Ouyang" or "Anderljung" is. The other 18 entries already used
+self-describing anchor text (a paper title, or a phrase like "Anthropic's
+documentation on context windows"). Rewrote each of the 12 anchors'
+visible text only -- href byte-identical, surrounding sentence and every
+other field (`term`, `one_liner`, `related`, `seen_in`) untouched -- to a
+short plain-language description derived from that entry's own sentence
+(e.g. RLHF's sentence already names "OpenAI's InstructGPT work", so the
+anchor became "OpenAI's InstructGPT paper"; scaling laws' and compute's
+anchors already carried the real paper title in the surrounding text, so
+those just dropped the "Kaplan et al., " author-name prefix and kept the
+title). No description was invented beyond what the existing sentence or
+the paper's already-quoted title supported.
+
+Judgment call, spec-silent: `content/lexicon.json` actually has 13
+entries whose anchor text contains the string "et al", not 12 --
+`inference`'s anchor reads "Pope et al.'s work on efficiently scaling
+Transformer inference". The fix plan's own scope explicitly named exactly
+12 entries and `inference` was not among them, even though a blind grep
+for `et al` also turns it up. Left `inference` unchanged rather than
+"completing" the set to 13, on the reasoning that the plan's explicit,
+named enumeration is the authoritative scope for this task -- and that
+`inference`'s anchor, unlike the 12 fixed here, already trails a
+descriptive clause ("work on efficiently scaling Transformer inference")
+rather than ending bare on a name-and-year, so it's closer to (if not
+fully inside) the "already self-describing" bucket the other 18 entries
+occupy. Logged here rather than silently expanding scope, since a future
+pass may reasonably decide `inference` should be fixed too for the same
+non-expert-reader rationale (the surname "Pope" is just as opaque as
+"Shazeer" was in the MoE entry this pass did fix).

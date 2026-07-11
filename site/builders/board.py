@@ -38,7 +38,9 @@ convention):
 """
 from __future__ import annotations
 
+import importlib.util
 import json
+import sys
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
@@ -46,12 +48,42 @@ from typing import Any, Iterable, Mapping, Sequence
 from urllib.parse import urlsplit
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
+from markupsafe import Markup
 
 SITE_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = SITE_DIR.parent
 TEMPLATES_DIR = SITE_DIR / "templates"
+LIB_DIR = SITE_DIR / "lib"
 CONTENT_DIR = REPO_ROOT / "content"
 FRONTIER_BOARD_PATH = CONTENT_DIR / "frontier_board.json"
+
+
+def _load_module_by_path(name: str, path: Path):
+    """Load a module from an explicit file path, registering it in
+    `sys.modules` *before* `exec_module` runs.
+
+    Matches the convention every other Phase 4 module/test already uses
+    (`site/builders/wire.py`, `site/generate.py`'s own test,
+    `site/tests/test_linkify.py`, `site/tests/test_svg_sparkline.py`):
+    `site/` is deliberately never turned into an importable package (it
+    would shadow the stdlib `site` module for anything else sharing the
+    interpreter's `sys.path`), so every cross-file reference within
+    `site/` loads its target by path instead of via `import
+    site.lib.linkify`. The early `sys.modules` registration is required
+    because `linkify.py` uses `@dataclass` together with `from __future__
+    import annotations`; dataclasses' own annotation resolution looks up
+    `sys.modules[cls.__module__]` and raises if that key isn't populated
+    yet.
+    """
+    spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+linkify = _load_module_by_path("frontier_wire_site_lib_linkify", LIB_DIR / "linkify.py")
 
 # A row is "pulse-eligible" -- gets the small dot next to its Model cell --
 # when its last_verified date is within this many days at-or-before
@@ -157,6 +189,7 @@ class BoardRow:
     context_window_display: str
     access: str
     significance: str
+    significance_html: Markup
     source_url: str
     source_host: str
     last_verified: str
@@ -179,7 +212,12 @@ def _row_region(raw: Mapping[str, Any]) -> str:
     return str(raw["region"])
 
 
-def _to_board_row(raw: Mapping[str, Any], today: date) -> BoardRow:
+def _to_board_row(
+    raw: Mapping[str, Any],
+    today: date,
+    terms: Sequence[str] = (),
+    slug_map: Mapping[str, str] | None = None,
+) -> BoardRow:
     # `.get(...)` rather than `raw["last_verified"]`: a row missing this
     # required field entirely should already have been rejected by
     # schema validation upstream, but this module is deliberately
@@ -188,6 +226,10 @@ def _to_board_row(raw: Mapping[str, Any], today: date) -> BoardRow:
     # `is_pulse_eligible` already treats as never-eligible.
     last_verified_raw = raw.get("last_verified")
     last_verified = str(last_verified_raw) if last_verified_raw is not None else ""
+    significance = str(raw["significance"])
+    significance_html = linkify.linkify(
+        significance, list(terms), slug_map or {}
+    ).html
     return BoardRow(
         lab=str(raw["lab"]),
         model=str(raw["model"]),
@@ -195,7 +237,8 @@ def _to_board_row(raw: Mapping[str, Any], today: date) -> BoardRow:
         modality_display=format_modality(raw["modality"]),
         context_window_display=format_context_window(raw.get("context_window")),
         access=str(raw["access"]),
-        significance=str(raw["significance"]),
+        significance=significance,
+        significance_html=significance_html,
         source_url=str(raw["source_url"]),
         source_host=source_host(str(raw["source_url"])),
         last_verified=last_verified,
@@ -204,10 +247,12 @@ def _to_board_row(raw: Mapping[str, Any], today: date) -> BoardRow:
 
 
 def build_regions(
-    board_rows: Sequence[Mapping[str, Any]], today: date
+    board_rows: Sequence[Mapping[str, Any]],
+    today: date,
+    lexicon_entries: Iterable[Mapping[str, Any]] = (),
 ) -> list[BoardRegion]:
     """Group+order the loaded `content/frontier_board.json` rows into
-    per-region tables.
+    per-region row-card lists.
 
     Regions render in the fixed `REGION_ORDER` (US -> China ->
     open-weights); any region key present in the data but not in that
@@ -216,12 +261,24 @@ def build_regions(
     absent from `board_rows` -- including the degenerate `board_rows ==
     []` case, matching this build's "content/cards/ is currently EMPTY"
     empty-collection-handling precedent elsewhere in the site generator
-    -- is simply omitted: ONE table per *present* region, never a
-    placeholder table for a region with zero rows.
+    -- is simply omitted: ONE row-card list per *present* region, never a
+    placeholder for a region with zero rows.
+
+    `lexicon_entries` (defaulted to `()` so every existing caller keeps
+    working unchanged) drives auto-linking of each row's `significance`
+    prose, exactly like `site/builders/wire.py` already does for card
+    bodies: `terms`/`slug_map` are computed once here, not once per row,
+    then threaded into every `_to_board_row` call.
     """
+    lexicon_entries = list(lexicon_entries)
+    terms = [str(e["term"]) for e in lexicon_entries]
+    slug_map = linkify.build_slug_map(lexicon_entries)
+
     by_region: dict[str, list[BoardRow]] = {}
     for raw in board_rows:
-        by_region.setdefault(_row_region(raw), []).append(_to_board_row(raw, today))
+        by_region.setdefault(_row_region(raw), []).append(
+            _to_board_row(raw, today, terms=terms, slug_map=slug_map)
+        )
 
     ordered_keys = list(REGION_ORDER) + sorted(
         key for key in by_region if key not in REGION_ORDER
@@ -246,11 +303,18 @@ def build_regions(
 
 
 def build_context(
-    board_rows: Sequence[Mapping[str, Any]], today: date
+    board_rows: Sequence[Mapping[str, Any]],
+    today: date,
+    lexicon_entries: Iterable[Mapping[str, Any]] = (),
 ) -> dict[str, Any]:
     """The full `templates/board.html` render context for a given set of
-    loaded `content/frontier_board.json` rows and an explicit `today`."""
-    regions = build_regions(board_rows, today)
+    loaded `content/frontier_board.json` rows and an explicit `today`.
+
+    `lexicon_entries` (defaulted to `()`) is passed straight through to
+    :func:`build_regions` -- see that function's docstring for the
+    auto-linking behavior.
+    """
+    regions = build_regions(board_rows, today, lexicon_entries=lexicon_entries)
     return {
         "regions": regions,
         "today": today.isoformat(),
@@ -288,16 +352,21 @@ def render_board_page(
     today: date,
     *,
     env: Environment | None = None,
+    lexicon_entries: Iterable[Mapping[str, Any]] = (),
 ) -> str:
     """Render the full `/board/` page HTML for `board_rows` (a loaded
     `content/frontier_board.json` array) as of `today`.
 
     `today` is always the caller's explicit value (never this module's
-    own wall-clock read) -- see :func:`is_pulse_eligible`.
+    own wall-clock read) -- see :func:`is_pulse_eligible`. `lexicon_entries`
+    (defaulted to `()` so every pre-existing call site keeps rendering the
+    same raw-prose output) is passed through to :func:`build_context` to
+    auto-link Significance prose against `content/lexicon.json`, matching
+    `site/builders/wire.py`'s card-body linkify behavior.
     """
     jinja_env = env or build_jinja_env()
     template = jinja_env.get_template("board.html")
-    context = build_context(board_rows, today)
+    context = build_context(board_rows, today, lexicon_entries=lexicon_entries)
     return template.render(**context)
 
 
@@ -306,6 +375,7 @@ def write_board_page(
     board_rows: Sequence[Mapping[str, Any]],
     today: date,
     public_dir: Path,
+    lexicon_entries: Iterable[Mapping[str, Any]] = (),
 ) -> Path:
     """Render + write `/board/` (`<public_dir>/board/index.html`).
 
@@ -316,8 +386,11 @@ def write_board_page(
     `corrections.py`/`about.py`) already exposes -- this module was the one
     built without it, since it was written concurrently before that
     convention was established elsewhere. See IMPROVEMENT_BACKLOG.md.
+
+    `lexicon_entries` (defaulted to `()`) is passed straight through to
+    :func:`render_board_page`.
     """
-    html = render_board_page(board_rows, today, env=env)
+    html = render_board_page(board_rows, today, env=env, lexicon_entries=lexicon_entries)
     path = Path(public_dir) / "board" / "index.html"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(html, encoding="utf-8")

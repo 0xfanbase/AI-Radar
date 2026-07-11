@@ -166,6 +166,16 @@ a {
   text-decoration: underline;
 }
 
+/* Current-page indicator -- the 4 masthead nav items are the only ones
+ * ever marked `aria-current="page"` (set per-page via base.html's
+ * `active_nav` context variable); this rule only adds a color/underline
+ * accent on top of that real, screen-reader-visible attribute, never a
+ * color-only signal. */
+.masthead__nav a[aria-current="page"] {
+  color: var(--color-star-white);
+  text-decoration: underline;
+}
+
 /* --- Masthead sparkline strip ------------------------------------------
  * Thin, site-wide "what's moving" strip -- see
  * site/templates/_masthead_moving_strip.html for when/why it renders.
@@ -225,6 +235,22 @@ a {
   color: var(--color-ink);
 }
 
+/* Footer secondary nav -- the meta/transparency pages (What's Moving,
+ * Method, About, Corrections), moved here from the masthead (see
+ * IMPROVEMENT_BACKLOG.md) so every page still carries one-tap access to
+ * them without adding to the above-content masthead's own item count. A
+ * compact horizontal, wrapping link row -- no new color, just the
+ * existing footer type scale. */
+.site-footer__nav ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
 /* --- Status chips --------------------------------------------------------
  * A status is always visible text, never color-only -- these classes only
  * add a color accent on top of the literal status word every template
@@ -248,4 +274,47 @@ a {
 
 .chip--corrected {
   color: var(--color-corrected-red);
+}
+
+/* --- Inert chips -----------------------------------------------------------
+ * A chip with no resolvable link target (e.g. a related/fallback lexicon
+ * term with no matching entry yet) renders in the same pill shape as a
+ * clickable one, so it must visually read as non-interactive: dimmed and a
+ * default (non-pointer) cursor. No color-only signal -- the `title`
+ * attribute on the element itself (rendered by the templates that use this
+ * class) still carries the reason as real, accessible text.
+ */
+.chip--inert {
+  opacity: 0.65;
+  cursor: default;
+}
+
+/* --- Card disclosure footnote (Hard Rule 5) ------------------------------
+ * Generated timestamp + model, shown beneath the plain publish date. This
+ * is transparency metadata, not editorial content -- small, muted, and
+ * visually secondary to everything above it in the card.
+ */
+.wire-card__meta {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  margin-top: 0.25rem;
+}
+
+/* --- "Why it matters" payoff block ---------------------------------------
+ * Visually distinguishes the payoff paragraph from the plain narration
+ * above it with a signal-cyan rule + small uppercase label, reusing the
+ * one-liner's accent color rather than introducing a new one.
+ */
+.wire-card__why {
+  border-left: 2px solid var(--color-signal-cyan);
+  padding-inline-start: 0.75em;
+}
+
+.wire-card__why-label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin: 0 0 0.25rem;
 }

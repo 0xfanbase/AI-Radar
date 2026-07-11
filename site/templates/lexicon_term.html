@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% set active_nav = "lexicon" %}
 
 {% block title %}{{ entry.term }} — Lexicon — AI Frontier Wire{% endblock %}
 
@@ -48,7 +49,7 @@
       {% if rel.slug %}
       <span class="chip"><a href="/lexicon/{{ rel.slug }}/">{{ rel.term }}</a></span>
       {% else %}
-      <span class="chip">{{ rel.term }}</span>
+      <span class="chip chip--inert" title="Not yet defined in the Lexicon">{{ rel.term }}</span>
       {% endif %}
     </li>
     {% endfor %}
@@ -63,7 +64,7 @@
   {% if entry.seen_in %}
   <ul class="lexicon-term__seen-in">
     {% for ref in entry.seen_in %}
-    <li><a href="{{ ref.href }}">{{ ref.card_id }}</a></li>
+    <li><a href="{{ ref.href }}">{{ ref.label }}</a></li>
     {% endfor %}
   </ul>
   {% else %}
