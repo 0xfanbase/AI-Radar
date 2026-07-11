@@ -72,7 +72,8 @@
     <p><strong>Why:</strong> {{ correction.reason }}</p>
     <p class="correction-card__meta">
       Corrected {{ correction.corrected_at }} --
-      <a href="{{ correction.source_url }}">source</a>
+      <a href="{{ correction.source_url }}">source</a> --
+      <a href="{{ correction.card_href }}">read the original story</a>
     </p>
   </li>
   {% endfor %}

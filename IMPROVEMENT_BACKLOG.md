@@ -3428,3 +3428,35 @@ target-files list, since leaving the real content/primer.json's own
 schema-validation gap unclosed in `test_seed_content.py` would have left
 this task's stated goal -- "no malformed primer.json silently passes" --
 only half-verified.
+
+## Corrections cross-linking, both directions (T6, 2026-07-11)
+
+Hard Rule 5 says "The Corrections page is public and linked from every
+card footer" but, until now, a corrected card's own footer note was
+unlinked plain text and `/corrections/` itself loaded each entry's
+`card_id` into `CorrectionView` without ever rendering a way back to that
+card. Fixed both directions: `site/templates/card.html` now (a) gives
+every rendered card `<article>` a stable `id="card-<card id>"` anchor, (b)
+links a `correction_note`'s own inline text straight to `/corrections/`
+("see the full correction"), and (c) appends a `/corrections/` link to
+the existing `.wire-card__meta` footer line on *every* card, not only
+corrected ones -- satisfying "every card footer" literally rather than
+only the corrected-card case. `site/builders/corrections.py` gains a
+`card_href_for(card_id)` helper (`/wire/<card_id[:7]>/#card-<card_id>`)
+and a new `CorrectionView.card_href` field computed from it;
+`corrections.html` renders that as "read the original story" -- plain
+link text, never the raw `card_id` slug -- alongside the existing
+`source_url` link.
+
+Judgment call, spec-silent: the task instructions said to append the
+`/corrections/` link "inside the card's existing footer date/meta
+paragraph" without pinning down whether that means literally every card
+or only corrected ones; Hard Rule 5's own wording ("every card footer")
+settled it in favor of every card, confirmed and reused everywhere in the
+one `.wire-card__meta` line rather than adding a second conditional
+element only for corrected cards. Also confirmed `card_href_for` is safe
+to compute unconditionally off `card_id[:7]` for every real corrections
+entry, since `card.schema.json`'s `id` field is always `YYYY-MM-DD-slug`
+and `write_wire_pages` always emits one `/wire/<YYYY-MM>/` archive page
+per month any card exists in -- there is no card whose month page could
+be missing.

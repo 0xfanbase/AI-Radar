@@ -53,6 +53,7 @@ class CorrectionView:
 
     id: str
     card_id: str
+    card_href: str
     original_claim: str
     corrected_claim: str
     reason: str
@@ -67,10 +68,25 @@ def _sort_key(correction: Mapping[str, Any]) -> str:
     return str(correction.get("corrected_at", ""))
 
 
+def card_href_for(card_id: str) -> str:
+    """The corrected card's own page + anchor, given its `card_id`.
+
+    Card ids are always `YYYY-MM-DD-slug` (`card.schema.json`'s `id`
+    pattern), so the first 7 characters are always that card's month
+    archive key -- `site/builders/wire.py::write_wire_pages` writes one
+    `/wire/<YYYY-MM>/` page per month any card exists in, and
+    `site/templates/card.html` gives every rendered card article the
+    matching `id="card-<card_id>"` anchor (added alongside this field),
+    so this href always resolves for any real, published card."""
+    return f"/wire/{card_id[:7]}/#card-{card_id}"
+
+
 def build_correction_view(raw: Mapping[str, Any]) -> CorrectionView:
+    card_id = str(raw["card_id"])
     return CorrectionView(
         id=str(raw["id"]),
-        card_id=str(raw["card_id"]),
+        card_id=card_id,
+        card_href=card_href_for(card_id),
         original_claim=str(raw["original_claim"]),
         corrected_claim=str(raw["corrected_claim"]),
         reason=str(raw["reason"]),

@@ -311,6 +311,36 @@ def test_render_wire_index_generated_at_and_model_disclosed_in_meta_element(env)
     assert CARD_REPORTED["generated_at"] in joined_meta
 
 
+def test_render_wire_index_card_article_carries_stable_id_anchor(env):
+    # CLAUDE.md Hard Rule 5 cross-link (T6): the Corrections page links
+    # back to the exact card via `/wire/<YYYY-MM>/#card-<id>`, which only
+    # resolves if the rendered card article itself carries a matching
+    # `id="card-<id>"` anchor.
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+    assert f'id="card-{CARD_CONFIRMED["id"]}"' in html
+    assert f'id="card-{CARD_REPORTED["id"]}"' in html
+
+
+def test_render_wire_index_every_card_footer_links_to_corrections_page(env):
+    # Hard Rule 5: "The Corrections page is public and linked from every
+    # card footer." Both in-window cards' `.wire-card__meta` footer line
+    # must each carry a `/corrections/` link -- not just the shared
+    # site-wide footer.
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+    import re
+
+    meta_matches = re.findall(r'<p class="wire-card__meta[^"]*">.*?</p>', html, flags=re.DOTALL)
+    assert len(meta_matches) == 2
+    for meta in meta_matches:
+        assert 'href="/corrections/"' in meta
+
+
+def test_render_wire_month_correction_note_links_to_corrections_page(env):
+    html = wire.render_wire_month(env, ALL_CARDS, SYNTHETIC_LEXICON, "2026-05")
+    assert CARD_CORRECTED_OLD_MONTH["correction_note"] in html
+    assert 'href="/corrections/">see the full correction</a>' in html
+
+
 def test_render_wire_index_why_it_matters_label_once_per_card(env):
     html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
     # Within the 14-day window there are exactly two cards (CARD_CONFIRMED,
