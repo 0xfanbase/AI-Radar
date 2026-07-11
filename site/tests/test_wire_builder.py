@@ -309,6 +309,26 @@ def test_render_wire_index_lexicon_fallback_chip_rendered(env):
     assert "unlisted term" in html
 
 
+def test_render_wire_index_lexicon_fallback_chip_marks_inert_vs_clickable(env):
+    # T8: a fallback chip with no resolvable lexicon slug must be visually
+    # (and accessibly) distinguishable from a clickable one -- readers
+    # can't tell a plain-text chip from a link chip otherwise, since both
+    # render inside the identical `.chip` pill.
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+
+    # "RLHF" resolves to a real lexicon page -- its chip is clickable and
+    # must NOT carry the inert marker.
+    assert '<span class="chip"><a href="/lexicon/rlhf/">RLHF</a></span>' in html
+
+    # "unlisted term" has no lexicon entry at all -- its chip must carry
+    # the inert class plus a visible-to-assistive-tech `title` explaining
+    # why it isn't a link.
+    assert (
+        '<span class="chip chip--inert" title="Not yet defined in the Lexicon">unlisted term</span>'
+        in html
+    )
+
+
 def test_render_wire_index_generated_at_and_model_disclosed_in_meta_element(env):
     # Hard Rule 5 (CLAUDE.md): generated timestamp + model must be visibly
     # rendered per card, in a dedicated disclosure line -- not merely

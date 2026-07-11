@@ -276,6 +276,19 @@ a {
   color: var(--color-corrected-red);
 }
 
+/* --- Inert chips -----------------------------------------------------------
+ * A chip with no resolvable link target (e.g. a related/fallback lexicon
+ * term with no matching entry yet) renders in the same pill shape as a
+ * clickable one, so it must visually read as non-interactive: dimmed and a
+ * default (non-pointer) cursor. No color-only signal -- the `title`
+ * attribute on the element itself (rendered by the templates that use this
+ * class) still carries the reason as real, accessible text.
+ */
+.chip--inert {
+  opacity: 0.65;
+  cursor: default;
+}
+
 /* --- Card disclosure footnote (Hard Rule 5) ------------------------------
  * Generated timestamp + model, shown beneath the plain publish date. This
  * is transparency metadata, not editorial content -- small, muted, and

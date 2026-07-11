@@ -79,7 +79,7 @@ already shipped in site/static/css/components.css):
     {% if entry.slug %}
     <span class="chip"><a href="/lexicon/{{ entry.slug }}/">{{ entry.term }}</a></span>
     {% else %}
-    <span class="chip">{{ entry.term }}</span>
+    <span class="chip chip--inert" title="Not yet defined in the Lexicon">{{ entry.term }}</span>
     {% endif %}
     {% endfor %}
   </p>

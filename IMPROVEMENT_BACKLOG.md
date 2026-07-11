@@ -3501,3 +3501,37 @@ changes -- per this repo's own testing rule ("fix your change, not the
 test, unless the test asserts the old, wrong behavior your task is
 explicitly changing") -- and updated it to assert the shared display name
 instead.
+
+## Lexicon "Seen in" real headlines + inert-chip styling (T8, 2026-07-11)
+
+`site/templates/lexicon_term.html`'s "Seen in" list rendered a raw card-id
+machine slug (e.g. `2026-07-09-gpt-5-5-release`) as the visible link
+text -- meaningless to the non-technical reader this site is written for.
+Separately, both `lexicon_term.html`'s related-terms chips and
+`card.html`'s lexicon-fallback chips rendered an unresolvable (no-slug)
+term inside the exact same `.chip` pill as a clickable one, with nothing
+to tell a reader which chips are actually links.
+
+Fixed by giving `site/builders/lexicon.py`'s `SeenInView` a `label` field
+(`resolve_seen_in(card_ids, headline_by_id=None)` resolves each id against
+a `card_id -> headline` map, falling back to the bare id only when
+unresolvable), threaded down from a new defaulted `cards=()` parameter on
+`write_lexicon_pages`/`render_lexicon_term`/`build_term_context` so every
+existing call site keeps working unchanged; `site/generate.py` now passes
+`cards=cards` at its one real call site. Both templates' no-slug chip
+branch now renders `class="chip chip--inert" title="Not yet defined in
+the Lexicon"`, and `components.css` gained a `.chip--inert { opacity:
+0.65; cursor: default; }` rule reusing existing tokens (no new colors, no
+JS) -- dimmed + default cursor, with the reason still carried as real
+text via `title` rather than color alone.
+
+Judgment call, spec-silent: the fix plan didn't specify what a
+`seen_in[]` id should render as when `cards=` is supplied but the id
+still isn't found in it (a stale reference to a card that no longer
+exists, as opposed to the "no mapping supplied at all" case the plan did
+call out). Treated it the same as the no-mapping case -- fall back to the
+bare card id as the label -- rather than dropping the reference or
+raising, since a stale link is still better than a crash or a silently
+vanished "Seen in" entry, and this mirrors how `RelatedTermView`/`rel.slug
+is None` already handles an unresolvable related-term name elsewhere in
+this same file.

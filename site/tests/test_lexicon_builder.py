@@ -211,6 +211,32 @@ def test_resolve_seen_in_synthetic_non_empty_case():
     assert len(resolved) == 1
     assert resolved[0].card_id == "2026-07-09-test-card"
     assert resolved[0].href == "/wire/2026-07/#card-2026-07-09-test-card-headline"
+    # No headline_by_id supplied at all (the default) -- label falls back
+    # to the bare card id, matching this function's pre-headline-lookup
+    # behavior exactly.
+    assert resolved[0].label == "2026-07-09-test-card"
+
+
+def test_resolve_seen_in_with_headline_mapping_uses_the_real_headline_as_label():
+    resolved = lexicon.resolve_seen_in(
+        ["2026-07-09-test-card"],
+        headline_by_id={"2026-07-09-test-card": "Test Lab ships Test Model Alpha"},
+    )
+    assert resolved[0].label == "Test Lab ships Test Model Alpha"
+    # The raw slug never leaks into the label once a headline resolves.
+    assert resolved[0].label != resolved[0].card_id
+
+
+def test_resolve_seen_in_unresolvable_id_falls_back_to_the_card_id_label():
+    # A stale seen_in[] reference to a card id absent from the supplied
+    # mapping (e.g. a card that no longer exists) must still render
+    # *something* usable rather than a blank label -- falls back to the
+    # bare id, exactly the no-mapping-supplied behavior above.
+    resolved = lexicon.resolve_seen_in(
+        ["2026-07-09-unknown-card"],
+        headline_by_id={"2026-07-09-other-card": "Some other headline"},
+    )
+    assert resolved[0].label == "2026-07-09-unknown-card"
 
 
 # ---------------------------------------------------------------------------
@@ -294,6 +320,26 @@ def test_render_lexicon_term_real_content_related_terms_link_to_real_pages():
             assert f'href="/lexicon/{rel_slug}/"' in html
 
 
+def test_render_lexicon_term_unresolvable_related_term_renders_as_inert_chip():
+    # T8: a related-term chip with no matching lexicon entry must be
+    # visually (and accessibly) distinguishable from a clickable one --
+    # both would otherwise render inside the identical `.chip` pill.
+    synthetic = [
+        {
+            "term": "widget",
+            "one_liner": "A widget is a test term.",
+            "deeper": "More about widgets.",
+            "related": ["not a real term"],
+            "seen_in": [],
+        }
+    ]
+    html = lexicon.render_lexicon_term(synthetic, "widget")
+    assert (
+        '<span class="chip chip--inert" title="Not yet defined in the Lexicon">'
+        "not a real term</span>" in html
+    )
+
+
 def test_render_lexicon_term_real_content_anchor_citation_is_a_real_link():
     for entry in REAL_ENTRIES:
         slug = lexicon.slugify(entry["term"])
@@ -315,8 +361,50 @@ def test_render_lexicon_term_with_synthetic_non_empty_seen_in_renders_links():
     ]
     html = lexicon.render_lexicon_term(synthetic, "widget")
     assert 'href="/wire/2026-07/#card-2026-07-09-widget-card-headline"' in html
+    # No `cards=` supplied -- link text falls back to the raw card id.
     assert "2026-07-09-widget-card" in html
     assert lexicon.EMPTY_SEEN_IN_MESSAGE not in html
+
+
+def test_render_lexicon_term_seen_in_resolves_the_cards_real_headline_as_link_text():
+    synthetic = [
+        {
+            "term": "widget",
+            "one_liner": "A widget is a test term.",
+            "deeper": 'More about widgets, see <a href="https://example.test/widget">the widget paper</a>.',
+            "related": [],
+            "seen_in": ["2026-07-09-widget-card"],
+        }
+    ]
+    cards = [{"id": "2026-07-09-widget-card", "headline": "Widget Labs ships Widget 2.0"}]
+    html = lexicon.render_lexicon_term(synthetic, "widget", cards=cards)
+    assert (
+        '<a href="/wire/2026-07/#card-2026-07-09-widget-card-headline">'
+        "Widget Labs ships Widget 2.0</a>" in html
+    )
+    # The raw machine slug is never shown as the visible link text once a
+    # matching headline is available.
+    assert ">2026-07-09-widget-card<" not in html
+
+
+def test_render_lexicon_term_seen_in_falls_back_to_the_card_id_when_unresolvable():
+    synthetic = [
+        {
+            "term": "widget",
+            "one_liner": "A widget is a test term.",
+            "deeper": 'More about widgets, see <a href="https://example.test/widget">the widget paper</a>.',
+            "related": [],
+            "seen_in": ["2026-07-09-widget-card"],
+        }
+    ]
+    # `cards=` supplied but with no matching id -- a stale seen_in[]
+    # reference -- still renders a usable link, labeled with the bare id.
+    cards = [{"id": "2026-07-09-some-other-card", "headline": "Unrelated headline"}]
+    html = lexicon.render_lexicon_term(synthetic, "widget", cards=cards)
+    assert (
+        '<a href="/wire/2026-07/#card-2026-07-09-widget-card-headline">'
+        "2026-07-09-widget-card</a>" in html
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -344,3 +432,22 @@ def test_write_lexicon_pages_every_related_reference_resolves_to_a_generated_pag
                 f"{entry['term']!r}'s related term {rel!r} (slug {rel_slug!r}) "
                 "has no generated page"
             )
+
+
+def test_write_lexicon_pages_threads_cards_through_to_seen_in_headline_labels(tmp_path):
+    synthetic_entries = [
+        {
+            "term": "widget",
+            "one_liner": "A widget is a test term.",
+            "deeper": 'More about widgets, see <a href="https://example.test/widget">the widget paper</a>.',
+            "related": [],
+            "seen_in": ["2026-07-09-widget-card"],
+        }
+    ]
+    cards = [{"id": "2026-07-09-widget-card", "headline": "Widget Labs ships Widget 2.0"}]
+    env = lexicon.build_jinja_env()
+    lexicon.write_lexicon_pages(env, synthetic_entries, tmp_path, cards=cards)
+    page = tmp_path / "lexicon" / "widget" / "index.html"
+    html = page.read_text(encoding="utf-8")
+    assert "Widget Labs ships Widget 2.0</a>" in html
+    assert ">2026-07-09-widget-card<" not in html

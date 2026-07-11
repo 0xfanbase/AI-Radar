@@ -184,10 +184,20 @@ class RelatedTermView:
 
 @dataclass(frozen=True)
 class SeenInView:
-    """One `seen_in[]` reference, resolved to a best-effort href."""
+    """One `seen_in[]` reference, resolved to a best-effort href plus a
+    human-readable link label.
+
+    `label` is the referenced card's real headline when the id resolves
+    against a supplied `headline_by_id` mapping, falling back to the bare
+    `card_id` machine slug (e.g. `"2026-07-09-gpt-5-5-release"`) only when
+    it doesn't -- a stale/unresolvable reference, not the common case.
+    Readers should never have to parse a slug to know what they're
+    clicking into.
+    """
 
     card_id: str
     href: str
+    label: str
 
 
 @dataclass(frozen=True)
@@ -229,12 +239,31 @@ def resolve_related(
     )
 
 
-def resolve_seen_in(card_ids: Iterable[str]) -> tuple[SeenInView, ...]:
-    return tuple(SeenInView(card_id=cid, href=seen_in_href(cid)) for cid in card_ids)
+def resolve_seen_in(
+    card_ids: Iterable[str], headline_by_id: Mapping[str, str] | None = None
+) -> tuple[SeenInView, ...]:
+    """Resolve each `seen_in[]` card id to a link target + a human-readable
+    label. `headline_by_id` (defaulted so every existing call site keeps
+    working unchanged) maps `card_id -> headline`; a card id absent from it
+    -- a stale reference to a card that no longer exists, or simply no
+    mapping supplied at all -- falls back to showing the bare id, exactly
+    today's pre-fix behavior, rather than a broken/blank label.
+    """
+    headline_by_id = headline_by_id or {}
+    return tuple(
+        SeenInView(
+            card_id=cid,
+            href=seen_in_href(cid),
+            label=headline_by_id.get(cid) or cid,
+        )
+        for cid in card_ids
+    )
 
 
 def build_entry_view(
-    raw: Mapping[str, Any], slug_map: Mapping[str, str]
+    raw: Mapping[str, Any],
+    slug_map: Mapping[str, str],
+    headline_by_id: Mapping[str, str] | None = None,
 ) -> LexiconEntryView:
     """Turn one raw `content/lexicon.json` entry into the plain-value view
     model `templates/lexicon_term.html` renders."""
@@ -245,7 +274,7 @@ def build_entry_view(
         one_liner=str(raw["one_liner"]),
         deeper_html=render_deeper_html(str(raw["deeper"])),
         related=resolve_related(raw.get("related", []), slug_map),
-        seen_in=resolve_seen_in(raw.get("seen_in", [])),
+        seen_in=resolve_seen_in(raw.get("seen_in", []), headline_by_id),
     )
 
 
@@ -265,7 +294,9 @@ def build_index_context(entries: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
 
 
 def build_term_context(
-    entries: Sequence[Mapping[str, Any]], slug: str
+    entries: Sequence[Mapping[str, Any]],
+    slug: str,
+    cards: Sequence[Mapping[str, Any]] = (),
 ) -> dict[str, Any]:
     """Full Jinja context for one `/lexicon/<slug>/` page
     (`lexicon_term.html`). Raises `KeyError` if `slug` doesn't resolve to
@@ -273,12 +304,18 @@ def build_term_context(
     derived from this same `entries` list (see `all_slugs`), so an
     unresolvable slug here means a caller bug, not user input to handle
     gracefully.
+
+    `cards` (defaulted -- every existing call site keeps working
+    unchanged) is the full set of raw Wire cards, used only to build the
+    `card_id -> headline` mapping so `seen_in[]` entries render a real
+    headline instead of a raw card-id slug; see `resolve_seen_in`.
     """
     slug_map = build_slug_map(entries)
     by_slug = {slug_map[str(e["term"]).lower()]: e for e in entries}
     raw = by_slug[slug]
+    headline_by_id = {str(c["id"]): str(c["headline"]) for c in cards}
     return {
-        "entry": build_entry_view(raw, slug_map),
+        "entry": build_entry_view(raw, slug_map, headline_by_id),
         "empty_seen_in_message": EMPTY_SEEN_IN_MESSAGE,
     }
 
@@ -323,22 +360,32 @@ def render_lexicon_index(
 
 
 def render_lexicon_term(
-    entries: Sequence[Mapping[str, Any]], slug: str, *, env: Environment | None = None
+    entries: Sequence[Mapping[str, Any]],
+    slug: str,
+    *,
+    env: Environment | None = None,
+    cards: Sequence[Mapping[str, Any]] = (),
 ) -> str:
     jinja_env = env or build_jinja_env()
-    context = build_term_context(entries, slug)
+    context = build_term_context(entries, slug, cards=cards)
     return jinja_env.get_template("lexicon_term.html").render(**context)
 
 
 def write_lexicon_pages(
-    env: Environment, entries: Sequence[Mapping[str, Any]], public_dir: Path
+    env: Environment,
+    entries: Sequence[Mapping[str, Any]],
+    public_dir: Path,
+    cards: Sequence[Mapping[str, Any]] = (),
 ) -> list[Path]:
     """Render + write `/lexicon/` (`<public_dir>/lexicon/index.html`) and
     every `/lexicon/<slug>/` term page
-    (`<public_dir>/lexicon/<slug>/index.html`). Convenience entry point
-    for a future `site/generate.py` integration -- not called by this
-    module itself, and not called from `generate.py` yet (out of this
-    turn's scope)."""
+    (`<public_dir>/lexicon/<slug>/index.html`).
+
+    `cards` (defaulted so every existing call site keeps working
+    unchanged) is the full set of raw Wire cards -- passed straight
+    through to `render_lexicon_term`/`build_term_context` so each term
+    page's "Seen in" list can resolve a real headline for every
+    `seen_in[]` card id instead of showing the raw machine slug."""
     public_dir = Path(public_dir)
     written: list[Path] = []
 
@@ -349,7 +396,7 @@ def write_lexicon_pages(
     written.append(index_path)
 
     for slug in all_slugs(entries):
-        term_html = render_lexicon_term(entries, slug, env=env)
+        term_html = render_lexicon_term(entries, slug, env=env, cards=cards)
         term_path = public_dir / "lexicon" / slug / "index.html"
         term_path.parent.mkdir(parents=True, exist_ok=True)
         term_path.write_text(term_html, encoding="utf-8")
