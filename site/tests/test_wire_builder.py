@@ -229,6 +229,20 @@ def test_prepare_card_view_correction_note_passthrough():
     assert wire.prepare_card_view(CARD_CONFIRMED, slug_map)["correction_note"] is None
 
 
+def test_prepare_card_view_generated_at_and_model_passthrough():
+    # Hard Rule 5 (CLAUDE.md): every card must visibly carry its generated
+    # timestamp and model. prepare_card_view must actually copy these two
+    # schema-required fields into the view model, not just the date/status.
+    slug_map = wire.linkify.build_slug_map(SYNTHETIC_LEXICON)
+    view = wire.prepare_card_view(CARD_CONFIRMED, slug_map)
+    assert view["generated_at"] == CARD_CONFIRMED["generated_at"]
+    assert view["model"] == CARD_CONFIRMED["model"]
+
+    view_reported = wire.prepare_card_view(CARD_REPORTED, slug_map)
+    assert view_reported["generated_at"] == CARD_REPORTED["generated_at"]
+    assert view_reported["model"] == CARD_REPORTED["model"]
+
+
 # ---------------------------------------------------------------------------
 # Rendered HTML -- wire_index.html / wire_month.html / card.html.
 # ---------------------------------------------------------------------------
@@ -279,6 +293,30 @@ def test_render_wire_index_lexicon_fallback_chip_rendered(env):
     assert '<a href="/lexicon/rlhf/">RLHF</a>' in html
     # Unresolvable fallback term still renders as a (plain, unlinked) chip.
     assert "unlisted term" in html
+
+
+def test_render_wire_index_generated_at_and_model_disclosed_in_meta_element(env):
+    # Hard Rule 5 (CLAUDE.md): generated timestamp + model must be visibly
+    # rendered per card, in a dedicated disclosure line -- not merely
+    # available in the view model.
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+    import re
+
+    meta_matches = re.findall(r'<p class="wire-card__meta[^"]*">.*?</p>', html, flags=re.DOTALL)
+    assert meta_matches, "expected at least one wire-card__meta element"
+    joined_meta = "\n".join(meta_matches)
+    assert CARD_CONFIRMED["model"] in joined_meta
+    assert CARD_CONFIRMED["generated_at"] in joined_meta
+    assert CARD_REPORTED["model"] in joined_meta
+    assert CARD_REPORTED["generated_at"] in joined_meta
+
+
+def test_render_wire_index_why_it_matters_label_once_per_card(env):
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+    # Within the 14-day window there are exactly two cards (CARD_CONFIRMED,
+    # CARD_REPORTED) -- the label must appear exactly once per card, as a
+    # distinct visual block, not zero or duplicated.
+    assert html.count('<p class="wire-card__why-label">Why it matters</p>') == 2
 
 
 def test_render_wire_index_excludes_cards_outside_the_window(env):

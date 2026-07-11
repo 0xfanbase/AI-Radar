@@ -213,6 +213,8 @@ def prepare_card_view(card: Mapping[str, Any], slug_map: Mapping[str, str]) -> d
     return {
         "id": card["id"],
         "date": card["date"],
+        "generated_at": card["generated_at"],
+        "model": card["model"],
         "headline": card["headline"],
         "status": status,
         "status_label": status.upper(),

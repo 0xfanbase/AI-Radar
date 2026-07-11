@@ -22,7 +22,13 @@ already shipped in site/static/css/components.css):
   - lexicon-term fallback chips only appear for terms linkify.py could
     not inline-match anywhere in this card's prose (see
     `prepare_card_view`'s docstring for the exact rule), and link to the
-    term's lexicon page when a slug is resolvable. #}
+    term's lexicon page when a slug is resolvable;
+  - "Why it matters" gets its own visually distinct block (`.wire-card__why`,
+    a signal-cyan left rule + small uppercase label) so the payoff
+    paragraph reads differently from the plain narration above it;
+  - Hard Rule 5's per-card disclosures (generated timestamp + model) are
+    a small, muted `.wire-card__meta` footnote line beneath the date --
+    transparency metadata, not editorial content. #}
 <article class="wire-card" aria-labelledby="card-{{ card.id }}-headline">
   <div class="wire-card__header">
     <h2 id="card-{{ card.id }}-headline" class="wire-card__headline">{{ card.headline }}</h2>
@@ -32,7 +38,11 @@ already shipped in site/static/css/components.css):
   <p class="one-liner">{{ card.one_liner }}</p>
 
   <p>{{ card.what_happened_html }}</p>
-  <p>{{ card.why_it_matters_html }}</p>
+
+  <div class="wire-card__why">
+    <p class="wire-card__why-label">Why it matters</p>
+    <p>{{ card.why_it_matters_html }}</p>
+  </div>
 
   {% if card.correction_note %}
   <p class="chip--corrected">Correction: {{ card.correction_note }}</p>
@@ -70,4 +80,5 @@ already shipped in site/static/css/components.css):
   {% endif %}
 
   <p class="wire-card__date font-data"><time datetime="{{ card.date }}">{{ card.date }}</time></p>
+  <p class="wire-card__meta font-data">AI-generated <time datetime="{{ card.generated_at }}">{{ card.generated_at }}</time> · model: {{ card.model }}</p>
 </article>

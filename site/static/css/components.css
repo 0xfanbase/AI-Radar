@@ -275,3 +275,33 @@ a {
 .chip--corrected {
   color: var(--color-corrected-red);
 }
+
+/* --- Card disclosure footnote (Hard Rule 5) ------------------------------
+ * Generated timestamp + model, shown beneath the plain publish date. This
+ * is transparency metadata, not editorial content -- small, muted, and
+ * visually secondary to everything above it in the card.
+ */
+.wire-card__meta {
+  font-size: 0.8rem;
+  opacity: 0.75;
+  margin-top: 0.25rem;
+}
+
+/* --- "Why it matters" payoff block ---------------------------------------
+ * Visually distinguishes the payoff paragraph from the plain narration
+ * above it with a signal-cyan rule + small uppercase label, reusing the
+ * one-liner's accent color rather than introducing a new one.
+ */
+.wire-card__why {
+  border-left: 2px solid var(--color-signal-cyan);
+  padding-inline-start: 0.75em;
+}
+
+.wire-card__why-label {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin: 0 0 0.25rem;
+}
