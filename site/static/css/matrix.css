@@ -32,7 +32,12 @@
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
-  opacity: 0.15; /* ambient only -- must never compete with foreground contrast */
+  opacity: 0.4; /* a moderate, legible "terminal screen" look -- individual
+                   falling streams with real gaps between them, not a
+                   dense saturated wall. Still strictly decorative and
+                   behind opaque chrome/panels (components.css); legibility
+                   of real content comes from z-order + opaque panels, not
+                   from how dim the rain itself is. */
 }
 
 .matrix-rain__col {
@@ -42,6 +47,11 @@
   width: var(--rain-tile-w);
   background-repeat: repeat-y;
   background-position: 0 0;
+  /* A single, soft glow -- matching a terminal phosphor screen, not a
+     heavy neon bloom. Sourced from the same --color-signal-green token
+     every other accent on this site uses -- never a hardcoded hex, per
+     this file's own header rule. */
+  filter: drop-shadow(0 0 2px var(--color-signal-green));
 }
 
 @media (prefers-reduced-motion: no-preference) {

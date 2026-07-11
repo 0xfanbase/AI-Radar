@@ -56,17 +56,30 @@ GLYPH_UNIT_HEIGHT = 22
 TILE_WIDTH_UNITS = 24
 FONT_SIZE_UNITS = 18
 
+# Each tile's glyphs are grouped into repeating "trail" cycles -- glyph 0 of
+# each cycle renders at full opacity (the trail's bright leading character),
+# fading down toward the cycle's own dim tail, then snapping back to full
+# brightness at the next cycle -- the classic bright-head/fading-tail look
+# of the source material's on-screen terminal effect, rather than one flat
+# brightness for every glyph. Cycle length is randomized per tile (within
+# this range) so adjacent columns don't all pulse in visible lock-step.
+TRAIL_CYCLE_MIN_GLYPHS = 8
+TRAIL_CYCLE_MAX_GLYPHS = 16
+TRAIL_TAIL_MIN_OPACITY = 0.15
+
 # Defaults match the shared partial's expectations (see
 # `site/templates/_matrix_rain.html` / `site/static/css/matrix.css`):
 # enough distinct tiles that adjacent columns rarely look identical, a
 # glyph count per tile tall enough that the seamless `repeat-y` loop isn't
-# obviously short, and enough columns to fill a wide desktop viewport
-# (extras beyond a narrow/mobile viewport's width simply overflow-hidden,
-# same convention as every other fixed-width overflow guard on this site).
+# obviously short, and a column count with real horizontal gaps between
+# streams -- a moderate, "terminal screen" density (individually legible
+# falling streams), not a wall-to-wall saturated block. Extras beyond a
+# narrow/mobile viewport's width simply overflow-hidden, same convention as
+# every other fixed-width overflow guard on this site.
 DEFAULT_SEED = 1337
 DEFAULT_TILE_COUNT = 10
 DEFAULT_GLYPHS_PER_TILE = 44
-DEFAULT_COLUMN_COUNT = 72
+DEFAULT_COLUMN_COUNT = 40
 DEFAULT_MIN_DURATION_S = 9.0
 DEFAULT_MAX_DURATION_S = 23.0
 
@@ -85,21 +98,43 @@ class RainColumn:
     left_pct: float
 
 
+def _trail_opacity(index_in_tile: int, cycle_length: int) -> float:
+    """Opacity for one glyph, `index_in_tile` glyphs into the tile, given a
+    `cycle_length`-glyph repeating "trail": position 0 of every cycle is
+    the bright leading glyph (opacity 1.0); opacity falls off toward
+    `TRAIL_TAIL_MIN_OPACITY` by the cycle's last glyph, then snaps back to
+    1.0 at the next cycle's position 0. A lower opacity glyph reads as
+    "further down the trail, dimmer" against the black background --
+    exactly the bright-head/fading-tail look, without needing a second
+    (hardcoded) highlight color."""
+    position = index_in_tile % cycle_length
+    if position == 0:
+        return 1.0
+    falloff = position / (cycle_length - 1)
+    return max(TRAIL_TAIL_MIN_OPACITY, 1.0 - falloff)
+
+
 def _build_tile_svg(rng: random.Random, glyphs_per_tile: int, color: str) -> str:
     """One seamlessly-`repeat-y`-tileable SVG data URI: a vertical strip of
-    `glyphs_per_tile` random glyphs. Seamless by construction -- a
-    `background-repeat: repeat-y` tiling of any image against itself has no
-    seam, so this never needs special first/last-glyph handling."""
+    `glyphs_per_tile` random glyphs, each carrying a `fill-opacity` from
+    :func:`_trail_opacity` so the tile reads as a repeating sequence of
+    bright-head/fading-tail trails rather than one flat brightness.
+    Seamless by construction -- a `background-repeat: repeat-y` tiling of
+    any image against itself has no seam, so this never needs special
+    first/last-glyph handling."""
     glyphs = [rng.choice(_GLYPH_POOL) for _ in range(glyphs_per_tile)]
+    cycle_length = rng.randint(TRAIL_CYCLE_MIN_GLYPHS, TRAIL_CYCLE_MAX_GLYPHS)
     height = glyphs_per_tile * GLYPH_UNIT_HEIGHT
     center_x = TILE_WIDTH_UNITS / 2
     rows = "".join(
         '<text x="{x}" y="{y}" text-anchor="middle" font-size="{size}" '
-        'font-family="monospace" fill="{color}">{glyph}</text>'.format(
+        'font-family="monospace" fill="{color}" fill-opacity="{opacity:.2f}">'
+        "{glyph}</text>".format(
             x=center_x,
             y=(i + 1) * GLYPH_UNIT_HEIGHT - (GLYPH_UNIT_HEIGHT - FONT_SIZE_UNITS),
             size=FONT_SIZE_UNITS,
             color=xml_escape(color),
+            opacity=_trail_opacity(i, cycle_length),
             glyph=xml_escape(glyph),
         )
         for i, glyph in enumerate(glyphs)

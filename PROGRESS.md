@@ -7,6 +7,96 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Addendum: the opacity/glow fix above overshot -- retuned to the classic "movie screen" look
+
+Immediately after the fix below shipped (opacity 0.15 -> 0.6, a double
+drop-shadow glow), the owner gave more specific feedback: it should look
+like "the movie set's screen" -- i.e. the diegetic terminal/monitor
+readout from the source material -- and "not too dense." The 0.6-opacity,
+heavy-bloom version below had swung too far from "barely visible" to a
+dense, uniformly-bright wall, missing the actual defining visual trait of
+that look: individual, legible falling streams, each with a bright leading
+character fading to a dim trailing one, with real black space between
+adjacent streams -- not a flat-brightness, wall-to-wall block.
+
+**Three changes, `site/lib/matrix_rain.py` + `site/static/css/matrix.css`:**
+1. `site/lib/matrix_rain.py`'s `_build_tile_svg` now assigns each glyph a
+   `fill-opacity` from a new `_trail_opacity()` helper: glyphs are grouped
+   into a repeating "trail cycle" (length randomized per tile, 8-16
+   glyphs) -- position 0 of each cycle renders at full opacity (the bright
+   head), fading toward a dim floor by the cycle's last glyph, then
+   snapping back to full brightness at the next cycle. Tiled and animated,
+   this reads as a continuous sequence of falling trails with real
+   depth, rather than one flat brightness throughout -- the single biggest
+   missing ingredient for the authentic look, and achieved without a
+   second (hardcoded) highlight color: it's the same `--color-signal-green`
+   token at varying opacity against the black background.
+2. `DEFAULT_COLUMN_COUNT` reduced from 72 to 40, so adjacent streams have
+   real horizontal gaps -- distinct, individually-legible columns instead
+   of a dense block.
+3. `matrix.css`: `.matrix-rain` opacity brought down from 0.6 to a
+   moderate 0.4; `.matrix-rain__col`'s glow simplified from two stacked
+   drop-shadows to one smaller, softer one -- a terminal-phosphor glow,
+   not a neon bloom.
+
+Verification: `python -m pytest` (709 passed, 2 deselected) and
+`python -m pytest site/tests` (292 passed) both green -- the column-count
+test (`test_matrix_rain_layer_has_the_full_default_column_count_on_every_page`)
+reads `DEFAULT_COLUMN_COUNT` from the module dynamically rather than
+hardcoding 72, so it graded the new value automatically with no test edit
+needed. `python site/generate.py` builds clean. Re-screenshotted desktop
+Wire and Board pages: distinct, legible falling streams with visible
+bright/dim variation down each column, moderate density, real gaps between
+columns, all reading content still exactly as legible as before (the
+opaque-panel legibility mechanism is untouched by any of this).
+
+---
+
+## 2026-07-11 — Fix: Matrix rain was too faint/sparse against real user feedback
+
+After the Matrix-theme redesign (PR #5) merged and went live, the owner
+looked at the actual rendered page and reported it "looks weird," pointing
+at a reference screenshot from a different, unrelated project of theirs
+(a Bitcoin dashboard with its own, more vivid digital-rain background) as
+the look they actually wanted: denser, brighter, glowing green rain,
+rather than the muted ambient backdrop this project shipped.
+
+**Root cause**: `site/static/css/matrix.css`'s `.matrix-rain` rule set
+`opacity: 0.15` specifically to keep the rain from ever competing with
+foreground text contrast -- a reasonable-sounding precaution that, in
+practice, made the whole effect read as washed-out and barely visible
+rather than as an intentional theme. Legibility was already guaranteed by
+a different, independent mechanism (every content panel -- masthead,
+footer, wire cards, board rows -- has its own opaque background, and the
+rain layer sits at `z-index: -1` strictly behind all of them), so dimming
+the rain's own color on top of that was redundant and just made it look
+weak instead of vivid.
+
+**Fix**: `.matrix-rain`'s opacity raised to `0.6`, and `.matrix-rain__col`
+gained a `filter: drop-shadow(...)` glow (two stacked drop-shadows at
+different radii for a soft phosphor-CRT bloom), sourced from the same
+`--color-signal-green` token every other accent on the site already uses
+-- matrix.css's own header rule ("this stylesheet contains ZERO
+[hardcoded] color values... source it from a tokens.css custom property")
+is preserved; nothing new is hardcoded. No column-count/density change was
+needed -- the existing column layout read as sparse only because of how
+dim it was rendered, not because there were too few columns.
+
+Verification: `python -m pytest` (709 passed, 2 deselected) and
+`python -m pytest site/tests` (292 passed) both still green (no test
+asserted the old opacity value or the absence of a `filter` property);
+`python site/generate.py` builds clean. Re-screenshotted desktop (1280px)
+Wire and Board pages against the reference -- the rain now reads as
+vivid, dense, glowing green in the page gutters, while all reading
+content remains exactly as legible as before (the opaque-panel mechanism
+that guarantees this was untouched by this fix). Mobile (390px) still
+shows no visible rain, unchanged from the original design -- the content
+column fills the viewport there, a previously-logged, deliberate
+readability-over-ambience trade-off that this fix didn't revisit since the
+reported problem was specifically about the desktop look.
+
+---
+
 ## 2026-07-11 — T7: two case-sensitive-grep survivors from the T1 rename fixed; zero-stale-references check hardened
 
 A further, independent verification pass on the T1-T6 Matrix-theme
