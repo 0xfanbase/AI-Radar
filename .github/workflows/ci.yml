@@ -30,20 +30,24 @@ jobs:
       - name: Install dev dependencies
         run: pip install -r requirements-dev.txt
 
+      # DELIBERATE ORDERING: the root suite runs BEFORE site/requirements.txt
+      # is installed, so every CI run structurally proves repo-root tests/
+      # needs nothing beyond requirements-dev.txt. See PROGRESS.md /
+      # IMPROVEMENT_BACKLOG.md for the incident this ordering exists to
+      # prevent from recurring: 10 site-dependent test files were once
+      # misplaced under repo-root tests/, invisible to every local session
+      # (which had jinja2 installed for other reasons) and fatal in real CI.
+      # If site deps were installed first, a recurrence of that misplacement
+      # would silently pass this step; with this ordering it fails here.
+      - name: Run tests
+        run: python -m pytest
+
       # site/tests/ exercises site/builders/*.py + site/lib/*.py, which
       # depend on jinja2/markupsafe -- requirements-dev.txt does not
       # include them (they're only in site/requirements.txt), so this
-      # install is required before site/tests can even collect. See
-      # PROGRESS.md / IMPROVEMENT_BACKLOG.md for the incident this step
-      # exists to prevent from recurring: 10 site-dependent test files were
-      # previously misplaced under repo-root tests/, which meant this gap
-      # never showed up here because requirements-dev.txt alone was enough
-      # to collect them (wrongly) as part of the step below.
+      # install is required before site/tests can even collect.
       - name: Install site generator dependencies
         run: pip install -r site/requirements.txt
-
-      - name: Run tests
-        run: python -m pytest
 
       # Mirrors deploy.yml's own existing "Run site generator tests" step
       # -- pytest.ini's `testpaths = tests` deliberately does not collect

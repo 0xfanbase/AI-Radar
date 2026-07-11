@@ -84,6 +84,23 @@ passed** — proving the ten moved files genuinely work at their new
 location with the corrected `REPO_ROOT` path math, not merely "still pass
 in an environment that already happened to have everything."
 
+**Addendum (same day, independent verification pass).** An independent
+from-scratch re-verification of this fix (its own fresh venvs, reproducing
+the exact 701/227 counts above, plus a check of the real GitHub Actions
+run at the fixed commit — green, both new steps executed) found one
+remaining weakness in the `ci.yml` half: the "Install site generator
+dependencies" step ran *before* the root "Run tests" step, so a future
+recurrence of the exact misplacement this entry corrects (a
+jinja2-dependent test file landing back in repo-root `tests/`) would have
+silently passed CI — jinja2 would already be installed by the time the
+root suite ran. `ci.yml`'s steps were reordered to: install dev deps →
+run root suite → install site deps → run `site/tests` — so every CI run
+now structurally proves repo-root `tests/` needs nothing beyond
+`requirements-dev.txt`, closing the recurrence path rather than only the
+original symptom. No test asserts on `ci.yml` step order (verified by
+grep before the change), and both suites re-ran green in the fresh venvs
+after it (**701 passed, 2 deselected** root; **227 passed** `site/tests`).
+
 ## 2026-07-11 — Phase 5 complete: final consolidation across all 5 phases; single "what remains for the human" list
 
 This is the final Phase 5 checkpoint and the closing entry for the whole

@@ -3227,3 +3227,11 @@ convention noted in the entry directly above), not retroactively edited.
   **227 passed**, proving the 10 moved files genuinely work at their new
   location with the corrected `REPO_ROOT` math. See `PROGRESS.md`'s
   matching entry for the full narrative.
+- **Addendum (same day, independent verification pass):** `ci.yml`'s step
+  order was subsequently hardened — root `python -m pytest` now runs
+  *before* `pip install -r site/requirements.txt`, not after. As
+  originally committed, site deps were installed first, so a recurrence of
+  this exact misplacement (a jinja2-dependent test back in repo-root
+  `tests/`) would still have passed CI silently; with the reorder, every
+  CI run structurally proves `tests/` needs only `requirements-dev.txt`.
+  See `PROGRESS.md`'s matching addendum for the verification details.
