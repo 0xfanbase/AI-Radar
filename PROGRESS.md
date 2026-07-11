@@ -7,6 +7,83 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Correction: 10 site-dependent test files were misplaced under repo-root `tests/`, silently breaking real GitHub Actions CI despite every local `pytest` run passing
+
+**What was wrong.** `tests/test_about_builder.py`, `test_board_builder.py`,
+`test_corrections_builder.py`, `test_lexicon_builder.py`, `test_linkify.py`,
+`test_method_builder.py`, `test_moving_builder.py`, `test_primer_builder.py`,
+`test_svg_sparkline.py`, and `test_wire_builder.py` — all ten of Phase 4's
+`site/builders/*.py` / `site/lib/*.py` test files — lived directly under
+the repo-root `tests/` directory instead of `site/tests/`, where every
+other Phase 4 test (`site/tests/test_build.py`,
+`site/tests/test_contrast_ratios.py`) correctly lives. Nine of the ten
+import `jinja2`/`markupsafe` transitively (by `importlib`-loading a
+`site/builders/*.py` module that itself imports them) or directly;
+`test_svg_sparkline.py` doesn't strictly need them but tests a `site/`
+module and belongs with its siblings. `pytest.ini`'s `testpaths = tests`
+collects all of `tests/`, and `.github/workflows/ci.yml`'s "Install dev
+dependencies" step only ever ran `pip install -r requirements-dev.txt` —
+which does not include `jinja2`/`markupsafe` (those live only in
+`site/requirements.txt`, installed solely for `deploy.yml`'s separate
+`site/tests` step). In real GitHub Actions CI, a bare `python -m pytest`
+would hit `ModuleNotFoundError` collecting these ten files and fail
+collection for the *entire* `tests/` suite, not just these files.
+
+**Why it wasn't caught locally.** Across Phase 4's build stages, path
+instructions for where a new test file should live were given
+inconsistently from one commit to the next — several
+`IMPROVEMENT_BACKLOG.md` entries (Phase 4's own board/lexicon/primer/wire
+builder entries) explicitly log, at the time, a "deliberate asymmetry"
+placing these files at repo-root `tests/` specifically so a bare
+`python -m pytest` would pick them up; that reasoning independently held
+for each individual commit but the accumulated result put nine
+jinja2-dependent files somewhere `ci.yml` never installs `jinja2` for.
+Every dev/build session that touched this repo during Phase 3/4 had
+already run `pip install -r site/requirements.txt` at some point (to build
+and inspect the actual site), so `jinja2`/`markupsafe` were already present
+in every local/session Python environment that ever ran `python -m
+pytest` here — a false negative masking a real CI-only failure, the same
+class of bug as this file's own shallow-checkout `HEAD~1` incident above
+(`ci.yml`'s `fetch-depth: 0` fix): something GitHub Actions' clean,
+minimal environment exposes that every local sandbox's accumulated state
+quietly papers over.
+
+**The fix.**
+
+1. `git mv`'d all 10 files from `tests/` to `site/tests/`.
+2. Corrected each file's own `REPO_ROOT = Path(__file__).resolve()...`
+   computation for the new, one-level-deeper location
+   (`site/tests/file.py` → `site/tests` → `site` → repo root, i.e.
+   `.parent.parent.parent` instead of `.parent.parent`) — the only change
+   made to these files' path math; everything built relative to
+   `REPO_ROOT` (`schemas/`, `content/`, `data/`, `site/builders/`, etc.)
+   keeps working unchanged. Every moved file's own docstring/comments
+   that named a sibling by its old `tests/test_*.py` path (e.g. "matching
+   `tests/test_board_builder.py`'s own convention") were updated to
+   `site/tests/test_*.py`, and the same fix was applied to code comments
+   in `site/generate.py`, `site/builders/{lexicon,wire,primer}.py`,
+   `site/lib/{linkify,svg_sparkline}.py`, and one cross-reference in
+   `tests/test_auditor_lexicon_coverage.py` that pointed at the old
+   location.
+3. `.github/workflows/ci.yml` now also installs `site/requirements.txt`
+   and runs `python -m pytest site/tests` as a second, explicit step —
+   mirroring `deploy.yml`'s own pre-existing pattern for that suite — so
+   this class of bug (a test file quietly depending on a package `ci.yml`
+   never installs) cannot silently recur regardless of what any future
+   commit's own local session happens to already have installed.
+
+**Verification — the only way to actually prove this, since this shared
+dev environment already has `jinja2` installed and would falsely pass
+either way:** a fresh `python3 -m venv` with *only*
+`requirements-dev.txt` installed (zero `site/` dependencies) ran the root
+suite genuinely green — **701 passed, 2 deselected** — proving `tests/`
+no longer depends on `jinja2`/`markupsafe` at all. A second fresh venv
+with both `requirements-dev.txt` and `site/requirements.txt` installed
+(matching the new `ci.yml` step) ran `python -m pytest site/tests` — **227
+passed** — proving the ten moved files genuinely work at their new
+location with the corrected `REPO_ROOT` path math, not merely "still pass
+in an environment that already happened to have everything."
+
 ## 2026-07-11 — Phase 5 complete: final consolidation across all 5 phases; single "what remains for the human" list
 
 This is the final Phase 5 checkpoint and the closing entry for the whole

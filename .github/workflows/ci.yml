@@ -30,5 +30,24 @@ jobs:
       - name: Install dev dependencies
         run: pip install -r requirements-dev.txt
 
+      # site/tests/ exercises site/builders/*.py + site/lib/*.py, which
+      # depend on jinja2/markupsafe -- requirements-dev.txt does not
+      # include them (they're only in site/requirements.txt), so this
+      # install is required before site/tests can even collect. See
+      # PROGRESS.md / IMPROVEMENT_BACKLOG.md for the incident this step
+      # exists to prevent from recurring: 10 site-dependent test files were
+      # previously misplaced under repo-root tests/, which meant this gap
+      # never showed up here because requirements-dev.txt alone was enough
+      # to collect them (wrongly) as part of the step below.
+      - name: Install site generator dependencies
+        run: pip install -r site/requirements.txt
+
       - name: Run tests
         run: python -m pytest
+
+      # Mirrors deploy.yml's own existing "Run site generator tests" step
+      # -- pytest.ini's `testpaths = tests` deliberately does not collect
+      # site/tests/, so it must be run explicitly here too, or a PR could
+      # pass this gate while silently breaking the site builders.
+      - name: Run site generator tests
+        run: python -m pytest site/tests
