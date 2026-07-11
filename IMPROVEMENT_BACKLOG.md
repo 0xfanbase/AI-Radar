@@ -3252,3 +3252,43 @@ convention noted in the entry directly above), not retroactively edited.
   touching all seven already-tested page builders' internals and existing
   test assertions, for no behavioral difference in the output. See
   `PROGRESS.md`'s matching entry for the full incident and verification.
+
+- **Frontier Board redesign: `<table class="board-table data">` ->
+  per-model `<details>` row-cards (2026-07-11, owner-reported readability
+  failure).** The owner flagged that `/board/` was unreadable in
+  practice: `components.css`'s `.data` utility (reused from the Wire's
+  numeric-field styling) was applied to the *whole* `<table>`, so every
+  cell -- including the Significance column's 36-124-word prose
+  paragraphs -- rendered in JetBrains Mono, and
+  `td.board-cell--significance{min-width:18rem}` combined with the
+  table's 44rem min-width to break those paragraphs into unreadable
+  monospace fragments; on a phone the table also just hid four columns
+  off-screen with no affordance to reveal them. Target reader is an
+  interested non-expert, not someone who reads data tables for a living,
+  so "technically all the data is there, just scroll/squint" wasn't an
+  acceptable fix. Replaced the table with one `<ul>` of native
+  `<details>`/`<summary>` "row-cards" per region -- Lab/Model/Released/
+  Access always visible in the summary line, Modality/Context
+  window/Source/Significance revealed on tap -- with monospace now
+  scoped narrowly to the two genuinely tabular fields (Released,
+  Context) via the existing `.font-data` utility, and every prose field
+  (including Significance) in the body font at a readable measure. This
+  also closed a real gap: `board.py` never called
+  `site/lib/linkify.py`, so Significance jargon (e.g. "context window",
+  "multimodal") went unlinked even though the Wire's card bodies already
+  got this via `wire.py`; `board.py` now threads `lexicon_entries`
+  through `build_regions`/`build_context`/`render_board_page`/
+  `write_board_page` (all as defaulted params, so every pre-existing
+  caller/test with no lexicon argument keeps rendering identical
+  raw-prose output) and computes `significance_html` once per row via
+  the same `linkify.linkify()` call `wire.py` already uses for card
+  prose. No new JavaScript was introduced -- `<details>` is a native,
+  zero-JS disclosure widget, consistent with this site's "no hydration,
+  no JS-driven widgets" rule. Considered a CSS-only fix (keep the table,
+  just stop applying `.data` to the Significance cell, add
+  `overflow-x: auto`) instead of a structural markup change; rejected
+  because an 8-column table still doesn't fit a 375px viewport without
+  either horizontal scrolling (the reader cannot see Lab and
+  Significance for the same row at once) or drastically truncating
+  columns, whereas per-row disclosure cards are legible at any viewport
+  width with zero overflow anywhere.

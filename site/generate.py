@@ -392,7 +392,11 @@ def render_pages(env: Environment, content: dict[str, Any], public_dir: Path) ->
 
     written: list[Path] = []
     written += wire.write_wire_pages(env, cards, lexicon_entries, public_dir, today=today)
-    written.append(board.write_board_page(env, frontier_board_rows, today, public_dir))
+    written.append(
+        board.write_board_page(
+            env, frontier_board_rows, today, public_dir, lexicon_entries=lexicon_entries
+        )
+    )
     written += lexicon_builder.write_lexicon_pages(env, lexicon_entries, public_dir)
     written.append(
         primer_builder.write_primer_page(env, primer, lexicon_entries, public_dir)

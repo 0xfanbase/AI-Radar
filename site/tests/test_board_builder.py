@@ -30,6 +30,7 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 BOARD_PATH = REPO_ROOT / "site" / "builders" / "board.py"
 FRONTIER_BOARD_CONTENT_PATH = REPO_ROOT / "content" / "frontier_board.json"
+LEXICON_CONTENT_PATH = REPO_ROOT / "content" / "lexicon.json"
 
 
 def _load_board_module():
@@ -234,13 +235,16 @@ def test_render_board_page_against_real_content_has_one_h1_and_page_title():
     assert "Skip to content" in html
 
 
-def test_render_board_page_against_real_content_has_exactly_one_table_per_region():
+def test_render_board_page_against_real_content_has_exactly_one_row_list_per_region():
     rows = _load_real_board_rows()
     html = board.render_board_page(rows, today=REAL_CONTENT_TODAY)
-    assert html.count("<table") == 3
+    # Table->details redesign (see IMPROVEMENT_BACKLOG.md): one
+    # <ul class="board-list"> per present region, replacing the old
+    # one-<table>-per-region markup.
+    assert html.count('<ul class="board-list"') == 3
 
 
-def test_render_board_page_headings_precede_and_are_associated_with_their_table():
+def test_render_board_page_headings_precede_and_are_associated_with_their_row_list():
     rows = _load_real_board_rows()
     html = board.render_board_page(rows, today=REAL_CONTENT_TODAY)
     for key, heading_text in (
@@ -250,22 +254,19 @@ def test_render_board_page_headings_precede_and_are_associated_with_their_table(
     ):
         slug = key.lower().replace(" ", "-")
         heading_id = f"board-region-{slug}-heading"
-        table_id = f"board-region-{slug}-table"
 
         heading_marker = f'<h2 id="{heading_id}">{heading_text}</h2>'
-        table_marker = f'id="{table_id}"'
-        aria_marker = f'aria-labelledby="{heading_id}"'
+        list_marker = f'<ul class="board-list" aria-labelledby="{heading_id}">'
 
         assert heading_marker in html
-        assert table_marker in html
-        # The table (identified by its own table_id) is associated with
-        # the heading via aria-labelledby, for screen readers.
-        assert aria_marker in html
+        # The row-list (a <ul>) is associated with the heading via
+        # aria-labelledby, for screen readers.
+        assert list_marker in html
 
         heading_pos = html.index(heading_marker)
-        table_pos = html.index(table_marker)
-        assert heading_pos < table_pos, (
-            f"heading for region {key!r} must appear before its table"
+        list_pos = html.index(list_marker)
+        assert heading_pos < list_pos, (
+            f"heading for region {key!r} must appear before its row list"
         )
 
 
@@ -278,48 +279,49 @@ def test_render_board_page_region_tables_appear_in_fixed_order():
     assert us_pos < china_pos < open_weights_pos
 
 
-def test_render_board_page_columns_present_in_each_table_header():
+def test_render_board_page_facts_dt_labels_present_once_per_row():
     rows = _load_real_board_rows()
     html = board.render_board_page(rows, today=REAL_CONTENT_TODAY)
-    for column in (
-        "Lab",
-        "Model",
-        "Released",
-        "Modality",
-        "Context",
-        "Access",
-        "Significance",
-        "Source",
-    ):
-        assert f"<th scope=\"col\">{column}</th>" in html
+    # The old 8-column header row (Lab/Model/Released/Modality/Context/
+    # Access/Significance/Source) is gone; the three facts that still
+    # need an explicit label in the new per-row <dl> are Modality,
+    # Context window, and Source -- Lab/Model/Released/Access are
+    # self-evident from their position/styling in the summary line.
+    for label in ("Modality", "Context window", "Source"):
+        assert html.count(f"<dt>{label}</dt>") == 13
 
 
 def test_render_board_page_row_count_matches_real_content():
     rows = _load_real_board_rows()
     html = board.render_board_page(rows, today=REAL_CONTENT_TODAY)
-    # One <th scope="row"> per Board row (the Lab cell), across all
-    # tables combined.
-    assert html.count('<th scope="row">') == 13
+    # One <details class="board-row"> per Board row, across all regions
+    # combined.
+    assert html.count('<details class="board-row">') == 13
 
 
-def test_render_board_page_uses_jetbrains_mono_data_styling_with_tabular_figures():
+def test_render_board_page_never_uses_the_old_monospace_table_styling():
     rows = _load_real_board_rows()
     html = board.render_board_page(rows, today=REAL_CONTENT_TODAY)
-    # Reuses components.css's existing `.data` utility class (JetBrains
-    # Mono + tabular-nums font-feature), applied to every board table --
-    # see components.css's own header comment for what `.data` renders.
-    assert html.count('class="board-table data"') == 3
+    # The old `.data` (whole-table JetBrains Mono) styling is gone
+    # entirely -- monospace is now scoped only to the genuinely tabular
+    # Released/Context values via `.font-data`.
+    assert "board-table data" not in html
+    assert html.count('class="board-row__released font-data"') == 13
+    assert html.count('class="font-data"') == 13  # the Context window <dd>s
+    assert 'class="board-row__significance"' in html
+    assert 'board-row__significance font-data' not in html
 
 
 def test_render_board_page_handles_zero_rows_gracefully():
     html = board.render_board_page([], today=REAL_CONTENT_TODAY)
+    assert "<details" not in html
     assert "<table" not in html
     assert "No frontier-model rows are tracked yet" in html
     assert 'id="main-content"' in html
 
 
 # ---------------------------------------------------------------------------
-# Source cells are real <a href="..."> link elements
+# Source links are real <a href="..."> link elements
 # ---------------------------------------------------------------------------
 
 
@@ -328,10 +330,9 @@ def test_render_board_page_source_cells_are_real_link_elements():
     html = board.render_board_page(rows, today=REAL_CONTENT_TODAY)
     for row in rows:
         url = row["source_url"]
-        # Exact structural match against this template's own markup: a
-        # real anchor element inside the Source <td>, not just the bare
+        # A real anchor element for the Source fact, not just the bare
         # URL string appearing somewhere as plain text.
-        assert f'<td><a href="{url}">' in html, (
+        assert f'<a href="{url}">' in html, (
             f"expected a real <a href> link element for {url!r}"
         )
 
@@ -339,8 +340,79 @@ def test_render_board_page_source_cells_are_real_link_elements():
 def test_render_board_page_source_link_count_matches_row_count():
     rows = _load_real_board_rows()
     html = board.render_board_page(rows, today=REAL_CONTENT_TODAY)
-    hrefs = re.findall(r'<td><a href="[^"]+">', html)
+    # Scoped to each row's Source fact (`<dd><a href="...">`) so the
+    # shared shell's own nav links (Board/Lexicon/Primer/... in
+    # base.html, present on every page) don't inflate the count.
+    hrefs = re.findall(r'<dd><a href="[^"]+">', html)
     assert len(hrefs) == 13
+
+
+# ---------------------------------------------------------------------------
+# Significance prose auto-linking against content/lexicon.json
+# ---------------------------------------------------------------------------
+
+
+def _load_real_lexicon_entries() -> list[dict]:
+    with LEXICON_CONTENT_PATH.open("r", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def _significance_paragraphs(html: str) -> list[str]:
+    return re.findall(
+        r'<p class="board-row__significance">(.*?)</p>', html, re.DOTALL
+    )
+
+
+def test_render_board_page_with_real_lexicon_linkifies_significance_prose():
+    rows = _load_real_board_rows()
+    lexicon_entries = _load_real_lexicon_entries()
+    html = board.render_board_page(
+        rows, today=REAL_CONTENT_TODAY, lexicon_entries=lexicon_entries
+    )
+    paragraphs = _significance_paragraphs(html)
+    assert len(paragraphs) == 13
+    # The real seed data genuinely contains literal lexicon-term matches
+    # (e.g. "context window" appears in 8 of the 13 rows' significance
+    # prose) -- at least one significance paragraph must contain a real
+    # lexicon anchor.
+    assert any('<a href="/lexicon/' in p for p in paragraphs)
+
+
+def test_render_board_page_without_lexicon_entries_has_raw_text_and_no_lexicon_anchors():
+    # Back-compat: every pre-existing call site that doesn't pass
+    # lexicon_entries at all must keep rendering the same raw (escaped)
+    # significance prose, with zero lexicon anchors.
+    rows = _load_real_board_rows()
+    html = board.render_board_page(rows, today=REAL_CONTENT_TODAY)
+    # Scoped to significance paragraphs -- base.html's own shared nav
+    # always links to "/lexicon/" (the Lexicon index page) on every page,
+    # so the absence check must not be a whole-page substring search.
+    paragraphs = _significance_paragraphs(html)
+    assert len(paragraphs) == 13
+    assert not any("/lexicon/" in p for p in paragraphs)
+    # A verbatim (HTML-special-character-free) fragment of the DeepSeek
+    # row's real significance prose survives untouched.
+    assert "extends default context to 1 million tokens" in html
+
+
+def test_long_significance_prose_stays_in_body_font_never_monospace():
+    # Regression test: a 100+-word significance string must render
+    # inside the plain-prose `.board-row__significance` element, never
+    # tagged `font-data`/`data` (the bug this redesign fixes), regardless
+    # of length.
+    long_significance = " ".join(["Alpha", "beta", "gamma", "delta", "epsilon"] * 22)
+    assert len(long_significance.split()) >= 100
+    row = _synthetic_row(significance=long_significance)
+    html = board.render_board_page([row], today=date(2026, 7, 9))
+
+    match = re.search(
+        r'<p class="([^"]*)">' + re.escape(long_significance) + r"</p>", html
+    )
+    assert match is not None, "expected the full significance prose in its own <p>"
+    classes = match.group(1)
+    assert classes == "board-row__significance"
+    assert "font-data" not in classes
+    assert "data" not in classes
 
 
 # ---------------------------------------------------------------------------
@@ -393,12 +465,13 @@ def test_rendered_pulse_dot_present_only_for_the_recent_synthetic_row():
     dot_spans = re.findall(r'<span[^>]*class="board-pulse-dot"[^>]*>', html)
     assert len(dot_spans) == 1
 
-    # The dot must sit in the recent row's Model cell, not the old row's.
+    # The dot must sit in the recent row's <details> row-card, not the
+    # old row's.
     recent_idx = html.index("Synthbench Recent")
     old_idx = html.index("Synthbench Old")
     dot_idx = re.search(r'<span[^>]*class="board-pulse-dot"[^>]*>', html).start()
-    recent_row_end = html.index("</tr>", recent_idx)
-    old_row_end = html.index("</tr>", old_idx)
+    recent_row_end = html.index("</details>", recent_idx)
+    old_row_end = html.index("</details>", old_idx)
     assert recent_idx < dot_idx < recent_row_end
     assert not (old_idx < dot_idx < old_row_end)
 
