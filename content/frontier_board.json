@@ -1,0 +1,194 @@
+[
+  {
+    "lab": "Anthropic",
+    "region": "US",
+    "model": "Claude Fable 5",
+    "release_date": "2026-06-09",
+    "modality": [
+      "text",
+      "image"
+    ],
+    "context_window": 1000000,
+    "access": "api",
+    "significance": "Anthropic's current top-tier release, aimed at heavy-duty agentic coding and extended reasoning tasks, ships with adaptive thinking on by default (it can't be switched off) and a 1M-token context window out of the box. It became generally available on June 9, 2026 across the Claude API, Claude Platform on AWS, Amazon Bedrock, Google Cloud, and Microsoft Foundry, alongside a Project-Glasswing-restricted sibling, Claude Mythos 5. Anthropic's own models-overview guidance now directs developers who need the ceiling of available capability toward Fable 5 rather than Opus 4.8 -- a signal that Fable 5, not Opus 4.8, now sits atop Anthropic's publicly available lineup.",
+    "source_url": "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "DeepSeek",
+    "region": "China",
+    "model": "DeepSeek-V4 Pro",
+    "release_date": "2026-04-24",
+    "modality": [
+      "text"
+    ],
+    "context_window": 1000000,
+    "access": "open-weights",
+    "significance": "DeepSeek's newest flagship reasoning and agentic model extends default context to 1 million tokens and, per Lab DeepSeek, approaches the performance of leading closed frontier models while remaining open-weight and far cheaper to run via API.",
+    "source_url": "https://api-docs.deepseek.com/news/news260424/",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "Ai2",
+    "region": "open-weights",
+    "model": "Olmo 3.1 (32B Think / 32B Instruct)",
+    "release_date": "2025-12-12",
+    "modality": [
+      "text"
+    ],
+    "context_window": 65536,
+    "access": "open-weights",
+    "significance": "Ai2 describes Olmo 3.1 -- an extended reinforcement-learning follow-up to the Olmo 3 family it first shipped on Nov 20, 2025 -- as its best-performing fully open 32B checkpoints to date for both reasoning (Think) and instruction-following (Instruct) use, citing internal evaluation gains over the original Olmo 3 32B models of over 5 points on AIME and over 20 points on IFBench.",
+    "source_url": "https://allenai.org/blog/olmo3",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "NVIDIA",
+    "region": "open-weights",
+    "model": "Nemotron 3 Ultra",
+    "release_date": "2026-06-04",
+    "modality": [
+      "text"
+    ],
+    "context_window": 1000000,
+    "access": "open-weights",
+    "significance": "NVIDIA's newest and largest Nemotron 3 release, Ultra is a 550-billion-parameter (55 billion active) Mixture-of-Experts hybrid Mamba-Attention model built for long-running agentic workloads. NVIDIA's own benchmarks put its inference throughput at 1.6x to 5.9x that of three comparably-sized open models, varying by which one it's measured against, at matching accuracy, plus strong long-context retrieval at its 1M-token window.",
+    "source_url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "OpenAI",
+    "region": "US",
+    "model": "GPT-5.6 Sol",
+    "release_date": "2026-06-26",
+    "modality": [
+      "text",
+      "image"
+    ],
+    "context_window": null,
+    "access": "api",
+    "significance": "OpenAI began a limited preview of its GPT-5.6 family on June 26, 2026, led by Sol, the line's new flagship, alongside the mid-tier Terra and the fast, low-cost Luna. Per OpenAI's own preview system card, Sol pushes coding, biology, and cybersecurity capability further than any prior OpenAI release and adds new \"max\"/\"ultra\" reasoning and multi-subagent modes for long, complex problems, alongside a hardened safety stack with activation-classifier monitoring. Because of its cybersecurity strength, OpenAI initially limited the preview to a small group of trusted partners coordinated with the U.S. government, with broader availability to follow.",
+    "source_url": "https://deploymentsafety.openai.com/gpt-5-6-preview",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "Google DeepMind",
+    "region": "US",
+    "model": "Gemini 3.5 Flash",
+    "release_date": "2026-05-19",
+    "modality": [
+      "text",
+      "image"
+    ],
+    "context_window": null,
+    "access": "api",
+    "significance": "Gemini 3.5 Flash, released May 19, 2026 as the first model in Google's new 3.5 family, is built for agentic workflows and coding rather than general chat; Google's own benchmark table has it outperforming Gemini 3.1 Pro on coding and multi-step agentic tasks while running roughly four times faster on output tokens per second than prior frontier models. It shipped broadly at once across the free Gemini app and Search's AI Mode, the Gemini API in Google AI Studio and Android Studio, the new Antigravity developer platform, and Gemini Enterprise. A larger 3.5 Pro sibling remains in development.",
+    "source_url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "Meta",
+    "region": "US",
+    "model": "Muse Spark",
+    "release_date": "2026-04-08",
+    "modality": [
+      "text",
+      "image",
+      "video"
+    ],
+    "context_window": null,
+    "access": "consumer",
+    "significance": "Muse Spark, unveiled April 8, 2026, is the first model in a new series built by Meta Superintelligence Labs, capping a nine-month, ground-up rebuild of Meta's AI stack, and is built to reason over text, images, and live camera or video input while answering in text, images, or code. It is rolling out primarily through consumer surfaces -- the Meta AI app, WhatsApp, Instagram, Facebook, Messenger, and Ray-Ban Meta glasses -- with only a private API preview open to select partners so far rather than a broad developer API. Meta says it hopes to open-source future Muse-series models, though Spark itself remains proprietary.",
+    "source_url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "xAI (SpaceXAI)",
+    "region": "US",
+    "model": "Grok 4.5",
+    "release_date": "2026-07-08",
+    "modality": [
+      "text"
+    ],
+    "context_window": 500000,
+    "access": "api",
+    "significance": "Grok 4.5, released July 8, 2026, is the first model shipped under the SpaceXAI brand following xAI's merger into SpaceX, and xAI's own developer documentation positions it as the company's most capable and fastest model yet, built for coding, agentic tasks, and knowledge work rather than general chat. It was trained jointly with Cursor -- incorporating a large volume of Cursor's real-world coding and agent-interaction data -- carries a 500,000-token context window, and is priced at $2/$6 per million input/output tokens. Elon Musk described it as \"an Opus-class model, but faster, more token-efficient and lower cost,\" positioning it as a cheaper rival to Anthropic's and OpenAI's flagship models.",
+    "source_url": "https://docs.x.ai/developers/models",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "Mistral",
+    "region": "US",
+    "model": "Mistral Large 3",
+    "release_date": "2025-12-02",
+    "modality": [
+      "text",
+      "image"
+    ],
+    "context_window": null,
+    "access": "open-weights",
+    "significance": "Mistral Large 3, released December 2, 2025, is Mistral's flagship sparse mixture-of-experts model -- 675 billion total parameters with 41 billion active per token -- released fully open under the Apache 2.0 license alongside the smaller Ministral 3 family (14B/8B/3B). It adds image understanding on top of text, supports 40-plus languages, and Mistral's own announcement places it at #2 among open-weight non-reasoning models on the LMArena leaderboard at launch. Mistral is headquartered in the EU, not the US, but this Board -- per this project's own logged taxonomy decision -- buckets it into the US section rather than a third regional column, since the Board's three tracked lanes are US, China, and notable open-weights releases, not a geography-complete list of every lab's home country.",
+    "source_url": "https://mistral.ai/news/mistral-3/",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "Alibaba Qwen",
+    "region": "China",
+    "model": "Qwen3.7-Max",
+    "release_date": "2026-05-21",
+    "modality": [
+      "text"
+    ],
+    "context_window": 1000000,
+    "access": "api",
+    "significance": "Qwen3.7-Max, unveiled by Alibaba Cloud on May 21, 2026, is Alibaba's coding- and office-agent flagship, demonstrating sustained end-to-end autonomy across a 35-hour kernel-optimization run involving more than 1,000 tool calls with no manual intervention. It ships with a 1-million-token context window, OpenAI- and Anthropic-compatible APIs, and cross-framework support (Claude Code, OpenClaw, Qwen Code), available as a closed, proprietary API through Alibaba Cloud Model Studio rather than as downloadable weights.",
+    "source_url": "https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "Moonshot AI",
+    "region": "China",
+    "model": "Kimi K2.6",
+    "release_date": "2026-04-20",
+    "modality": [
+      "text",
+      "image",
+      "video"
+    ],
+    "context_window": 256000,
+    "access": "open-weights",
+    "significance": "Kimi K2.6, which Moonshot AI shipped as generally available around April 20, 2026, is a trillion-parameter Mixture-of-Experts model (32 billion active per token) built around long-horizon endurance rather than one-shot reasoning: its \"Agent Swarm\" system coordinates up to 300 sub-agents across roughly 4,000 steps in a single autonomous run, and it can sustain coding sessions for hours at a stretch. It is released open-weight on Hugging Face under a Modified MIT license, with a 256,000-token context window and multimodal (text, image, video) input support, and is also served through Kimi.com, the Kimi app, and Moonshot's own API and CLI.",
+    "source_url": "https://huggingface.co/moonshotai/Kimi-K2.6",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "Zhipu AI",
+    "region": "China",
+    "model": "GLM-5.2",
+    "release_date": "2026-06-17",
+    "modality": [
+      "text"
+    ],
+    "context_window": 1000000,
+    "access": "open-weights",
+    "significance": "GLM-5.2, which Zhipu AI (Z.ai) released on June 17, 2026, refines the GLM-5 line for long-horizon coding and agentic work on a 1-million-token context window, using a new \"IndexShare\" sparse-attention mechanism that Zhipu's own model card says cuts per-token compute at that context length by roughly 2.9x. The roughly 753-billion-parameter mixture-of-experts model is released open-weight under the MIT license -- no usage or regional restrictions -- through Hugging Face and Zhipu's own GLM Coding Plan and API, positioned as a coding-first engine rather than a general-purpose chat assistant.",
+    "source_url": "https://huggingface.co/blog/zai-org/glm-52-blog",
+    "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "ByteDance",
+    "region": "China",
+    "model": "Seed 2.1 Pro",
+    "release_date": "2026-06-23",
+    "modality": [
+      "text",
+      "image",
+      "video"
+    ],
+    "context_window": null,
+    "access": "api",
+    "significance": "Seed 2.1, which ByteDance's Seed team released on June 23, 2026 in Pro and lighter Turbo variants, is built to carry out full multi-step tasks -- project planning, document processing, end-to-end coding across an entire codebase -- rather than answer single prompts, and adds stronger multimodal understanding of documents, charts, and video. ByteDance serves it through its own Doubao consumer assistant and the Volcano Engine cloud platform rather than as downloadable weights or a widely available third-party API.",
+    "source_url": "https://seed.bytedance.com/en/blog/seed2-1-officially-released-advancing-ai-productivity",
+    "last_verified": "2026-07-09"
+  }
+]

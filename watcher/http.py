@@ -29,6 +29,7 @@ from watcher.config import (
     MAX_RETRIES,
     REQUEST_TIMEOUT_SECONDS,
     RETRY_STATUS_FORCELIST,
+    ROBOTS_EXEMPT_API_HOSTS,
     USER_AGENT,
 )
 
@@ -238,8 +239,27 @@ def check_robots_allowed(url: str, user_agent: str = USER_AGENT) -> bool:
       unparseable body -- is treated as "skip this source for the run":
       returns False and logs why, rather than guessing allow-all.
     - An explicit disallow from a parseable ``robots.txt`` returns False.
+
+    Documented-API exemption (CLAUDE.md's fetch-discipline exception,
+    deliberately narrow): if ``url``'s host is in
+    ``watcher.config.ROBOTS_EXEMPT_API_HOSTS``, this short-circuits to
+    ``True`` without ever fetching that host's ``robots.txt`` at all --
+    the host's own published API terms of use are the governing contract
+    for these requests, not a crawl directive aimed at page-indexing
+    crawlers. Every other host (including any HTML page on the same
+    domain the exemption doesn't name) is unaffected and stays fully
+    gated by the logic below.
     """
     parsed = urlsplit(url)
+
+    if parsed.netloc in ROBOTS_EXEMPT_API_HOSTS:
+        logger.info(
+            "robots.txt check skipped for %s -- documented-API exemption "
+            "per CLAUDE.md (host %r is in ROBOTS_EXEMPT_API_HOSTS).",
+            url, parsed.netloc,
+        )
+        return True
+
     robots_url = urlunsplit((parsed.scheme, parsed.netloc, "/robots.txt", "", ""))
 
     try:

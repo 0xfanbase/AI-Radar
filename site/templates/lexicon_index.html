@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Lexicon — AI Frontier Wire{% endblock %}
+
+{% block meta_description %}A plain-English glossary of {{ total_terms }} AI terms, each with a one-sentence definition, a deeper cut, and a live source citation.{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for the Lexicon index. Scoped to this page
+   * only (matches the Frontier Board / Wire builders' own precedent for
+   * page-specific <style> blocks), built entirely from
+   * site/static/css/tokens.css's custom properties -- no new site-wide
+   * stylesheet rules are introduced here. See IMPROVEMENT_BACKLOG.md.
+   */
+  .lexicon-intro {
+    max-width: 38rem;
+  }
+
+  .lexicon-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+  }
+
+  .lexicon-list__term {
+    margin: 0 0 0.2rem;
+  }
+
+  .lexicon-list__one-liner {
+    margin: 0;
+  }
+</style>
+
+<h1>Lexicon</h1>
+<p class="lexicon-intro">A plain-English glossary of {{ total_terms }} AI
+  terms, alphabetically ordered. Each term has a one-sentence definition,
+  a deeper cut with a live source citation, and links to related terms.
+  New to all of this? Start with the <a href="/primer/">Primer</a> for a
+  fixed, dependency-ordered reading sequence instead.</p>
+
+{% if entries %}
+<ul class="lexicon-list">
+  {% for entry in entries %}
+  <li>
+    <h2 class="lexicon-list__term"><a href="/lexicon/{{ entry.slug }}/">{{ entry.term }}</a></h2>
+    <p class="lexicon-list__one-liner">{{ entry.one_liner }}</p>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>No lexicon terms are seeded yet -- check back once the first analyst
+  run publishes card-driven definitions.</p>
+{% endif %}
+
+{% endblock %}

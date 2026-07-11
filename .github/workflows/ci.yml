@@ -1,0 +1,57 @@
+name: ci
+
+# Runs the full deterministic test suite (live-network tests excluded by
+# pytest.ini's default `-m "not live"`) on every push and pull request --
+# the CI gate that must stay green before anything merges.
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          # Full history, not the default shallow (depth-1) clone: some
+          # tests shell out to real `git diff`/`git rev-parse` against a
+          # prior commit (e.g. HEAD~1), which doesn't exist in a depth-1
+          # checkout even though it does in every full-history local
+          # sandbox -- that mismatch caused real CI failures here despite
+          # `pytest` passing locally (see PROGRESS.md).
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dev dependencies
+        run: pip install -r requirements-dev.txt
+
+      # DELIBERATE ORDERING: the root suite runs BEFORE site/requirements.txt
+      # is installed, so every CI run structurally proves repo-root tests/
+      # needs nothing beyond requirements-dev.txt. See PROGRESS.md /
+      # IMPROVEMENT_BACKLOG.md for the incident this ordering exists to
+      # prevent from recurring: 10 site-dependent test files were once
+      # misplaced under repo-root tests/, invisible to every local session
+      # (which had jinja2 installed for other reasons) and fatal in real CI.
+      # If site deps were installed first, a recurrence of that misplacement
+      # would silently pass this step; with this ordering it fails here.
+      - name: Run tests
+        run: python -m pytest
+
+      # site/tests/ exercises site/builders/*.py + site/lib/*.py, which
+      # depend on jinja2/markupsafe -- requirements-dev.txt does not
+      # include them (they're only in site/requirements.txt), so this
+      # install is required before site/tests can even collect.
+      - name: Install site generator dependencies
+        run: pip install -r site/requirements.txt
+
+      # Mirrors deploy.yml's own existing "Run site generator tests" step
+      # -- pytest.ini's `testpaths = tests` deliberately does not collect
+      # site/tests/, so it must be run explicitly here too, or a PR could
+      # pass this gate while silently breaking the site builders.
+      - name: Run site generator tests
+        run: python -m pytest site/tests

@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/verifier_stats.schema.json",
+  "title": "Verifier Stats",
+  "description": "Spec-silent shape (the approved build plan's Phase 2 section names 'data/verifier_stats.json' -- one row appended per day by scripts/reconcile_run.py -- without fixing fields; decision logged in IMPROVEMENT_BACKLOG.md). Top-level object: a version plus one entry per analyst/verifier run, feeding the weekly audit.yml's verifier pass-rate trend check (rolling 7d/30d) and the Method page. cards_drafted is the analyst's own output count for that run; confirmed+reported+dropped should sum to cards_drafted (not schema-enforced, since a demoted-not-dropped card is still one of confirmed/reported); pass_rate is the run's own (confirmed+reported)/cards_drafted, precomputed so the frontend/auditor never has to re-derive it. Phase 2 seeds data/verifier_stats.json = {\"version\": 1, \"runs\": []}.",
+  "type": "object",
+  "required": ["version", "runs"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "runs": {
+      "type": "array",
+      "description": "One entry per analyst/verifier run, oldest first by convention (not schema-enforced).",
+      "items": {
+        "type": "object",
+        "required": [
+          "date",
+          "cards_drafted",
+          "confirmed",
+          "reported",
+          "dropped",
+          "pass_rate"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "cards_drafted": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total cards the analyst wrote this run, before the verifier's pass."
+          },
+          "confirmed": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Cards that finished this run with status confirmed."
+          },
+          "reported": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Cards that finished this run with status reported (including any demoted from confirmed)."
+          },
+          "dropped": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Clusters the verifier permanently dropped this run (see data/ledger.json's status: 'dropped' entries)."
+          },
+          "pass_rate": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "(confirmed + reported) / cards_drafted for this run; 0 when cards_drafted is 0."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

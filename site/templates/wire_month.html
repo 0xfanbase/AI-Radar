@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}AI Frontier Wire -- {{ month_label }} archive{% endblock %}
+{% block meta_description %}Every AI Frontier Wire card published in {{ month_label }}.{% endblock %}
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for Wire cards -- identical to wire_index.html's
+   * own block (see that file's comment for the full rationale). Kept as a
+   * literal duplicate rather than a shared include so this template stays
+   * a self-contained page, matching the Frontier Board builder's own
+   * precedent of inlining page-specific CSS rather than extending
+   * components.css.
+   */
+  .wire-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-block: 1.5rem;
+  }
+
+  .wire-card {
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--color-panel);
+  }
+
+  .wire-card__header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem 1rem;
+  }
+
+  .wire-card__headline {
+    margin: 0;
+  }
+
+  .wire-card__topics {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .wire-card__sources {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0;
+  }
+
+  .wire-card__sources li {
+    margin-block-end: 0.35rem;
+  }
+
+  .wire-card__terms {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-block: 0.75rem;
+  }
+
+  .wire-card__date {
+    opacity: 0.75;
+    margin-block-start: 0.75rem;
+    margin-block-end: 0;
+  }
+
+  .wire-empty {
+    border: 1px dashed var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-block: 1.5rem;
+  }
+
+  .wire-archive-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+</style>
+
+<h1>Wire archive: {{ month_label }}</h1>
+
+{% if cards %}
+<div class="wire-list">
+  {% for card in cards %}
+  {% include "card.html" %}
+  {% endfor %}
+</div>
+{% else %}
+<p class="wire-empty">{{ empty_message }}</p>
+{% endif %}
+
+<p><a href="/">Back to the Wire</a></p>
+
+{% if archive_months %}
+<nav class="wire-archive-nav" aria-label="Other months">
+  <h2>Other months</h2>
+  <ul>
+    {% for month in archive_months %}
+    <li><a href="/wire/{{ month.key }}/">{{ month.label }}</a></li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

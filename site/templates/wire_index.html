@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}AI Frontier Wire -- The Wire{% endblock %}
+{% block meta_description %}The last {{ window_days }} days of fact-checked frontier AI news, newest first.{% endblock %}
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for Wire cards. Scoped to this page only (this
+   * <style> block is only ever emitted inside the rendered wire_index.html
+   * / wire_month.html documents -- see the identical block there), and
+   * built entirely from site/static/css/tokens.css's existing custom
+   * properties plus the already-established `.chip`/`.chip--*`/
+   * `.one-liner`/`.font-data` utilities from components.css -- no new
+   * site-wide stylesheet rules are introduced here, and no color is
+   * hardcoded outside a tokens.css custom property. See
+   * IMPROVEMENT_BACKLOG.md for why this lives inline in the template
+   * rather than in components.css (matches the Frontier Board builder's
+   * own precedent, built concurrently in this same working tree).
+   */
+  .wire-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-block: 1.5rem;
+  }
+
+  .wire-card {
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--color-panel);
+  }
+
+  .wire-card__header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem 1rem;
+  }
+
+  .wire-card__headline {
+    margin: 0;
+  }
+
+  .wire-card__topics {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .wire-card__sources {
+    list-style: none;
+    padding: 0;
+    margin: 0.75rem 0;
+  }
+
+  .wire-card__sources li {
+    margin-block-end: 0.35rem;
+  }
+
+  .wire-card__terms {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-block: 0.75rem;
+  }
+
+  .wire-card__date {
+    opacity: 0.75;
+    margin-block-start: 0.75rem;
+    margin-block-end: 0;
+  }
+
+  .wire-empty {
+    border: 1px dashed var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-block: 1.5rem;
+  }
+
+  .wire-archive-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+  }
+</style>
+
+<h1>The Wire</h1>
+<p>The last {{ window_days }} days of fact-checked frontier AI news, newest
+  first. Every status chip is real, checkable sourcing -- see the
+  <a href="/method/">Method page</a> for how CONFIRMED/REPORTED/CORRECTED
+  are decided.</p>
+
+{% if cards %}
+<div class="wire-list">
+  {% for card in cards %}
+  {% include "card.html" %}
+  {% endfor %}
+</div>
+{% else %}
+<p class="wire-empty">{{ empty_message }}</p>
+{% endif %}
+
+{% if archive_months %}
+<nav class="wire-archive-nav" aria-label="Wire archive by month">
+  <h2>Browse by month</h2>
+  <ul>
+    {% for month in archive_months %}
+    <li><a href="/wire/{{ month.key }}/">{{ month.label }}</a></li>
+    {% endfor %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

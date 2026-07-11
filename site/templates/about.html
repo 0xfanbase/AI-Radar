@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}About — AI Frontier Wire{% endblock %}
+
+{% block meta_description %}What AI Frontier Wire is, how it's run, and its licensing.{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for the About page. Scoped to this page only,
+   * built entirely from site/static/css/tokens.css's existing custom
+   * properties -- matches the Frontier Board/Primer/Wire builders' own
+   * established "inline <style>, no new site-wide rules" convention. See
+   * IMPROVEMENT_BACKLOG.md.
+   */
+  .about-section {
+    max-width: 38rem;
+  }
+
+  .about-section + .about-section {
+    margin-block-start: 1.5rem;
+  }
+</style>
+
+<h1>About</h1>
+
+<section class="about-section" aria-labelledby="about-what-heading">
+  <h2 id="about-what-heading">What this is</h2>
+  <p>AI Frontier Wire is a free, public site covering frontier AI: a
+    fact-checked daily wire of what happened and why it matters, a living
+    tracker of frontier models across US, Chinese, and open-weights labs
+    (the Frontier Board), and a plain-English glossary (the Lexicon) so a
+    newcomer can actually follow along. Every part of it -- watching for
+    news, drafting, fact-checking, publishing, and auditing itself -- runs
+    on its own, with as little day-to-day human involvement as the design
+    can manage. See the <a href="/method/">Method page</a> for exactly how
+    that works.</p>
+</section>
+
+<section class="about-section" aria-labelledby="about-auto-heading">
+  <h2 id="about-auto-heading">Auto-published, non-commercial</h2>
+  <p>Every card, Frontier Board row, and Lexicon entry is written by an AI
+    process and published automatically once it clears the fact-checking
+    steps on the Method page -- there is no human editor reviewing each
+    story before it goes live. This site carries no ads, no sponsorships,
+    and no paid placement of any kind; it exists because running it costs
+    nothing beyond a subscription its operator already pays for anyway.</p>
+</section>
+
+<section class="about-section" aria-labelledby="about-anonymous-heading">
+  <h2 id="about-anonymous-heading">Published anonymously</h2>
+  <p>This project is published under the <code>frontier-wire-bot</code>
+    identity. No personal name, contact detail, or other identifying
+    information appears anywhere in this site, its underlying code
+    repository, or its commit history -- every change is committed under
+    that same bot identity, never a person's. The operator may choose to
+    claim authorship publicly at some point, but only through an
+    explicit, later change to this page -- never by default.</p>
+</section>
+
+<section class="about-section" aria-labelledby="about-disclaimer-heading">
+  <h2 id="about-disclaimer-heading">Disclaimer</h2>
+  <p>AI-curated and AI-written; links go to primary sources. Every card
+    carries its own generation timestamp, the model that wrote it, and
+    its verification status, and any error is corrected in the open, not
+    silently -- see the <a href="/corrections/">Corrections page</a>.</p>
+</section>
+
+<section class="about-section" aria-labelledby="about-license-heading">
+  <h2 id="about-license-heading">Licensing</h2>
+  <p>The code that runs this site is licensed <strong>MIT</strong>.
+    Published editorial output -- Wire cards, the Frontier Board, and the
+    Lexicon -- is licensed <strong>CC BY&nbsp;4.0</strong>: reuse it
+    freely, with attribution.</p>
+</section>
+
+{% endblock %}

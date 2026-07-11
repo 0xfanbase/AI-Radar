@@ -1,0 +1,93 @@
+name: watch
+
+# Phase 1 pure-code half of the daily loop (CLAUDE.md's diagram): fetch all
+# feeds, cluster & rank, diff vs data/ledger.json, write data/queue.json and
+# data/whats_moving.json. No LLM involved -- this workflow only ever runs
+# watcher/ code and commits the resulting data/*.json artifacts.
+#
+# Cron targets CLAUDE.md's documented "daily 07:00 HKT" run exactly: Hong
+# Kong is UTC+8 with no DST, so 07:00 HKT = 23:00 UTC the previous day --
+# "0 23 * * *" fires once every day at 23:00 UTC, which is 07:00 HKT the
+# following day. (Phase 1's original placeholder, "17 6 * * *"/06:17 UTC,
+# was an off-hour-minute approximation that never actually matched the
+# documented target hour; corrected at the Phase 1 PM checkpoint -- see
+# PROGRESS.md.)
+on:
+  schedule:
+    - cron: "0 23 * * *"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          # Full history rather than the default shallow (depth-1) clone --
+          # this job's own production code only ever diffs against HEAD (a
+          # shallow clone would be fine for that alone), but a depth-1
+          # checkout bit ci.yml's test suite in exactly this repo (real
+          # `git diff ... HEAD~1` failing in CI despite passing locally;
+          # see PROGRESS.md), so every workflow here checks out full
+          # history uniformly rather than relying on each script's exact
+          # git-history needs staying shallow-clone-safe forever.
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # Persists watcher/http.py's ETag/Last-Modified cache (data/.cache/,
+      # gitignored) across scheduled runs so conditional GETs stay cheap.
+      # Key always includes the run id so the cache is re-saved every run
+      # (an exact key hit would otherwise skip the post-job save); the
+      # "watcher-cache-" prefix in restore-keys still finds the most recent
+      # previous run's cache to restore from.
+      - name: Cache watcher ETag store
+        uses: actions/cache@v4
+        with:
+          path: data/.cache
+          key: watcher-cache-${{ github.run_id }}
+          restore-keys: |
+            watcher-cache-
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run watcher
+        run: python -m watcher.cli run
+
+      - name: Commit and push changed data files (bot identity)
+        run: |
+          git add data/ledger.json data/queue.json data/whats_moving.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git -c user.name="frontier-wire-bot" \
+                -c user.email="bot@users.noreply.github.com" \
+                commit -m "chore(watch): update ledger/queue/whats_moving [skip ci]"
+            git push
+          fi
+
+      # Phase 2's analyst/verifier half of CLAUDE.md's daily loop is
+      # intentionally NOT dispatched from here. It was originally designed
+      # as a `gh workflow run analyze.yml` step (analyze.yml still exists,
+      # as reference documentation of the exact Analyst/Verifier prompts
+      # and procedure), but the repo owner does not want to manage a
+      # CLAUDE_CODE_OAUTH_TOKEN GitHub secret -- so analyze.yml is never
+      # actually invoked, and this workflow no longer needs the
+      # actions:write permission that dispatching it would require.
+      #
+      # The daily analyst+verifier run instead happens via a scheduled
+      # Claude Code Remote Routine ("AI Frontier Wire -- daily
+      # analyst+verifier refresh"), which fires independently of this
+      # workflow, reads analyze.yml's ANALYST/VERIFIER prompts directly,
+      # runs them as fresh subagents, and commits+pushes the same way this
+      # job does -- no GitHub secret involved anywhere in that path. See
+      # CLAUDE.md's "Daily self-learning loop" section for the full
+      # architecture note.

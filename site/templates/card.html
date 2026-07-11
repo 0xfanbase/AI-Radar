@@ -1,0 +1,73 @@
+{# Wire card partial (Phase 4, build-plan section 5).
+
+Expects a single `card` variable in context -- the plain-value view model
+`site/builders/wire.py::prepare_card_view()` produces, not a raw
+`content/cards/<id>.json` dict. Included (not extended) from
+`wire_index.html`/`wire_month.html` inside a `{% for card in cards %}`
+loop, relying on Jinja's default `{% include %}` context-sharing so
+`card` is already in scope here.
+
+Markup rules from the build plan, all satisfied without any new CSS
+(reuses `.chip`/`.chip--confirmed|reported|corrected` and `.one-liner`,
+already shipped in site/static/css/components.css):
+  - status chip is literal visible text ("CONFIRMED"/"REPORTED"/
+    "CORRECTED"), never color-only -- the CSS class only adds an accent
+    color on top of that text;
+  - the one-liner is the one field styled larger + signal-cyan, so the
+    eye can skim only the one-liners;
+  - sources are a real list of `<a>` elements naming their outlet, not a
+    bare URL dump;
+  - topic chips are text-labeled (the topic name is the chip's visible
+    content, not an icon);
+  - lexicon-term fallback chips only appear for terms linkify.py could
+    not inline-match anywhere in this card's prose (see
+    `prepare_card_view`'s docstring for the exact rule), and link to the
+    term's lexicon page when a slug is resolvable. #}
+<article class="wire-card" aria-labelledby="card-{{ card.id }}-headline">
+  <div class="wire-card__header">
+    <h2 id="card-{{ card.id }}-headline" class="wire-card__headline">{{ card.headline }}</h2>
+    <span class="{{ card.status_chip_class }}">{{ card.status_label }}</span>
+  </div>
+
+  <p class="one-liner">{{ card.one_liner }}</p>
+
+  <p>{{ card.what_happened_html }}</p>
+  <p>{{ card.why_it_matters_html }}</p>
+
+  {% if card.correction_note %}
+  <p class="chip--corrected">Correction: {{ card.correction_note }}</p>
+  {% endif %}
+
+  {% if card.topics %}
+  <ul class="wire-card__topics" aria-label="Topics">
+    {% for topic in card.topics %}
+    <li><span class="chip">{{ topic }}</span></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if card.citations %}
+  <ul class="wire-card__sources" aria-label="Sources">
+    {% for citation in card.citations %}
+    <li>
+      <a href="{{ citation.url }}">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+
+  {% if card.lexicon_fallback_terms %}
+  <p class="wire-card__terms">
+    <span>Terms:</span>
+    {% for entry in card.lexicon_fallback_terms %}
+    {% if entry.slug %}
+    <span class="chip"><a href="/lexicon/{{ entry.slug }}/">{{ entry.term }}</a></span>
+    {% else %}
+    <span class="chip">{{ entry.term }}</span>
+    {% endif %}
+    {% endfor %}
+  </p>
+  {% endif %}
+
+  <p class="wire-card__date font-data"><time datetime="{{ card.date }}">{{ card.date }}</time></p>
+</article>

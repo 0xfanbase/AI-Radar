@@ -1,0 +1,5548 @@
+{
+  "exhaustive": {
+    "nbHits": true,
+    "typo": true
+  },
+  "exhaustiveNbHits": true,
+  "exhaustiveTypo": true,
+  "hits": [
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "slymax"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "NPM 12 makes install scripts, Git, and remote-url dependencies opt-in by default"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://github.blog/changelog/2026-07-08-npm-install-time-security-and-gat-bypass2fa-deprecation/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_slymax",
+        "story_48840760"
+      ],
+      "author": "slymax",
+      "created_at": "2026-07-09T03:48:29Z",
+      "created_at_i": 1783568909,
+      "num_comments": 0,
+      "objectID": "48840760",
+      "points": 1,
+      "story_id": 48840760,
+      "title": "NPM 12 makes install scripts, Git, and remote-url dependencies opt-in by default",
+      "updated_at": "2026-07-09T03:50:14Z",
+      "url": "https://github.blog/changelog/2026-07-08-npm-install-time-security-and-gat-bypass2fa-deprecation/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "brandonb"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Cancer cases worldwide are expected to soar in the coming decades"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.washingtonpost.com/health/2026/07/08/why-who-is-warning-about-escalating-cancer-rates-by-2050/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_brandonb",
+        "story_48840758"
+      ],
+      "author": "brandonb",
+      "created_at": "2026-07-09T03:48:12Z",
+      "created_at_i": 1783568892,
+      "num_comments": 0,
+      "objectID": "48840758",
+      "points": 1,
+      "story_id": 48840758,
+      "title": "Cancer cases worldwide are expected to soar in the coming decades",
+      "updated_at": "2026-07-09T03:50:57Z",
+      "url": "https://www.washingtonpost.com/health/2026/07/08/why-who-is-warning-about-escalating-cancer-rates-by-2050/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "kerim-ca"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Waymo Calls Police on Teenage Riders Who Were Drinking"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.roadandtrack.com/news/a71866405/waymo-robotaxi-calls-police-on-teenage-passengers-drinking-firing-toy-guns/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_kerim-ca",
+        "story_48840731"
+      ],
+      "author": "kerim-ca",
+      "children": [
+        48840755
+      ],
+      "created_at": "2026-07-09T03:44:29Z",
+      "created_at_i": 1783568669,
+      "num_comments": 1,
+      "objectID": "48840731",
+      "points": 1,
+      "story_id": 48840731,
+      "title": "Waymo Calls Police on Teenage Riders Who Were Drinking",
+      "updated_at": "2026-07-09T03:50:14Z",
+      "url": "https://www.roadandtrack.com/news/a71866405/waymo-robotaxi-calls-police-on-teenage-passengers-drinking-firing-toy-guns/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Jimmc414"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Top Legal Adviser to Joint Chiefs Is Stepping Down a Year Before Completing Term"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.propublica.org/article/eric-widmar-retiring-joint-chiefs-legal-adviser"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_Jimmc414",
+        "story_48840726"
+      ],
+      "author": "Jimmc414",
+      "created_at": "2026-07-09T03:43:07Z",
+      "created_at_i": 1783568587,
+      "num_comments": 0,
+      "objectID": "48840726",
+      "points": 2,
+      "story_id": 48840726,
+      "title": "Top Legal Adviser to Joint Chiefs Is Stepping Down a Year Before Completing Term",
+      "updated_at": "2026-07-09T03:50:28Z",
+      "url": "https://www.propublica.org/article/eric-widmar-retiring-joint-chiefs-legal-adviser"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "luvverma2011"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Practical Lessons from Reinforcement Learning Post Training Experiments [pdf]"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://zenodo.org/records/21115798"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_luvverma2011",
+        "story_48840720"
+      ],
+      "author": "luvverma2011",
+      "children": [
+        48840721
+      ],
+      "created_at": "2026-07-09T03:42:20Z",
+      "created_at_i": 1783568540,
+      "num_comments": 0,
+      "objectID": "48840720",
+      "points": 1,
+      "story_id": 48840720,
+      "title": "Practical Lessons from Reinforcement Learning Post Training Experiments [pdf]",
+      "updated_at": "2026-07-09T03:44:58Z",
+      "url": "https://zenodo.org/records/21115798"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "happy-go-lucky"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "China Cuts 12,200 University Programs, Replaces Many with AI Degrees"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.forbes.com/sites/annaesakismith/2026/06/23/china-cuts-12200-university-programs-replaces-many-with-ai-degrees/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_happy-go-lucky",
+        "story_48840689"
+      ],
+      "author": "happy-go-lucky",
+      "created_at": "2026-07-09T03:36:45Z",
+      "created_at_i": 1783568205,
+      "num_comments": 0,
+      "objectID": "48840689",
+      "points": 2,
+      "story_id": 48840689,
+      "title": "China Cuts 12,200 University Programs, Replaces Many with AI Degrees",
+      "updated_at": "2026-07-09T03:41:58Z",
+      "url": "https://www.forbes.com/sites/annaesakismith/2026/06/23/china-cuts-12200-university-programs-replaces-many-with-ai-degrees/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "virtuallymundo"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Primarily looking to test out app concepts and website ideas. What is exactly the main differences or pros\\cons with each of these LLM&quot;s when just 'having fun' 'shipping code' ?"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Non-tech background, choosing between using CLaudeCode and CodeX"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_virtuallymundo",
+        "story_48840681",
+        "ask_hn"
+      ],
+      "author": "virtuallymundo",
+      "created_at": "2026-07-09T03:34:58Z",
+      "created_at_i": 1783568098,
+      "num_comments": 0,
+      "objectID": "48840681",
+      "points": 1,
+      "story_id": 48840681,
+      "story_text": "Primarily looking to test out app concepts and website ideas. What is exactly the main differences or pros\\cons with each of these LLM&quot;s when just &#x27;having fun&#x27; &#x27;shipping code&#x27; ?",
+      "title": "Non-tech background, choosing between using CLaudeCode and CodeX",
+      "updated_at": "2026-07-09T03:39:43Z"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "KilledByAPixel"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Texans deserve more then a Ken Paxton snake game"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://paxtonsnake.3d2k.com/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_KilledByAPixel",
+        "story_48840675"
+      ],
+      "author": "KilledByAPixel",
+      "children": [
+        48840676
+      ],
+      "created_at": "2026-07-09T03:33:54Z",
+      "created_at_i": 1783568034,
+      "num_comments": 1,
+      "objectID": "48840675",
+      "points": 1,
+      "story_id": 48840675,
+      "title": "Texans deserve more then a Ken Paxton snake game",
+      "updated_at": "2026-07-09T03:34:58Z",
+      "url": "https://paxtonsnake.3d2k.com/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "subby"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "For the past 3 weeks, I've been hacking on a personal AI that you can text.<p>It's curious about you &amp; proactively figures out ways to help you, while still feeling like a friend.<p>Its personality &amp; proactivity is probably what I've spent the most time working on for this project, testing out a bunch of different models and prompts etc. It has more work to be done for sure, but I kinda like how it's come to be so far!<p>It has its own 24/7 computer and browser (still working on improving its use of them!), with its own curiosities &amp; proactivity.<p>For ex, it might decide to surf the web on its own every once in a while, and if it comes across anything that it feels might be interesting to you, it'll text you it.<p>In the past 2 weeks of my friends using it, I've noticed this particular personal ai setup/harness produce a ton of emergent magical moments that I thought were pretty cool.<p>For ex, my roommate @aadilpickle signed up 2 weeks ago, told it about sfpursuit.org and his sfalexandria.com project during the onboarding, and then didn't use it much, but after like 3 days, it proactively surfed through these sites, did deeper research into his past work, and texted him asking about his `hamburger phone at flippin burger` project that he once worked on with some friends, which was really cool. he felt that to be really magical and he's been using it since then (mostly for reminders etc). :)<p>This project is in a very rough/early state, but i'd definitely really love some feedback! :)<p>I also created a Discord community for this: <a href=\"https://discord.gg/8dGBGg6rXu\" rel=\"nofollow\">https://discord.gg/8dGBGg6rXu</a>"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Figment – An AI that I made my friends talk to for 2 weeks"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://figment.computer/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_subby",
+        "story_48840666",
+        "show_hn"
+      ],
+      "author": "subby",
+      "created_at": "2026-07-09T03:31:43Z",
+      "created_at_i": 1783567903,
+      "num_comments": 0,
+      "objectID": "48840666",
+      "points": 1,
+      "story_id": 48840666,
+      "story_text": "For the past 3 weeks, I&#x27;ve been hacking on a personal AI that you can text.<p>It&#x27;s curious about you &amp; proactively figures out ways to help you, while still feeling like a friend.<p>Its personality &amp; proactivity is probably what I&#x27;ve spent the most time working on for this project, testing out a bunch of different models and prompts etc. It has more work to be done for sure, but I kinda like how it&#x27;s come to be so far!<p>It has its own 24&#x2F;7 computer and browser (still working on improving its use of them!), with its own curiosities &amp; proactivity.<p>For ex, it might decide to surf the web on its own every once in a while, and if it comes across anything that it feels might be interesting to you, it&#x27;ll text you it.<p>In the past 2 weeks of my friends using it, I&#x27;ve noticed this particular personal ai setup&#x2F;harness produce a ton of emergent magical moments that I thought were pretty cool.<p>For ex, my roommate @aadilpickle signed up 2 weeks ago, told it about sfpursuit.org and his sfalexandria.com project during the onboarding, and then didn&#x27;t use it much, but after like 3 days, it proactively surfed through these sites, did deeper research into his past work, and texted him asking about his `hamburger phone at flippin burger` project that he once worked on with some friends, which was really cool. he felt that to be really magical and he&#x27;s been using it since then (mostly for reminders etc). :)<p>This project is in a very rough&#x2F;early state, but i&#x27;d definitely really love some feedback! :)<p>I also created a Discord community for this: <a href=\"https:&#x2F;&#x2F;discord.gg&#x2F;8dGBGg6rXu\" rel=\"nofollow\">https:&#x2F;&#x2F;discord.gg&#x2F;8dGBGg6rXu</a>",
+      "title": "Show HN: Figment – An AI that I made my friends talk to for 2 weeks",
+      "updated_at": "2026-07-09T03:34:30Z",
+      "url": "https://figment.computer/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "texasjosh"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Burner Email, Temp email Box lasting 24 hours"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://burneremail24.com/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_texasjosh",
+        "story_48840664"
+      ],
+      "author": "texasjosh",
+      "created_at": "2026-07-09T03:31:41Z",
+      "created_at_i": 1783567901,
+      "num_comments": 0,
+      "objectID": "48840664",
+      "points": 1,
+      "story_id": 48840664,
+      "title": "Burner Email, Temp email Box lasting 24 hours",
+      "updated_at": "2026-07-09T03:34:30Z",
+      "url": "https://burneremail24.com/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "userbinator"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Llama 2 LLM on DOS (2025)"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://yeokhengmeng.com/2025/04/llama2-llm-on-dos/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_userbinator",
+        "story_48840660"
+      ],
+      "author": "userbinator",
+      "created_at": "2026-07-09T03:31:33Z",
+      "created_at_i": 1783567893,
+      "num_comments": 0,
+      "objectID": "48840660",
+      "points": 1,
+      "story_id": 48840660,
+      "title": "Llama 2 LLM on DOS (2025)",
+      "updated_at": "2026-07-09T03:34:30Z",
+      "url": "https://yeokhengmeng.com/2025/04/llama2-llm-on-dos/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "cookinat"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Rutazo – Argentina's freight marketplace, built solo in 4 months"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.rutazo.com"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_cookinat",
+        "story_48840658"
+      ],
+      "author": "cookinat",
+      "children": [
+        48840659
+      ],
+      "created_at": "2026-07-09T03:31:30Z",
+      "created_at_i": 1783567890,
+      "num_comments": 0,
+      "objectID": "48840658",
+      "points": 1,
+      "story_id": 48840658,
+      "title": "Rutazo – Argentina's freight marketplace, built solo in 4 months",
+      "updated_at": "2026-07-09T03:34:30Z",
+      "url": "https://www.rutazo.com"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "thunderbong"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Citicorp Center Engineering Crisis"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://en.wikipedia.org/wiki/Citicorp_Center_engineering_crisis"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_thunderbong",
+        "story_48840648"
+      ],
+      "author": "thunderbong",
+      "children": [
+        48840706
+      ],
+      "created_at": "2026-07-09T03:29:42Z",
+      "created_at_i": 1783567782,
+      "num_comments": 1,
+      "objectID": "48840648",
+      "points": 2,
+      "story_id": 48840648,
+      "title": "Citicorp Center Engineering Crisis",
+      "updated_at": "2026-07-09T03:42:58Z",
+      "url": "https://en.wikipedia.org/wiki/Citicorp_Center_engineering_crisis"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "droidjj"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "What's slowing down the AI buildout"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.worksinprogress.news/p/ai-is-bottlenecked-by-the-grid"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_droidjj",
+        "story_48840620"
+      ],
+      "author": "droidjj",
+      "created_at": "2026-07-09T03:26:02Z",
+      "created_at_i": 1783567562,
+      "num_comments": 0,
+      "objectID": "48840620",
+      "points": 1,
+      "story_id": 48840620,
+      "title": "What's slowing down the AI buildout",
+      "updated_at": "2026-07-09T03:29:14Z",
+      "url": "https://www.worksinprogress.news/p/ai-is-bottlenecked-by-the-grid"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "brandonb"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Researchers uncover possible cause of muscle pain from cholesterol medication"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://medicalxpress.com/news/2026-07-uncover-muscle-pain-widely-cholesterol.html"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_brandonb",
+        "story_48840597"
+      ],
+      "author": "brandonb",
+      "created_at": "2026-07-09T03:23:15Z",
+      "created_at_i": 1783567395,
+      "num_comments": 0,
+      "objectID": "48840597",
+      "points": 2,
+      "story_id": 48840597,
+      "title": "Researchers uncover possible cause of muscle pain from cholesterol medication",
+      "updated_at": "2026-07-09T03:26:58Z",
+      "url": "https://medicalxpress.com/news/2026-07-uncover-muscle-pain-widely-cholesterol.html"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "gvlachos"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Hi HN, I've been working on building this tool for myself and my software dev shop so I can easily share project specific + interactive views with my clients.<p>Have been slowly adding/improving the platform over the last 9 months and while I'm sure there are still some gaps, it's at a point where it would be nice to share with the community.<p>As per the domain, the intention for this is to always be 100% free with MIT license.<p>Current plan is to try and polish the UI to the level of Linear + try and replicate the sync engine experience (as close as possible noting that Linear API is the main bottleneck).<p>Any feedback is welcome either on here or as an issue :)"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Free and OSS way to extend client-facing functionality of Linear"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://linear.gratis/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_gvlachos",
+        "story_48840578",
+        "show_hn"
+      ],
+      "author": "gvlachos",
+      "created_at": "2026-07-09T03:20:34Z",
+      "created_at_i": 1783567234,
+      "num_comments": 0,
+      "objectID": "48840578",
+      "points": 1,
+      "story_id": 48840578,
+      "story_text": "Hi HN, I&#x27;ve been working on building this tool for myself and my software dev shop so I can easily share project specific + interactive views with my clients.<p>Have been slowly adding&#x2F;improving the platform over the last 9 months and while I&#x27;m sure there are still some gaps, it&#x27;s at a point where it would be nice to share with the community.<p>As per the domain, the intention for this is to always be 100% free with MIT license.<p>Current plan is to try and polish the UI to the level of Linear + try and replicate the sync engine experience (as close as possible noting that Linear API is the main bottleneck).<p>Any feedback is welcome either on here or as an issue :)",
+      "title": "Show HN: Free and OSS way to extend client-facing functionality of Linear",
+      "updated_at": "2026-07-09T03:23:58Z",
+      "url": "https://linear.gratis/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "zaik"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "AI could keep poor countries poor"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://newsletter.deenamousa.com/p/ai-could-keep-poor-countries-poor"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_zaik",
+        "story_48840572"
+      ],
+      "author": "zaik",
+      "created_at": "2026-07-09T03:20:08Z",
+      "created_at_i": 1783567208,
+      "num_comments": 0,
+      "objectID": "48840572",
+      "points": 2,
+      "story_id": 48840572,
+      "title": "AI could keep poor countries poor",
+      "updated_at": "2026-07-09T03:38:13Z",
+      "url": "https://newsletter.deenamousa.com/p/ai-could-keep-poor-countries-poor"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "dvduval"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Morph Chess"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.david-duval.com/morph-chess/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_dvduval",
+        "story_48840562"
+      ],
+      "author": "dvduval",
+      "children": [
+        48840563
+      ],
+      "created_at": "2026-07-09T03:18:41Z",
+      "created_at_i": 1783567121,
+      "num_comments": 1,
+      "objectID": "48840562",
+      "points": 1,
+      "story_id": 48840562,
+      "title": "Morph Chess",
+      "updated_at": "2026-07-09T03:49:29Z",
+      "url": "https://www.david-duval.com/morph-chess/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "andsoitis"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Looksmaxxing influencer who fled police found dead"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://thetab.com/2026/07/08/looksmaxxing-influencer-who-fled-police-found-dead-after-swimming-naked-in-lake-for-hours"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_andsoitis",
+        "story_48840554"
+      ],
+      "author": "andsoitis",
+      "created_at": "2026-07-09T03:17:53Z",
+      "created_at_i": 1783567073,
+      "num_comments": 0,
+      "objectID": "48840554",
+      "points": 2,
+      "story_id": 48840554,
+      "title": "Looksmaxxing influencer who fled police found dead",
+      "updated_at": "2026-07-09T03:38:44Z",
+      "url": "https://thetab.com/2026/07/08/looksmaxxing-influencer-who-fled-police-found-dead-after-swimming-naked-in-lake-for-hours"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "henrypissler"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Character AI Alternative for Roleplay"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://chatbrat.ai/bratlog/best-character-ai-alternatives-2026"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_henrypissler",
+        "story_48840543"
+      ],
+      "author": "henrypissler",
+      "children": [
+        48840544
+      ],
+      "created_at": "2026-07-09T03:16:27Z",
+      "created_at_i": 1783566987,
+      "num_comments": 0,
+      "objectID": "48840543",
+      "points": 1,
+      "story_id": 48840543,
+      "title": "Character AI Alternative for Roleplay",
+      "updated_at": "2026-07-09T03:20:28Z",
+      "url": "https://chatbrat.ai/bratlog/best-character-ai-alternatives-2026"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "mjbachhav"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "The library of lost journals 603 pages novel fiction book"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://play.google.com/store/books/details/The_Library_of_Lost_Journals_The_Archivist_s_Journ?id=s4TdEQAAQBAJ&hl=en_US"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_mjbachhav",
+        "story_48840520"
+      ],
+      "author": "mjbachhav",
+      "children": [
+        48840521
+      ],
+      "created_at": "2026-07-09T03:13:38Z",
+      "created_at_i": 1783566818,
+      "num_comments": 0,
+      "objectID": "48840520",
+      "points": 1,
+      "story_id": 48840520,
+      "title": "The library of lost journals 603 pages novel fiction book",
+      "updated_at": "2026-07-09T03:18:43Z",
+      "url": "https://play.google.com/store/books/details/The_Library_of_Lost_Journals_The_Archivist_s_Journ?id=s4TdEQAAQBAJ&hl=en_US"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Jimmc414"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "DDB: Source-Level Interactive Debugging for Distributed Applications"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://arxiv.org/abs/2607.06107"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_Jimmc414",
+        "story_48840519"
+      ],
+      "author": "Jimmc414",
+      "created_at": "2026-07-09T03:13:06Z",
+      "created_at_i": 1783566786,
+      "num_comments": 0,
+      "objectID": "48840519",
+      "points": 1,
+      "story_id": 48840519,
+      "title": "DDB: Source-Level Interactive Debugging for Distributed Applications",
+      "updated_at": "2026-07-09T03:18:43Z",
+      "url": "https://arxiv.org/abs/2607.06107"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "anitroves"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "I launched anitroves.com a few months ago and had added many wiki pages for Anime series and movies. At first we got around 20kexpression in under 2 weeks and most of our pages were indexed which was very likely google testing my website.<p>After a month google started deindexing my website and due to our one tiny mistake this action got its pace and almost whole site was deindexed then we fixed our that mistake and also removed every wiki page now we have only a few hundred of pages.<p>Its been more than a month since we removed every wiki and other possible thin pages yet google search console shows around 24000 discovered pages and keeps showing some urls which doesn't even exist as indexed we submitted Validate fix options but it looks like it is of no use and we don't have any manual penalty or issue shown in search console.<p>We are now recreating every single page on our website though on frontend it shows same old pages but on backend we are cooking something and will launch it at once but we want to recover from this problem or penalty or whatever it is before that.<p>You can access my website from google as if I write link here hackernews will most likely hide this post from public.<p>Can someone explain what this is and how to recover from this professionally"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ask HN: How to recover from thin content or de-indexing penalty on Google"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_anitroves",
+        "story_48840515",
+        "ask_hn"
+      ],
+      "author": "anitroves",
+      "children": [
+        48840629,
+        48840534
+      ],
+      "created_at": "2026-07-09T03:12:31Z",
+      "created_at_i": 1783566751,
+      "num_comments": 2,
+      "objectID": "48840515",
+      "points": 2,
+      "story_id": 48840515,
+      "story_text": "I launched anitroves.com a few months ago and had added many wiki pages for Anime series and movies. At first we got around 20kexpression in under 2 weeks and most of our pages were indexed which was very likely google testing my website.<p>After a month google started deindexing my website and due to our one tiny mistake this action got its pace and almost whole site was deindexed then we fixed our that mistake and also removed every wiki page now we have only a few hundred of pages.<p>Its been more than a month since we removed every wiki and other possible thin pages yet google search console shows around 24000 discovered pages and keeps showing some urls which doesn&#x27;t even exist as indexed we submitted Validate fix options but it looks like it is of no use and we don&#x27;t have any manual penalty or issue shown in search console.<p>We are now recreating every single page on our website though on frontend it shows same old pages but on backend we are cooking something and will launch it at once but we want to recover from this problem or penalty or whatever it is before that.<p>You can access my website from google as if I write link here hackernews will most likely hide this post from public.<p>Can someone explain what this is and how to recover from this professionally",
+      "title": "Ask HN: How to recover from thin content or de-indexing penalty on Google",
+      "updated_at": "2026-07-09T03:27:58Z"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Jimmc414"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Meta Patents AI Device That Tracks Your Emotions, Watches You Take Your Meds"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.404media.co/meta-patents-ai-device-that-tracks-your-emotions-watches-you-take-your-meds/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_Jimmc414",
+        "story_48840514"
+      ],
+      "author": "Jimmc414",
+      "created_at": "2026-07-09T03:12:24Z",
+      "created_at_i": 1783566744,
+      "num_comments": 0,
+      "objectID": "48840514",
+      "points": 4,
+      "story_id": 48840514,
+      "title": "Meta Patents AI Device That Tracks Your Emotions, Watches You Take Your Meds",
+      "updated_at": "2026-07-09T03:40:43Z",
+      "url": "https://www.404media.co/meta-patents-ai-device-that-tracks-your-emotions-watches-you-take-your-meds/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "fortran77"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Counterfeit Air-Bags Are Killing U.S. Drivers–and the Government Can't Stop It"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.wsj.com/business/autos/counterfeit-air-bag-parts-deaths-regulators-6eddfdd4"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_fortran77",
+        "story_48840507"
+      ],
+      "author": "fortran77",
+      "children": [
+        48840508
+      ],
+      "created_at": "2026-07-09T03:11:17Z",
+      "created_at_i": 1783566677,
+      "num_comments": 1,
+      "objectID": "48840507",
+      "points": 2,
+      "story_id": 48840507,
+      "title": "Counterfeit Air-Bags Are Killing U.S. Drivers–and the Government Can't Stop It",
+      "updated_at": "2026-07-09T03:48:13Z",
+      "url": "https://www.wsj.com/business/autos/counterfeit-air-bag-parts-deaths-regulators-6eddfdd4"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "agnishom"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ergo: Long Form Philosophy Lectures"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://ergo.org/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_agnishom",
+        "story_48840497"
+      ],
+      "author": "agnishom",
+      "created_at": "2026-07-09T03:08:32Z",
+      "created_at_i": 1783566512,
+      "num_comments": 0,
+      "objectID": "48840497",
+      "points": 2,
+      "story_id": 48840497,
+      "title": "Ergo: Long Form Philosophy Lectures",
+      "updated_at": "2026-07-09T03:50:28Z",
+      "url": "https://ergo.org/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "evo_9"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Neuromancer (TV Series) – IMDB"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.imdb.com/title/tt31512174/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_evo_9",
+        "story_48840474"
+      ],
+      "author": "evo_9",
+      "created_at": "2026-07-09T03:04:01Z",
+      "created_at_i": 1783566241,
+      "num_comments": 0,
+      "objectID": "48840474",
+      "points": 1,
+      "story_id": 48840474,
+      "title": "Neuromancer (TV Series) – IMDB",
+      "updated_at": "2026-07-09T03:08:14Z",
+      "url": "https://www.imdb.com/title/tt31512174/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "gbourne1"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Two teens learn the hard way not to do toy gun drive-bys from a Waymo"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://arstechnica.com/cars/2026/07/two-teens-learn-the-hard-way-not-to-do-toy-gun-drivebys-from-a-waymo/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_gbourne1",
+        "story_48840425"
+      ],
+      "author": "gbourne1",
+      "children": [
+        48840555,
+        48840456
+      ],
+      "created_at": "2026-07-09T02:55:47Z",
+      "created_at_i": 1783565747,
+      "num_comments": 2,
+      "objectID": "48840425",
+      "points": 1,
+      "story_id": 48840425,
+      "title": "Two teens learn the hard way not to do toy gun drive-bys from a Waymo",
+      "updated_at": "2026-07-09T03:49:29Z",
+      "url": "https://arstechnica.com/cars/2026/07/two-teens-learn-the-hard-way-not-to-do-toy-gun-drivebys-from-a-waymo/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Jimmc414"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "FIFA president targeted by complaint to Olympic ethics body"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.pbs.org/newshour/world/fifas-infantino-targeted-by-complaint-to-olympic-ethics-body-after-trump-lobbying-on-balogun-ban"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_Jimmc414",
+        "story_48840411"
+      ],
+      "author": "Jimmc414",
+      "created_at": "2026-07-09T02:53:31Z",
+      "created_at_i": 1783565611,
+      "num_comments": 0,
+      "objectID": "48840411",
+      "points": 1,
+      "story_id": 48840411,
+      "title": "FIFA president targeted by complaint to Olympic ethics body",
+      "updated_at": "2026-07-09T02:57:44Z",
+      "url": "https://www.pbs.org/newshour/world/fifas-infantino-targeted-by-complaint-to-olympic-ethics-body-after-trump-lobbying-on-balogun-ban"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "pentagrama"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Automattic Code for the People Is Rallying Cry for Open Internet"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://variety.com/2026/digital/news/automattic-code-for-the-people-1236802508/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_pentagrama",
+        "story_48840405"
+      ],
+      "author": "pentagrama",
+      "created_at": "2026-07-09T02:52:22Z",
+      "created_at_i": 1783565542,
+      "num_comments": 0,
+      "objectID": "48840405",
+      "points": 1,
+      "story_id": 48840405,
+      "title": "Automattic Code for the People Is Rallying Cry for Open Internet",
+      "updated_at": "2026-07-09T02:57:44Z",
+      "url": "https://variety.com/2026/digital/news/automattic-code-for-the-people-1236802508/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "PaulHoule"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "A self-driving Waymo just reports its own passengers to police"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.fastcompany.com/91570761/a-self-driving-waymo-just-reported-its-own-passengers-to-police"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_PaulHoule",
+        "story_48840401"
+      ],
+      "author": "PaulHoule",
+      "children": [
+        48840461
+      ],
+      "created_at": "2026-07-09T02:51:48Z",
+      "created_at_i": 1783565508,
+      "num_comments": 1,
+      "objectID": "48840401",
+      "points": 1,
+      "story_id": 48840401,
+      "title": "A self-driving Waymo just reports its own passengers to police",
+      "updated_at": "2026-07-09T03:43:58Z",
+      "url": "https://www.fastcompany.com/91570761/a-self-driving-waymo-just-reported-its-own-passengers-to-police"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "jscrab"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Grudge: Stochastic data structure for holding multi-tenant grudges"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://github.com/satmihir/grudge"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_jscrab",
+        "story_48840391"
+      ],
+      "author": "jscrab",
+      "children": [
+        48840392
+      ],
+      "created_at": "2026-07-09T02:50:18Z",
+      "created_at_i": 1783565418,
+      "num_comments": 0,
+      "objectID": "48840391",
+      "points": 1,
+      "story_id": 48840391,
+      "title": "Grudge: Stochastic data structure for holding multi-tenant grudges",
+      "updated_at": "2026-07-09T02:52:28Z",
+      "url": "https://github.com/satmihir/grudge"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Khaine"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "AI models' values are different from most people's"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.economist.com/briefing/2026/06/25/ai-models-values-are-very-different-from-most-peoples"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_Khaine",
+        "story_48840388"
+      ],
+      "author": "Khaine",
+      "created_at": "2026-07-09T02:49:35Z",
+      "created_at_i": 1783565375,
+      "num_comments": 0,
+      "objectID": "48840388",
+      "points": 1,
+      "story_id": 48840388,
+      "title": "AI models' values are different from most people's",
+      "updated_at": "2026-07-09T02:52:28Z",
+      "url": "https://www.economist.com/briefing/2026/06/25/ai-models-values-are-very-different-from-most-peoples"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "gregsadetsky"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Widevine"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://en.wikipedia.org/wiki/Widevine"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_gregsadetsky",
+        "story_48840378"
+      ],
+      "author": "gregsadetsky",
+      "created_at": "2026-07-09T02:48:10Z",
+      "created_at_i": 1783565290,
+      "num_comments": 0,
+      "objectID": "48840378",
+      "points": 1,
+      "story_id": 48840378,
+      "title": "Widevine",
+      "updated_at": "2026-07-09T02:52:28Z",
+      "url": "https://en.wikipedia.org/wiki/Widevine"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "petethomas"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Former Judge Hannah Dugan avoids prison, fined $5k in ICE obstruction case"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://wisconsinexaminer.com/2026/07/08/former-judge-hannah-dugan-avoids-prison-fined-5000-in-ice-obstruction-case/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_petethomas",
+        "story_48840377"
+      ],
+      "author": "petethomas",
+      "children": [
+        48840581,
+        48840725
+      ],
+      "created_at": "2026-07-09T02:48:00Z",
+      "created_at_i": 1783565280,
+      "num_comments": 1,
+      "objectID": "48840377",
+      "points": 4,
+      "story_id": 48840377,
+      "title": "Former Judge Hannah Dugan avoids prison, fined $5k in ICE obstruction case",
+      "updated_at": "2026-07-09T03:51:58Z",
+      "url": "https://wisconsinexaminer.com/2026/07/08/former-judge-hannah-dugan-avoids-prison-fined-5000-in-ice-obstruction-case/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "briangao"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "When you're deep in a dense book, do you ever wish you could just ask the author something?<p>If each author had an official AI version of themselves, one they licensed and approved, trained on their books, talks, and interviews, with revenue going back to them and you could pay $15 per book to talk it through in a voice or video call while you read, would you try it?<p>I'm considering building this and want your opinion. Just asking if this interests people, like would you pay for that or at least try it free or would you just paste the book into ChatGPT for free?"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ask HN: Would you pay to discuss a book with an official AI clone of its author?"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_briangao",
+        "story_48840370",
+        "ask_hn"
+      ],
+      "author": "briangao",
+      "children": [
+        48840419,
+        48840532,
+        48840694
+      ],
+      "created_at": "2026-07-09T02:46:03Z",
+      "created_at_i": 1783565163,
+      "num_comments": 3,
+      "objectID": "48840370",
+      "points": 1,
+      "story_id": 48840370,
+      "story_text": "When you&#x27;re deep in a dense book, do you ever wish you could just ask the author something?<p>If each author had an official AI version of themselves, one they licensed and approved, trained on their books, talks, and interviews, with revenue going back to them and you could pay $15 per book to talk it through in a voice or video call while you read, would you try it?<p>I&#x27;m considering building this and want your opinion. Just asking if this interests people, like would you pay for that or at least try it free or would you just paste the book into ChatGPT for free?",
+      "title": "Ask HN: Would you pay to discuss a book with an official AI clone of its author?",
+      "updated_at": "2026-07-09T03:46:14Z"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "HademLeFashie"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Hey guys!<p>With an increase in AI-generated content (a.k.a &quot;Slop&quot;), I made a Chrome extension to help people identify it online.<p>It's sort of a like a rating system on how &quot;slop&quot;-y a page is, and you get to see other people's ratings to determine if the content is AI or not.<p>Go ahead and check it out on the Chrome Web Store, and let me know what you think!"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: SlopWatch - A browser extension to rate webpages with AI content"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://chromewebstore.google.com/detail/slopwatch-the-online-watc/nihlmmcfkabobchdpjimenhcfmaoglkj"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_HademLeFashie",
+        "story_48840353",
+        "show_hn"
+      ],
+      "author": "HademLeFashie",
+      "created_at": "2026-07-09T02:41:49Z",
+      "created_at_i": 1783564909,
+      "num_comments": 0,
+      "objectID": "48840353",
+      "points": 2,
+      "story_id": 48840353,
+      "story_text": "Hey guys!<p>With an increase in AI-generated content (a.k.a &quot;Slop&quot;), I made a Chrome extension to help people identify it online.<p>It&#x27;s sort of a like a rating system on how &quot;slop&quot;-y a page is, and you get to see other people&#x27;s ratings to determine if the content is AI or not.<p>Go ahead and check it out on the Chrome Web Store, and let me know what you think!",
+      "title": "Show HN: SlopWatch - A browser extension to rate webpages with AI content",
+      "updated_at": "2026-07-09T03:28:59Z",
+      "url": "https://chromewebstore.google.com/detail/slopwatch-the-online-watc/nihlmmcfkabobchdpjimenhcfmaoglkj"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "E-Reverance"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "A Theory of Contrastive Learning with Natural Images"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://arxiv.org/abs/2607.07470"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_E-Reverance",
+        "story_48840347"
+      ],
+      "author": "E-Reverance",
+      "created_at": "2026-07-09T02:40:38Z",
+      "created_at_i": 1783564838,
+      "num_comments": 0,
+      "objectID": "48840347",
+      "points": 2,
+      "story_id": 48840347,
+      "title": "A Theory of Contrastive Learning with Natural Images",
+      "updated_at": "2026-07-09T02:43:29Z",
+      "url": "https://arxiv.org/abs/2607.07470"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "linzhangrun"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Google Earth Pro desktop downloads will end in 2027"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://support.google.com/earth/thread/448773864/update-on-google-earth-pro-desktop-app-downloads?hl=en"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_linzhangrun",
+        "story_48840301"
+      ],
+      "author": "linzhangrun",
+      "children": [
+        48840698
+      ],
+      "created_at": "2026-07-09T02:35:23Z",
+      "created_at_i": 1783564523,
+      "num_comments": 1,
+      "objectID": "48840301",
+      "points": 2,
+      "story_id": 48840301,
+      "title": "Google Earth Pro desktop downloads will end in 2027",
+      "updated_at": "2026-07-09T03:44:28Z",
+      "url": "https://support.google.com/earth/thread/448773864/update-on-google-earth-pro-desktop-app-downloads?hl=en"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "HR01"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "How to Listen to a Tarantino Movie"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://hollisrobbinsanecdotal.substack.com/p/how-to-listen-to-a-tarantino-movie"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_HR01",
+        "story_48840288"
+      ],
+      "author": "HR01",
+      "created_at": "2026-07-09T02:33:57Z",
+      "created_at_i": 1783564437,
+      "num_comments": 0,
+      "objectID": "48840288",
+      "points": 1,
+      "story_id": 48840288,
+      "title": "How to Listen to a Tarantino Movie",
+      "updated_at": "2026-07-09T02:36:44Z",
+      "url": "https://hollisrobbinsanecdotal.substack.com/p/how-to-listen-to-a-tarantino-movie"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "jonbaer"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "The DuckDB ADBC Extension"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://columnar.tech/blog/announcing-duckdb-adbc-extension//"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_jonbaer",
+        "story_48840287"
+      ],
+      "author": "jonbaer",
+      "created_at": "2026-07-09T02:33:51Z",
+      "created_at_i": 1783564431,
+      "num_comments": 0,
+      "objectID": "48840287",
+      "points": 1,
+      "story_id": 48840287,
+      "title": "The DuckDB ADBC Extension",
+      "updated_at": "2026-07-09T02:36:44Z",
+      "url": "https://columnar.tech/blog/announcing-duckdb-adbc-extension//"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "jmsflknr"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Superhero Movies Lost Their Power"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.statsignificant.com/p/how-superhero-movies-lost-their-power"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_jmsflknr",
+        "story_48840264"
+      ],
+      "author": "jmsflknr",
+      "created_at": "2026-07-09T02:30:40Z",
+      "created_at_i": 1783564240,
+      "num_comments": 0,
+      "objectID": "48840264",
+      "points": 2,
+      "story_id": 48840264,
+      "title": "Superhero Movies Lost Their Power",
+      "updated_at": "2026-07-09T03:36:58Z",
+      "url": "https://www.statsignificant.com/p/how-superhero-movies-lost-their-power"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "petethomas"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Argentina to Repay $4B, Defying Critics Who Doubted Tack"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.bloomberg.com/news/articles/2026-07-08/argentina-to-repay-4-billion-defying-critics-who-doubted-tack"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_petethomas",
+        "story_48840230"
+      ],
+      "author": "petethomas",
+      "created_at": "2026-07-09T02:26:34Z",
+      "created_at_i": 1783563994,
+      "num_comments": 0,
+      "objectID": "48840230",
+      "points": 1,
+      "story_id": 48840230,
+      "title": "Argentina to Repay $4B, Defying Critics Who Doubted Tack",
+      "updated_at": "2026-07-09T02:31:29Z",
+      "url": "https://www.bloomberg.com/news/articles/2026-07-08/argentina-to-repay-4-billion-defying-critics-who-doubted-tack"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "colinprince"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "AI Stack Gap Map"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.currentai.org/blogs/introducing-the-gap-map-v0-1"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_colinprince",
+        "story_48840224"
+      ],
+      "author": "colinprince",
+      "created_at": "2026-07-09T02:25:54Z",
+      "created_at_i": 1783563954,
+      "num_comments": 0,
+      "objectID": "48840224",
+      "points": 2,
+      "story_id": 48840224,
+      "title": "AI Stack Gap Map",
+      "updated_at": "2026-07-09T03:07:00Z",
+      "url": "https://www.currentai.org/blogs/introducing-the-gap-map-v0-1"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "droidjj"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Together for a Healthier Clippy"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://blog.rust-lang.org/inside-rust/2026/07/06/unite-for-clippy/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_droidjj",
+        "story_48840219"
+      ],
+      "author": "droidjj",
+      "created_at": "2026-07-09T02:25:10Z",
+      "created_at_i": 1783563910,
+      "num_comments": 0,
+      "objectID": "48840219",
+      "points": 2,
+      "story_id": 48840219,
+      "title": "Together for a Healthier Clippy",
+      "updated_at": "2026-07-09T02:43:29Z",
+      "url": "https://blog.rust-lang.org/inside-rust/2026/07/06/unite-for-clippy/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "leonickson"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Reading a paper means opening a PDF, then hunting separately for the code, the citations, whether it replicated, and what genes/drugs it touches. I spent a few months trying to fix that.<p>Two parts:<p>1. The map: I embedded 8.5M papers (arXiv, PubMed Central, bioRxiv, medRxiv), ran UMAP to lay them out in 2D, and render them with a WebGL scatterplot. Every dot is a paper — click it for an LLM TLDR, key findings, citations, peer reviews (where they exist), and similar work. Zoom in and the clusters are labeled by topic.<p>2. Rich paper pages + an MCP server: each paper is rebuilt with linked genes/proteins/diseases/drugs (normalized to real IDs via PubTator, not regex), clinical trials, 3D structures, code, and a citation graph. It's all exposed as an MCP server too, so you can point Claude or an agent at 8.5M papers instead of pasting PDFs.<p>Stack: Next.js, Postgres (Neon), Cloudflare R2 for content, embeddings + UMAP/HDBSCAN for the map, a WebGL renderer. The hard part was the ingestion pipeline — 45+ heterogeneous sources normalized into one schema — and keeping entity links accurate, since papers use names not accession IDs (so curated link tables + PubTator beat regex every time).<p>Free, no signup to explore. I'd love feedback on the map UX and whether the TLDRs/entity links hold up for papers you know well.<p>Known limits: Google indexing is still slow so title-search isn't great yet, some older arXiv figures are missing, and peer-review coverage is partial."
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: I mapped 8.5M research papers into an interactive atlas"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://tomesphere.com/atlas"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_leonickson",
+        "story_48840207",
+        "show_hn"
+      ],
+      "author": "leonickson",
+      "created_at": "2026-07-09T02:23:24Z",
+      "created_at_i": 1783563804,
+      "num_comments": 0,
+      "objectID": "48840207",
+      "points": 1,
+      "story_id": 48840207,
+      "story_text": "Reading a paper means opening a PDF, then hunting separately for the code, the citations, whether it replicated, and what genes&#x2F;drugs it touches. I spent a few months trying to fix that.<p>Two parts:<p>1. The map: I embedded 8.5M papers (arXiv, PubMed Central, bioRxiv, medRxiv), ran UMAP to lay them out in 2D, and render them with a WebGL scatterplot. Every dot is a paper — click it for an LLM TLDR, key findings, citations, peer reviews (where they exist), and similar work. Zoom in and the clusters are labeled by topic.<p>2. Rich paper pages + an MCP server: each paper is rebuilt with linked genes&#x2F;proteins&#x2F;diseases&#x2F;drugs (normalized to real IDs via PubTator, not regex), clinical trials, 3D structures, code, and a citation graph. It&#x27;s all exposed as an MCP server too, so you can point Claude or an agent at 8.5M papers instead of pasting PDFs.<p>Stack: Next.js, Postgres (Neon), Cloudflare R2 for content, embeddings + UMAP&#x2F;HDBSCAN for the map, a WebGL renderer. The hard part was the ingestion pipeline — 45+ heterogeneous sources normalized into one schema — and keeping entity links accurate, since papers use names not accession IDs (so curated link tables + PubTator beat regex every time).<p>Free, no signup to explore. I&#x27;d love feedback on the map UX and whether the TLDRs&#x2F;entity links hold up for papers you know well.<p>Known limits: Google indexing is still slow so title-search isn&#x27;t great yet, some older arXiv figures are missing, and peer-review coverage is partial.",
+      "title": "Show HN: I mapped 8.5M research papers into an interactive atlas",
+      "updated_at": "2026-07-09T02:56:28Z",
+      "url": "https://tomesphere.com/atlas"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "pankaj4u4m"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Atelier - open source, honest 30% savings on Claude code."
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://github.com/atelier-ws/atelier"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_pankaj4u4m",
+        "story_48840196",
+        "show_hn"
+      ],
+      "author": "pankaj4u4m",
+      "children": [
+        48840197
+      ],
+      "created_at": "2026-07-09T02:22:31Z",
+      "created_at_i": 1783563751,
+      "num_comments": 1,
+      "objectID": "48840196",
+      "points": 1,
+      "story_id": 48840196,
+      "title": "Show HN: Atelier - open source, honest 30% savings on Claude code.",
+      "updated_at": "2026-07-09T03:04:12Z",
+      "url": "https://github.com/atelier-ws/atelier"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "dgudkov"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "What Does a 13-Year-Old See on Snapchat in a Normal Week?"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.afterbabel.com/p/snapchat-recommends-harmful-content-kids-brooke-istook-2026"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_dgudkov",
+        "story_48840194"
+      ],
+      "author": "dgudkov",
+      "children": [
+        48840524,
+        48840494,
+        48840276
+      ],
+      "created_at": "2026-07-09T02:22:18Z",
+      "created_at_i": 1783563738,
+      "num_comments": 4,
+      "objectID": "48840194",
+      "points": 15,
+      "story_id": 48840194,
+      "title": "What Does a 13-Year-Old See on Snapchat in a Normal Week?",
+      "updated_at": "2026-07-09T03:49:29Z",
+      "url": "https://www.afterbabel.com/p/snapchat-recommends-harmful-content-kids-brooke-istook-2026"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "gmays"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Product Shape Is the Moat"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://twitter.com/scottastevenson/status/2072336746327458178"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_gmays",
+        "story_48840161"
+      ],
+      "author": "gmays",
+      "created_at": "2026-07-09T02:18:41Z",
+      "created_at_i": 1783563521,
+      "num_comments": 0,
+      "objectID": "48840161",
+      "points": 2,
+      "story_id": 48840161,
+      "title": "Product Shape Is the Moat",
+      "updated_at": "2026-07-09T02:43:29Z",
+      "url": "https://twitter.com/scottastevenson/status/2072336746327458178"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "hydrogen7800"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Jellyfish Undersea Roundabout"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://visitfaroeislands.com/en/plan-your-stay/getting-around/world-first-under-sea-roundabout"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_hydrogen7800",
+        "story_48840152"
+      ],
+      "author": "hydrogen7800",
+      "created_at": "2026-07-09T02:17:59Z",
+      "created_at_i": 1783563479,
+      "num_comments": 0,
+      "objectID": "48840152",
+      "points": 2,
+      "story_id": 48840152,
+      "title": "Jellyfish Undersea Roundabout",
+      "updated_at": "2026-07-09T02:43:58Z",
+      "url": "https://visitfaroeislands.com/en/plan-your-stay/getting-around/world-first-under-sea-roundabout"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "RajX_dev"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "this repo does the indexing parsing and retriving in a way that is fast and more accurate and its not uses Ai to compute \n<a href=\"https://github.com/RajX-dev/N3MO\" rel=\"nofollow\">https://github.com/RajX-dev/N3MO</a>"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: I solved biggest issue for the mainatiners of GitHub"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_RajX_dev",
+        "story_48840139",
+        "show_hn"
+      ],
+      "author": "RajX_dev",
+      "created_at": "2026-07-09T02:16:32Z",
+      "created_at_i": 1783563392,
+      "num_comments": 0,
+      "objectID": "48840139",
+      "points": 2,
+      "story_id": 48840139,
+      "story_text": "this repo does the indexing parsing and retriving in a way that is fast and more accurate and its not uses Ai to compute \n<a href=\"https:&#x2F;&#x2F;github.com&#x2F;RajX-dev&#x2F;N3MO\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;RajX-dev&#x2F;N3MO</a>",
+      "title": "Show HN: I solved biggest issue for the mainatiners of GitHub",
+      "updated_at": "2026-07-09T02:25:59Z"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "mooreds"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Auto compiles recorded LLM-agent behavior into verified WASM binaries"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://github.com/RightNow-AI/auto"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_mooreds",
+        "story_48840103"
+      ],
+      "author": "mooreds",
+      "created_at": "2026-07-09T02:12:01Z",
+      "created_at_i": 1783563121,
+      "num_comments": 0,
+      "objectID": "48840103",
+      "points": 1,
+      "story_id": 48840103,
+      "title": "Auto compiles recorded LLM-agent behavior into verified WASM binaries",
+      "updated_at": "2026-07-09T02:34:44Z",
+      "url": "https://github.com/RightNow-AI/auto"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "cratermoon"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "The AI Hype Reckoning Is Upon Us"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://karlbode.com/the-ai-hype-reckoning-is-upon-us/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_cratermoon",
+        "story_48840092"
+      ],
+      "author": "cratermoon",
+      "children": [
+        48840217
+      ],
+      "created_at": "2026-07-09T02:09:44Z",
+      "created_at_i": 1783562984,
+      "num_comments": 1,
+      "objectID": "48840092",
+      "points": 3,
+      "story_id": 48840092,
+      "title": "The AI Hype Reckoning Is Upon Us",
+      "updated_at": "2026-07-09T02:34:13Z",
+      "url": "https://karlbode.com/the-ai-hype-reckoning-is-upon-us/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "cdrnsf"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "We Mapped Rural Data Center Development – and Opposition"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://dailyyonder.com/we-mapped-rural-data-center-development-and-opposition-heres-what-we-found/2026/06/29/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_cdrnsf",
+        "story_48840090"
+      ],
+      "author": "cdrnsf",
+      "created_at": "2026-07-09T02:09:29Z",
+      "created_at_i": 1783562969,
+      "num_comments": 0,
+      "objectID": "48840090",
+      "points": 2,
+      "story_id": 48840090,
+      "title": "We Mapped Rural Data Center Development – and Opposition",
+      "updated_at": "2026-07-09T02:50:58Z",
+      "url": "https://dailyyonder.com/we-mapped-rural-data-center-development-and-opposition-heres-what-we-found/2026/06/29/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "thunderbong"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Tiiny.host: The simplest way to share your work online"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://tiiny.host/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_thunderbong",
+        "story_48840057"
+      ],
+      "author": "thunderbong",
+      "created_at": "2026-07-09T02:05:46Z",
+      "created_at_i": 1783562746,
+      "num_comments": 0,
+      "objectID": "48840057",
+      "points": 1,
+      "story_id": 48840057,
+      "title": "Tiiny.host: The simplest way to share your work online",
+      "updated_at": "2026-07-09T02:10:45Z",
+      "url": "https://tiiny.host/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "mooreds"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Athenz vs. Spire Comparison"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.athenz.io/comparison.html#general"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_mooreds",
+        "story_48840049"
+      ],
+      "author": "mooreds",
+      "created_at": "2026-07-09T02:04:47Z",
+      "created_at_i": 1783562687,
+      "num_comments": 0,
+      "objectID": "48840049",
+      "points": 1,
+      "story_id": 48840049,
+      "title": "Athenz vs. Spire Comparison",
+      "updated_at": "2026-07-09T02:05:29Z",
+      "url": "https://www.athenz.io/comparison.html#general"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "sbulaev"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Nobel-winning chemist leaves US to direct AI materials lab in China"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.nature.com/articles/d41586-026-02143-x"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_sbulaev",
+        "story_48840035"
+      ],
+      "author": "sbulaev",
+      "children": [
+        48840107
+      ],
+      "created_at": "2026-07-09T02:02:53Z",
+      "created_at_i": 1783562573,
+      "num_comments": 2,
+      "objectID": "48840035",
+      "points": 3,
+      "story_id": 48840035,
+      "title": "Nobel-winning chemist leaves US to direct AI materials lab in China",
+      "updated_at": "2026-07-09T03:52:28Z",
+      "url": "https://www.nature.com/articles/d41586-026-02143-x"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "tnus"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Couldn't find a complete Codenames Generator so I make one"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://codenames-generator-bay.vercel.app/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_tnus",
+        "story_48840021",
+        "show_hn"
+      ],
+      "author": "tnus",
+      "children": [
+        48840022
+      ],
+      "created_at": "2026-07-09T02:00:51Z",
+      "created_at_i": 1783562451,
+      "num_comments": 1,
+      "objectID": "48840021",
+      "points": 1,
+      "story_id": 48840021,
+      "title": "Show HN: Couldn't find a complete Codenames Generator so I make one",
+      "updated_at": "2026-07-09T02:19:28Z",
+      "url": "https://codenames-generator-bay.vercel.app/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "zenai666"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "OpenAI Launches Patch the Planet to Pay Down Open Source's Security Debt"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://zenaicorp.com/en/news/openai-patch-the-planet-open-source-security-trail-of-bits"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_zenai666",
+        "story_48840008"
+      ],
+      "author": "zenai666",
+      "created_at": "2026-07-09T01:59:03Z",
+      "created_at_i": 1783562343,
+      "num_comments": 0,
+      "objectID": "48840008",
+      "points": 2,
+      "story_id": 48840008,
+      "title": "OpenAI Launches Patch the Planet to Pay Down Open Source's Security Debt",
+      "updated_at": "2026-07-09T02:25:59Z",
+      "url": "https://zenaicorp.com/en/news/openai-patch-the-planet-open-source-security-trail-of-bits"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "gdss"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": ".38"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.guidavid.com/writing/38"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_gdss",
+        "story_48840004"
+      ],
+      "author": "gdss",
+      "created_at": "2026-07-09T01:58:50Z",
+      "created_at_i": 1783562330,
+      "num_comments": 0,
+      "objectID": "48840004",
+      "points": 2,
+      "story_id": 48840004,
+      "title": ".38",
+      "updated_at": "2026-07-09T02:43:58Z",
+      "url": "https://www.guidavid.com/writing/38"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "sosodev"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "I Think I Have LLM Burnout"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.alecscollon.com/blog/llm-burnout/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_sosodev",
+        "story_48839984",
+        "front_page"
+      ],
+      "author": "sosodev",
+      "children": [
+        48840162,
+        48840077,
+        48840503,
+        48840499,
+        48840215,
+        48840737,
+        48840080,
+        48840117,
+        48840438,
+        48840328,
+        48840636,
+        48840549,
+        48840110,
+        48840120,
+        48840133,
+        48840400,
+        48840458,
+        48840273,
+        48840190,
+        48840157,
+        48840258,
+        48840426,
+        48840345,
+        48840174,
+        48840055,
+        48840530,
+        48840526,
+        48840663,
+        48840263,
+        48840732,
+        48840631
+      ],
+      "created_at": "2026-07-09T01:56:28Z",
+      "created_at_i": 1783562188,
+      "num_comments": 107,
+      "objectID": "48839984",
+      "points": 158,
+      "story_id": 48839984,
+      "title": "I Think I Have LLM Burnout",
+      "updated_at": "2026-07-09T03:52:28Z",
+      "url": "https://www.alecscollon.com/blog/llm-burnout/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Corrado"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Artificial Confidence: They all picked September first"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://artificialconfidence.com/p/artificial-confidence-they-all-picked"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_Corrado",
+        "story_48839978"
+      ],
+      "author": "Corrado",
+      "children": [
+        48840019
+      ],
+      "created_at": "2026-07-09T01:55:42Z",
+      "created_at_i": 1783562142,
+      "num_comments": 1,
+      "objectID": "48839978",
+      "points": 2,
+      "story_id": 48839978,
+      "title": "Artificial Confidence: They all picked September first",
+      "updated_at": "2026-07-09T02:44:29Z",
+      "url": "https://artificialconfidence.com/p/artificial-confidence-they-all-picked"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "ankitg12"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Network Connectivity Status Indicator Overview for Windows"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://learn.microsoft.com/en-us/windows-server/networking/ncsi/ncsi-overview"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_ankitg12",
+        "story_48839970"
+      ],
+      "author": "ankitg12",
+      "created_at": "2026-07-09T01:54:55Z",
+      "created_at_i": 1783562095,
+      "num_comments": 0,
+      "objectID": "48839970",
+      "points": 2,
+      "story_id": 48839970,
+      "title": "Network Connectivity Status Indicator Overview for Windows",
+      "updated_at": "2026-07-09T02:44:29Z",
+      "url": "https://learn.microsoft.com/en-us/windows-server/networking/ncsi/ncsi-overview"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "mehranzand"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: RepoFleet – manage issues that span multiple Git repositories"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://github.com/mehranzand/repofleet"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_mehranzand",
+        "story_48839967",
+        "show_hn"
+      ],
+      "author": "mehranzand",
+      "created_at": "2026-07-09T01:54:00Z",
+      "created_at_i": 1783562040,
+      "num_comments": 0,
+      "objectID": "48839967",
+      "points": 1,
+      "story_id": 48839967,
+      "title": "Show HN: RepoFleet – manage issues that span multiple Git repositories",
+      "updated_at": "2026-07-09T01:54:58Z",
+      "url": "https://github.com/mehranzand/repofleet"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "lyfeninja"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "I've been working on a Python SDK for signing and verifying digital content. Unlike traditional digital signatures, it's built around a revocable signature model using lease-based signing authority instead of conventional public/private key distribution. I'd love feedback on the API and whether the approach seems useful. Thanks."
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Python SDK for Content Integrity"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://github.com/lyfeninja/lyfeninja_blkseal_python_sdk"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_lyfeninja",
+        "story_48839953",
+        "show_hn"
+      ],
+      "author": "lyfeninja",
+      "created_at": "2026-07-09T01:51:11Z",
+      "created_at_i": 1783561871,
+      "num_comments": 0,
+      "objectID": "48839953",
+      "points": 1,
+      "story_id": 48839953,
+      "story_text": "I&#x27;ve been working on a Python SDK for signing and verifying digital content. Unlike traditional digital signatures, it&#x27;s built around a revocable signature model using lease-based signing authority instead of conventional public&#x2F;private key distribution. I&#x27;d love feedback on the API and whether the approach seems useful. Thanks.",
+      "title": "Show HN: Python SDK for Content Integrity",
+      "updated_at": "2026-07-09T01:54:58Z",
+      "url": "https://github.com/lyfeninja/lyfeninja_blkseal_python_sdk"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "hafizdhanani"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Growth Marketing Jobs – growth, CRO, SEO, and performance marketing roles"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.growthmarketingjobs.xyz"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_hafizdhanani",
+        "story_48839942"
+      ],
+      "author": "hafizdhanani",
+      "children": [
+        48839943
+      ],
+      "created_at": "2026-07-09T01:49:57Z",
+      "created_at_i": 1783561797,
+      "num_comments": 1,
+      "objectID": "48839942",
+      "points": 1,
+      "story_id": 48839942,
+      "title": "Growth Marketing Jobs – growth, CRO, SEO, and performance marketing roles",
+      "updated_at": "2026-07-09T01:54:58Z",
+      "url": "https://www.growthmarketingjobs.xyz"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "jftuga"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "I made a date time calculator tool with six different functions that I gave an old-school terminal-based look-n-feel. It has a few unique features that I have not seen on other similar web sites before. I have it try very hard to allow for a wide variety of inputs such as just a date or just a time; a three/four letter timezone, such as EDT or CEST as opposed to having to remember something like America/New_York (which it can also handle). Another unique feature would be adding or subtracting two durations. For example, adding 3 days 5 hours 14 minutes to 2 days 23 hours and 51 minutes.  Another nice function is the ability to convert from one group of durations to another: 386 hours 24 minutes 36 seconds to just days hours minutes seconds.<p>There is also an example button for each function so that you can see how it works.<p>If you like find this useful, there is also a GitHub link to the CLI equivalent at the bottom of the page.<p><a href=\"https://datetimemate.com/\" rel=\"nofollow\">https://datetimemate.com/</a>"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Date Time calulator with unique functions"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://datetimemate.com/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_jftuga",
+        "story_48839908",
+        "show_hn"
+      ],
+      "author": "jftuga",
+      "created_at": "2026-07-09T01:44:31Z",
+      "created_at_i": 1783561471,
+      "num_comments": 0,
+      "objectID": "48839908",
+      "points": 1,
+      "story_id": 48839908,
+      "story_text": "I made a date time calculator tool with six different functions that I gave an old-school terminal-based look-n-feel. It has a few unique features that I have not seen on other similar web sites before. I have it try very hard to allow for a wide variety of inputs such as just a date or just a time; a three&#x2F;four letter timezone, such as EDT or CEST as opposed to having to remember something like America&#x2F;New_York (which it can also handle). Another unique feature would be adding or subtracting two durations. For example, adding 3 days 5 hours 14 minutes to 2 days 23 hours and 51 minutes.  Another nice function is the ability to convert from one group of durations to another: 386 hours 24 minutes 36 seconds to just days hours minutes seconds.<p>There is also an example button for each function so that you can see how it works.<p>If you like find this useful, there is also a GitHub link to the CLI equivalent at the bottom of the page.<p><a href=\"https:&#x2F;&#x2F;datetimemate.com&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;datetimemate.com&#x2F;</a>",
+      "title": "Show HN: Date Time calulator with unique functions",
+      "updated_at": "2026-07-09T01:49:43Z",
+      "url": "https://datetimemate.com/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "tahiram"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "CI Forge – A zero-dependency CLI that replaces 20 CI services"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://github.com/Tahiram32/ciforge"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_tahiram",
+        "story_48839904"
+      ],
+      "author": "tahiram",
+      "children": [
+        48839905
+      ],
+      "created_at": "2026-07-09T01:44:14Z",
+      "created_at_i": 1783561454,
+      "num_comments": 0,
+      "objectID": "48839904",
+      "points": 1,
+      "story_id": 48839904,
+      "title": "CI Forge – A zero-dependency CLI that replaces 20 CI services",
+      "updated_at": "2026-07-09T01:49:43Z",
+      "url": "https://github.com/Tahiram32/ciforge"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "handfuloflight"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Dream IDE"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://github.com/dreamide/dream"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_handfuloflight",
+        "story_48839865"
+      ],
+      "author": "handfuloflight",
+      "created_at": "2026-07-09T01:38:58Z",
+      "created_at_i": 1783561138,
+      "num_comments": 0,
+      "objectID": "48839865",
+      "points": 1,
+      "story_id": 48839865,
+      "title": "Dream IDE",
+      "updated_at": "2026-07-09T01:44:28Z",
+      "url": "https://github.com/dreamide/dream"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "mikelgan"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Question of the moment: \"Should a chatbot manage your bank account?\""
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://news.uga.edu/should-a-chatbot-manage-your-bank-account/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_mikelgan",
+        "story_48839854"
+      ],
+      "author": "mikelgan",
+      "children": [
+        48839855,
+        48840733
+      ],
+      "created_at": "2026-07-09T01:37:24Z",
+      "created_at_i": 1783561044,
+      "num_comments": 2,
+      "objectID": "48839854",
+      "points": 1,
+      "story_id": 48839854,
+      "title": "Question of the moment: \"Should a chatbot manage your bank account?\"",
+      "updated_at": "2026-07-09T03:47:43Z",
+      "url": "https://news.uga.edu/should-a-chatbot-manage-your-bank-account/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "TACO_CODER"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "I coded a Google site with games it has bunch of games but what should I add current games:3D RACERGeometry dashSHOWSAIMore\nSPACE INVADERS\nMESSENGER\nTIC-TAC-TOE\n2048\nBREAK OUT\nTETRIS\nWORDLE\nFLAPPY BIRD\nDOOM (CAN BE BLOCKED KEEP TAB OPEN TO PLAY)\nTACO BATTLE\nTIME STOP SWAT\nMAZE GAME"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Google Site"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_TACO_CODER",
+        "story_48839839",
+        "ask_hn"
+      ],
+      "author": "TACO_CODER",
+      "children": [
+        48840052
+      ],
+      "created_at": "2026-07-09T01:35:31Z",
+      "created_at_i": 1783560931,
+      "num_comments": 0,
+      "objectID": "48839839",
+      "points": 1,
+      "story_id": 48839839,
+      "story_text": "I coded a Google site with games it has bunch of games but what should I add current games:3D RACERGeometry dashSHOWSAIMore\nSPACE INVADERS\nMESSENGER\nTIC-TAC-TOE\n2048\nBREAK OUT\nTETRIS\nWORDLE\nFLAPPY BIRD\nDOOM (CAN BE BLOCKED KEEP TAB OPEN TO PLAY)\nTACO BATTLE\nTIME STOP SWAT\nMAZE GAME",
+      "title": "Google Site",
+      "updated_at": "2026-07-09T02:33:43Z"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "petethomas"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "How the Smithsonian Lost America's Plot"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.wsj.com/opinion/how-the-smithsonian-lost-americas-plot-622709db"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_petethomas",
+        "story_48839835"
+      ],
+      "author": "petethomas",
+      "children": [
+        48840223
+      ],
+      "created_at": "2026-07-09T01:35:25Z",
+      "created_at_i": 1783560925,
+      "num_comments": 1,
+      "objectID": "48839835",
+      "points": 1,
+      "story_id": 48839835,
+      "title": "How the Smithsonian Lost America's Plot",
+      "updated_at": "2026-07-09T02:27:13Z",
+      "url": "https://www.wsj.com/opinion/how-the-smithsonian-lost-americas-plot-622709db"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "nreece"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "NPM v12 Ships with Install Scripts Off by Default, Deprecating 2FA-Bypass Tokens"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://socket.dev/blog/npm-12"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_nreece",
+        "story_48839833"
+      ],
+      "author": "nreece",
+      "created_at": "2026-07-09T01:35:16Z",
+      "created_at_i": 1783560916,
+      "num_comments": 0,
+      "objectID": "48839833",
+      "points": 1,
+      "story_id": 48839833,
+      "title": "NPM v12 Ships with Install Scripts Off by Default, Deprecating 2FA-Bypass Tokens",
+      "updated_at": "2026-07-09T01:39:14Z",
+      "url": "https://socket.dev/blog/npm-12"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "pseudolus"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Independent Labs Crack Google's Cryptography Work"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://spectrum.ieee.org/google-quantum-cryptography-zero-knowledge"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_pseudolus",
+        "story_48839787"
+      ],
+      "author": "pseudolus",
+      "created_at": "2026-07-09T01:27:38Z",
+      "created_at_i": 1783560458,
+      "num_comments": 0,
+      "objectID": "48839787",
+      "points": 3,
+      "story_id": 48839787,
+      "title": "Independent Labs Crack Google's Cryptography Work",
+      "updated_at": "2026-07-09T02:44:29Z",
+      "url": "https://spectrum.ieee.org/google-quantum-cryptography-zero-knowledge"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "dj_rock"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Meta to build its first $13B data centre in Canada"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.ctvnews.ca/business/article/meta-to-build-its-first-13-billion-data-centre-in-canada/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_dj_rock",
+        "story_48839756"
+      ],
+      "author": "dj_rock",
+      "created_at": "2026-07-09T01:22:43Z",
+      "created_at_i": 1783560163,
+      "num_comments": 0,
+      "objectID": "48839756",
+      "points": 2,
+      "story_id": 48839756,
+      "title": "Meta to build its first $13B data centre in Canada",
+      "updated_at": "2026-07-09T01:26:43Z",
+      "url": "https://www.ctvnews.ca/business/article/meta-to-build-its-first-13-billion-data-centre-in-canada/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "doppp"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Rewriting Bun in Rust"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://simonwillison.net/2026/Jul/8/rewriting-bun-in-rust/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_doppp",
+        "story_48839751"
+      ],
+      "author": "doppp",
+      "children": [
+        48839851,
+        48839789,
+        48839971
+      ],
+      "created_at": "2026-07-09T01:22:24Z",
+      "created_at_i": 1783560144,
+      "num_comments": 6,
+      "objectID": "48839751",
+      "points": 23,
+      "story_id": 48839751,
+      "title": "Rewriting Bun in Rust",
+      "updated_at": "2026-07-09T03:47:14Z",
+      "url": "https://simonwillison.net/2026/Jul/8/rewriting-bun-in-rust/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "HotGarbage"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Google Discontinues Google Earth Pro for Desktop"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://pxlnv.com/linklog/google-earth-pro-sunset/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_HotGarbage",
+        "story_48839739"
+      ],
+      "author": "HotGarbage",
+      "children": [
+        48839792
+      ],
+      "created_at": "2026-07-09T01:20:54Z",
+      "created_at_i": 1783560054,
+      "num_comments": 1,
+      "objectID": "48839739",
+      "points": 3,
+      "story_id": 48839739,
+      "title": "Google Discontinues Google Earth Pro for Desktop",
+      "updated_at": "2026-07-09T02:00:58Z",
+      "url": "https://pxlnv.com/linklog/google-earth-pro-sunset/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "nateb2022"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Public LLM benchmarks are mostly garbage"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://grandpacad.com/en/blog/public-benchmarks-misled-me-opus-4-7"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_nateb2022",
+        "story_48839720"
+      ],
+      "author": "nateb2022",
+      "created_at": "2026-07-09T01:19:09Z",
+      "created_at_i": 1783559949,
+      "num_comments": 0,
+      "objectID": "48839720",
+      "points": 1,
+      "story_id": 48839720,
+      "title": "Public LLM benchmarks are mostly garbage",
+      "updated_at": "2026-07-09T01:23:30Z",
+      "url": "https://grandpacad.com/en/blog/public-benchmarks-misled-me-opus-4-7"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "pghqdev"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: OpenScreenShot: open-source full-page screenshot and annotation tool"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://openscreenshot.app"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_pghqdev",
+        "story_48839719",
+        "show_hn"
+      ],
+      "author": "pghqdev",
+      "children": [
+        48839740
+      ],
+      "created_at": "2026-07-09T01:19:05Z",
+      "created_at_i": 1783559945,
+      "num_comments": 0,
+      "objectID": "48839719",
+      "points": 3,
+      "story_id": 48839719,
+      "title": "Show HN: OpenScreenShot: open-source full-page screenshot and annotation tool",
+      "updated_at": "2026-07-09T03:06:29Z",
+      "url": "https://openscreenshot.app"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "vermaden"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "GitLab on FreeBSD"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://vermaden.wordpress.com/2026/07/09/gitlab-on-freebsd/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_vermaden",
+        "story_48839718"
+      ],
+      "author": "vermaden",
+      "created_at": "2026-07-09T01:19:00Z",
+      "created_at_i": 1783559940,
+      "num_comments": 0,
+      "objectID": "48839718",
+      "points": 2,
+      "story_id": 48839718,
+      "title": "GitLab on FreeBSD",
+      "updated_at": "2026-07-09T01:23:57Z",
+      "url": "https://vermaden.wordpress.com/2026/07/09/gitlab-on-freebsd/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "harpia"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Decentralized, encrypted (E2EE), censorship-resistant messenger"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://github.com/harpiabrasil/hydra"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_harpia",
+        "story_48839684"
+      ],
+      "author": "harpia",
+      "children": [
+        48839685
+      ],
+      "created_at": "2026-07-09T01:14:52Z",
+      "created_at_i": 1783559692,
+      "num_comments": 0,
+      "objectID": "48839684",
+      "points": 2,
+      "story_id": 48839684,
+      "title": "Decentralized, encrypted (E2EE), censorship-resistant messenger",
+      "updated_at": "2026-07-09T02:45:13Z",
+      "url": "https://github.com/harpiabrasil/hydra"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "rankinzheng"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: I built 38-0, a Premier League draft game with a Poisson match engine"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.38-0.pro"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_rankinzheng",
+        "story_48839681",
+        "show_hn"
+      ],
+      "author": "rankinzheng",
+      "children": [
+        48839690
+      ],
+      "created_at": "2026-07-09T01:14:36Z",
+      "created_at_i": 1783559676,
+      "num_comments": 0,
+      "objectID": "48839681",
+      "points": 3,
+      "story_id": 48839681,
+      "title": "Show HN: I built 38-0, a Premier League draft game with a Poisson match engine",
+      "updated_at": "2026-07-09T02:45:13Z",
+      "url": "https://www.38-0.pro"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "tjek"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Abnormal Response to Anthropic Lawsuit"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://abnormal.ai/blog/abnormal-response-to-anthropic-lawsuit"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_tjek",
+        "story_48839662"
+      ],
+      "author": "tjek",
+      "children": [
+        48839729,
+        48839964
+      ],
+      "created_at": "2026-07-09T01:10:43Z",
+      "created_at_i": 1783559443,
+      "num_comments": 2,
+      "objectID": "48839662",
+      "points": 5,
+      "story_id": 48839662,
+      "title": "Abnormal Response to Anthropic Lawsuit",
+      "updated_at": "2026-07-09T02:52:42Z",
+      "url": "https://abnormal.ai/blog/abnormal-response-to-anthropic-lawsuit"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "cratermoon"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "StoryScope: Investigating Idiosyncrasies in AI Fiction"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://arxiv.org/abs/2604.03136"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_cratermoon",
+        "story_48839656"
+      ],
+      "author": "cratermoon",
+      "created_at": "2026-07-09T01:10:08Z",
+      "created_at_i": 1783559408,
+      "num_comments": 0,
+      "objectID": "48839656",
+      "points": 2,
+      "story_id": 48839656,
+      "title": "StoryScope: Investigating Idiosyncrasies in AI Fiction",
+      "updated_at": "2026-07-09T02:45:13Z",
+      "url": "https://arxiv.org/abs/2604.03136"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "petethomas"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "The AI factory: the rewiring of India's tech industry [video]"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.ft.com/video/5a5733ea-f8fa-488f-906d-418584b8bc36"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_petethomas",
+        "story_48839655"
+      ],
+      "author": "petethomas",
+      "created_at": "2026-07-09T01:10:08Z",
+      "created_at_i": 1783559408,
+      "num_comments": 0,
+      "objectID": "48839655",
+      "points": 1,
+      "story_id": 48839655,
+      "title": "The AI factory: the rewiring of India's tech industry [video]",
+      "updated_at": "2026-07-09T01:12:58Z",
+      "url": "https://www.ft.com/video/5a5733ea-f8fa-488f-906d-418584b8bc36"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "bookmtn"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Space Lasers Show How Venezuela's Earthquakes Reshaped the Earth's Crust"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.wired.com/story/space-lasers-show-venezuela-earthquakes-reshaped-earth-crust/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_bookmtn",
+        "story_48839648"
+      ],
+      "author": "bookmtn",
+      "created_at": "2026-07-09T01:09:28Z",
+      "created_at_i": 1783559368,
+      "num_comments": 0,
+      "objectID": "48839648",
+      "points": 2,
+      "story_id": 48839648,
+      "title": "Space Lasers Show How Venezuela's Earthquakes Reshaped the Earth's Crust",
+      "updated_at": "2026-07-09T02:22:44Z",
+      "url": "https://www.wired.com/story/space-lasers-show-venezuela-earthquakes-reshaped-earth-crust/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "petethomas"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Banks, card networks, fintechs partner on 'low-cost' stablecoin"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.bankingdive.com/news/stablecoin-open-standard-bridge-abrams-bny-stripe-mastercard-visa-coinbase-adyen/824200/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_petethomas",
+        "story_48839647"
+      ],
+      "author": "petethomas",
+      "created_at": "2026-07-09T01:08:35Z",
+      "created_at_i": 1783559315,
+      "num_comments": 0,
+      "objectID": "48839647",
+      "points": 2,
+      "story_id": 48839647,
+      "title": "Banks, card networks, fintechs partner on 'low-cost' stablecoin",
+      "updated_at": "2026-07-09T02:45:13Z",
+      "url": "https://www.bankingdive.com/news/stablecoin-open-standard-bridge-abrams-bny-stripe-mastercard-visa-coinbase-adyen/824200/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "rajkverma123"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "How to Meet Word Count for School Assignments"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://fastwordcount.com/blog/how-to-meet-word-count-for-school-assignments/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_rajkverma123",
+        "story_48839619"
+      ],
+      "author": "rajkverma123",
+      "children": [
+        48839679
+      ],
+      "created_at": "2026-07-09T01:04:39Z",
+      "created_at_i": 1783559079,
+      "num_comments": 0,
+      "objectID": "48839619",
+      "points": 4,
+      "story_id": 48839619,
+      "title": "How to Meet Word Count for School Assignments",
+      "updated_at": "2026-07-09T02:45:13Z",
+      "url": "https://fastwordcount.com/blog/how-to-meet-word-count-for-school-assignments/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Alan_Writer"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Bull Bitcoin challenges EU's DAC8 crypto surveillance rules in French court"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://thecoinheadlines.com/crypto/bull-bitcoin-challenges-eus-dac8-crypto-surveillance-rules-in-french-court/article-25451/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_Alan_Writer",
+        "story_48839604"
+      ],
+      "author": "Alan_Writer",
+      "children": [
+        48839745,
+        48839769,
+        48839605
+      ],
+      "created_at": "2026-07-09T01:01:57Z",
+      "created_at_i": 1783558917,
+      "num_comments": 1,
+      "objectID": "48839604",
+      "points": 2,
+      "story_id": 48839604,
+      "title": "Bull Bitcoin challenges EU's DAC8 crypto surveillance rules in French court",
+      "updated_at": "2026-07-09T02:27:45Z",
+      "url": "https://thecoinheadlines.com/crypto/bull-bitcoin-challenges-eus-dac8-crypto-surveillance-rules-in-french-court/article-25451/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "adityamwagh"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Search engine that donates 51% profits to charity"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://1.org/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_adityamwagh",
+        "story_48839589"
+      ],
+      "author": "adityamwagh",
+      "children": [
+        48839590
+      ],
+      "created_at": "2026-07-09T00:59:51Z",
+      "created_at_i": 1783558791,
+      "num_comments": 1,
+      "objectID": "48839589",
+      "points": 3,
+      "story_id": 48839589,
+      "title": "Search engine that donates 51% profits to charity",
+      "updated_at": "2026-07-09T02:45:43Z",
+      "url": "https://1.org/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "dweekly"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Working with Fable 5, a MacBook, and a Pixel phone, I built an acoustic transport library that is several orders of magnitude faster than existing SoTA open source options like ggwave, quiet, minimodem, or Chirp.<p>Paper: <a href=\"https://cyrinx.org/cyrinx-acoustic-link.pdf\" rel=\"nofollow\">https://cyrinx.org/cyrinx-acoustic-link.pdf</a><p>Apache 2.0 source: <a href=\"https://github.com/dweekly/cyrinx\" rel=\"nofollow\">https://github.com/dweekly/cyrinx</a>"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Cyrinx (36kbps Acoustic Transport)"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://cyrinx.org/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_dweekly",
+        "story_48839585",
+        "show_hn"
+      ],
+      "author": "dweekly",
+      "created_at": "2026-07-09T00:59:22Z",
+      "created_at_i": 1783558762,
+      "num_comments": 0,
+      "objectID": "48839585",
+      "points": 3,
+      "story_id": 48839585,
+      "story_text": "Working with Fable 5, a MacBook, and a Pixel phone, I built an acoustic transport library that is several orders of magnitude faster than existing SoTA open source options like ggwave, quiet, minimodem, or Chirp.<p>Paper: <a href=\"https:&#x2F;&#x2F;cyrinx.org&#x2F;cyrinx-acoustic-link.pdf\" rel=\"nofollow\">https:&#x2F;&#x2F;cyrinx.org&#x2F;cyrinx-acoustic-link.pdf</a><p>Apache 2.0 source: <a href=\"https:&#x2F;&#x2F;github.com&#x2F;dweekly&#x2F;cyrinx\" rel=\"nofollow\">https:&#x2F;&#x2F;github.com&#x2F;dweekly&#x2F;cyrinx</a>",
+      "title": "Show HN: Cyrinx (36kbps Acoustic Transport)",
+      "updated_at": "2026-07-09T02:45:43Z",
+      "url": "https://cyrinx.org/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "birdculture"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Accessibility in Gnome"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://blogs.gnome.org/sophieh/2026/07/07/accessibility-in-gnome/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_birdculture",
+        "story_48839574"
+      ],
+      "author": "birdculture",
+      "children": [
+        48839640
+      ],
+      "created_at": "2026-07-09T00:57:35Z",
+      "created_at_i": 1783558655,
+      "num_comments": 1,
+      "objectID": "48839574",
+      "points": 3,
+      "story_id": 48839574,
+      "title": "Accessibility in Gnome",
+      "updated_at": "2026-07-09T02:45:43Z",
+      "url": "https://blogs.gnome.org/sophieh/2026/07/07/accessibility-in-gnome/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "tortilla"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Felons, Fraudsters Flog Offensive Cybersecurity Startup"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://krebsonsecurity.com/2026/07/felons-fraudsters-flog-offensive-cybersecurity-startup/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_tortilla",
+        "story_48839573"
+      ],
+      "author": "tortilla",
+      "created_at": "2026-07-09T00:57:32Z",
+      "created_at_i": 1783558652,
+      "num_comments": 0,
+      "objectID": "48839573",
+      "points": 3,
+      "story_id": 48839573,
+      "title": "Felons, Fraudsters Flog Offensive Cybersecurity Startup",
+      "updated_at": "2026-07-09T02:45:43Z",
+      "url": "https://krebsonsecurity.com/2026/07/felons-fraudsters-flog-offensive-cybersecurity-startup/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "ABO_Studios"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN:Ghost – real-time AI that tells you what to say during job interviews"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://ghostinterview.dev"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_ABO_Studios",
+        "story_48839534",
+        "show_hn"
+      ],
+      "author": "ABO_Studios",
+      "children": [
+        48839535
+      ],
+      "created_at": "2026-07-09T00:51:57Z",
+      "created_at_i": 1783558317,
+      "num_comments": 0,
+      "objectID": "48839534",
+      "points": 1,
+      "story_id": 48839534,
+      "title": "Show HN:Ghost – real-time AI that tells you what to say during job interviews",
+      "updated_at": "2026-07-09T01:59:59Z",
+      "url": "https://ghostinterview.dev"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "campbellhendee"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Gated Frontier Model = the Fall of Capitalism"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.elevair.org/letter"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_campbellhendee",
+        "story_48839527"
+      ],
+      "author": "campbellhendee",
+      "children": [
+        48839528,
+        48839654
+      ],
+      "created_at": "2026-07-09T00:51:07Z",
+      "created_at_i": 1783558267,
+      "num_comments": 0,
+      "objectID": "48839527",
+      "points": 1,
+      "story_id": 48839527,
+      "title": "Gated Frontier Model = the Fall of Capitalism",
+      "updated_at": "2026-07-09T01:10:42Z",
+      "url": "https://www.elevair.org/letter"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "TeaVMFan"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "1 down, 1 to go: Aptera clears first federal hurdle"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://aptera.us/epa-release/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_TeaVMFan",
+        "story_48839502"
+      ],
+      "author": "TeaVMFan",
+      "children": [
+        48839503
+      ],
+      "created_at": "2026-07-09T00:47:33Z",
+      "created_at_i": 1783558053,
+      "num_comments": 1,
+      "objectID": "48839502",
+      "points": 2,
+      "story_id": 48839502,
+      "title": "1 down, 1 to go: Aptera clears first federal hurdle",
+      "updated_at": "2026-07-09T02:45:43Z",
+      "url": "https://aptera.us/epa-release/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "gnabgib"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Tinfoil Pigeons – see the aircraft overhead"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://tinfoilpigeons.com/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_gnabgib",
+        "story_48839467"
+      ],
+      "author": "gnabgib",
+      "created_at": "2026-07-09T00:41:42Z",
+      "created_at_i": 1783557702,
+      "num_comments": 0,
+      "objectID": "48839467",
+      "points": 2,
+      "story_id": 48839467,
+      "title": "Tinfoil Pigeons – see the aircraft overhead",
+      "updated_at": "2026-07-09T02:27:45Z",
+      "url": "https://tinfoilpigeons.com/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "OsamaJaber"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Compiler for LLMs, world models, and AGI"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://arxiv.org/abs/2607.04542"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_OsamaJaber",
+        "story_48839463"
+      ],
+      "author": "OsamaJaber",
+      "created_at": "2026-07-09T00:41:17Z",
+      "created_at_i": 1783557677,
+      "num_comments": 0,
+      "objectID": "48839463",
+      "points": 1,
+      "story_id": 48839463,
+      "title": "Compiler for LLMs, world models, and AGI",
+      "updated_at": "2026-07-09T00:41:58Z",
+      "url": "https://arxiv.org/abs/2607.04542"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "zuzululu"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Korean law targeting fake news takes effect as journalist groups raise concerns"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://apnews.com/article/south-korea-fake-news-law-press-freedom-7dcc52be82c047f9645218bec2f93966"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_zuzululu",
+        "story_48839453"
+      ],
+      "author": "zuzululu",
+      "created_at": "2026-07-09T00:40:30Z",
+      "created_at_i": 1783557630,
+      "num_comments": 0,
+      "objectID": "48839453",
+      "points": 2,
+      "story_id": 48839453,
+      "title": "Korean law targeting fake news takes effect as journalist groups raise concerns",
+      "updated_at": "2026-07-09T02:46:43Z",
+      "url": "https://apnews.com/article/south-korea-fake-news-law-press-freedom-7dcc52be82c047f9645218bec2f93966"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "speckx"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "A software engineering interview question I like: computing the median"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://krisshamloo.com/blog/007"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_speckx",
+        "story_48839434"
+      ],
+      "author": "speckx",
+      "children": [
+        48840410,
+        48840208,
+        48839717,
+        48839735,
+        48840143,
+        48839805,
+        48840195,
+        48840115,
+        48840184,
+        48840261,
+        48840042,
+        48840305,
+        48839753,
+        48839856,
+        48840024,
+        48839988,
+        48839911,
+        48839915,
+        48839957,
+        48839777,
+        48839962,
+        48839797
+      ],
+      "created_at": "2026-07-09T00:38:02Z",
+      "created_at_i": 1783557482,
+      "num_comments": 60,
+      "objectID": "48839434",
+      "points": 51,
+      "story_id": 48839434,
+      "title": "A software engineering interview question I like: computing the median",
+      "updated_at": "2026-07-09T03:50:28Z",
+      "url": "https://krisshamloo.com/blog/007"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "lcvw"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Remote Attestation"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.liamcvw.com/p/remote-attestation"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_lcvw",
+        "story_48839397",
+        "front_page"
+      ],
+      "author": "lcvw",
+      "children": [
+        48839730,
+        48839592,
+        48840724,
+        48839501,
+        48840403
+      ],
+      "created_at": "2026-07-09T00:32:33Z",
+      "created_at_i": 1783557153,
+      "num_comments": 22,
+      "objectID": "48839397",
+      "points": 41,
+      "story_id": 48839397,
+      "title": "Remote Attestation",
+      "updated_at": "2026-07-09T03:52:28Z",
+      "url": "https://www.liamcvw.com/p/remote-attestation"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ellis_dev"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "A terminal designed for ClaudeCode to replace Claude Desktop"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://velaterm.com/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_Ellis_dev",
+        "story_48839395"
+      ],
+      "author": "Ellis_dev",
+      "children": [
+        48839396
+      ],
+      "created_at": "2026-07-09T00:32:16Z",
+      "created_at_i": 1783557136,
+      "num_comments": 0,
+      "objectID": "48839395",
+      "points": 4,
+      "story_id": 48839395,
+      "title": "A terminal designed for ClaudeCode to replace Claude Desktop",
+      "updated_at": "2026-07-09T03:32:14Z",
+      "url": "https://velaterm.com/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "ryscheng"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Blockchain Is Inevitable"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.raymondcheng.net/posts/blockchain-inevitable/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_ryscheng",
+        "story_48839370"
+      ],
+      "author": "ryscheng",
+      "children": [
+        48839374
+      ],
+      "created_at": "2026-07-09T00:29:07Z",
+      "created_at_i": 1783556947,
+      "num_comments": 1,
+      "objectID": "48839370",
+      "points": 2,
+      "story_id": 48839370,
+      "title": "Blockchain Is Inevitable",
+      "updated_at": "2026-07-09T00:39:45Z",
+      "url": "https://www.raymondcheng.net/posts/blockchain-inevitable/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "ethanlipson"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "<a href=\"https://mira-wm.com/blog-post/\" rel=\"nofollow\">https://mira-wm.com/blog-post/</a>"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "MIRA: Multiplayer Interactive World Models Trained on Rocket League"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://mira-wm.com/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_ethanlipson",
+        "story_48839355",
+        "front_page"
+      ],
+      "author": "ethanlipson",
+      "children": [
+        48840625,
+        48839723,
+        48839923,
+        48840005,
+        48840045,
+        48839800,
+        48840756
+      ],
+      "created_at": "2026-07-09T00:27:57Z",
+      "created_at_i": 1783556877,
+      "num_comments": 9,
+      "objectID": "48839355",
+      "points": 40,
+      "story_id": 48839355,
+      "story_text": "<a href=\"https:&#x2F;&#x2F;mira-wm.com&#x2F;blog-post&#x2F;\" rel=\"nofollow\">https:&#x2F;&#x2F;mira-wm.com&#x2F;blog-post&#x2F;</a>",
+      "title": "MIRA: Multiplayer Interactive World Models Trained on Rocket League",
+      "updated_at": "2026-07-09T03:48:43Z",
+      "url": "https://mira-wm.com/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "arhamshahrier"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Tilion – MCP for Claude Code to stop it getting blocked on the web"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://github.com/tiliondev/fortress/tree/main/mcp"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_arhamshahrier",
+        "story_48839328",
+        "show_hn"
+      ],
+      "author": "arhamshahrier",
+      "created_at": "2026-07-09T00:24:45Z",
+      "created_at_i": 1783556685,
+      "num_comments": 0,
+      "objectID": "48839328",
+      "points": 5,
+      "story_id": 48839328,
+      "title": "Show HN: Tilion – MCP for Claude Code to stop it getting blocked on the web",
+      "updated_at": "2026-07-09T00:37:58Z",
+      "url": "https://github.com/tiliondev/fortress/tree/main/mcp"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "illectronic"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Find genre of a track with CNN trained on spectrograms"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://findgenre.com/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_illectronic",
+        "story_48839316"
+      ],
+      "author": "illectronic",
+      "children": [
+        48839317
+      ],
+      "created_at": "2026-07-09T00:23:04Z",
+      "created_at_i": 1783556584,
+      "num_comments": 1,
+      "objectID": "48839316",
+      "points": 3,
+      "story_id": 48839316,
+      "title": "Find genre of a track with CNN trained on spectrograms",
+      "updated_at": "2026-07-09T02:46:43Z",
+      "url": "https://findgenre.com/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "appreciatorBus"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "AI bills are baffling the C-suite after shift to usage-based pricing"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.theregister.com/ai-and-ml/2026/07/03/ai-bills-are-baffling-the-c-suite-after-shift-to-usage-based-pricing/5266383"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_appreciatorBus",
+        "story_48839285"
+      ],
+      "author": "appreciatorBus",
+      "children": [
+        48839892
+      ],
+      "created_at": "2026-07-09T00:19:18Z",
+      "created_at_i": 1783556358,
+      "num_comments": 0,
+      "objectID": "48839285",
+      "points": 8,
+      "story_id": 48839285,
+      "title": "AI bills are baffling the C-suite after shift to usage-based pricing",
+      "updated_at": "2026-07-09T03:19:58Z",
+      "url": "https://www.theregister.com/ai-and-ml/2026/07/03/ai-bills-are-baffling-the-c-suite-after-shift-to-usage-based-pricing/5266383"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "herbertl"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "The Return of Gravity"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://abcdinamo.com/news/the-return-of-gravity"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_herbertl",
+        "story_48839258"
+      ],
+      "author": "herbertl",
+      "created_at": "2026-07-09T00:16:34Z",
+      "created_at_i": 1783556194,
+      "num_comments": 0,
+      "objectID": "48839258",
+      "points": 2,
+      "story_id": 48839258,
+      "title": "The Return of Gravity",
+      "updated_at": "2026-07-09T02:46:43Z",
+      "url": "https://abcdinamo.com/news/the-return-of-gravity"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "matt_d"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Occupancy Math on the AMD MI355X GPU (CDNA4): A From-First-Principles Guide"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://rocm.blogs.amd.com/software-tools-optimization/occupancy-math-mi355x/README.html"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_matt_d",
+        "story_48839243"
+      ],
+      "author": "matt_d",
+      "created_at": "2026-07-09T00:15:03Z",
+      "created_at_i": 1783556103,
+      "num_comments": 0,
+      "objectID": "48839243",
+      "points": 2,
+      "story_id": 48839243,
+      "title": "Occupancy Math on the AMD MI355X GPU (CDNA4): A From-First-Principles Guide",
+      "updated_at": "2026-07-09T00:37:28Z",
+      "url": "https://rocm.blogs.amd.com/software-tools-optimization/occupancy-math-mi355x/README.html"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "gpjt"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Poppy the training box, part 1: the beginnings"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.gilesthomas.com/2026/07/poppy-the-training-box-1-the-beginnings"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_gpjt",
+        "story_48839233"
+      ],
+      "author": "gpjt",
+      "created_at": "2026-07-09T00:13:57Z",
+      "created_at_i": 1783556037,
+      "num_comments": 0,
+      "objectID": "48839233",
+      "points": 2,
+      "story_id": 48839233,
+      "title": "Poppy the training box, part 1: the beginnings",
+      "updated_at": "2026-07-09T00:38:28Z",
+      "url": "https://www.gilesthomas.com/2026/07/poppy-the-training-box-1-the-beginnings"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "dataflow"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Outspoken Chinese economist who doubted official GDP data dies"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.ft.com/content/e201f9f4-e3b2-4c59-8300-e50e9310a554"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_dataflow",
+        "story_48839219"
+      ],
+      "author": "dataflow",
+      "children": [
+        48839224
+      ],
+      "created_at": "2026-07-09T00:12:41Z",
+      "created_at_i": 1783555961,
+      "num_comments": 1,
+      "objectID": "48839219",
+      "points": 2,
+      "story_id": 48839219,
+      "title": "Outspoken Chinese economist who doubted official GDP data dies",
+      "updated_at": "2026-07-09T01:00:28Z",
+      "url": "https://www.ft.com/content/e201f9f4-e3b2-4c59-8300-e50e9310a554"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "matt_d"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Intelligence Is Free, Now What? Data Systems For, Of, and by Agents"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://bair.berkeley.edu/blog/2026/07/07/intelligence-is-free-now-what/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_matt_d",
+        "story_48839218"
+      ],
+      "author": "matt_d",
+      "children": [
+        48839468
+      ],
+      "created_at": "2026-07-09T00:12:37Z",
+      "created_at_i": 1783555957,
+      "num_comments": 1,
+      "objectID": "48839218",
+      "points": 2,
+      "story_id": 48839218,
+      "title": "Intelligence Is Free, Now What? Data Systems For, Of, and by Agents",
+      "updated_at": "2026-07-09T00:44:13Z",
+      "url": "https://bair.berkeley.edu/blog/2026/07/07/intelligence-is-free-now-what/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "boredemployee"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "QuakeWorld Air Physics"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://mattias.niklewski.com/2013/01/qw_air_physics.html"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_boredemployee",
+        "story_48839214"
+      ],
+      "author": "boredemployee",
+      "created_at": "2026-07-09T00:12:04Z",
+      "created_at_i": 1783555924,
+      "num_comments": 0,
+      "objectID": "48839214",
+      "points": 3,
+      "story_id": 48839214,
+      "title": "QuakeWorld Air Physics",
+      "updated_at": "2026-07-09T02:47:13Z",
+      "url": "https://mattias.niklewski.com/2013/01/qw_air_physics.html"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "jnord"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Is Life Just Different?"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.quantamagazine.org/is-life-just-different-20260708/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_jnord",
+        "story_48839188"
+      ],
+      "author": "jnord",
+      "created_at": "2026-07-09T00:09:45Z",
+      "created_at_i": 1783555785,
+      "num_comments": 0,
+      "objectID": "48839188",
+      "points": 4,
+      "story_id": 48839188,
+      "title": "Is Life Just Different?",
+      "updated_at": "2026-07-09T02:47:13Z",
+      "url": "https://www.quantamagazine.org/is-life-just-different-20260708/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "tempaccount420"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Rust and Artificial Intelligence: The Rust Foundation's Position"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://rustfoundation.org/resource/rust-and-ai-position-statement/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_tempaccount420",
+        "story_48839186"
+      ],
+      "author": "tempaccount420",
+      "created_at": "2026-07-09T00:09:19Z",
+      "created_at_i": 1783555759,
+      "num_comments": 0,
+      "objectID": "48839186",
+      "points": 2,
+      "story_id": 48839186,
+      "title": "Rust and Artificial Intelligence: The Rust Foundation's Position",
+      "updated_at": "2026-07-09T00:31:13Z",
+      "url": "https://rustfoundation.org/resource/rust-and-ai-position-statement/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "alentodorov"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "built it in spring 2026--ready to share today.<p>use opus 4.8 to create css and js snipptes to style the websites you visit the way you want. make nytimes more print-like, hn more matrix, or just replace any mention of AI with the :poop-emoji&quot; -- your call."
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Chrome extension that creates mini-Chrome extensions for you"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.clickremix.com/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_alentodorov",
+        "story_48839159",
+        "show_hn"
+      ],
+      "author": "alentodorov",
+      "created_at": "2026-07-09T00:06:33Z",
+      "created_at_i": 1783555593,
+      "num_comments": 0,
+      "objectID": "48839159",
+      "points": 1,
+      "story_id": 48839159,
+      "story_text": "built it in spring 2026--ready to share today.<p>use opus 4.8 to create css and js snipptes to style the websites you visit the way you want. make nytimes more print-like, hn more matrix, or just replace any mention of AI with the :poop-emoji&quot; -- your call.",
+      "title": "Show HN: Chrome extension that creates mini-Chrome extensions for you",
+      "updated_at": "2026-07-09T00:10:04Z",
+      "url": "https://www.clickremix.com/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "ttd"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Rough and Ready, California"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://en.wikipedia.org/wiki/Rough_and_Ready,_California"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_ttd",
+        "story_48839102"
+      ],
+      "author": "ttd",
+      "created_at": "2026-07-09T00:00:27Z",
+      "created_at_i": 1783555227,
+      "num_comments": 0,
+      "objectID": "48839102",
+      "points": 2,
+      "story_id": 48839102,
+      "title": "Rough and Ready, California",
+      "updated_at": "2026-07-09T02:47:13Z",
+      "url": "https://en.wikipedia.org/wiki/Rough_and_Ready,_California"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "backlit4034"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Have you heard? ClickHouse is winning the observability wars"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://charity.wtf/p/have-you-heard-clickhouse-is-winning"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_backlit4034",
+        "story_48839068"
+      ],
+      "author": "backlit4034",
+      "created_at": "2026-07-08T23:57:21Z",
+      "created_at_i": 1783555041,
+      "num_comments": 0,
+      "objectID": "48839068",
+      "points": 3,
+      "story_id": 48839068,
+      "title": "Have you heard? ClickHouse is winning the observability wars",
+      "updated_at": "2026-07-09T03:08:01Z",
+      "url": "https://charity.wtf/p/have-you-heard-clickhouse-is-winning"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Bender"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Joe Rogan Experience #2524 – Rupert Lowe [video]"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.youtube.com/watch?v=k29cMrVtVXY"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_Bender",
+        "story_48839047"
+      ],
+      "author": "Bender",
+      "created_at": "2026-07-08T23:55:59Z",
+      "created_at_i": 1783554959,
+      "num_comments": 0,
+      "objectID": "48839047",
+      "points": 5,
+      "story_id": 48839047,
+      "title": "Joe Rogan Experience #2524 – Rupert Lowe [video]",
+      "updated_at": "2026-07-09T00:22:43Z",
+      "url": "https://www.youtube.com/watch?v=k29cMrVtVXY"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "nadermx"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Calculator.Free - 200+ Free Calculators"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://calculator.free/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_nadermx",
+        "story_48839030",
+        "show_hn"
+      ],
+      "author": "nadermx",
+      "created_at": "2026-07-08T23:54:08Z",
+      "created_at_i": 1783554848,
+      "num_comments": 0,
+      "objectID": "48839030",
+      "points": 2,
+      "story_id": 48839030,
+      "title": "Show HN: Calculator.Free - 200+ Free Calculators",
+      "updated_at": "2026-07-09T02:47:13Z",
+      "url": "https://calculator.free/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "taurath"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Simple Made Easy – Rich Hickey (2011) [video]"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.youtube.com/watch?v=SxdOUGdseq4"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_taurath",
+        "story_48839005"
+      ],
+      "author": "taurath",
+      "created_at": "2026-07-08T23:51:32Z",
+      "created_at_i": 1783554692,
+      "num_comments": 0,
+      "objectID": "48839005",
+      "points": 3,
+      "story_id": 48839005,
+      "title": "Simple Made Easy – Rich Hickey (2011) [video]",
+      "updated_at": "2026-07-09T01:26:43Z",
+      "url": "https://www.youtube.com/watch?v=SxdOUGdseq4"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "htahir111"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Skillburst - AI skills for your whole team, not just the engineers"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://skillburst.ai/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_htahir111",
+        "story_48838979",
+        "show_hn"
+      ],
+      "author": "htahir111",
+      "children": [
+        48838980
+      ],
+      "created_at": "2026-07-08T23:48:27Z",
+      "created_at_i": 1783554507,
+      "num_comments": 0,
+      "objectID": "48838979",
+      "points": 1,
+      "story_id": 48838979,
+      "title": "Show HN: Skillburst - AI skills for your whole team, not just the engineers",
+      "updated_at": "2026-07-08T23:49:59Z",
+      "url": "https://skillburst.ai/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "MrVandemar"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Microsoft Publisher will no longer be supported after October 2026"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://support.microsoft.com/en-us/publisher/microsoft-publisher-will-no-longer-be-supported-after-october-2026"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_MrVandemar",
+        "story_48838935"
+      ],
+      "author": "MrVandemar",
+      "children": [
+        48839007,
+        48839948,
+        48838936
+      ],
+      "created_at": "2026-07-08T23:43:36Z",
+      "created_at_i": 1783554216,
+      "num_comments": 4,
+      "objectID": "48838935",
+      "points": 11,
+      "story_id": 48838935,
+      "title": "Microsoft Publisher will no longer be supported after October 2026",
+      "updated_at": "2026-07-09T03:50:57Z",
+      "url": "https://support.microsoft.com/en-us/publisher/microsoft-publisher-will-no-longer-be-supported-after-october-2026"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "thunderbong"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "The Unbearable Anxiety of Being Just an Ordinary Human"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.freepressjournal.in/analysis/the-unbearable-anxiety-of-being-just-an-ordinary-human"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_thunderbong",
+        "story_48838932"
+      ],
+      "author": "thunderbong",
+      "created_at": "2026-07-08T23:43:24Z",
+      "created_at_i": 1783554204,
+      "num_comments": 0,
+      "objectID": "48838932",
+      "points": 4,
+      "story_id": 48838932,
+      "title": "The Unbearable Anxiety of Being Just an Ordinary Human",
+      "updated_at": "2026-07-09T02:47:13Z",
+      "url": "https://www.freepressjournal.in/analysis/the-unbearable-anxiety-of-being-just-an-ordinary-human"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "xupianpian1"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "The Amotions AI Zoom App is now available!<p>Win more business opportunities with real-time AI guidance during your Zoom meetings and calls to help you:<p>Ask better discovery questions<p>Answer technical questions with confidence<p>Handle objections effectively<p>Stay aligned with your sales playbook<p>Win more customer conversations<p>Adding the Amotions app in your Zoom desktop app only takes a minute. You can set up Amotions app to auto-start in every of your meetings! It doesn’t join as another participant in the meeting and is only visible to you. You can position it anywhere on your screen for a quick glance!<p>Watch how to install the Amotions AI Zoom App:<p><a href=\"https://youtu.be/KlKEheVWdH8\" rel=\"nofollow\">https://youtu.be/KlKEheVWdH8</a><p>Step-by-step setup guide:<p><a href=\"https://amotionsinc.com/blogs/how-to-use-amotions-ai-zoom-app\" rel=\"nofollow\">https://amotionsinc.com/blogs/how-to-use-amotions-ai-zoom-ap...</a><p>See Amotions AI providing real-time coaching during a live Zoom call:<p><a href=\"https://youtu.be/zCubh5DDdjg\" rel=\"nofollow\">https://youtu.be/zCubh5DDdjg</a><p>Every customer-facing professional deserves an AI coach that helps them perform at their best—right when it matters most."
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Amotions app in Zoom: real-time guidance for sales calls"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://amotionsinc.com/blogs/how-to-use-amotions-ai-zoom-app"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_xupianpian1",
+        "story_48838909",
+        "show_hn"
+      ],
+      "author": "xupianpian1",
+      "created_at": "2026-07-08T23:41:19Z",
+      "created_at_i": 1783554079,
+      "num_comments": 0,
+      "objectID": "48838909",
+      "points": 2,
+      "story_id": 48838909,
+      "story_text": "The Amotions AI Zoom App is now available!<p>Win more business opportunities with real-time AI guidance during your Zoom meetings and calls to help you:<p>Ask better discovery questions<p>Answer technical questions with confidence<p>Handle objections effectively<p>Stay aligned with your sales playbook<p>Win more customer conversations<p>Adding the Amotions app in your Zoom desktop app only takes a minute. You can set up Amotions app to auto-start in every of your meetings! It doesn’t join as another participant in the meeting and is only visible to you. You can position it anywhere on your screen for a quick glance!<p>Watch how to install the Amotions AI Zoom App:<p><a href=\"https:&#x2F;&#x2F;youtu.be&#x2F;KlKEheVWdH8\" rel=\"nofollow\">https:&#x2F;&#x2F;youtu.be&#x2F;KlKEheVWdH8</a><p>Step-by-step setup guide:<p><a href=\"https:&#x2F;&#x2F;amotionsinc.com&#x2F;blogs&#x2F;how-to-use-amotions-ai-zoom-app\" rel=\"nofollow\">https:&#x2F;&#x2F;amotionsinc.com&#x2F;blogs&#x2F;how-to-use-amotions-ai-zoom-ap...</a><p>See Amotions AI providing real-time coaching during a live Zoom call:<p><a href=\"https:&#x2F;&#x2F;youtu.be&#x2F;zCubh5DDdjg\" rel=\"nofollow\">https:&#x2F;&#x2F;youtu.be&#x2F;zCubh5DDdjg</a><p>Every customer-facing professional deserves an AI coach that helps them perform at their best—right when it matters most.",
+      "title": "Show HN: Amotions app in Zoom: real-time guidance for sales calls",
+      "updated_at": "2026-07-09T02:47:43Z",
+      "url": "https://amotionsinc.com/blogs/how-to-use-amotions-ai-zoom-app"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "xeonmc"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Browsing the front page feels homogeneous these days.<p>It seems like what gets voted to the top these days are no longer &quot;things people find interesting&quot; but are all either boring &quot;big industry news&quot;, or common-denominator topics that people have contentious opinions about rather than any real novelty.<p>Does anyone else feel similarly that there are hardly any interesting or different or quirky topics that gets voted up these days?"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ask HN: HN frontpage feels boring now?"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_xeonmc",
+        "story_48838907",
+        "ask_hn"
+      ],
+      "author": "xeonmc",
+      "children": [
+        48840493,
+        48840070,
+        48840299,
+        48840393,
+        48840312,
+        48839823,
+        48838965,
+        48839859,
+        48840539
+      ],
+      "created_at": "2026-07-08T23:40:58Z",
+      "created_at_i": 1783554058,
+      "num_comments": 9,
+      "objectID": "48838907",
+      "points": 17,
+      "story_id": 48838907,
+      "story_text": "Browsing the front page feels homogeneous these days.<p>It seems like what gets voted to the top these days are no longer &quot;things people find interesting&quot; but are all either boring &quot;big industry news&quot;, or common-denominator topics that people have contentious opinions about rather than any real novelty.<p>Does anyone else feel similarly that there are hardly any interesting or different or quirky topics that gets voted up these days?",
+      "title": "Ask HN: HN frontpage feels boring now?",
+      "updated_at": "2026-07-09T03:49:29Z"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "gone35"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "How to build a cancer vaccine, and whether they will work this time"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.owlposting.com/p/how-to-build-a-cancer-vaccine-and"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_gone35",
+        "story_48838898"
+      ],
+      "author": "gone35",
+      "created_at": "2026-07-08T23:39:45Z",
+      "created_at_i": 1783553985,
+      "num_comments": 0,
+      "objectID": "48838898",
+      "points": 3,
+      "story_id": 48838898,
+      "title": "How to build a cancer vaccine, and whether they will work this time",
+      "updated_at": "2026-07-09T00:58:13Z",
+      "url": "https://www.owlposting.com/p/how-to-build-a-cancer-vaccine-and"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "jnord"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "US seeks cheaper hunter-killer drones after Iran destroys $1B worth of Reapers"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://arstechnica.com/gadgets/2026/07/us-seeks-cheaper-hunter-killer-drones-after-iran-destroys-1b-worth-of-reapers/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_jnord",
+        "story_48838888"
+      ],
+      "author": "jnord",
+      "children": [
+        48839036,
+        48840068
+      ],
+      "created_at": "2026-07-08T23:38:50Z",
+      "created_at_i": 1783553930,
+      "num_comments": 2,
+      "objectID": "48838888",
+      "points": 5,
+      "story_id": 48838888,
+      "title": "US seeks cheaper hunter-killer drones after Iran destroys $1B worth of Reapers",
+      "updated_at": "2026-07-09T03:07:28Z",
+      "url": "https://arstechnica.com/gadgets/2026/07/us-seeks-cheaper-hunter-killer-drones-after-iran-destroys-1b-worth-of-reapers/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "djoldman"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "John Deere owners will get the right to repair equipment under FTC settlement"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://apnews.com/article/john-deere-right-to-repair-agriculture-equipment-cb7514ffedb95c130a976af661f2bc02"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_djoldman",
+        "story_48838876",
+        "front_page"
+      ],
+      "author": "djoldman",
+      "children": [
+        48839300,
+        48839183,
+        48839210,
+        48839289,
+        48840226,
+        48839245,
+        48839762,
+        48839348,
+        48840511,
+        48840279,
+        48839706,
+        48839092,
+        48839253,
+        48839530,
+        48840437,
+        48839516,
+        48839761,
+        48840565,
+        48839271,
+        48839108,
+        48839476
+      ],
+      "created_at": "2026-07-08T23:37:43Z",
+      "created_at_i": 1783553863,
+      "num_comments": 89,
+      "objectID": "48838876",
+      "points": 436,
+      "story_id": 48838876,
+      "title": "John Deere owners will get the right to repair equipment under FTC settlement",
+      "updated_at": "2026-07-09T03:52:28Z",
+      "url": "https://apnews.com/article/john-deere-right-to-repair-agriculture-equipment-cb7514ffedb95c130a976af661f2bc02"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "bpierre"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "M64 Controller Review: The N64 Remote Perfected"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://retrododo.com/m64-controller-review-the-n64-remote-perfected/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_bpierre",
+        "story_48838872"
+      ],
+      "author": "bpierre",
+      "created_at": "2026-07-08T23:37:13Z",
+      "created_at_i": 1783553833,
+      "num_comments": 0,
+      "objectID": "48838872",
+      "points": 3,
+      "story_id": 48838872,
+      "title": "M64 Controller Review: The N64 Remote Perfected",
+      "updated_at": "2026-07-09T02:48:28Z",
+      "url": "https://retrododo.com/m64-controller-review-the-n64-remote-perfected/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Cynddl"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Hijacking Defensive Cyber AI Agents for Remote Code Execution"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://ainowinstitute.org/publications/friendly-fire-exploit-brief"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_Cynddl",
+        "story_48838857"
+      ],
+      "author": "Cynddl",
+      "created_at": "2026-07-08T23:35:29Z",
+      "created_at_i": 1783553729,
+      "num_comments": 0,
+      "objectID": "48838857",
+      "points": 1,
+      "story_id": 48838857,
+      "title": "Hijacking Defensive Cyber AI Agents for Remote Code Execution",
+      "updated_at": "2026-07-08T23:38:30Z",
+      "url": "https://ainowinstitute.org/publications/friendly-fire-exploit-brief"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "cable2600"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "The AI Bubble We need to talk"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.youtube.com/watch?v=2J2Fb1bBufA"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_cable2600",
+        "story_48838844"
+      ],
+      "author": "cable2600",
+      "created_at": "2026-07-08T23:34:33Z",
+      "created_at_i": 1783553673,
+      "num_comments": 0,
+      "objectID": "48838844",
+      "points": 3,
+      "story_id": 48838844,
+      "title": "The AI Bubble We need to talk",
+      "updated_at": "2026-07-09T02:18:28Z",
+      "url": "https://www.youtube.com/watch?v=2J2Fb1bBufA"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "jnord"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "US rare earths flow to Asia as domestic demand is slow to emerge"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://arstechnica.com/science/2026/07/us-rare-earths-flow-to-asia-as-domestic-demand-is-slow-to-emerge/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_jnord",
+        "story_48838835"
+      ],
+      "author": "jnord",
+      "created_at": "2026-07-08T23:33:48Z",
+      "created_at_i": 1783553628,
+      "num_comments": 0,
+      "objectID": "48838835",
+      "points": 2,
+      "story_id": 48838835,
+      "title": "US rare earths flow to Asia as domestic demand is slow to emerge",
+      "updated_at": "2026-07-09T01:55:27Z",
+      "url": "https://arstechnica.com/science/2026/07/us-rare-earths-flow-to-asia-as-domestic-demand-is-slow-to-emerge/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "m101"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Anyone heard or xsight labs (https://xsightlabs.com/)? They are making networking gear for AI and spacex satellites. I'd be curious if anyone can shine a light on:<p>- Does full switch programmability actually matter in production, or is it one of those things that sounds great in a slide deck but nobody uses?<p>- Is &quot;on-path cores&quot; in a DPU genuinely better than Pensando's P4 approach or NVIDIA's off-path model, or does it converge at scale?<p>- Can you actually swap merchant silicon under SONiC in practice, or is Broadcom lock-in deeper than the software layer?<p>- Is there a real market for a power-optimised 12.8T switch when the spine is moving to 51.2T+, or does the spine vendor always drag the leaf along?<p>- How big a deal is open-sourcing the ISA? Do people buying this really care to pay up for this type of thing?<p>Thanks!!"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ask HN: What do you think of xsight labs?"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_m101",
+        "story_48838806",
+        "ask_hn"
+      ],
+      "author": "m101",
+      "created_at": "2026-07-08T23:30:20Z",
+      "created_at_i": 1783553420,
+      "num_comments": 0,
+      "objectID": "48838806",
+      "points": 1,
+      "story_id": 48838806,
+      "story_text": "Anyone heard or xsight labs (https:&#x2F;&#x2F;xsightlabs.com&#x2F;)? They are making networking gear for AI and spacex satellites. I&#x27;d be curious if anyone can shine a light on:<p>- Does full switch programmability actually matter in production, or is it one of those things that sounds great in a slide deck but nobody uses?<p>- Is &quot;on-path cores&quot; in a DPU genuinely better than Pensando&#x27;s P4 approach or NVIDIA&#x27;s off-path model, or does it converge at scale?<p>- Can you actually swap merchant silicon under SONiC in practice, or is Broadcom lock-in deeper than the software layer?<p>- Is there a real market for a power-optimised 12.8T switch when the spine is moving to 51.2T+, or does the spine vendor always drag the leaf along?<p>- How big a deal is open-sourcing the ISA? Do people buying this really care to pay up for this type of thing?<p>Thanks!!",
+      "title": "Ask HN: What do you think of xsight labs?",
+      "updated_at": "2026-07-08T23:33:14Z"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "matt_daemon"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Telling Stories with Data (2023)"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://tellingstorieswithdata.com"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_matt_daemon",
+        "story_48838779"
+      ],
+      "author": "matt_daemon",
+      "created_at": "2026-07-08T23:27:47Z",
+      "created_at_i": 1783553267,
+      "num_comments": 0,
+      "objectID": "48838779",
+      "points": 1,
+      "story_id": 48838779,
+      "title": "Telling Stories with Data (2023)",
+      "updated_at": "2026-07-08T23:28:27Z",
+      "url": "https://tellingstorieswithdata.com"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "hershyb_"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "We made Grok 4.5, GPT-5.5, and Claude build the same apps"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.tryai.dev/blog/grok-4.5-vs-gpt-5.5-vs-claude-build-off"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_hershyb_",
+        "story_48838772",
+        "front_page"
+      ],
+      "author": "hershyb_",
+      "children": [
+        48839886,
+        48839699,
+        48840357,
+        48839687,
+        48839584,
+        48839770,
+        48839850,
+        48839950,
+        48839562,
+        48840096,
+        48839858,
+        48839631,
+        48840330,
+        48840747,
+        48839799,
+        48840366,
+        48839494
+      ],
+      "created_at": "2026-07-08T23:27:14Z",
+      "created_at_i": 1783553234,
+      "num_comments": 40,
+      "objectID": "48838772",
+      "points": 100,
+      "story_id": 48838772,
+      "title": "We made Grok 4.5, GPT-5.5, and Claude build the same apps",
+      "updated_at": "2026-07-09T03:52:28Z",
+      "url": "https://www.tryai.dev/blog/grok-4.5-vs-gpt-5.5-vs-claude-build-off"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "kalwrepo"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "BassBet – Live Games, Fast Payouts and Big Wins Online"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://bassbet-login.com/en/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_kalwrepo",
+        "story_48838732"
+      ],
+      "author": "kalwrepo",
+      "children": [
+        48838733
+      ],
+      "created_at": "2026-07-08T23:22:31Z",
+      "created_at_i": 1783552951,
+      "num_comments": 0,
+      "objectID": "48838732",
+      "points": 1,
+      "story_id": 48838732,
+      "title": "BassBet – Live Games, Fast Payouts and Big Wins Online",
+      "updated_at": "2026-07-08T23:27:59Z",
+      "url": "https://bassbet-login.com/en/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "m101"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Xsight labs - anyone talking about these guys?"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://xsightlabs.com/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_m101",
+        "story_48838716"
+      ],
+      "author": "m101",
+      "children": [
+        48838717
+      ],
+      "created_at": "2026-07-08T23:21:09Z",
+      "created_at_i": 1783552869,
+      "num_comments": 1,
+      "objectID": "48838716",
+      "points": 3,
+      "story_id": 48838716,
+      "title": "Xsight labs - anyone talking about these guys?",
+      "updated_at": "2026-07-09T02:48:58Z",
+      "url": "https://xsightlabs.com/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "dr_"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "You may not need 8 hours of sleep"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.nytimes.com/2026/07/05/opinion/sleep-health-8-hours.html"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_dr_",
+        "story_48838700"
+      ],
+      "author": "dr_",
+      "created_at": "2026-07-08T23:18:57Z",
+      "created_at_i": 1783552737,
+      "num_comments": 0,
+      "objectID": "48838700",
+      "points": 2,
+      "story_id": 48838700,
+      "title": "You may not need 8 hours of sleep",
+      "updated_at": "2026-07-08T23:23:29Z",
+      "url": "https://www.nytimes.com/2026/07/05/opinion/sleep-health-8-hours.html"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "newspaper1"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Ghislaine Maxwell's Dad Sold Bugged Israeli Software to Two Nuclear Weapons Labs"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://alisav.substack.com/p/ghislaine-maxwells-father-sold-bugged"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_newspaper1",
+        "story_48838686"
+      ],
+      "author": "newspaper1",
+      "children": [
+        48839366,
+        48838938
+      ],
+      "created_at": "2026-07-08T23:18:09Z",
+      "created_at_i": 1783552689,
+      "num_comments": 3,
+      "objectID": "48838686",
+      "points": 14,
+      "story_id": 48838686,
+      "title": "Ghislaine Maxwell's Dad Sold Bugged Israeli Software to Two Nuclear Weapons Labs",
+      "updated_at": "2026-07-09T03:24:13Z",
+      "url": "https://alisav.substack.com/p/ghislaine-maxwells-father-sold-bugged"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "furcyd"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Suspecting AI cheating, Ivy League prof ordered in-person final; scores fell 50%"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://arstechnica.com/ai/2026/07/we-cannot-choose-to-become-idiots-the-ai-cheating-scandal-roiling-brown-university/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_furcyd",
+        "story_48838611"
+      ],
+      "author": "furcyd",
+      "children": [
+        48839414,
+        48839341,
+        48839071,
+        48839521,
+        48839367,
+        48838744,
+        48840557,
+        48839339,
+        48838773
+      ],
+      "created_at": "2026-07-08T23:11:28Z",
+      "created_at_i": 1783552288,
+      "num_comments": 66,
+      "objectID": "48838611",
+      "points": 92,
+      "story_id": 48838611,
+      "title": "Suspecting AI cheating, Ivy League prof ordered in-person final; scores fell 50%",
+      "updated_at": "2026-07-09T03:50:28Z",
+      "url": "https://arstechnica.com/ai/2026/07/we-cannot-choose-to-become-idiots-the-ai-cheating-scandal-roiling-brown-university/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "kyuuri1791"
+        },
+        "story_text": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "There exists several schema migration tools from MySQL to PostgreSQL, pgloader as one of the most popular ones.<p>All off them, as far as I have seen, is designed to be a single shot schema migration tool, so if MySQL schema was changed due to continuous development after pgloader was executed, developers have to sync them to PostgresQL in some kind of manual, or custom-made script. (custom-made script seems like the most common way when I searched it online)\nAnother aspect of the existing ones is that how the schema is migrated tends to be a black box, and the configuration file didn't seem fully customizable to me. For example, you cannot do something like excluding an index for a certain table.<p>This tool can resolve both cases.<p>How it works consists of 3 steps:<p>1. parse MySQL schema into ruby-handleable objects by using rails ActiveRecord<p>2. combine 1., pre-defined general migration rules, and user-defined dsl to generate a PostgresQL schemafile<p>3. apply 2. using ridgepole(a common rails schema management tool in japan) to PostgresQL, which checks the diff between 2. and the actual PostgresQL schema and generates/runs the exact DDL necessary to apply"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Show HN: Schema_ferry – Continuous schema migration from MySQL to PostgreSQL"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://github.com/kyuuri1791/schema_ferry"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_kyuuri1791",
+        "story_48838597",
+        "show_hn"
+      ],
+      "author": "kyuuri1791",
+      "created_at": "2026-07-08T23:10:15Z",
+      "created_at_i": 1783552215,
+      "num_comments": 0,
+      "objectID": "48838597",
+      "points": 1,
+      "story_id": 48838597,
+      "story_text": "There exists several schema migration tools from MySQL to PostgreSQL, pgloader as one of the most popular ones.<p>All off them, as far as I have seen, is designed to be a single shot schema migration tool, so if MySQL schema was changed due to continuous development after pgloader was executed, developers have to sync them to PostgresQL in some kind of manual, or custom-made script. (custom-made script seems like the most common way when I searched it online)\nAnother aspect of the existing ones is that how the schema is migrated tends to be a black box, and the configuration file didn&#x27;t seem fully customizable to me. For example, you cannot do something like excluding an index for a certain table.<p>This tool can resolve both cases.<p>How it works consists of 3 steps:<p>1. parse MySQL schema into ruby-handleable objects by using rails ActiveRecord<p>2. combine 1., pre-defined general migration rules, and user-defined dsl to generate a PostgresQL schemafile<p>3. apply 2. using ridgepole(a common rails schema management tool in japan) to PostgresQL, which checks the diff between 2. and the actual PostgresQL schema and generates&#x2F;runs the exact DDL necessary to apply",
+      "title": "Show HN: Schema_ferry – Continuous schema migration from MySQL to PostgreSQL",
+      "updated_at": "2026-07-08T23:14:28Z",
+      "url": "https://github.com/kyuuri1791/schema_ferry"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "MrVandemar"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Observations of a Journal Editor"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://uq.pressbooks.pub/editorobservations/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_MrVandemar",
+        "story_48838587"
+      ],
+      "author": "MrVandemar",
+      "created_at": "2026-07-08T23:09:43Z",
+      "created_at_i": 1783552183,
+      "num_comments": 0,
+      "objectID": "48838587",
+      "points": 2,
+      "story_id": 48838587,
+      "title": "Observations of a Journal Editor",
+      "updated_at": "2026-07-09T02:48:58Z",
+      "url": "https://uq.pressbooks.pub/editorobservations/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "doener"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Meta datacenter contractor flushed contaminated water"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.theguardian.com/us-news/2026/jul/08/meta-datacenter-ai-wyoming-water"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_doener",
+        "story_48838558"
+      ],
+      "author": "doener",
+      "children": [
+        48838633,
+        48839808
+      ],
+      "created_at": "2026-07-08T23:05:45Z",
+      "created_at_i": 1783551945,
+      "num_comments": 3,
+      "objectID": "48838558",
+      "points": 10,
+      "story_id": 48838558,
+      "title": "Meta datacenter contractor flushed contaminated water",
+      "updated_at": "2026-07-09T01:57:13Z",
+      "url": "https://www.theguardian.com/us-news/2026/jul/08/meta-datacenter-ai-wyoming-water"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "fernando-ram"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Visualizing Buns new Rust Files against the rest of the JavaScript / cpp"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://old.reddit.com/r/bun/comments/1ur8ka2/visualizing_the_rust_portion_of_bun_against/"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_fernando-ram",
+        "story_48838525"
+      ],
+      "author": "fernando-ram",
+      "created_at": "2026-07-08T23:02:05Z",
+      "created_at_i": 1783551725,
+      "num_comments": 0,
+      "objectID": "48838525",
+      "points": 1,
+      "story_id": 48838525,
+      "title": "Visualizing Buns new Rust Files against the rest of the JavaScript / cpp",
+      "updated_at": "2026-07-08T23:07:14Z",
+      "url": "https://old.reddit.com/r/bun/comments/1ur8ka2/visualizing_the_rust_portion_of_bun_against/"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "petethomas"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "The family of a man shot by the Tennessee National Guard demands video release"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://apnews.com/article/memphis-national-guard-shooting-tyrin-johnson-6a1ea3e51176d8ddf6519f900eccb16c"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_petethomas",
+        "story_48838521"
+      ],
+      "author": "petethomas",
+      "created_at": "2026-07-08T23:01:32Z",
+      "created_at_i": 1783551692,
+      "num_comments": 0,
+      "objectID": "48838521",
+      "points": 22,
+      "story_id": 48838521,
+      "title": "The family of a man shot by the Tennessee National Guard demands video release",
+      "updated_at": "2026-07-09T02:48:58Z",
+      "url": "https://apnews.com/article/memphis-national-guard-shooting-tyrin-johnson-6a1ea3e51176d8ddf6519f900eccb16c"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "petethomas"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "Family demands an independent probe after ICE officer shoots a man in Houston"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://apnews.com/article/ice-houston-shooting-lorenzo-salgado-araujo-2d01ba69caf2445f05005096891ba5b2"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_petethomas",
+        "story_48838492"
+      ],
+      "author": "petethomas",
+      "created_at": "2026-07-08T22:57:56Z",
+      "created_at_i": 1783551476,
+      "num_comments": 0,
+      "objectID": "48838492",
+      "points": 9,
+      "story_id": 48838492,
+      "title": "Family demands an independent probe after ICE officer shoots a man in Houston",
+      "updated_at": "2026-07-09T00:23:43Z",
+      "url": "https://apnews.com/article/ice-houston-shooting-lorenzo-salgado-araujo-2d01ba69caf2445f05005096891ba5b2"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "petethomas"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "The Trump admin is ramping up pressure on states to change election practices"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://apnews.com/article/trump-voting-threat-states-3ec6b7838c97342965416756c0b83496"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_petethomas",
+        "story_48838470"
+      ],
+      "author": "petethomas",
+      "created_at": "2026-07-08T22:56:01Z",
+      "created_at_i": 1783551361,
+      "num_comments": 0,
+      "objectID": "48838470",
+      "points": 8,
+      "story_id": 48838470,
+      "title": "The Trump admin is ramping up pressure on states to change election practices",
+      "updated_at": "2026-07-09T02:49:32Z",
+      "url": "https://apnews.com/article/trump-voting-threat-states-3ec6b7838c97342965416756c0b83496"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "cybermango"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "New report highlights reasons for hope in the climate fight"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.unep.org/news-and-stories/story/new-report-highlights-five-reasons-hope-climate-fight"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_cybermango",
+        "story_48838450"
+      ],
+      "author": "cybermango",
+      "created_at": "2026-07-08T22:53:58Z",
+      "created_at_i": 1783551238,
+      "num_comments": 0,
+      "objectID": "48838450",
+      "points": 3,
+      "story_id": 48838450,
+      "title": "New report highlights reasons for hope in the climate fight",
+      "updated_at": "2026-07-09T02:49:32Z",
+      "url": "https://www.unep.org/news-and-stories/story/new-report-highlights-five-reasons-hope-climate-fight"
+    },
+    {
+      "_highlightResult": {
+        "author": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "indigodaddy"
+        },
+        "title": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "A New 'Little House' Expands and Updates the Prairie"
+        },
+        "url": {
+          "matchLevel": "none",
+          "matchedWords": [],
+          "value": "https://www.nytimes.com/2026/07/08/arts/television/little-house-on-the-prairie-netflix.html"
+        }
+      },
+      "_tags": [
+        "story",
+        "author_indigodaddy",
+        "story_48838429"
+      ],
+      "author": "indigodaddy",
+      "children": [
+        48838750
+      ],
+      "created_at": "2026-07-08T22:51:26Z",
+      "created_at_i": 1783551086,
+      "num_comments": 1,
+      "objectID": "48838429",
+      "points": 1,
+      "story_id": 48838429,
+      "title": "A New 'Little House' Expands and Updates the Prairie",
+      "updated_at": "2026-07-08T23:25:44Z",
+      "url": "https://www.nytimes.com/2026/07/08/arts/television/little-house-on-the-prairie-netflix.html"
+    }
+  ],
+  "hitsPerPage": 150,
+  "nbHits": 2326,
+  "nbPages": 7,
+  "page": 0,
+  "params": "tags=story&numericFilters=created_at_i%3E1783396352&hitsPerPage=150&page=0&advancedSyntax=true&analyticsTags=backend",
+  "processingTimeMS": 2,
+  "processingTimingsMS": {
+    "_request": {
+      "roundTrip": 24
+    },
+    "afterFetch": {
+      "format": {
+        "highlighting": 1,
+        "total": 2
+      }
+    },
+    "fetch": {
+      "total": 1
+    },
+    "total": 2
+  },
+  "query": "",
+  "serverTimeMS": 5
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/run_plan.schema.json",
+  "title": "Run Plan",
+  "description": "Spec-silent shape (the approved build plan's Phase 2 section names 'scripts/plan_run.py ... writes data/run_plan.json (today's cluster subset, pre-computed card IDs ..., degradation-ladder decision)' without fixing fields; decision logged in IMPROVEMENT_BACKLOG.md). Written by the pure-code plan_run.py step before the analyst runs, so the LLM never invents or collides card IDs and the degradation ladder (CLAUDE.md's quota-degradation section) is decided deterministically, not by the analyst's own discretion. run_mode 'skip' is the unconditional empty-queue case (cards_cap/clusters/reason should reflect nothing-to-publish); 'normal'/'capped'/'digest' correspond to degradation_level 0, 1-2, and 3 respectively per CLAUDE.md's ladder. No seed data/run_plan.json is shipped yet -- the script that produces real ones is a later Phase 2 commit.",
+  "type": "object",
+  "required": [
+    "version",
+    "generated_at",
+    "degradation_level",
+    "run_mode",
+    "cards_cap",
+    "clusters",
+    "reason"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "degradation_level": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "vars.QUOTA_DEGRADATION_LEVEL at plan time: 0 normal, 1 capped (top-5), 2 every-other-day, 3 weekly digest -- per CLAUDE.md's quota-degradation ladder."
+    },
+    "run_mode": {
+      "type": "string",
+      "enum": ["normal", "capped", "skip", "digest"],
+      "description": "'skip' is forced whenever data/queue.json is empty, unconditionally, regardless of degradation_level -- CLAUDE.md's 'empty queue = exit without inventing news' rule."
+    },
+    "cards_cap": {
+      "type": ["integer", "null"],
+      "minimum": 0,
+      "description": "Max cards the analyst may write this run (e.g. 8 normal, 5 capped, 1 digest); null when run_mode is 'skip'."
+    },
+    "clusters": {
+      "type": "array",
+      "description": "The cluster subset selected for this run, in rank order; empty when run_mode is 'skip'.",
+      "items": {
+        "type": "object",
+        "required": ["cluster_hash", "proposed_card_id", "rank"],
+        "properties": {
+          "cluster_hash": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Joins back to data/ledger.json's entries key and data/queue.json's own cluster_hash."
+          },
+          "proposed_card_id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Pre-computed content/cards/<id>.json slug so the analyst never invents or collides IDs."
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "reason": {
+      "type": "string",
+      "description": "Short human-readable explanation of the run_mode/degradation_level decision (e.g. 'queue empty', 'degradation_level=1: capped to top 5', 'normal run, 8 clusters available')."
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Page not found — AI Frontier Wire{% endblock %}
+
+{% block meta_description %}This page doesn't exist on AI Frontier Wire.{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for the 404 page. Scoped to this page only,
+   * built entirely from site/static/css/tokens.css's existing custom
+   * properties -- matches every other page's own established "inline
+   * <style>, no new site-wide rules" convention. See
+   * IMPROVEMENT_BACKLOG.md.
+   */
+  .not-found-section {
+    max-width: 38rem;
+  }
+
+  .not-found-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    padding: 0;
+    list-style: none;
+    margin: 1.25rem 0 0;
+  }
+</style>
+
+<h1>Page not found</h1>
+
+<section class="not-found-section">
+  <p>There's no page at this address. It may have been mistyped, or the
+    page it once pointed to no longer exists -- this site never silently
+    removes a published card or Lexicon entry, but URLs can still go
+    stale if a link was wrong to begin with.</p>
+
+  <p>Try one of these instead:</p>
+  <ul class="not-found-links">
+    <li><a href="/">The Wire</a></li>
+    <li><a href="/board/">Frontier Board</a></li>
+    <li><a href="/lexicon/">Lexicon</a></li>
+    <li><a href="/primer/">Primer</a></li>
+    <li><a href="/moving/">What's Moving</a></li>
+    <li><a href="/method/">Method</a></li>
+  </ul>
+</section>
+
+{% endblock %}

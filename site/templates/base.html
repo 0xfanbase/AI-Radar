@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AI Frontier Wire{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}A fact-checked daily wire of frontier AI news, a living tracker of frontier models, and a plain-English glossary.{% endblock %}">
+  <link rel="stylesheet" href="/static/css/tokens.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <header class="masthead">
+    <div class="container masthead__inner">
+      <a class="masthead__brand" href="/">AI Frontier Wire</a>
+      <nav class="masthead__nav" aria-label="Primary">
+        <ul>
+          <li><a href="/">Wire</a></li>
+          <li><a href="/board/">Board</a></li>
+          <li><a href="/lexicon/">Lexicon</a></li>
+          <li><a href="/primer/">Primer</a></li>
+          <li><a href="/moving/">What's Moving</a></li>
+          <li><a href="/method/">Method</a></li>
+          <li><a href="/about/">About</a></li>
+        </ul>
+      </nav>
+    </div>
+    {% if masthead_sparklines is defined and masthead_sparklines %}
+    {% include "_masthead_moving_strip.html" %}
+    {% endif %}
+  </header>
+
+  <main id="main-content" class="container">
+    {% block content %}
+    <h1>AI Frontier Wire</h1>
+    <p>This page is a build placeholder from the Phase 4 site-generator
+      scaffold. The Wire, Board, Lexicon, Primer, What's Moving, and Method
+      pages are built by later stages -- see
+      <code>IMPROVEMENT_BACKLOG.md</code> and <code>PROGRESS.md</code> for
+      status.</p>
+    {% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p class="disclaimer">AI-curated and AI-written; links go to primary
+        sources; see the <a href="/method/">Method page</a> for how
+        verification works.</p>
+      <p><a href="/corrections/">Corrections</a></p>
+    </div>
+  </footer>
+</body>
+</html>

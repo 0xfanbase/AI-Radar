@@ -1,0 +1,251 @@
+/*
+ * AI Frontier Wire -- base layout + components (Phase 4).
+ *
+ * Rules of the road for this file:
+ *   - Single-column, mobile-first, "375px-clean" -- nothing here assumes a
+ *     viewport wider than a small phone; wider viewports just get more
+ *     breathing room via a fluid max-width container, never a fixed-width
+ *     element.
+ *   - No hydration, no JS-driven widgets -- everything interactive-looking
+ *     (focus states, the skip-link, later the pulse effect) is pure CSS.
+ *   - Every color comes from tokens.css's custom properties. See that
+ *     file's header comment for the hairline/focus-ring rule this file
+ *     must not violate.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+main {
+  flex: 1 1 auto;
+}
+
+/* Fluid container -- relative max-width, never a fixed pixel width, so
+   nothing here assumes or requires a viewport wider than 375px. */
+.container {
+  width: 100%;
+  max-width: 40rem;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-star-white);
+  line-height: 1.15;
+}
+
+a {
+  color: var(--color-signal-cyan);
+}
+
+/* Data / tabular figures -- apply to numeric fields (dates, counts,
+   context windows, scores) that should line up in a monospaced,
+   tabular-numeral face. */
+.font-data,
+.data {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* One-liners are the site's "skim only this" affordance -- larger and in
+   the signal-cyan accent color, per the design spec. */
+.one-liner {
+  color: var(--color-signal-cyan);
+  font-size: 1.125rem;
+}
+
+/* --- Skip link ---------------------------------------------------------
+ * First focusable element on every page. Sits off-screen above the
+ * viewport until it receives keyboard focus, then slides into view. No
+ * JS involved -- pure CSS transform + :focus.
+ */
+.skip-link {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  transform: translateY(-100%);
+  background: var(--color-panel);
+  color: var(--color-star-white);
+  font-family: var(--font-body);
+  padding: 0.75em 1.25em;
+  border-bottom: 1px solid var(--color-hairline);
+  border-right: 1px solid var(--color-hairline);
+  text-decoration: underline;
+  transition: transform 0.15s ease-in-out;
+}
+
+.skip-link:focus {
+  transform: translateY(0%);
+}
+
+/* --- Focus visibility ---------------------------------------------------
+ * Signal-cyan is the site's one and only focus-ring color (never the
+ * hairline color -- see tokens.css). A visible offset keeps the ring from
+ * touching small text/chip edges.
+ */
+:focus-visible {
+  outline: 2px solid var(--color-signal-cyan);
+  outline-offset: 3px;
+}
+
+/* --- Masthead / footer (minimal scaffold styling) ----------------------
+ * Page-specific layout for the Wire/Board/Lexicon/etc. arrives with their
+ * own builders; this is just enough so the shared shell doesn't look
+ * broken on its own.
+ */
+.masthead {
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.masthead__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.25rem;
+  padding-block: 0.75rem;
+}
+
+.masthead__brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-star-white);
+  text-decoration: none;
+  font-size: 1.125rem;
+}
+
+.masthead__nav ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.masthead__nav a {
+  text-decoration: none;
+}
+
+.masthead__nav a:hover,
+.masthead__nav a:focus-visible {
+  text-decoration: underline;
+}
+
+/* --- Masthead sparkline strip ------------------------------------------
+ * Thin, site-wide "what's moving" strip -- see
+ * site/templates/_masthead_moving_strip.html for when/why it renders.
+ * Its own <ul> scrolls horizontally on its own (never the page body) if
+ * it's wider than the viewport, matching the Board table's own
+ * `.board-table-wrap` precedent.
+ */
+.masthead-strip {
+  border-bottom: 1px solid var(--color-hairline);
+}
+
+.masthead-strip__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  padding-block: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.masthead-strip__link {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  white-space: nowrap;
+}
+
+.masthead-strip__list {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.masthead-strip__item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.masthead-strip__topic {
+  opacity: 0.85;
+  white-space: nowrap;
+}
+
+.site-footer {
+  border-top: 1px solid var(--color-hairline);
+  padding-block: 1.25rem;
+  font-size: 0.9rem;
+}
+
+.site-footer .disclaimer {
+  color: var(--color-ink);
+}
+
+/* --- Status chips --------------------------------------------------------
+ * A status is always visible text, never color-only -- these classes only
+ * add a color accent on top of the literal status word every template
+ * renders.
+ */
+.chip {
+  display: inline-block;
+  border: 1px solid var(--color-hairline);
+  border-radius: 999px;
+  padding: 0.15em 0.7em;
+  font-size: 0.85rem;
+}
+
+.chip--confirmed {
+  color: var(--color-signal-cyan);
+}
+
+.chip--reported {
+  color: var(--color-reported-amber);
+}
+
+.chip--corrected {
+  color: var(--color-corrected-red);
+}

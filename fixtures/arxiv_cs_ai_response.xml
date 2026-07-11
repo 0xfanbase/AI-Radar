@@ -1,0 +1,367 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/JytubbqWqtaYctZbUolm74C6F88</id>
+  <title>arXiv Query: search_query=cat:cs.AI&amp;id_list=&amp;start=0&amp;max_results=12</title>
+  <updated>2026-07-09T03:41:41Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=cat:cs.AI&amp;start=0&amp;max_results=12&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>12</opensearch:itemsPerPage>
+  <opensearch:totalResults>188591</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07708v1</id>
+    <title>Accurate, Interdisciplinary and Transparent Structure-property Understanding with Deep Native Structural Reasoning</title>
+    <updated>2026-07-08T17:59:59Z</updated>
+    <link href="https://arxiv.org/abs/2607.07708v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07708v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Structure-property relationships are foundational to biology, chemistry and materials science, where function, reactivity and physical response emerge from spatial, chemical and periodic organization. Mechanistically explaining these relationships requires interpreting structural evidence through scientific principles and physical constraints, from stereochemistry and bonding to symmetry, energetics and periodic order. However, applying artificial intelligence to this process presents a joint challenge of representation and reasoning: models must preserve domain-native structural information while showing how specific evidence supports predictions under these constraints. Here we introduce SciReasoner, a multimodal scientific foundation model for native structural reasoning across proteins, small molecules and inorganic crystals. SciReasoner discretizes coordinates, topologies and periodic connectivities into a unified structure-aware vocabulary, treating structural tokens as addressable evidence units during reasoning. In homology-controlled Gene Ontology prediction, SciReasoner improves Cellular Component annotation for low-homology and orphan-like proteins, increasing $F_{\max}$ from 0.42 to 0.55. In chemistry, it raises single-step retrosynthesis accuracy from 0.63 to 0.72 while generating fragment-level disconnection and precursor-verification traces. In materials science, its representations separate elemental and compound phases and resolve high- and low-band-gap regimes. Across 86 benchmarks, SciReasoner achieves state-of-the-art performance on 67 tasks. Double-blind expert evaluation rates its reasoning traces as preferred or at least comparable to those of a frontier large language model in 98% of cases. By making structure an inspectable substrate for reasoning under scientific constraints, SciReasoner connects accurate prediction with interpretable scientific inference.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CE" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T17:59:59Z</published>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Chen Tang</name>
+    </author>
+    <author>
+      <name>Yizhou Wang</name>
+    </author>
+    <author>
+      <name>Jianyu Wu</name>
+    </author>
+    <author>
+      <name>Lintao Wang</name>
+    </author>
+    <author>
+      <name>Shixiang Tang</name>
+    </author>
+    <author>
+      <name>Pengze Li</name>
+    </author>
+    <author>
+      <name>Encheng Su</name>
+    </author>
+    <author>
+      <name>Jun Yao</name>
+    </author>
+    <author>
+      <name>Jiabei Xiao</name>
+    </author>
+    <author>
+      <name>Yuqi Shi</name>
+    </author>
+    <author>
+      <name>Jielan Li</name>
+    </author>
+    <author>
+      <name>Hongxia Hao</name>
+    </author>
+    <author>
+      <name>Zhangyang Gao</name>
+    </author>
+    <author>
+      <name>Fang Wu</name>
+    </author>
+    <author>
+      <name>Ben Fei</name>
+    </author>
+    <author>
+      <name>Xiangyu Yue</name>
+    </author>
+    <author>
+      <name>Pan Tan</name>
+    </author>
+    <author>
+      <name>Bozitao Zhong</name>
+    </author>
+    <author>
+      <name>Jinouwen Zhang</name>
+    </author>
+    <author>
+      <name>Aoran Wang</name>
+    </author>
+    <author>
+      <name>Yan Lu</name>
+    </author>
+    <author>
+      <name>Jiaheng Liu</name>
+    </author>
+    <author>
+      <name>Xinzhu Ma</name>
+    </author>
+    <author>
+      <name>Liang Hong</name>
+    </author>
+    <author>
+      <name>Mingyue Zheng</name>
+    </author>
+    <author>
+      <name>Phil Torr</name>
+    </author>
+    <author>
+      <name>Bowen Zhou</name>
+    </author>
+    <author>
+      <name>Wanli Ouyang</name>
+    </author>
+    <author>
+      <name>Lei Bai</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07707v1</id>
+    <title>Co-LMLM: Continuous-Query Limited Memory Language Models</title>
+    <updated>2026-07-08T17:59:45Z</updated>
+    <link href="https://arxiv.org/abs/2607.07707v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07707v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Limited memory language models (LMLMs) externalize factual knowledge during pretraining to a knowledge base (KB), rather than memorizing it in their weights. During generation, the model then fetches knowledge from the KB as needed. This recently introduced paradigm provides multiple advantages, including knowledge control capabilities that remain beyond conventional LLMs. We propose continuous-query LMLM (CO-LMLM), where the KB pairs continuous keys with textual knowledge values, a significant departure from prior reliance on relational KB and queries. CO-LMLM generates flexible vector queries at minimal cost, while still integrating human-readable and attributable retrieved knowledge into its generation. We pair this design with an annotation pipeline that tags free-form factual spans in arbitrary text, removing prior work's restriction to Wikipedia. Across pretraining on Wikipedia and FineWeb-Edu and at multiple model scales, CO-LMLM outperforms prior LMLMs and vanilla LLMs in both perplexity and factual precision. At 360M scale, this includes lower perplexity than models pretrained on 40x more data, and SimpleQA-verified performance that is in line with gpt-4o-mini and higher than Claude Sonnet 4.5.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T17:59:45Z</published>
+    <arxiv:comment>preprint</arxiv:comment>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Yair Feldman</name>
+    </author>
+    <author>
+      <name>Linxi Zhao</name>
+    </author>
+    <author>
+      <name>Nathan Godey</name>
+    </author>
+    <author>
+      <name>Dongyoung Go</name>
+    </author>
+    <author>
+      <name>Yilun Hua</name>
+    </author>
+    <author>
+      <name>Kilian Q. Weinberger</name>
+    </author>
+    <author>
+      <name>Jennifer J. Sun</name>
+    </author>
+    <author>
+      <name>Yoav Artzi</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07696v1</id>
+    <title>Breaking Database Lock-in: Agentic Regeneration of High Performance Storage Readers for Database Bypass</title>
+    <updated>2026-07-08T17:55:00Z</updated>
+    <link href="https://arxiv.org/abs/2607.07696v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07696v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Analytical workloads operating on data stored in external database systems face a fundamental bottleneck: data access is guarded entirely by the database driver, like JDBC or ODBC, forcing all reads through query execution and other driver layers that are not designed for bulk columnar analytics. We present Jailbreak, an approach that bypasses the database engine entirely by reading storage files directly and materializing data as in-memory columnar buffers. Jailbreak's key insight is that database file formats, while complex, are fully specified by their source code and documentation, artifacts that Large Language Models (LLMs) can ingest to regenerate operator-specific table reading components without human-engineered parsing logic. Jailbreak leverages LLM-assisted code synthesis for database storage decoding, turning a traditionally opaque format into a directly queryable artifact. We evaluate Jailbreak on PostgreSQL and MySQL storage files, targeting analytical snapshot scenarios common in read replicas and offline processing pipelines. The generated reader produces Apache Arrow buffers consumable directly by most of the widely known query engines, including DuckDB, Apache Spark, and GPU-accelerated frameworks such as cuDF and Spark RAPIDS. We validate correctness against JDBC/ODBC-based baselines using the TPC-H benchmark across all query results, and demonstrate significant performance improvements in end-to-end analytical throughput, achieving up to 27x speedups. Our results showcase that LLM-assisted storage reader synthesis is a viable and generalizable methodology for breaking data lock-in across database systems, with applications beyond PostgreSQL and MySQL for any system whose file format is available to the LLM from documentation or source code.</summary>
+    <category term="cs.DB" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T17:55:00Z</published>
+    <arxiv:comment>To be presented at AIDB 2026 (co-located with VLDB)</arxiv:comment>
+    <arxiv:primary_category term="cs.DB"/>
+    <author>
+      <name>Victor Giannakouris</name>
+    </author>
+    <author>
+      <name>Immanuel Trummer</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07695v1</id>
+    <title>Institutional Red-Teaming: Deployment Rules, Not Just Models, Causally Shape Multi-Agent AI Safety</title>
+    <updated>2026-07-08T17:53:56Z</updated>
+    <link href="https://arxiv.org/abs/2607.07695v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07695v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>We introduce institutional red-teaming, an evaluation methodology for testing deployment rules in multi-agent AI: hold the agents, objectives, and task state fixed, vary only one rule, and attribute the resulting change in collective behavior to that rule. We instantiate the methodology in IABench-CA, a consequence-allocation benchmark spanning 228 contexts, five canonical rules, and seven model populations (33,924 games), with a normative cooperative reference and auto-labelled reasoning traces. Three findings emerge. (1) Deployment rules causally alter collective safety: changing only the consequence rule moves mean fatality by 22 to 58 percentage points within every population. (2) There is no safe default, but the targeting hazard is universal: the safest rule, the least-safe rule, and even the direction of the incidence effect vary across populations, yet regressive identity-targeting is never decisively safest in any context for any population, eliminates the least-resourced agent in 30-87% of games everywhere, and is selection-unsafe relative to the cooperative reference for all seven populations. (3) Identity salience is the mechanism: a one-shot anonymization ablation on the most exploitation-prone population (gpt-5.1) shows that merely naming the loss bearer in the rule text drives targeted elimination from 22% to 81% at identical payoffs; under repeated play, anonymization only delays the targeting, as agents re-infer the hidden rule from observed eliminations. We package the methodology as a safety-case workflow that certifies a provisional rule region $Φ(c,P)$ per deployment context and population, with explicit residual risks and monitoring obligations.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.GT" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.MA" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T17:53:56Z</published>
+    <arxiv:primary_category term="cs.AI"/>
+    <author>
+      <name>Yujiao Chen</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07693v1</id>
+    <title>Selective Timestep Weighting and Advantage-Based Replay for Sample-Efficient Diffusion RLHF</title>
+    <updated>2026-07-08T17:49:49Z</updated>
+    <link href="https://arxiv.org/abs/2607.07693v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07693v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Reinforcement learning from human feedback (RLHF) has emerged as a powerful paradigm for aligning generative models with human preferences. However, applying RLHF to diffusion models remains highly feedback inefficient, as existing approaches typically require large amounts of human or reward model evaluations. This limitation reduces the practicality of diffusion RLHF in realworld settings where feedback is the primary bottleneck. In this paper, we propose two complementary strategies that substantially improve the feedback efficiency of diffusion RLHF while preserving generalization to unseen prompts. Our key observation is that reward information in diffusion trajectories is unevenly distributed: not all denoising timesteps or trajectories contribute equally to learning from a reward signal. By emphasizing informative timesteps and trajectories during optimization, we obtain more effective gradient updates. First, we introduce a per-timestep weighting scheme that reweights denoising steps during policy optimization. We theoretically connect this weighting to the optimal convergence properties of proximal policy optimization (PPO) and approximate the resulting weighting trend empirically. Second, we introduce a replay mechanism that prioritizes informative trajectories, enabling the model to reuse past samples instead of repeatedly querying new rewards. Together, these strategies significantly improve the feedback efficiency of diffusion RLHF. Under identical hyperparameter settings, our approach achieves up to a 6$\times$ improvement in sample efficiency compared to widely used diffusion RLHF baselines.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CV" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T17:49:49Z</published>
+    <arxiv:comment>19 pages, 18 figures, 4 tables. Submission under review. A shorter, non-archival 4-page abstract version of this work was accepted to CVPR 2026 Workshops (GCV, CVEU)</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Eric Zhu</name>
+    </author>
+    <author>
+      <name>Abhinav Shrivastava</name>
+    </author>
+    <author>
+      <name>Soumik Mukhopadhyay</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07690v1</id>
+    <title>Agon: Competitive Cross-Model RL with Implicit Rival Grading of Reasoning</title>
+    <updated>2026-07-08T17:49:14Z</updated>
+    <link href="https://arxiv.org/abs/2607.07690v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07690v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Reinforcement learning from verifiable rewards (e.g. GRPO) is the engine behind today's reasoning models, yet it grades only the final answer. On hard problems this trains models to write more rather than to think better, since the trace itself is never graded and no label for good thinking exists. We introduce Agon, which makes two competing models each other's graders. Both attempt the same problem; in alternating roles, one drafts a solution and the other reads it while solving, and each is rewarded for out-solving the other. To win, a model must out-reason a rival that has seen its work, so reasoning is judged implicitly during training, with no process labels and no reward model. Because both models are optimized, each faces a progressively stronger rival, which single-model RL cannot provide. The two need only be comparably strong and behaviorally different. At inference the pair deploys as it trains, a two-stage cascade in which one model drafts and the other answers after reading the draft. On the hard split of DeepMath with Qwen3, this doubles GRPO's pass@1, roughly eight times the gain of an untrained Mixture-of-Agents pass over the same base. The ordering replicates on competitive-programming code and across model families (Qwen3.5, Gemma 4). For now the models talk in text; the next step is to let them reason together in latent space.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T17:49:14Z</published>
+    <arxiv:comment>15 pages, 7 figures, 8 tables</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Vladislav Beliaev</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07676v1</id>
+    <title>SkillCenter: A Large-Scale Source-Grounded Skill Library for Autonomous AI Agents</title>
+    <updated>2026-07-08T17:34:28Z</updated>
+    <link href="https://arxiv.org/abs/2607.07676v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07676v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Autonomous AI agents can execute complex tasks with limited human review, yet they often lack the grounded operational knowledge to make their outputs not just executable but correct, secure, and maintainable. We introduce SkillCenter, to our knowledge the largest open skill library for agents by total count: 216,938 structured skills across 24 domain bundles. A SkillGate-filtered pipeline contributes 114,565 source-grounded skills from peer-reviewed journals, ArXiv, and over 24,000 technical sources, integrated with 102,373 community skills from GitHub and the ClawHub marketplace. We present the end-to-end framework that builds the pipeline subset: multi-source acquisition, an LLM-based quality gate (SkillGate), template-driven generation, iterative source-grounding, and quality-controlled publishing. Source grounding is a traceability guarantee: each retained claim maps to an exact quotation in its source. All skills ship as offline-searchable SQLite FTS5 bundles.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T17:34:28Z</published>
+    <arxiv:comment>44 pages, 5 figures. Code: https://github.com/LabRAI/SkillCenter ; Data: https://huggingface.co/datasets/Tommysha/skillcenter-bundles</arxiv:comment>
+    <arxiv:primary_category term="cs.AI"/>
+    <author>
+      <name>Tianming Sha</name>
+    </author>
+    <author>
+      <name>Yue Zhao</name>
+    </author>
+    <author>
+      <name>Lichao Sun</name>
+    </author>
+    <author>
+      <name>Yushun Dong</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07669v1</id>
+    <title>DiaLLM: An Investigation into the Robustness-Generation Gap in English Dialect Adaptation</title>
+    <updated>2026-07-08T17:24:27Z</updated>
+    <link href="https://arxiv.org/abs/2607.07669v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07669v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Large language models increasingly \emph{understand} dialectal English, yet still \emph{produce} only standard, US-leaning English, leaving dialectal generation, the harder half of the problem, largely unaddressed. We introduce \textbf{DiaLLM}, which continually pretrains three open-weight language model families on the International Corpus of English and applies implicit and explicit post-training paradigms, each combined with three model alignment strategies, giving the first controlled comparison of these components across Australian, Indian, and Northern British English. Our results reveal that dialectal robustness and generation are \emph{dissociated}: benchmarks are shaped by continual pretraining and SFT, while alignment visibly reshapes generation in ways benchmarks do not capture. Explicit variety-targeted adaptation produces output reliably recognised as dialectal and preferred over broad alignment, yet the method that most aggressively optimises the dialectal reward is not preferred by human evaluators. Independent linguistic analysis corroborates this reward-quality gap, most clearly on two of the three families. No single alignment method dominates, and closing the gap will require richer reward designs and continued investment in dialectal resources. We release all code, checkpoints, and preference datasets.</summary>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T17:24:27Z</published>
+    <arxiv:primary_category term="cs.CL"/>
+    <author>
+      <name>Jordan Painter</name>
+    </author>
+    <author>
+      <name>Dipankar Srirag</name>
+    </author>
+    <author>
+      <name>Adarsh Kappiyath</name>
+    </author>
+    <author>
+      <name>Diptesh Kanojia</name>
+    </author>
+    <author>
+      <name>Aditya Joshi</name>
+    </author>
+    <author>
+      <name>Lu Yin</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07663v1</id>
+    <title>Recursive Self-Improvement in AI: From Bounded Self-Refinement to Autonomous Research Loops</title>
+    <updated>2026-07-08T17:19:50Z</updated>
+    <link href="https://arxiv.org/abs/2607.07663v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07663v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>AI systems increasingly participate in their own improvement: revising their outputs, adapting their own harnesses during deployment, training on data they generate, and, increasingly, conducting AI research itself. This literature is described under a vocabulary ("self-refine," "self-reward," "self-play," "self-evolve") that conflates fundamentally different ambitions. We survey 1,250 arXiv papers (2024-2026) along two axes: what the system improves -- its behavior in deployment, its policy through training, its evaluator, or the research process itself -- and the degree of loop closure (human-in-the-loop to fully closed). The taxonomy separates bounded self-refinement -- convergent, evaluable, and already industrial practice -- from open-ended recursive self-improvement (RSI), which remains bounded by grounding requirements, collapse dynamics, and compute constraints on every measured axis. Its distinctive feature is a dedicated category for self-evaluation: every improvement loop is a claim that some signal can substitute for human judgment. We survey the evaluator design space -- judges, process reward models, verifiers, rubrics, meta-evaluation -- order the signals into a verification hierarchy from formal verifiers (strongest) to intrinsic self-assessment (weakest), and observe that demonstrated self-improvement strength tracks this hierarchy, that its failure modes (self-confirming loops, model collapse, diversity collapse) follow from its violations, and that the "research direction-setting" bottleneck keeping humans in the loop sits at the top of that hierarchy. We connect the technical literature to the theory of RSI limits and to the safety and governance questions raised by frontier-lab accounts of closing the loop, and identify governance-grade measurement of self-improvement as the field's most underpopulated niche.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T17:19:50Z</published>
+    <arxiv:comment>42 pages, 6 figures</arxiv:comment>
+    <arxiv:primary_category term="cs.AI"/>
+    <author>
+      <name>Mingguang Chen</name>
+    </author>
+    <author>
+      <name>Licheng Wang</name>
+    </author>
+    <author>
+      <name>Bo Qu</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07646v1</id>
+    <title>RL Post-Training Builds Compositional Reasoning Strategies</title>
+    <updated>2026-07-08T17:04:42Z</updated>
+    <link href="https://arxiv.org/abs/2607.07646v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07646v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Does RL post-training merely amplify primitive skills already latent in a base model, or can it compose primitive skills into new higher-level strategies? We study this question in a fully observable rewrite-grammar environment where the pretraining distribution is known and every generated rewrite can be audited. A Transformer is pretrained on primitive symbol-rewrite chains and post-trained on a Trace-based reasoning task with only a binary final-answer reward. RL solves held-out problems that remain rarely solved by the pretrained model even under much larger sampling budgets, while rejection fine-tuning improves early but plateaus. Trace analysis shows that RL reorganizes primitive competence through a phased compositional mechanism: it first strengthens primitive reductions, then discovers valid composed procedures. These include sequential compositions, which collapse ordered chains of primitive contractions, and parallel compositions, which combine independent primitive contractions in a single step. The composed procedures are not isolated samples; they are reused and consolidated into a stable repertoire. Comparing RL with rejection fine-tuning shows that the key difference is not exploration volume but selectivity: RFT produces many shortcut-like rewrites, much of them invalid, whereas RL concentrates exploration into valid reusable structure. Pretraining ablations show that the emergence of compositional strategies is gated not by primitive exposure alone, but by whether pretraining organizes primitive competence into reduction procedures that RL can later compress. The base model provides weak procedural ingredients; RL builds them into reliable higher-level strategies.</summary>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CL" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T17:04:42Z</published>
+    <arxiv:comment>8 pages, 6 figures. Accepted to the 2nd Workshop on Compositional Learning at ICML 2026, Seoul, South Korea</arxiv:comment>
+    <arxiv:primary_category term="cs.AI"/>
+    <author>
+      <name>Azwar Abdulsalam</name>
+    </author>
+    <author>
+      <name>Nishil Patel</name>
+    </author>
+    <author>
+      <name>Andrew Saxe</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07640v1</id>
+    <title>ALER-TI: Aligned Latent Embedding Retrieval for Time Series Imputation</title>
+    <updated>2026-07-08T16:59:38Z</updated>
+    <link href="https://arxiv.org/abs/2607.07640v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07640v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Deep learning has significantly advanced time series imputation, yet most existing architectures primarily rely on localized temporal context within the corrupted input sequence. This reliance can be limiting in real-world scenarios, where time series often exhibit non-stationary dynamics, weak temporal correlations, and infrequent patterns that are difficult to reconstruct from nearby observations alone. In this paper, we propose ALER-TI, Aligned Latent Embedding Retrieval for Time Series Imputation, a retrieval-augmented framework that explicitly leverages historical patterns to supplement degraded local context for more reliable missing-value reconstruction. The core of ALER-TI is Latent Embedding Alignment (LEA), which mitigates the representation mismatch between corrupted queries and complete historical candidates. By applying post-hoc masking in the latent space, LEA aligns candidates with the query's missingness pattern while allowing historical embeddings to be pre-computed and cached for efficient retrieval. ALER-TI is model-agnostic and can be integrated with various imputation backbones through a lightweight adaptation module. Extensive experiments on six real-world datasets under different missing rates demonstrate that ALER-TI consistently improves strong baseline models and enhances robustness across diverse imputation settings.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T16:59:38Z</published>
+    <arxiv:comment>10 pages, 2 figures, 12 tables</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Xuan-Thong Truong</name>
+    </author>
+    <author>
+      <name>Trung-Kien Le</name>
+    </author>
+    <author>
+      <name>Tung Kieu</name>
+    </author>
+    <author>
+      <name>Thi-Thu Nguyen</name>
+    </author>
+    <author>
+      <name>Nhat-Hai Nguyen</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2607.07634v1</id>
+    <title>QCNN with Rough Path Signature Kernels</title>
+    <updated>2026-07-08T16:50:46Z</updated>
+    <link href="https://arxiv.org/abs/2607.07634v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2607.07634v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Time series analysis plays a vital role across a wide range of scientific and engineering domains but poses substantial computational challenges. A major difficulty arises from the time reparameterization invariance of time series data, which complicates the extraction of meaningful temporal features. In this work, we address the problem of time series classification by exploring the application of quantum computation techniques. We propose a hybrid quantum-classical architecture that integrates recent advances in quantum neural networks with the mathematical framework of path signatures, mitigating the impact of time reparametrization invariance. The architecture employs feature layers that compute a signature kernel between pairs of input paths, consisting of a reference path and a target path for classification, using either classical or quantum variational linear solvers (VQLS). These feature layers are followed by a Quantum Convolutional Neural Network (QCNN) to perform downstream learning tasks. We evaluate several realizations of the proposed architecture, differing in QCNN configurations, on a binary classification task involving time series representations of handwritten digits. Our experiments demonstrate the potential advantages of implementing path signature kernel layers within quantum circuits and provide an analysis of the computational limitations associated with the VQLS component.</summary>
+    <category term="quant-ph" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-07-08T16:50:46Z</published>
+    <arxiv:primary_category term="quant-ph"/>
+    <author>
+      <name>Leonardo Nogueira Falabella</name>
+    </author>
+    <author>
+      <name>Vasily Sazonov</name>
+    </author>
+  </entry>
+</feed>

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Corrections — AI Frontier Wire{% endblock %}
+
+{% block meta_description %}Every correction ever published to AI Frontier Wire, in full, permanently.{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for the Corrections list. Scoped to this page
+   * only, built entirely from site/static/css/tokens.css's existing
+   * custom properties -- matches the Frontier Board/Primer/Wire builders'
+   * own established "inline <style>, no new site-wide rules" convention.
+   * See IMPROVEMENT_BACKLOG.md.
+   */
+  .corrections-intro {
+    max-width: 38rem;
+  }
+
+  .corrections-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .correction-card {
+    max-width: 38rem;
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 1rem 1.25rem;
+    background: var(--color-panel);
+  }
+
+  .correction-card p {
+    margin: 0.5rem 0 0;
+  }
+
+  .correction-card p:first-child {
+    margin-block-start: 0;
+  }
+
+  .correction-card__meta {
+    opacity: 0.8;
+    font-size: 0.9rem;
+  }
+
+  .corrections-empty {
+    max-width: 38rem;
+    border: 1px dashed var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-block: 1.5rem;
+  }
+</style>
+
+<h1>Corrections</h1>
+<p class="corrections-intro">Every correction this site has ever
+  published, in full, permanently -- nothing is silently edited. See the
+  <a href="/method/">Method page</a> for how a claim gets checked before
+  it's ever published, let alone corrected.</p>
+
+{% if corrections %}
+<ul class="corrections-list">
+  {% for correction in corrections %}
+  <li class="correction-card">
+    <p><strong>Was:</strong> {{ correction.original_claim }}</p>
+    <p><strong>Now:</strong> {{ correction.corrected_claim }}</p>
+    <p><strong>Why:</strong> {{ correction.reason }}</p>
+    <p class="correction-card__meta">
+      Corrected {{ correction.corrected_at }} --
+      <a href="{{ correction.source_url }}">source</a>
+    </p>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="corrections-empty">{{ empty_message }}</p>
+{% endif %}
+
+{% endblock %}

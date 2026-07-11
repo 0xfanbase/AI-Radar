@@ -1,0 +1,123 @@
+{
+  "generated_at": "2026-07-09T05:37:31Z",
+  "topics": [
+    {
+      "daily_counts": [
+        0,
+        0,
+        0,
+        0,
+        3,
+        6,
+        1
+      ],
+      "topic": "models",
+      "trend": "accelerating"
+    },
+    {
+      "daily_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "topic": "research",
+      "trend": "flat"
+    },
+    {
+      "daily_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "topic": "chips/compute",
+      "trend": "flat"
+    },
+    {
+      "daily_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "topic": "policy",
+      "trend": "flat"
+    },
+    {
+      "daily_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
+      "topic": "products",
+      "trend": "accelerating"
+    },
+    {
+      "daily_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "topic": "safety",
+      "trend": "flat"
+    },
+    {
+      "daily_counts": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        0
+      ],
+      "topic": "open-source",
+      "trend": "accelerating"
+    },
+    {
+      "daily_counts": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
+      "topic": "China",
+      "trend": "accelerating"
+    },
+    {
+      "daily_counts": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "topic": "funding",
+      "trend": "flat"
+    }
+  ],
+  "window_days": 7
+}

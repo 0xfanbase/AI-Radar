@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}{{ entry.term }} — Lexicon — AI Frontier Wire{% endblock %}
+
+{% block meta_description %}{{ entry.one_liner }}{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for one Lexicon term page. Scoped to this page
+   * only, built entirely from site/static/css/tokens.css's custom
+   * properties plus the already-established `.chip`/`.one-liner`
+   * utilities from components.css -- no new site-wide stylesheet rules
+   * are introduced here. See IMPROVEMENT_BACKLOG.md.
+   */
+  .lexicon-term__deeper {
+    max-width: 38rem;
+  }
+
+  .lexicon-term__related,
+  .lexicon-term__seen-in {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .lexicon-term__back {
+    margin-block-start: 2rem;
+  }
+</style>
+
+<h1>{{ entry.term }}</h1>
+
+<p class="one-liner">{{ entry.one_liner }}</p>
+
+<p class="lexicon-term__deeper">{{ entry.deeper_html }}</p>
+
+<section aria-labelledby="lexicon-term-related-heading">
+  <h2 id="lexicon-term-related-heading">Related terms</h2>
+  {% if entry.related %}
+  <ul class="lexicon-term__related">
+    {% for rel in entry.related %}
+    <li>
+      {% if rel.slug %}
+      <span class="chip"><a href="/lexicon/{{ rel.slug }}/">{{ rel.term }}</a></span>
+      {% else %}
+      <span class="chip">{{ rel.term }}</span>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>No related terms recorded for this entry yet.</p>
+  {% endif %}
+</section>
+
+<section aria-labelledby="lexicon-term-seen-in-heading">
+  <h2 id="lexicon-term-seen-in-heading">Seen in</h2>
+  {% if entry.seen_in %}
+  <ul class="lexicon-term__seen-in">
+    {% for ref in entry.seen_in %}
+    <li><a href="{{ ref.href }}">{{ ref.card_id }}</a></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>{{ empty_seen_in_message }}</p>
+  {% endif %}
+</section>
+
+<p class="lexicon-term__back"><a href="/lexicon/">&larr; Back to the Lexicon</a></p>
+
+{% endblock %}

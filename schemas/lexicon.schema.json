@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://frontier-wire.example/schemas/lexicon.schema.json",
   "title": "Lexicon",
-  "description": "Top-level array of glossary entries (content/lexicon.json), spec sec-5 verbatim: [{term, one_liner, deeper, related[], seen_in[]}]. Phase 1 seeds data/lexicon.json = [] (empty) -- the 30-term backfill is Phase 3.",
+  "description": "Top-level array of glossary entries (content/lexicon.json), spec sec-5 verbatim: [{term, one_liner, deeper, related[], seen_in[]}]. Phase 1 seeds content/lexicon.json = [] (empty; relocated from data/lexicon.json in the content/-vs-data/ migration -- see IMPROVEMENT_BACKLOG.md) -- the 30-term backfill is Phase 3.",
   "type": "array",
   "items": {
     "type": "object",
