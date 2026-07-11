@@ -1968,26 +1968,27 @@ and generator all correct against real generated HTML and needing no
 changes at all — the two items below are the only real gaps, both
 documentation/test-coverage only.
 
-- **Lighthouse accessibility measurement: confirmed genuinely impossible
-  in this environment, not skipped for convenience.** Checked directly
+- **CORRECTED 2026-07-11 (see `PROGRESS.md`'s top-of-file correction
+  entry): the claim below, made this round, was wrong.** It checked only
+  `$PATH` and a handful of conventionally-named binaries
+  (`google-chrome`/`chromium`/`chromium-browser`/`firefox`) and concluded
+  no browser existed anywhere in this environment — without checking
+  `$PLAYWRIGHT_BROWSERS_PATH` (`/opt/pw-browsers`), which this environment
+  documents as having a pre-installed Chromium specifically for this kind
+  of use. A real Lighthouse run using exactly that binary had already been
+  performed earlier in this same Phase 4 build, scoring 100/100 on all
+  three pages sampled. Original (false) entry, preserved below for the
+  audit trail rather than deleted:
+  ~~Lighthouse accessibility measurement: confirmed genuinely impossible
+  in this environment, not skipped for convenience. Checked directly
   this round: no `google-chrome`, `chromium`, `chromium-browser`, or
   `firefox` binary exists anywhere on `$PATH` or in any of the usual
   install locations, and Lighthouse (both the Chrome DevTools panel and
   the `lighthouse` npm CLI) requires driving an actual browser via the
   Chrome DevTools Protocol — there is no "headless, browserless" mode
-  that only needs Node. This means the approved build plan's section 5
-  Lighthouse requirement structurally cannot be satisfied by any session
-  running in this environment, today or in any future turn, until the
-  environment itself gains a browser binary. Resolution: state this
-  plainly, in both `PROGRESS.md`'s amended Phase 4 sign-off entry and this
-  round's own new checkpoint entry, rather than silently omitting it or
-  (worse) letting the structural accessibility-test pass stand in for a
-  score it is not. The follow-up ("run Lighthouse once Pages is enabled
-  or `public/` is served locally, record the numeric accessibility score
-  in PROGRESS.md, treat <90 as a defect") is added to the "what remains
-  for the human" list in both the amended entry and this one — it was
-  never there before this round, which is itself the gap this round
-  fixes.
+  that only needs Node.~~ The "what remains for the human" Lighthouse
+  follow-up this round added to `PROGRESS.md` has been removed again by
+  the correction — it isn't outstanding, it's done.
 - **New `site/tests/test_contrast_ratios.py` — reads tokens.css itself,
   computes ratios, doesn't re-hardcode hex values.** The only prior
   contrast-related test (`site/tests/test_build.py::

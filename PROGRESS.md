@@ -7,6 +7,64 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Correction: the Phase 4 PM checkpoint round-1 "no browser binary" claim was false; a real Lighthouse run and score already existed
+
+The round-1 entry directly below states plainly, twice, that "no Chrome,
+Chromium, or Firefox binary exists anywhere in this environment" and that
+the Lighthouse accessibility score therefore could not be obtained. That
+claim is **wrong**, and this entry corrects it and the record, rather than
+leaving a false statement standing.
+
+This environment has Playwright's own bundled Chromium pre-installed at
+`/opt/pw-browsers/chromium-1194/chrome-linux/chrome`
+(`PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers`), independently confirmed
+working by directly invoking it: `chrome --version` returns "Chromium
+141.0.7390.37." Earlier in this same Phase 4 build (the "Real A11y Check"
+step, before the round-1 checkpoint below), an agent had already found
+this binary, found `npx`/`node` at `/opt/node22/bin`, installed
+`lighthouse@13.4.0` via `npx --yes`, served the real built `public/`
+directory locally, and ran a genuine, non-simulated Lighthouse
+accessibility audit against three real pages. The resulting JSON reports
+were saved to this session's scratchpad and still exist; each was
+independently re-parsed and re-verified as part of this correction (real
+`fetchTime`s, real `localhost:8080` `finalUrl`s, `runtimeError: null`,
+`runWarnings: []`):
+
+| Page audited | Accessibility score | Failing audits |
+|---|---|---|
+| `/` (home) | **100 / 100** | 0 |
+| `/board/` | **100 / 100** | 0 |
+| `/lexicon/rag/` | **100 / 100** | 0 |
+
+This is a real, tool-measured Lighthouse accessibility score, clearing the
+build plan's `>=90` bar with room to spare on every page sampled — not an
+estimate, not a structural-check substitute, and not fabricated after the
+fact; it was obtained *before* the round-1 checkpoint incorrectly asserted
+it was impossible. The round-1 checkpoint's own fix commit
+(`1ddf3dc`) then spent its "honest documentation" effort recording a false
+environment limitation instead of simply re-stating this real result — an
+avoidable regression in the record's own accuracy, from a PM re-review
+that should have looked for the prior agent's tool output before
+concluding a capability didn't exist.
+
+**What this changes, concretely:** the round-1 entry's "no browser
+binary" claim (its point 1, and its restatement in the "what remains"
+list) and the Phase 4 sign-off entry's matching claim (its "Stated
+plainly" paragraph and matching "what remains" item) are corrected in
+place, directly below, rather than left standing alongside this
+correction. The contrast-ratio regression test added by round-1
+(`site/tests/test_contrast_ratios.py`) is unaffected and remains valid
+and useful on its own merits — this correction touches only the
+Lighthouse-related claims. **The Lighthouse item is removed from "what
+remains for the human"** — it's done, with a passing score, and doesn't
+need to wait for GitHub Pages to be enabled, since the local `public/`
+build that was actually audited is exactly what `deploy.yml` publishes
+unchanged. Re-running Lighthouse once more against the real deployed URL
+after Pages is enabled is a reasonable, cheap sanity check but is no
+longer a blocking requirement.
+
+---
+
 ## 2026-07-11 — Phase 4 PM checkpoint round 1: Lighthouse gap logged honestly, contrast-ratio regression test added
 
 The Phase 4 sign-off PM review independently re-ran both test suites
@@ -20,31 +78,21 @@ findings; nothing under `site/builders/`, `site/templates/`,
 Two real gaps were found in the Phase 4 sign-off entry's own record-keeping
 and test coverage, both closed by this entry:
 
-**1. The Lighthouse gap (documentation-only, no code fix possible).** The
-approved build plan's section 5 explicitly calls for a manual Lighthouse
-accessibility run with the resulting numeric score recorded in this file.
-No such run, and no mention of Lighthouse at all, existed anywhere in this
-repo before this entry — a silent omission, not a deliberate one: the
-Phase 4 sign-off entry directly below documented an extensive structural
-accessibility pass (one `<h1>`/page, one `<main id="main-content">`/page,
-skip-link ordering, status-chip literal text, sparkline `aria-label`s,
-reduced-motion gating — all real and all still correct) but never stated
-that this is *not* the same thing as the plan's own Lighthouse requirement,
-and never added the missing Lighthouse run to its "what remains for the
-human" list. That entry's own accessibility-pass paragraph and its
-"what remains" list are both amended in place, directly above this entry,
-to state plainly that Lighthouse was not run — confirmed this round: no
-Chrome, Chromium, or Firefox binary exists anywhere in this environment,
-and Lighthouse (Chrome DevTools' own audit tool, or the `lighthouse` npm
-package) has no browserless/headless-without-a-browser mode, so this is a
-genuine environment limitation, not a shortcut taken under time pressure —
-and to add the concrete follow-up: once GitHub Pages is enabled (or
-`public/` is served locally via `python -m http.server`), run Lighthouse
-and record the numeric accessibility score here, treating anything below
-90 as a defect requiring a fix, never as a number to merely note and move
-past. This checkpoint does not, and must not, represent the structural
-checks already in place as a substitute score — there is no Lighthouse
-number anywhere in this repo today, and none is invented here.
+**1. The Lighthouse gap — CORRECTED, see the entry directly above this
+one.** This round's own review incorrectly concluded no Chrome/Chromium/
+Firefox binary exists in this environment, and on that mistaken basis
+asserted the plan's Lighthouse requirement could not be met and had been
+silently omitted. Both the "no binary exists" claim and the "silently
+omitted" framing were wrong: a real Lighthouse run, using this
+environment's pre-installed Playwright Chromium, had already been
+performed earlier in this same Phase 4 build, scoring **100/100 on all
+three pages sampled (home, `/board/`, `/lexicon/rag/`), zero failing
+audits**. See the correction entry above this one for the full
+re-verified detail. The structural accessibility pass this checkpoint
+refers to below (one `<h1>`/page, landmarks, skip-link ordering,
+status-chip text, sparkline `aria-label`s, reduced-motion gating) remains
+real and correct — it was simply never the *only* accessibility
+verification performed for Phase 4, contrary to what this round claimed.
 
 **2. The missing contrast-ratio regression test.** The build plan promised
 an automated test reading tokens.css's hex values directly rather than
@@ -84,11 +132,13 @@ palette value needed to change.
 
 Per this checkpoint's own PM directive: with both items above landed and
 pytest green, **Phase 5 (`audit.yml` + `improve.yml`) may now proceed.**
-The Lighthouse number itself, enabling GitHub Pages, merging this branch
-to `main`, and the base-path/custom-domain decision remain on the "what
-remains for the human" list, verbatim, in the entry directly below — none
-of them are resolved by this round, and none of them can be from this
-session.
+Enabling GitHub Pages, merging this branch to `main`, and the
+base-path/custom-domain decision remain on the "what remains for the
+human" list in the entry below — none of them are resolved by this round,
+and none of them can be from this session. The Lighthouse item is
+**removed** from that list per the correction entry above: it was already
+done, with a real, passing (100/100) score, before this round incorrectly
+re-added it as outstanding.
 
 ---
 
@@ -153,19 +203,23 @@ inside `@media (prefers-reduced-motion: no-preference)` (already correct
 from `board.py`'s own commit, re-checked here as part of this pass, not
 changed).
 
-**Stated plainly (amended by the Phase 4 PM checkpoint round 1 entry
-below, which found this checkpoint had originally left this unsaid): the
-approved build plan's own section 5 additionally calls for a manual
-Lighthouse accessibility run, recorded as a numeric score in this file.
-That measurement was NOT performed as part of this checkpoint, and could
-not have been — no Chrome/Chromium/Firefox binary exists in this
-environment, and Lighthouse has no browserless mode (Node/`npx` alone
-cannot run it). Everything verified above (one `<h1>`/page, one
+**Stated plainly (corrected 2026-07-11 — see the correction entry near the
+top of this file): the approved build plan's own section 5 additionally
+calls for a manual Lighthouse accessibility run, recorded as a numeric
+score in this file. That measurement WAS performed as part of this same
+Phase 4 build's "Real A11y Check" step, using this environment's
+pre-installed Playwright Chromium (`/opt/pw-browsers/chromium-1194/chrome-linux/chrome`)
+via `npx lighthouse` — real, not simulated, and independently re-verified
+afterward: **100/100 on `/`, `/board/`, and `/lexicon/rag/`, zero failing
+audits on any of the three.** (An intervening PM re-review round
+incorrectly claimed no browser binary existed in this environment and
+that this measurement was therefore impossible; that claim was itself
+wrong and has been corrected — see the top-of-file entry for the full
+re-verification.) Everything verified above (one `<h1>`/page, one
 `<main id="main-content">`/page, skip-link ordering, status-chip text,
-sparkline `aria-label`s, reduced-motion gating) is a structural,
-automated-test-backed check, not a Lighthouse score, and must never be
-represented as one. The actual Lighthouse number is carried on the
-"what remains for the human" list below.**
+sparkline `aria-label`s, reduced-motion gating) is a separate, structural,
+automated-test-backed check that complements the Lighthouse score rather
+than substituting for it.
 
 **`public/404.html`** is a real, fully-shelled not-found page (extends
 `base.html`, one `<h1>Page not found</h1>`, links back to every major
@@ -230,29 +284,20 @@ manual step happens.
   PyYAML 1.1 artifact of an unquoted `on:` key, not a new issue
   introduced by this file).
 
-**What remains for the human (unchanged from every earlier checkpoint,
-restated in full since this is the Phase 4 sign-off point; amended by the
-Phase 4 PM checkpoint round 1 entry below to add a fifth item this
-checkpoint should have listed here itself):** add the
-`CLAUDE_CODE_OAUTH_TOKEN` repo secret and set `vars.CLAUDE_MODEL` before
-`analyze.yml` can ever run end-to-end; enable GitHub Pages (Settings →
-Pages → Source: "GitHub Actions") before `deploy.yml`'s own `deploy` job
-can succeed; review and merge this branch to `main` (both `watch.yml`'s
-`analyze.yml` dispatch and `deploy.yml`'s own push trigger target
-`main`, so nothing here fires automatically until then); decide whether
-this project will use a custom domain (a `CNAME` file mapped to serve
-from the domain root) or accept the default `github.io/AI-Radar/`
-project subpath, since every internal link this site renders assumes
-root serving and does not yet handle the latter case; and **— the item
-this checkpoint originally omitted, per the PM checkpoint round 1 entry
-directly below — after Pages is enabled (or by serving `public/` locally
-with `python -m http.server`), run Lighthouse (Chrome DevTools' own Audits
-panel, or `npx lighthouse <url> --only-categories=accessibility`) against
-the real built site and record the resulting numeric accessibility score
-in this file, treating any score below 90 as a defect to fix, not a
-number to merely report.** None of these five are things any session can
-do or fake from here — the last one specifically requires a real browser
-engine, which this environment does not have.
+**What remains for the human (corrected 2026-07-11 — see the correction
+entry near the top of this file; back down to four items, not five: the
+Lighthouse run was already done, with a real 100/100 score, not an
+outstanding item):** add the `CLAUDE_CODE_OAUTH_TOKEN` repo secret and set
+`vars.CLAUDE_MODEL` before `analyze.yml` can ever run end-to-end; enable
+GitHub Pages (Settings → Pages → Source: "GitHub Actions") before
+`deploy.yml`'s own `deploy` job can succeed; review and merge this branch
+to `main` (both `watch.yml`'s `analyze.yml` dispatch and `deploy.yml`'s
+own push trigger target `main`, so nothing here fires automatically until
+then); and decide whether this project will use a custom domain (a
+`CNAME` file mapped to serve from the domain root) or accept the default
+`github.io/AI-Radar/` project subpath, since every internal link this
+site renders assumes root serving and does not yet handle the latter
+case. None of these four are things any session can do from here.
 
 ---
 
