@@ -161,7 +161,7 @@ def test_svg_has_title_element_stating_the_trend():
     assert "falling" in title_el.text
 
 
-def test_svg_has_polyline_using_signal_cyan():
+def test_svg_has_polyline_using_signal_green():
     result = spark.render_sparkline("models", [0, 0, 0, 0, 3, 6, 1])
     root = _parse_svg(result.svg)
     polyline = root.find(f"{SVG_NS}polyline")
