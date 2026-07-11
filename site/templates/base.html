@@ -7,9 +7,15 @@
   <meta name="description" content="{% block meta_description %}A fact-checked daily wire of frontier AI news, a living tracker of frontier models, and a plain-English glossary.{% endblock %}">
   <link rel="stylesheet" href="/static/css/tokens.css">
   <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/matrix.css">
+  <link rel="stylesheet" href="/static/css/matrix-tiles.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
+
+  {% if matrix_rain_columns is defined and matrix_rain_columns %}
+  {% include "_matrix_rain.html" %}
+  {% endif %}
 
   <header class="masthead">
     <div class="container masthead__inner">

@@ -18,8 +18,8 @@ survives both without color vision and without sight:
   falling", "(right arrow) flat") right next to the polyline, for sighted
   users who never touch the accessible-name machinery at all.
 
-The polyline itself is drawn in the site's signal-cyan accent color
-(``tokens.css``'s ``--color-signal-cyan``, hardcoded here as its resolved
+The polyline itself is drawn in the site's signal-green accent color
+(``tokens.css``'s ``--color-signal-green``, hardcoded here as its resolved
 hex value since this module has no CSS custom-property access -- see
 IMPROVEMENT_BACKLOG.md), but the color is only ever a reinforcing visual
 cue on top of the two textual statements above, never the sole carrier of
@@ -32,12 +32,12 @@ from typing import Sequence
 from xml.sax.saxutils import escape as xml_escape
 from xml.sax.saxutils import quoteattr as xml_quoteattr
 
-# Mirrors tokens.css's --color-signal-cyan (#43E5C4). This module cannot
+# Mirrors tokens.css's --color-signal-green (#39FF6E). This module cannot
 # read the CSS custom property directly (it emits plain SVG markup, not a
 # templated fragment with access to the stylesheet cascade), so the hex
 # value is duplicated here deliberately -- spec-silent judgment call,
 # logged in IMPROVEMENT_BACKLOG.md.
-SIGNAL_CYAN = "#43E5C4"
+SIGNAL_GREEN = "#39FF6E"
 
 MAX_DAILY_COUNTS = 7
 
@@ -174,10 +174,10 @@ def render_sparkline(
         'class="sparkline">'
         f"<title>{xml_escape(label)}</title>"
         f'<polyline points="{points}" fill="none" '
-        f'stroke="{SIGNAL_CYAN}" stroke-width="2" '
+        f'stroke="{SIGNAL_GREEN}" stroke-width="2" '
         'stroke-linecap="round" stroke-linejoin="round" />'
         f'<text x="{pad}" y="{height + 13}" class="sparkline__trend" '
-        f'font-size="11" fill="{SIGNAL_CYAN}">'
+        f'font-size="11" fill="{SIGNAL_GREEN}">'
         f"{xml_escape(glyph)} {xml_escape(trend)}</text>"
         "</svg>"
     )

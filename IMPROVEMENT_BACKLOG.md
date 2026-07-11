@@ -3574,3 +3574,406 @@ occupy. Logged here rather than silently expanding scope, since a future
 pass may reasonably decide `inference` should be fixed too for the same
 non-expert-reader rationale (the surname "Pope" is just as opaque as
 "Shazeer" was in the MoE entry this pass did fix).
+
+## Matrix-theme palette swap + `signal-cyan` -> `signal-green` token rename (T1, 2026-07-11)
+
+Replaced every hex value in `site/static/css/tokens.css`'s `:root` block
+with the pre-verified Matrix-green palette (`bg` #000000, `panel`
+#04120A, `hairline` #0E3320, `ink` #8FE3A8, the renamed signal token
+#39FF6E, `star-white` #D8FFE4, `reported-amber` #E8B23D, `corrected-red`
+#FF5C4D) and refreshed the header comment's contrast-ratio table to the
+real, pre-computed WCAG numbers (all text-role tokens 6.89:1 or higher
+against both `bg` and `panel`; `hairline` correctly stays sub-AA at
+1.51:1 / 1.38:1, border-only). `site/tests/test_contrast_ratios.py`
+parses `tokens.css` live and re-grades whatever palette is present, so no
+test hardcodes these numbers a second time.
+
+Judgment call, spec-silent (decision made, not left open): renamed
+`--color-signal-cyan` to `--color-signal-green` in the same commit,
+rather than keeping the old name with a new (now green, not cyan) value.
+First grepped actual usage to size the blast radius before deciding: the
+token appears in exactly two CSS declarations in `components.css` (link
+color, one-liner color, focus-ring outline, `.chip--confirmed`,
+`.wire-card__why` left rule -- five `var()` references total across that
+one file), one inline style in `board.html` (the pulse-dot background),
+a hardcoded duplicate hex in `site/lib/svg_sparkline.py`
+(`SIGNAL_CYAN`/now `SIGNAL_GREEN`), and prose-only mentions in
+`tokens.css`'s own header comment, `card.html`'s template comments,
+`matrix_rain.py`'s docstring, and two test files
+(`test_contrast_ratios.py`, `test_build.py`). That's a small, fully
+enumerated surface -- every reference was found by `grep -rn
+"signal-cyan" site/` and renamed in the same pass, so there is no
+lingering mix of old and new names anywhere in `site/`. Renaming now
+matches this project's own established bias (flagged repeatedly in
+earlier PM checkpoints in this file) that a token's name should describe
+what it actually holds -- `signal-cyan` describing a color that is now
+unambiguously green would itself be exactly the kind of name/meaning
+drift this project's audits treat as a real bug, and it only gets harder
+to justify renaming later as more templates/CSS accumulate references to
+it. The token's *role* (link/accent color, one-liner color, `chip--
+confirmed`, and -- unchanged -- the site's one and only focus-ring color)
+is untouched; only its name and hex value changed.
+
+Also fixed the one already-logged hardcoded-hex duplicate
+(`site/lib/svg_sparkline.py`'s `SIGNAL_CYAN` constant, renamed to
+`SIGNAL_GREEN` with the new hex, since this module emits raw SVG with no
+CSS custom-property access) and confirmed via `grep -rnoE
+"#[0-9A-Fa-f]{6}" site/ --include="*.py" --include="*.css"
+--include="*.html" | grep -v tokens.css` that no *other* module has a
+similar undocumented duplicate -- the only hex literals outside
+`tokens.css` are that one documented constant and literal expected-value
+assertions inside the test files themselves, both already accounted for.
+
+`site/lib/matrix_rain.py` (the deterministic zero-JS digital-rain SVG
+tile generator this same palette work builds toward) was already
+complete and untouched apart from one docstring mention of the renamed
+token; it is not yet wired into any template/`generate.py`/`matrix.css`
+-- that integration is explicitly a separate task, not part of this
+## Opaque chrome backgrounds ahead of the rain layer (T2, 2026-07-11)
+
+Added `background: var(--color-bg);` to `.masthead`, `.site-footer`, and
+`main` in `site/static/css/components.css`, plus a short invariant
+comment above `main` explaining why: the upcoming fixed rain layer
+(`site/static/css/matrix.css`, `position: fixed; inset: 0; z-index: -1`,
+next task) paints above the body's own background but below any in-flow
+element with its own background, so any text-bearing chrome surface left
+transparent would have moving rain scrolling behind its text. Every
+wire-card/board/lexicon/primer/method/corrections/moving panel already
+sets its own `background: var(--color-panel)` in its template's inline
+`<style>` (verified by inspection before making this change, per the
+task brief), and `.skip-link` already had `var(--color-panel)`, so
+neither needed touching here.
+
+Judgment call, spec-silent but flagged explicitly by the task brief to be
+logged either way: at 375px, `.container` (main's own class, max-width
+40rem) is full viewport width, so main's new opaque background covers the
+entire visible page and the rain effect will be essentially invisible on
+phones -- only wider viewports show it in the gutters either side of the
+reading column. Kept it this way rather than, say, leaving a narrow
+transparent margin on mobile or lowering main's opacity to let a hint of
+rain show through: readability of the actual reading column must never be
+put at risk for ambience, on any viewport size, and the rain effect is
+explicitly a progressive-enhancement flourish for wider screens, not a
+core feature mobile readers need to see. No hex literals were added --
+`var(--color-bg)` is the only new declaration in all three rules, and a
+new regression test (`site/tests/test_build.py`,
+`test_masthead_site_footer_and_main_have_opaque_token_backgrounds` /
+`test_components_css_has_no_hardcoded_hex_colors`) parses the real built
+`components.css` to hold both of those invariants going forward instead
+of relying on manual review alone.
+palette-and-rename sweep.
+
+## Wiring the digital-rain layer into every page (T3, 2026-07-11)
+
+Wired `site/lib/matrix_rain.py` (already complete, untouched) into
+`site/generate.py`, a new `site/templates/_matrix_rain.html` partial, and a
+new `site/static/css/matrix.css`, hooked into `base.html` right after the
+skip-link. Two judgment calls, spec-silent in the letter of the task brief
+but flagged there to be logged either way:
+
+1. **`env.globals` for the rain data, not a parameter threaded through
+   `render_pages()`/every builder.** The task brief itself already argues
+   for this (a site-wide visual theme is a genuinely global concern, unlike
+   the since-revisited `masthead_sparklines` global scoped to one page), so
+   this isn't really a fresh judgment call so much as confirmation: verified
+   by inspection that every one of the seven page builders
+   (`site/builders/*.py`) constructs its own standalone `StrictUndefined`
+   Jinja environment for its own tests, with no `site/generate.py` globals
+   present at all -- so the `{% if matrix_rain_columns is defined and
+   matrix_rain_columns %}` guard in `base.html` (mirroring the existing
+   `masthead_sparklines` guard) is load-bearing, not decorative: it is the
+   only reason all 263+ builder-level tests stay green without any of them
+   needing to fake this global in. Confirmed this holds after the change --
+   `python -m pytest site/tests` is green with zero builder-test edits.
+
+2. **`write_matrix_tiles_css()` writes into `public_dir` directly (a build
+   output path), not into `site/static/css/` (a source path).** The task
+   brief specifies this ordering explicitly (after `copy_static()`, which
+   `rmtree()`s and recopies `public/static/` from `site/static/`, so writing
+   the generated tiles file into the source tree first would just get
+   copied over needlessly and -- worse -- would leave a build artifact
+   sitting in version control if ever accidentally `git add`ed). Chose to
+   also *not* add `public/static/css/matrix-tiles.css` to `.gitignore`
+   explicitly, since `public/` as a whole is already gitignored wholesale
+   (confirmed via `git status --short` showing no `public/` entries
+   throughout this task) -- a redundant explicit ignore rule would be dead
+   weight.
+
+No new hardcoded hex values anywhere in this task: `site/generate.py`'s new
+`read_color_token()` is the only place a token hex is read, straight out of
+the real `tokens.css`, and `matrix.css` is verified (new regression test,
+`site/tests/test_build.py::test_matrix_css_has_no_hardcoded_hex_colors`) to
+contain zero color literals of its own -- the glyph color lives only inside
+the SVG tiles `matrix_rain.py` already builds from that same read value.
+Also added a regression test asserting `matrix.css`'s only `animation`/
+`@keyframes` declarations live inside
+`@media (prefers-reduced-motion: no-preference)`, matching `board.html`'s
+pulse-dot convention exactly, plus whole-site integration tests (via the
+existing `built_site` fixture) that the rain layer's `aria-hidden="true"`
+wrapper renders on every one of the site's 39 generated pages, right after
+the skip-link and before the masthead, with no inline `animation:` or
+inlined `data:` URI in the per-page HTML itself (those live in
+`matrix.css` / `matrix-tiles.css` respectively, not duplicated per-page).
+
+## Regression tests for the rain layer: a by-path-loader wrinkle `site/generate.py` doesn't hit (T4, 2026-07-11)
+
+New `site/tests/test_matrix_rain.py` loads `site/lib/matrix_rain.py` by
+explicit file path, the same convention every cross-file reference within
+`site/` already uses (`site/` is deliberately never an importable package
+-- see `test_build.py::_load_generate_module`'s own docstring). The task
+brief asked for this to work "exactly like `test_build.py`'s
+`_load_generate_module`", but that function's minimal
+`spec_from_file_location` + `module_from_spec` + `exec_module` sequence
+(with no `sys.modules` registration) actually fails for `matrix_rain.py`
+specifically: `AttributeError: 'NoneType' object has no attribute
+'__dict__'` inside `dataclasses._process_class`, because
+`matrix_rain.py`'s `RainColumn` combines `@dataclass` with `from
+__future__ import annotations`, and dataclasses' own annotation
+resolution looks up `sys.modules[cls.__module__]`, which isn't populated
+yet at that point without the registration step. `generate.py`'s own
+`_load_module_by_path` already documents and handles exactly this (it
+registers `sys.modules[spec.name] = module` before calling
+`exec_module()`, specifically because several `site/builders/*.py`
+modules hit the same combination) -- `generate.py` itself just never
+needed the workaround for its own module because `generate.py` has no
+dataclass of its own. The judgment call: rather than treat the task
+brief's "exactly like `_load_generate_module`" as requiring the literal
+no-registration sequence, the test loader here follows
+`_load_module_by_path`'s (already-established, already-documented)
+sys.modules-registration pattern instead, since that is the actual
+precedent this repo uses whenever the loaded-by-path module needs it --
+confirmed by re-running `python -m pytest site/tests`, which fails to even
+collect without the registration line and passes cleanly with it.
+
+## Documenting the Matrix theme: PROGRESS.md top entry + this log (T5, 2026-07-11)
+
+Docs-only task, no code touched. Wrote the reverse-chronological
+`PROGRESS.md` top entry summarizing T1-T4 and re-ran all four
+verification commands fresh rather than copying the numbers T1-T4's own
+commits already reported (`python -m pytest` 709 passed / 2 deselected;
+`python -m pytest site/tests` 290 passed; `python site/generate.py` clean
+build; `grep -r "<script" public/` empty) -- they matched, which is itself
+worth recording as a confirmation that nothing drifted between T4's
+commit and this one. Five judgment calls, logged individually per the task
+brief even though most of them just restate decisions already made and
+reasoned through in T1-T2's own entries above:
+
+- **(a) The `signal-cyan` -> `signal-green` rename, restated with its
+  measured blast radius.** Reaffirming T1's decision: before renaming,
+  grepped the live footprint and found it small and fully enumerable --
+  five `var()` references in `components.css`, one inline style in
+  `board.html`, one hardcoded hex duplicate in `svg_sparkline.py`, and a
+  handful of prose-only mentions in `tokens.css`'s header comment,
+  `card.html`'s template comments, `matrix_rain.py`'s docstring, and two
+  test files. That size (not "many dozens of call sites scattered across
+  the templates") is what made an atomic rename-everywhere-at-once the
+  right call instead of a deprecate-then-migrate approach. Historical
+  mentions of the old `signal-cyan` name inside `PROGRESS.md` and this
+  file's own earlier entries (e.g. the Phase 4 palette-selection entry,
+  and `test_contrast_ratios.py`'s own docstrings quoted verbatim in past
+  entries) were deliberately left untouched -- they describe what was true
+  *at the time those entries were written*, and rewriting history in a
+  reverse-chronological build log to match the present would itself be
+  the kind of silent drift this project's audits exist to catch. Only
+  live code/CSS/template/test references were renamed; the paper trail
+  documenting the old name was not.
+- **(b) Rain tuning choices, restated for the doc record.** `opacity: 0.15`
+  on `.matrix-rain` was chosen inside the deliberate 0.12-0.18 "ambient"
+  band -- high enough to actually read as a Matrix-style rain effect in
+  the desktop gutters, low enough that it can never compete with
+  foreground text contrast (the opaque chrome backgrounds from T2 are the
+  hard guarantee; this opacity choice is the softer, purely aesthetic
+  second layer of the same "never fight the reader" principle). Every one
+  of `site/lib/matrix_rain.py`'s own defaults was kept as-is (`seed=1337`,
+  `tile_count=10`, `glyphs_per_tile=44`, `column_count=72`,
+  `min_duration_s=9.0`, `max_duration_s=23.0`) -- that module was already
+  built, tested, and explicitly called out as complete in the task brief,
+  so re-tuning any of those numbers here would have been scope creep with
+  no reported problem to justify it.
+- **(c) The mobile trade-off, restated for the doc record.** Because
+  `.masthead`, `.site-footer`, and `main` are all opaque (T2) and `main`'s
+  `.container` is full viewport width at the site's 375px-clean baseline,
+  the rain is effectively invisible on phones -- visible only in the
+  gutters either side of the reading column on wider viewports. This is
+  the deliberate outcome T2 already chose (readability over ambience, on
+  every viewport, always) rather than a defect discovered here. Logging a
+  future candidate: a narrower-viewport tuning pass (e.g. a thin
+  translucent margin strip on mobile, or a very-low-opacity rain hint
+  bleeding through `main` itself below some minimum contrast floor) could
+  bring some ambience to phone readers without touching the opaque
+  guarantee for the actual text columns -- not attempted here, no reported
+  need for it, and any such change would need its own contrast
+  re-verification against `test_contrast_ratios.py`.
+- **(d) `matrix-tiles.css` as a build-generated static asset, not an
+  inline per-page `<style>` block.** Two reasons, both already implicit in
+  T3's own design but worth stating explicitly for the doc record: (1) the
+  10 unique SVG data-URI tiles are sizeable (the full generated file is
+  roughly 75KB); emitting them once into a single cached, browser-cachable
+  stylesheet that every one of the site's 39 generated pages links to
+  costs far less total bytes-over-the-wire across a real visit than
+  duplicating all 10 tiles inline into every single page's own `<head>`
+  (which would multiply that ~75KB by 39). (2) `generate.py`'s existing
+  `apply_base_path()` pass only ever rewrites literal `href="/`/`src="/`
+  prefixes in rendered HTML output -- it has no reason to, and does not,
+  reach into embedded `data:` URIs, so keeping the tiles in their own
+  linked stylesheet (referenced via a normal `href`) means they ride along
+  with every other static asset's existing base-path handling for free,
+  rather than requiring a new carve-out inside `apply_base_path()` to avoid
+  it accidentally mangling a `data:` URI it was never meant to touch.
+- **(e) Updating the standing `svg_sparkline.py` hardcoded-hex entry
+  above (originally logged around the Phase 4 sparkline commit, now
+  around line 1289 of this file).** That entry's constant is the same one
+  T1's rename swept: `SIGNAL_CYAN = "#43E5C4"` is now `SIGNAL_GREEN =
+  "#39FF6E"`, still hand-maintained in lockstep with `tokens.css` for the
+  same reason that original entry gave (this module emits raw SVG with no
+  CSS cascade access). What's new since that entry was written:
+  `site/generate.py` now has `read_color_token()`, a small,
+  already-tested function that parses a named `--color-*` custom property
+  straight out of the live `tokens.css` (built for `matrix_rain.py`'s own
+  color input in T3). That function lives in `site/generate.py`, not
+  `site/lib/`, and `svg_sparkline.py` is called from builder code that
+  runs independently of `generate.py`'s own module-level state in several
+  of its existing tests, so wiring `svg_sparkline.py` to call it directly
+  isn't a trivial one-line change today. Logging as a candidate follow-up,
+  not doing it now: a future pass could relocate `read_color_token()` (or
+  an equivalent) to `site/lib/` so both `matrix_rain.py` and
+  `svg_sparkline.py` share one real tokens.css parser instead of the
+  latter keeping a hand-maintained duplicate constant.
+
+## T6 independent verification pass: a hardcoded-decimal-RGB duplicate the rename swept never caught (2026-07-11)
+
+Ran the full T1-T5 gate list from scratch (not trusting any prior task's
+self-report): `python -m pytest` (709 passed / 2 deselected),
+`python -m pytest site/tests` (290 passed before this task's own two new
+tests, 292 after), `python site/generate.py` (clean build, no warnings),
+every structural grep against the real built `public/` output (zero
+`<script`, all 39 generated pages carry a single
+`<div class="matrix-rain" aria-hidden="true">` tag right after the
+skip-link, `matrix.css`'s `pointer-events: none` / `z-index: -1` /
+single reduced-motion-gated `animation:` / `matrix-tiles.css`'s live
+signal-green hex, base-path-rewritten `<link>` hrefs, opaque
+masthead/footer/main backgrounds), and every consistency grep against
+`site/` source (`signal-cyan` gone, every old-palette hex literal gone,
+`tokens.css`'s header table restated with the new ratios). All of that
+passed clean on the first pass.
+
+One real bug did *not* show up in any of those checks and needed a
+different grep to find: `site/templates/board.html`'s pulse-dot
+`box-shadow` (inside its `@keyframes board-pulse` rule) hardcoded a
+literal decimal `rgba(67, 229, 196, ...)` triple. `67, 229, 196` in hex
+is `43, E5, C4` -- the *old*, pre-rename signal-accent token's own hex
+value, predating this whole workstream (introduced with the Frontier
+Board's pulse-dot feature itself, well before T1). T1's rename swept
+every reference it could find via `grep -rn "signal-cyan" site/` (the
+token's old name) and via hex-literal greps (`#43E5C4`, `#[0-9A-Fa-f]{6}`
+patterns) -- both of which this decimal-RGB encoding structurally cannot
+match, since it spells the same color out as three base-10 numbers with
+no `#` and no hex digits anywhere. The result: after T1-T5, the
+pulse-dot itself correctly rendered green (`background:
+var(--color-signal-green)`), but its own animated glow was still
+tinting the old teal/cyan -- a real, live, easy-to-miss visual
+inconsistency that would have shipped unnoticed.
+
+Fix, not just a value swap: rather than hardcode the *new* color's
+decimal equivalent (which would just recreate the identical class of bug
+the next time the palette changes), both `box-shadow` declarations now
+use `color-mix(in srgb, var(--color-signal-green) <pct>%, transparent)`
+to derive the alpha-blended glow color directly from the live token at
+render time. This is the first use of CSS `color-mix()` anywhere in this
+codebase; it's been supported in all evergreen browsers since early 2023
+(Chrome 111, Firefox 113, Safari 16.4), well within this project's
+implicit "modern static site, zero JS, no polyfills" baseline, so no
+compatibility judgment call was needed beyond confirming that baseline.
+No new hardcoded color of any kind was introduced anywhere in this fix.
+
+Two new regression tests close the gap the original rename's greps
+couldn't reach: `site/tests/test_board_builder.py::
+test_pulse_box_shadow_derives_from_the_signal_green_token_not_a_hardcoded_rgb_triple`
+(rendered board-page-scoped: asserts the `color-mix()` call is present
+and that no decimal `rgb(`/`rgba(` literal appears anywhere in the
+rendered page) and a broader
+`site/tests/test_build.py::test_no_hardcoded_decimal_rgb_color_literal_anywhere_in_built_html`
+(scans every one of the site's 39 built HTML pages, not just the Board,
+for the same pattern) -- so any future reintroduction of this exact bug
+class, on any page, fails the suite immediately rather than requiring a
+human to think to grep for decimal RGB triples again. Both tests'
+own explanatory comments deliberately avoid quoting the old token's name
+or hex value verbatim, since those exact strings are independently
+checked (by this same verification pass's gate list) to be completely
+absent from `site/` -- a test asserting an invariant should not itself
+be the one live reference that breaks it.
+
+Judgment call, spec-silent: whether to also hardcode the *specific* old
+decimal triple into a test as a "never regress to exactly this" pin, versus
+the general "no decimal rgb literal at all" pattern implemented above.
+Chose the general pattern deliberately -- this codebase has zero
+legitimate uses of `rgb()`/`rgba()` with a literal numeric first channel
+anywhere today (the one prior instance was this bug), so banning the
+pattern outright is strictly stronger than pinning one specific stale
+value, and it also catches a *different* future hardcoded color someone
+might introduce for an unrelated reason, not just a reintroduction of
+this exact one.
+
+## T7: case-sensitive/hyphen-only grep let two stale `signal-cyan` strings survive T1 and T6; zero-stale-references check hardened (2026-07-11)
+
+A further independent verification pass on the Matrix-theme workstream
+found two old-name survivors neither T1's own rename commit nor T6's
+from-scratch re-verification caught, despite both explicitly claiming
+`grep -rn "signal-cyan" site/` returned nothing: `components.css`'s
+`:focus-visible` comment still read "Signal-cyan is the site's one and
+only focus-ring color" (the rule itself already correctly used
+`var(--color-signal-green)` -- only the prose above it lagged), and
+`site/tests/test_svg_sparkline.py::test_svg_has_polyline_using_signal_cyan`
+(the test body already correctly asserted `spark.SIGNAL_GREEN` -- only
+the function's own name lagged).
+
+**Root cause: the grep, not the rename.** T1's and T6's own verification
+command, `grep -rn "signal-cyan" site/`, is case-sensitive and matches
+only the literal hyphen-joined lowercase spelling. "Signal-cyan"
+(capitalized, inside a comment sentence) and "signal_cyan"
+(underscore-joined, inside a Python identifier) are the same stale name
+under a different case/punctuation convention than what the pattern was
+built to find, so the grep structurally could not see them -- it wasn't
+lying when it reported "nothing found," it just wasn't broad enough to
+be a true zero-stale-references gate. Both prior entries' "returns
+nothing" claims were accurate reports of what they actually ran; neither
+is being called wrong here, and neither is being retroactively edited
+(see the judgment call below).
+
+**Fixes, one commit each, `python -m pytest` verified green after each
+(709 passed / 2 deselected both times -- unchanged, since the test fix
+is a rename of an existing test, not an add or removal):**
+1. `site/static/css/components.css`'s comment: "Signal-cyan" ->
+   "Signal-green" (a two-word fix; the CSS rule below it was never
+   incorrect).
+2. `site/tests/test_svg_sparkline.py`: renamed
+   `test_svg_has_polyline_using_signal_cyan` to
+   `test_svg_has_polyline_using_signal_green` (function body already
+   correct, unchanged).
+
+**The gate itself, hardened:** replaced the verification command with
+`grep -rni 'signal[-_]cyan' site/` -- case-insensitive, and a character
+class matching either the hyphen or underscore separator in one pass, so
+a future rename's own completeness check can't repeat this exact class
+of miss (a differently-cased comment, or an underscore-joined
+identifier, anywhere a rename touches both prose and code). Re-run
+against every git-tracked file under `site/` after both fixes: zero
+matches. The one remaining hit found mid-pass, before ruling it
+irrelevant, was a stale compiled `test_svg_sparkline.cpython-*.pyc`
+inside `site/tests/__pycache__/` predating the rename above -- confirmed
+gitignored (`.gitignore`'s own first line, `__pycache__/`), not a
+tracked source file, and it is regenerated correctly (with the new name)
+by the next `pytest` invocation, so it isn't a real survivor of anything.
+
+**Judgment call, spec-silent:** whether to retroactively edit T1's and
+T6's own already-logged claims (in this file and in `PROGRESS.md`) to
+describe the wider grep, versus leaving them as-is and logging the fix
+as its own new entry. Chose the latter, for the same reason T1's own
+entry above already gives for not rewriting history elsewhere in this
+file: a build log's job is to record what was true and what was checked
+*at the time* each entry was written, and quietly editing a past entry's
+claims to match a later, better check would itself be exactly the kind
+of undocumented drift this project's own audits exist to catch. T1's and
+T6's entries are left exactly as written -- both are honest records of a
+real grep that genuinely came back clean against its own (too narrow)
+pattern -- and this entry is the correction of record.

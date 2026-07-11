@@ -36,8 +36,23 @@ body {
   line-height: 1.55;
 }
 
+/* --- Opaque chrome-background invariant ----------------------------------
+ * The decorative fixed rain layer (site/static/css/matrix.css, arriving in
+ * the next commit) is `position: fixed; inset: 0; z-index: -1` -- it paints
+ * above the body's own canvas background but below anything in-flow that
+ * sets its own background. Every text-bearing chrome surface (masthead,
+ * footer, this main reading column, .skip-link elsewhere in this file, and
+ * every wire-card/board/lexicon/primer/method/corrections/moving panel via
+ * its own template styles) MUST keep an opaque token background so rain is
+ * only ever visible in the gutters / empty chrome space around them --
+ * reading text must never have moving rain scrolling behind it. At 375px
+ * the reading column (.container, max-width 40rem) is full viewport width,
+ * so the rain is intentionally almost invisible on phones there --
+ * readability wins over ambience (logged in IMPROVEMENT_BACKLOG.md).
+ */
 main {
   flex: 1 1 auto;
+  background: var(--color-bg);
 }
 
 /* Fluid container -- relative max-width, never a fixed pixel width, so
@@ -67,7 +82,7 @@ h4 {
 }
 
 a {
-  color: var(--color-signal-cyan);
+  color: var(--color-signal-green);
 }
 
 /* Data / tabular figures -- apply to numeric fields (dates, counts,
@@ -81,9 +96,9 @@ a {
 }
 
 /* One-liners are the site's "skim only this" affordance -- larger and in
-   the signal-cyan accent color, per the design spec. */
+   the signal-green accent color, per the design spec. */
 .one-liner {
-  color: var(--color-signal-cyan);
+  color: var(--color-signal-green);
   font-size: 1.125rem;
 }
 
@@ -113,12 +128,12 @@ a {
 }
 
 /* --- Focus visibility ---------------------------------------------------
- * Signal-cyan is the site's one and only focus-ring color (never the
+ * Signal-green is the site's one and only focus-ring color (never the
  * hairline color -- see tokens.css). A visible offset keeps the ring from
  * touching small text/chip edges.
  */
 :focus-visible {
-  outline: 2px solid var(--color-signal-cyan);
+  outline: 2px solid var(--color-signal-green);
   outline-offset: 3px;
 }
 
@@ -128,6 +143,7 @@ a {
  * broken on its own.
  */
 .masthead {
+  background: var(--color-bg);
   border-bottom: 1px solid var(--color-hairline);
 }
 
@@ -226,6 +242,7 @@ a {
 }
 
 .site-footer {
+  background: var(--color-bg);
   border-top: 1px solid var(--color-hairline);
   padding-block: 1.25rem;
   font-size: 0.9rem;
@@ -265,7 +282,7 @@ a {
 }
 
 .chip--confirmed {
-  color: var(--color-signal-cyan);
+  color: var(--color-signal-green);
 }
 
 .chip--reported {
@@ -302,11 +319,11 @@ a {
 
 /* --- "Why it matters" payoff block ---------------------------------------
  * Visually distinguishes the payoff paragraph from the plain narration
- * above it with a signal-cyan rule + small uppercase label, reusing the
+ * above it with a signal-green rule + small uppercase label, reusing the
  * one-liner's accent color rather than introducing a new one.
  */
 .wire-card__why {
-  border-left: 2px solid var(--color-signal-cyan);
+  border-left: 2px solid var(--color-signal-green);
   padding-inline-start: 0.75em;
 }
 

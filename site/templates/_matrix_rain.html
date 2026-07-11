@@ -1,0 +1,45 @@
+{# Site-wide decorative "digital rain" background layer (Matrix-theme
+   redesign). templates/base.html includes this partial directly, right
+   after the skip-link, once a caller's render context carries a non-empty
+   `matrix_rain_columns` list (see site/generate.py::generate(), which sets
+   it as a Jinja env global for every page build, plus
+   `matrix_rain_tile_height_px` / `matrix_rain_tile_width_px`). Unlike the
+   Wire-home-page-only `masthead_sparklines` strip (see
+   `_masthead_moving_strip.html`'s own docstring), the rain layer is a
+   genuinely global concern -- every page's base.html shell renders it -- so
+   it's wired as an env global rather than threaded through every builder.
+
+   The `{% if matrix_rain_columns is defined and matrix_rain_columns %}`
+   guard in base.html is still load-bearing even though this global is set
+   unconditionally by generate.py's own real build: every page-builder
+   module (site/builders/*.py) builds its own separate, standalone
+   StrictUndefined Jinja env for its own tests, with no site/generate.py
+   globals at all -- the guard is what keeps every one of those builder
+   tests green without each of them having to fake this global in.
+
+   Each `<div class="matrix-rain__col">` is one falling column: no per-glyph
+   DOM node anywhere (the actual glyphs live inside a handful of shared,
+   tileable SVG `data:` URIs baked once into static/css/matrix-tiles.css --
+   see site/generate.py::write_matrix_tiles_css -- and referenced here only
+   by `var(--rain-tile-<n>)`, never inlined per-column). The whole layer is
+   structurally inert, not just visually decorative:
+     - `aria-hidden="true"` on the wrapper removes it from the accessibility
+       tree entirely -- assistive tech never sees it.
+     - `pointer-events: none` (matrix.css) means it can never intercept a
+       click/tap meant for real page content.
+     - `z-index: -1` + `position: fixed` (matrix.css) keeps it strictly
+       behind every in-flow element, including the opaque
+       `background: var(--color-bg)` chrome panels (.masthead,
+       .site-footer, main -- see components.css, T2) that keep it out from
+       behind actual reading text.
+   Every animation property (`--rain-duration`/`--rain-delay` here are inert
+   custom properties, not animations themselves) lives entirely inside
+   matrix.css's own `@media (prefers-reduced-motion: no-preference)` block,
+   with zero fallback animation outside it -- matching board.html's
+   pulse-dot convention exactly. Under reduced motion, columns render as a
+   static, non-animating tiled backdrop. #}
+<div class="matrix-rain" aria-hidden="true" style="--rain-tile-h: {{ matrix_rain_tile_height_px }}px; --rain-tile-w: {{ matrix_rain_tile_width_px }}px;">
+  {% for col in matrix_rain_columns %}
+  <div class="matrix-rain__col" style="left: {{ col.left_pct }}%; background-image: var(--rain-tile-{{ col.tile_index }}); --rain-duration: {{ col.duration_s }}s; --rain-delay: {{ col.delay_s }}s;"></div>
+  {% endfor %}
+</div>
