@@ -510,6 +510,144 @@ def test_matrix_rain_layer_has_no_inline_animation_or_data_uri(built_site):
     assert "data:image/svg+xml" not in rain_markup
 
 
+# --- Matrix-theme digital-rain layer (T4): regression tests ----------------
+#
+# T3 built the rain layer; these tests lock in five properties that a
+# future edit could otherwise silently break: the rain wrapper's own
+# opening tag genuinely carries both class="matrix-rain" and
+# aria-hidden="true" (not just "both strings appear somewhere on the
+# page"), the whole site stays zero-JavaScript, matrix.css's inertness
+# properties and reduced-motion gating are real (not just present in a
+# comment), matrix-tiles.css sources the live signal-green token, a
+# from-scratch build is byte-identical across two independent output
+# directories (the rain layer's seeded RNG must not break the
+# already-established idempotent-rebuild property), and the rain layer is
+# structurally inert (no focusable element inside it at all), which is
+# what makes the skip-link-first-focusable guarantee hold regardless of
+# how many rain columns render.
+
+
+def test_matrix_rain_wrapper_opening_tag_carries_class_and_aria_hidden_together(built_site):
+    # Order-independent: requires both attributes on the *same* opening
+    # <div ...> tag (no intervening ">"), not merely both substrings
+    # appearing anywhere in the page.
+    tag_re = re.compile(
+        r'<div\b(?=[^>]*\bclass="matrix-rain")(?=[^>]*\baria-hidden="true")[^>]*>'
+    )
+    for page in _all_html_files(built_site):
+        html = page.read_text(encoding="utf-8")
+        assert tag_re.search(html), (
+            f"{page.relative_to(built_site)}: no single <div> opening tag carries "
+            f'both class="matrix-rain" and aria-hidden="true"'
+        )
+
+
+def test_no_script_tag_anywhere_in_any_generated_html_page(built_site):
+    # The hard, site-wide zero-JavaScript constraint has no dedicated test
+    # anywhere else -- this is the one that actually enforces it across
+    # every generated page, not just the rain layer's own markup.
+    script_re = re.compile(r"<script", re.IGNORECASE)
+    for page in _all_html_files(built_site):
+        html = page.read_text(encoding="utf-8")
+        assert not script_re.search(html), (
+            f"{page.relative_to(built_site)} contains a <script> tag -- this "
+            f"site must stay zero-JavaScript"
+        )
+
+
+def test_matrix_css_declares_pointer_events_none_and_a_negative_z_index():
+    css = (generate.STATIC_DIR / "css" / "matrix.css").read_text(encoding="utf-8")
+    assert "pointer-events: none" in css
+    assert "z-index: -1" in css
+
+
+def test_matrix_css_reduced_motion_gating_is_positional_and_singular():
+    # Mirrors site/tests/test_board_builder.py's own
+    # test_pulse_animation_keyframes_only_inside_reduced_motion_media_query
+    # positional-index convention: the media query must open strictly
+    # before both the "animation:" declaration and the "@keyframes"
+    # matrix-rain-fall rule, and there must be exactly one "animation:"
+    # declaration in the whole file -- if a second, unguarded fallback
+    # animation is ever added outside the media query, this fails.
+    css = (generate.STATIC_DIR / "css" / "matrix.css").read_text(encoding="utf-8")
+    media_pos = css.index("@media (prefers-reduced-motion: no-preference)")
+    animation_pos = css.index("animation:")
+    keyframes_pos = css.index("@keyframes matrix-rain-fall")
+    assert media_pos < animation_pos
+    assert media_pos < keyframes_pos
+    assert css.count("animation:") == 1
+
+
+def test_built_matrix_tiles_css_sources_the_live_signal_green_token(built_site):
+    # Regression-tests generate.py::read_color_token() itself (never a
+    # pasted hex literal here) against the actual built output, reusing
+    # the shared module-scoped fixture rather than a second standalone
+    # build.
+    css = (built_site / "static" / "css" / "matrix-tiles.css").read_text(encoding="utf-8")
+    assert "data:image/svg+xml" in css
+    color = generate.read_color_token("signal-green")
+    assert ("%23" + color.lstrip("#")) in css
+
+
+def test_generate_produces_byte_identical_output_across_two_independent_dirs(
+    tmp_path_factory,
+):
+    # Function-scoped, its own two output directories -- deliberately not
+    # the shared built_site fixture, since this test needs two full,
+    # independent from-scratch builds to compare against each other.
+    dir_a = tmp_path_factory.mktemp("public_idempotence_a")
+    dir_b = tmp_path_factory.mktemp("public_idempotence_b")
+    generate.generate(public_dir=dir_a)
+    generate.generate(public_dir=dir_b)
+
+    def _relative_files(root: Path) -> set[Path]:
+        return {p.relative_to(root) for p in root.rglob("*") if p.is_file()}
+
+    files_a = _relative_files(dir_a)
+    files_b = _relative_files(dir_b)
+    assert files_a == files_b, (
+        "generate() produced a different set of files across two "
+        "independent builds"
+    )
+    for rel in sorted(files_a):
+        bytes_a = (dir_a / rel).read_bytes()
+        bytes_b = (dir_b / rel).read_bytes()
+        assert bytes_a == bytes_b, (
+            f"{rel} differs byte-for-byte between two independent "
+            f"generate() runs -- the rain layer's seeded RNG must not "
+            f"break the established byte-idempotent-rebuild property"
+        )
+
+
+def test_matrix_rain_layer_contains_no_focusable_elements(built_site):
+    # The rain layer sits between the skip-link and <header class="masthead">
+    # on every page (base.html's own template order) and is made up
+    # entirely of empty, childless <div class="matrix-rain__col"> elements
+    # -- this asserts that structurally, not just by convention, so the
+    # existing skip-link-first-focusable test's guarantee doesn't quietly
+    # depend on the rain layer staying "well-behaved" by accident.
+    focusable_re = re.compile(r"<(a|button|input|select|textarea)\b", re.IGNORECASE)
+    for page in _all_html_files(built_site):
+        html = page.read_text(encoding="utf-8")
+        if 'class="matrix-rain"' not in html:
+            continue
+        rain_start = html.index('<div class="matrix-rain"')
+        header_start = html.index("<header", rain_start)
+        rain_markup = html[rain_start:header_start]
+        assert not focusable_re.search(rain_markup), (
+            f"{page.relative_to(built_site)}'s matrix-rain layer unexpectedly "
+            f"contains a focusable element"
+        )
+
+
+def test_skip_link_first_focusable_guarantee_still_holds(built_site):
+    # Unmodified re-assertion of the existing invariant, run explicitly
+    # here alongside the rain-layer inertness test above so the two are
+    # read together: the rain layer being empty (previous test) is *why*
+    # this one holds regardless of how many columns render.
+    test_skip_link_is_first_focusable_element_on_every_page(built_site)
+
+
 # --- 404 / sitemap.xml / robots.txt ----------------------------------------
 
 

@@ -3714,3 +3714,33 @@ wrapper renders on every one of the site's 39 generated pages, right after
 the skip-link and before the masthead, with no inline `animation:` or
 inlined `data:` URI in the per-page HTML itself (those live in
 `matrix.css` / `matrix-tiles.css` respectively, not duplicated per-page).
+
+## Regression tests for the rain layer: a by-path-loader wrinkle `site/generate.py` doesn't hit (T4, 2026-07-11)
+
+New `site/tests/test_matrix_rain.py` loads `site/lib/matrix_rain.py` by
+explicit file path, the same convention every cross-file reference within
+`site/` already uses (`site/` is deliberately never an importable package
+-- see `test_build.py::_load_generate_module`'s own docstring). The task
+brief asked for this to work "exactly like `test_build.py`'s
+`_load_generate_module`", but that function's minimal
+`spec_from_file_location` + `module_from_spec` + `exec_module` sequence
+(with no `sys.modules` registration) actually fails for `matrix_rain.py`
+specifically: `AttributeError: 'NoneType' object has no attribute
+'__dict__'` inside `dataclasses._process_class`, because
+`matrix_rain.py`'s `RainColumn` combines `@dataclass` with `from
+__future__ import annotations`, and dataclasses' own annotation
+resolution looks up `sys.modules[cls.__module__]`, which isn't populated
+yet at that point without the registration step. `generate.py`'s own
+`_load_module_by_path` already documents and handles exactly this (it
+registers `sys.modules[spec.name] = module` before calling
+`exec_module()`, specifically because several `site/builders/*.py`
+modules hit the same combination) -- `generate.py` itself just never
+needed the workaround for its own module because `generate.py` has no
+dataclass of its own. The judgment call: rather than treat the task
+brief's "exactly like `_load_generate_module`" as requiring the literal
+no-registration sequence, the test loader here follows
+`_load_module_by_path`'s (already-established, already-documented)
+sys.modules-registration pattern instead, since that is the actual
+precedent this repo uses whenever the loaded-by-path module needs it --
+confirmed by re-running `python -m pytest site/tests`, which fails to even
+collect without the registration line and passes cleanly with it.
