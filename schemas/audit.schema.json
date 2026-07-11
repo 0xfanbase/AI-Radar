@@ -1,0 +1,254 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/audit.schema.json",
+  "title": "Audit Report",
+  "description": "Spec-silent shape (CLAUDE.md's audit.yml 'weekly' bullet and the approved build plan's Phase 5 section both name 'data/audit/latest.json (schema in schemas/audit.schema.json)' without fixing fields; decision logged in IMPROVEMENT_BACKLOG.md). Written by auditor/report.py::save_report, which assembles the five Phase 5 checkers' own already-computed dicts verbatim under link_rot/lexicon/verifier_trend/missed_stories/duplicates -- this schema is a direct transcription of those five modules' real return shapes (auditor/linkrot.py::audit_link_rot, auditor/lexicon_audit.py::audit_lexicon, auditor/trend.py::audit_trend, auditor/missed_story.py::audit_missed_stories, auditor/duplicates.py::audit_duplicates), not an independently-designed shape. window is the report's own top-level 'what period does this audit cover' annotation (fixed at audit.yml's own weekly, 7-day cadence) -- it is never itself fed into any of the five checkers, each of which computes its own window (or has none) independently; see auditor/report.py's own module docstring. findings_appended_to_backlog is a plain count of how many checkbox findings scripts/append_backlog_findings.py actually wrote to IMPROVEMENT_BACKLOG.md this run, not a duplicated findings list -- every finding's own detail already lives in one of the five per-checker fields.",
+  "$defs": {
+    "story_classification": {
+      "type": "object",
+      "description": "One HN story's missed-story classification -- auditor/missed_story.py's StoryClassification dataclass, verbatim (via dataclasses.asdict).",
+      "required": [
+        "title",
+        "url",
+        "points",
+        "classification",
+        "matched_card_id",
+        "matched_cluster_hash",
+        "dropped_reason"
+      ],
+      "properties": {
+        "title": { "type": "string" },
+        "url": { "type": "string" },
+        "points": { "type": ["integer", "null"] },
+        "classification": {
+          "type": "string",
+          "enum": ["covered", "seen_but_dropped", "missed"]
+        },
+        "matched_card_id": { "type": ["string", "null"] },
+        "matched_cluster_hash": { "type": ["string", "null"] },
+        "dropped_reason": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    }
+  },
+  "type": "object",
+  "required": [
+    "version",
+    "run_id",
+    "generated_at",
+    "window",
+    "link_rot",
+    "lexicon",
+    "verifier_trend",
+    "missed_stories",
+    "duplicates",
+    "findings_appended_to_backlog"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "'audit-<compact UTC timestamp>', per auditor/report.py::make_run_id -- not a random UUID (this project uses no UUID dependency anywhere else)."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "window": {
+      "type": "object",
+      "required": ["days", "start", "end"],
+      "properties": {
+        "days": { "type": "integer", "minimum": 1 },
+        "start": { "type": "string", "format": "date" },
+        "end": { "type": "string", "format": "date" }
+      },
+      "additionalProperties": false
+    },
+    "link_rot": {
+      "type": "object",
+      "description": "auditor/linkrot.py::audit_link_rot's own return dict, verbatim.",
+      "required": ["checked_at", "total_urls", "counts", "results"],
+      "properties": {
+        "checked_at": { "type": "string", "format": "date-time" },
+        "total_urls": { "type": "integer", "minimum": 0 },
+        "counts": {
+          "type": "object",
+          "required": ["ok", "dead", "unreachable"],
+          "properties": {
+            "ok": { "type": "integer", "minimum": 0 },
+            "dead": { "type": "integer", "minimum": 0 },
+            "unreachable": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["url", "status", "http_status", "method", "detail"],
+            "properties": {
+              "url": { "type": "string" },
+              "status": {
+                "type": "string",
+                "enum": ["ok", "dead", "unreachable"]
+              },
+              "http_status": { "type": ["integer", "null"] },
+              "method": { "type": "string", "enum": ["HEAD", "GET"] },
+              "detail": { "type": ["string", "null"] }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "lexicon": {
+      "type": "object",
+      "description": "auditor/lexicon_audit.py::audit_lexicon's own return dict, verbatim.",
+      "required": ["coverage_gaps", "orphans"],
+      "properties": {
+        "coverage_gaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["card_id", "missing_terms"],
+            "properties": {
+              "card_id": { "type": ["string", "null"] },
+              "missing_terms": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "orphans": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "verifier_trend": {
+      "type": "object",
+      "description": "auditor/trend.py::audit_trend's own return dict, verbatim.",
+      "required": [
+        "as_of",
+        "rolling_7d_pass_rate",
+        "rolling_30d_pass_rate",
+        "prior_week_pass_rate",
+        "trend"
+      ],
+      "properties": {
+        "as_of": { "type": "string", "format": "date" },
+        "rolling_7d_pass_rate": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "rolling_30d_pass_rate": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "prior_week_pass_rate": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "trend": {
+          "type": "string",
+          "enum": ["rising", "falling", "flat", "insufficient_data"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "missed_stories": {
+      "type": "object",
+      "description": "auditor/missed_story.py::audit_missed_stories's own return dict, verbatim.",
+      "required": [
+        "checked_at",
+        "window_hours",
+        "top_n",
+        "total_checked",
+        "counts",
+        "missed_stories",
+        "seen_but_dropped_stories",
+        "results"
+      ],
+      "properties": {
+        "checked_at": { "type": "string", "format": "date-time" },
+        "window_hours": { "type": "integer", "minimum": 1 },
+        "top_n": { "type": "integer", "minimum": 1 },
+        "total_checked": { "type": "integer", "minimum": 0 },
+        "counts": {
+          "type": "object",
+          "required": ["covered", "seen_but_dropped", "missed"],
+          "properties": {
+            "covered": { "type": "integer", "minimum": 0 },
+            "seen_but_dropped": { "type": "integer", "minimum": 0 },
+            "missed": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "missed_stories": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/story_classification" }
+        },
+        "seen_but_dropped_stories": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/story_classification" }
+        },
+        "results": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/story_classification" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "duplicates": {
+      "type": "object",
+      "description": "auditor/duplicates.py::audit_duplicates's own return dict, verbatim.",
+      "required": ["duplicate_pairs"],
+      "properties": {
+        "duplicate_pairs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "card_a",
+              "card_b",
+              "headline_a",
+              "headline_b",
+              "similarity",
+              "shared_topics"
+            ],
+            "properties": {
+              "card_a": { "type": "string" },
+              "card_b": { "type": "string" },
+              "headline_a": { "type": ["string", "null"] },
+              "headline_b": { "type": ["string", "null"] },
+              "similarity": { "type": "number", "minimum": 0, "maximum": 1 },
+              "shared_topics": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "findings_appended_to_backlog": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How many checkbox findings scripts/append_backlog_findings.py actually wrote to IMPROVEMENT_BACKLOG.md this run (0 for a dry run or a completely clean week)."
+    }
+  },
+  "additionalProperties": false
+}

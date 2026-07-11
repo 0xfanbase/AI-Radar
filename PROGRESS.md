@@ -7,6 +7,341 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Phase 5: `auditor/report.py`, `auditor/cli.py`, `schemas/audit.schema.json`, `scripts/append_backlog_findings.py` -- report assembler, CLI entrypoint, backlog-append step
+
+Integration commit landing the last four pieces of the Phase 5 `auditor/`
+package (the five checkers -- `lexicon_audit.py`, `linkrot.py`,
+`duplicates.py`, `trend.py`, `missed_story.py` -- were built in parallel by
+sibling agents in this same working tree; see the four entries directly
+below). This commit assembles all five checkers' own output into one
+`schemas/audit.schema.json`-shaped `data/audit/latest.json` artifact,
+wires the whole pipeline behind `python -m auditor.cli run`, and adds the
+`scripts/append_backlog_findings.py` step that promotes actionable
+findings into `IMPROVEMENT_BACKLOG.md` checkboxes.
+
+**`auditor/report.py`**: `build_report()` assembles the five checkers'
+already-computed dicts (passed through by identity, never re-derived)
+under `link_rot`/`lexicon`/`verifier_trend`/`missed_stories`/`duplicates`,
+plus a top-level `version`, `run_id` (`"audit-<compact UTC timestamp>"`,
+deterministic from an explicit `now` -- no UUID dependency anywhere in
+this project), `generated_at`, a `window` annotation (`{days, start,
+end}`, fixed at 7 days matching `audit.yml`'s own weekly cadence -- see
+the module's own docstring for why this is a top-level annotation only,
+never fed into any checker, each of which has its own different or absent
+window), and `findings_appended_to_backlog` (a plain count, not a
+duplicated findings list -- every finding's own detail already lives in
+one of the five per-checker fields). `save_report`/`load_report`
+schema-validate before writing / after reading, matching every other
+committed pipeline artifact's own convention.
+
+**`schemas/audit.schema.json`**: a direct transcription of the five real
+checkers' own return shapes (verified against their actual source, not
+independently redesigned), `additionalProperties: false` throughout, with
+a shared `$defs/story_classification` reused three times inside
+`missed_stories` (`missed_stories[]`/`seen_but_dropped_stories[]`/
+`results[]` all carry the identical per-story shape).
+
+**`auditor/cli.py`** (`python -m auditor.cli run`, mirroring
+`watcher/cli.py`'s own `python -m watcher.cli run` shape exactly --
+`argparse` subparsers, a `run` subcommand): `run_audit()` loads cards,
+`content/lexicon.json` (via a new small `load_lexicon()` -- no existing
+module owned a lexicon-file loader, since `auditor.lexicon_audit` is
+deliberately pure/filesystem-free), and `data/ledger.json` exactly once
+each and threads them into every checker that needs them; runs all five
+checks; derives findings via `scripts.append_backlog_findings.
+derive_findings`; appends them to `IMPROVEMENT_BACKLOG.md` (or a
+caller-supplied path) unless `append_to_backlog=False`; and returns the
+assembled report. `run_audit()` also accepts an explicit `hn_items`
+passthrough straight to `auditor.missed_story.audit_missed_stories`'s own
+parameter of the same name -- added specifically so a caller/test can
+keep the whole pipeline offline and deterministic without needing a
+`requests_mock` HN fixture, while the real CLI (`hn_items` left `None`)
+still does a genuine live fetch. `main()`'s `run` subcommand exposes
+`--out` (default `data/audit/latest.json`), `--backlog-path` (default the
+real `IMPROVEMENT_BACKLOG.md`), and `--no-backlog-append` (a dry-run
+flag) -- the latter two exist specifically so this repo's own real
+`IMPROVEMENT_BACKLOG.md` can be exercised against without being mutated
+by a one-off manual/test invocation, while the real weekly cadence would
+call it with neither flag set.
+
+**`scripts/append_backlog_findings.py`**: `derive_findings()` flattens
+the five checkers' dicts into `{severity, category, summary}` finding
+dicts per this turn's own explicit severity mapping (documented in full
+in `IMPROVEMENT_BACKLOG.md`'s own decision log, per instruction): a
+falling verifier trend is **high**; a missed story or a duplicate-topic
+pair is **medium**; a dead citation link or a lexicon
+orphan/coverage-gap is **low**. `format_finding_line()` renders one
+Markdown checkbox line (`- [ ] **[SEVERITY]** <summary>`);
+`append_findings_to_backlog()` appends one dated `## Audit findings --
+<run_id> (<generated_at>)` section (skipping entirely, writing nothing,
+on a completely clean run) and returns the count actually written.
+
+**A real, deliberate judgment call, logged in full in
+`IMPROVEMENT_BACKLOG.md`: lexicon-orphan findings are suppressed from the
+backlog-append step (not from the raw report) whenever zero cards have
+been published yet.** This repo's own real state today is exactly that
+case -- `content/cards/` doesn't exist and all 30 real
+`content/lexicon.json` entries have `seen_in: []` -- so an unconditional
+promotion would have flagged all 30 seed terms as "orphan" findings on
+literally the first-ever audit run, which is noise (the expected
+pre-launch state), not signal. Confirmed directly: a real, live
+end-to-end run against this repo's actual content/data (see below)
+produced `lexicon.orphans` with all 30 real terms in the raw report, but
+zero of them were promoted to backlog checkboxes.
+
+**Real, live verification run performed this turn** (not merely unit
+tests): `python -m auditor.cli run --out <scratch>/latest.json
+--backlog-path <scratch>/scratch_backlog.md` was actually executed
+against this repo's real, current `content/`/`data/` state (zero
+published cards, the real 30-entry `content/lexicon.json`, the real
+104-entry `data/ledger.json`, and a genuine live fetch of this week's
+top-20 HN AI stories via the real Algolia endpoint -- ~10.7s wall time,
+dominated by that fetch's 14 windowed sub-queries). Result: a
+schema-valid report (`link_rot`: 0 URLs checked, zero cards means zero
+citations to check; `lexicon`: 0 coverage gaps, 30 raw orphans;
+`verifier_trend`: `insufficient_data` (`data/verifier_stats.json` still
+has `runs: []`); `missed_stories`: 8 covered / 0 seen-but-dropped / 12
+missed out of the real top-20 HN AI stories of the week;
+`duplicates`: 0 pairs, correctly, since there are zero published cards to
+compare) with `findings_appended_to_backlog: 12` -- exactly the 12 real
+`missed_story` findings (the lexicon orphans were correctly suppressed
+per the guard above; nothing else was actionable). The 12 real findings
+were written, verbatim, into the scratch backlog file as properly
+formatted `- [ ] **[MEDIUM]**` checkboxes, confirmed by direct inspection.
+**This scratch run's own output (the generated `latest.json` and the
+findings it derived from this week's live HN stories) is deliberately
+*not* committed to the real repo** -- `--out`/`--backlog-path` pointed at
+a scratchpad directory for exactly this reason. Seeding
+`data/audit/latest.json` or appending this one-off run's now-ephemeral,
+will-go-stale HN titles to the real, committed `IMPROVEMENT_BACKLOG.md`
+was outside this turn's own specified commit scope (matching the
+`data/run_plan.json` precedent logged in Phase 2 -- "no seed file is
+created ... a placeholder ... would just be dead weight until [it] is a
+real scheduled run's own output"); the real repo's working tree was
+independently confirmed untouched by this verification (`git status`
+shows no `data/audit/` directory and no incidental changes beyond this
+turn's own intentional file additions). The real weekly cadence (once
+`audit.yml`/a scheduling mechanism for it exists -- out of this turn's
+scope) will produce and commit its own first real `data/audit/latest.json`
+and any real backlog findings on its own schedule.
+
+**`auditor/__init__.py` added, reversing an earlier logged decision.**
+The `lexicon_audit.py` entry below explicitly chose no `__init__.py`,
+matching `scripts/`'s own convention (Python's implicit namespace-package
+handling already made -- and still makes -- every `from auditor.<module>
+import ...` resolve with no `__init__.py` present). This turn adds one
+back per this turn's own explicit instruction, now that `auditor/` has a
+real `cli.py` entrypoint (`python -m auditor.cli run`) the same shape
+`watcher/__init__.py` already backs for `watcher/cli.py`. Nothing
+functional required this reversal -- `python -m pytest` stayed green
+before and after -- it's a consistency/explicitness choice, logged
+transparently as a reversal rather than silently overwritten.
+
+**New test files**: `tests/test_auditor_report.py` (18 tests --
+`make_run_id`/`compute_window` pure-date-math correctness including a
+non-UTC-timezone-normalization case, `build_report`'s pass-through-by-
+identity assembly and schema validity, `save_report`/`load_report`'s
+round trip / missing-file / malformed-file behavior against `tmp_path`,
+and one integration smoke test running every real checker against a
+fully-synthetic-but-real-shaped all-empty state), `tests/
+test_append_backlog_findings.py` (23 tests -- `_fmt_pct`, every category's
+severity/actionability rule including the unreachable-vs-dead link-rot
+distinction and both the falling-only verifier-trend gate and the
+zero-cards orphan-suppression guard and its non-interference with
+coverage-gap findings, deterministic cross-category ordering,
+`format_finding_line`'s exact Markdown shape, and
+`append_findings_to_backlog`'s empty/non-empty/multi-run-append behavior
+against a `tmp_path` scratch file), `tests/test_auditor_cli.py` (10 tests
+-- `load_lexicon` against the real repo file and missing/fixture paths,
+`run_audit` against this repo's real empty-cards state fully offline
+(`hn_items=[]`), the dry-run/backlog-mutation-only-on-request behavior,
+a monkeypatched-real-finding case proving an actual backlog write when
+one exists, and `main()`'s argparse plumbing including `--no-backlog-
+append`), `tests/test_audit_schema.py` (6 tests -- schema self-validity,
+valid/invalid fixtures, `additionalProperties`/enum enforcement).
+
+**Verification**: `python -m pytest` -- **858 passed, 2 deselected** (up
+from 801 immediately before this turn's own additions -- 57 new tests,
+exactly this turn's own count across the four new test files; nothing
+else changed or broke). The real, live `python -m auditor.cli run`
+verification described above is a genuine, tool-observed proof (not an
+estimate) that the full five-checker + report + backlog-append pipeline
+runs cleanly end to end against this repo's real, current, mostly-empty
+state -- the exact edge case this turn was asked to confirm.
+
+---
+
+## 2026-07-11 — Phase 5: `auditor/missed_story.py`, the missed-story checker
+
+Sixth file landed in `auditor/` this same day (see the `trend.py`,
+`duplicates.py`, and `linkrot.py` entries directly below, at least some
+built concurrently in this same working tree). Implements CLAUDE.md's
+`audit.yml` "weekly" bullet ('"missed-story" check (top-20 HN AI stories
+of the week vs cards; misses logged as findings, not failures)') --
+fetching the top-20 AI-relevant HN stories of the trailing 7 days and
+classifying each as `covered` (matches a published card, or a ledger
+entry the pipeline hasn't declined), `seen_but_dropped` (matches only a
+`"dropped"` ledger entry -- the pipeline saw it and correctly declined
+per the corroboration rule), or `missed` (matches neither -- a genuine
+gap, logged as a finding, never a test failure).
+
+**Reuse, not reimplementation, per this turn's own explicit instruction:**
+`fetch_weekly_top_hn_stories()` calls `watcher.sources.hn.fetch_hn_items()`
+directly -- the identical broad-pool/keyword-filter/final-candidacy
+pipeline the daily watcher itself runs -- widening only `lookback_hours`
+to 168 (7 days) and slicing the already-points-sorted result to the top
+20. No fetch/parse/filter logic is reimplemented. Matching reuses both
+tiers of `watcher/clustering.py`'s own two-tier algorithm ("exact-URL-
+normalization match, else Jaccard >= 0.35 over title tokens"): a
+published card is checked via exact-URL match against its own
+`citations[].url` OR Jaccard similarity of the HN story's raw title
+against the card's `headline` (reusing `_jaccard`/`tokenize_title`
+directly, the same composition `auditor/duplicates.py` already
+established); a `data/ledger.json` entry -- which carries `member_urls`
+but no title text at all (`ledger.schema.json`'s `ledger_entry` has no
+headline/title field) -- is checked via the exact-URL tier only, reusing
+`watcher.models.normalize_url()` directly. This asymmetry (both tiers for
+cards, one tier for the ledger) is a spec-silent judgment call, logged in
+full in `IMPROVEMENT_BACKLOG.md`, forced by what data each target
+actually carries.
+
+**Classification priority.** A card match always wins over any ledger
+match; among ledger matches, a `"queued"`/`"published"` entry (the
+pipeline already knows about this story and hasn't declined it) always
+wins over a `"dropped"` one. `classify_story()` scans every ledger entry
+before concluding `seen_but_dropped`, rather than returning on the first
+`"dropped"` hit -- proven order-independent by dedicated tests -- so a
+story that also separately matches a non-dropped entry elsewhere in the
+ledger is never misclassified. Full reasoning for this tie-break, and for
+trusting a `"published"` ledger entry's own `card_id` directly rather
+than re-deriving it via title/citation match, logged in
+`IMPROVEMENT_BACKLOG.md`.
+
+`audit_missed_stories()` is the one live-touching entry point
+(`hn_items`/`cards`/`ledger`/`session` all default to `None`, falling
+back respectively to a live `fetch_weekly_top_hn_stories()` call, `auditor.
+linkrot.load_cards()` reused directly, and a new `load_ledger()` reading
+`data/ledger.json`). Every other function (`story_matches_card`,
+`story_matches_ledger_entry`, `classify_story`) is pure and
+filesystem/network-free, matching every sibling `auditor/` module's own
+established convention.
+
+**New test file `tests/test_auditor_missed_story.py`** (33 tests): four
+reuse-by-identity proofs; the widened-window/top-20 behavior of
+`fetch_weekly_top_hn_stories()` via both a monkeypatched stub and a
+genuine end-to-end run against the same real captured Algolia fixture
+`tests/test_hn_fetch.py` uses for its own 48h test (here widened to 168h,
+14 windows instead of 4, same three real stories recovered); `load_ledger`'s
+missing/real-file paths; both matching tiers on each target, including a
+`normalize_url`-based match (`www.`/trailing-slash difference) proving
+it's genuinely normalized, not a raw string comparison, plus a `>=`-
+inclusive threshold-boundary check; `classify_story` across all three
+buckets, the card-beats-dropped-ledger priority case, and the ledger-
+iteration-order-independence case; and `audit_missed_stories()`'s
+explicit-data path, both default-loading paths (proven via `monkeypatch`),
+the empty-input clean-zero-report shape, and an integration-flavored
+smoke test against this repo's real (currently empty/all-`"queued"`)
+`content/cards/`/`data/ledger.json` disk state with a mocked HN endpoint.
+
+Verification: `python -m pytest` -- **801 passed, 2 deselected** (744
+recorded before `auditor/trend.py` landed, +24 from the concurrently-
+landed `trend.py`/`test_auditor_trend.py`, +33 from this turn's own new
+tests). No file outside `auditor/missed_story.py` and
+`tests/test_auditor_missed_story.py` was touched by this turn's own code
+changes (`PROGRESS.md` and `IMPROVEMENT_BACKLOG.md` are
+documentation-only). Per this turn's own explicit instruction, no commit
+was made -- another agent integrates this alongside the other Phase 5
+`auditor/` files already sitting uncommitted in this same working tree.
+
+---
+
+## 2026-07-11 — Phase 5: `auditor/trend.py`, the verifier pass-rate trend check
+
+Fifth file landed in `auditor/` this same day (see the `lexicon_audit.py`,
+`linkrot.py`, and `duplicates.py` entries directly below, all also this
+same day, at least some built concurrently in this same working tree).
+Implements CLAUDE.md's/the approved build plan's `audit.yml` "weekly"
+bullet "verifier pass-rate trend (rolling 7d/30d from
+`data/verifier_stats.json`)" -- reads `data/verifier_stats.json`'s
+`runs[]` history and computes a rolling 7-day pass rate, a rolling 30-day
+pass rate, and a `rising`/`falling`/`flat`/`insufficient_data` trend
+classification of the rolling-7d figure against the prior (non-overlapping)
+week's own rolling-7d figure, all anchored on one explicit `today` date
+argument -- never a live `datetime.now()`/`date.today()` call anywhere in
+this module, so every function here is fully unit-testable against a
+synthetic, hand-built history and an explicit date.
+
+**Reuse, not reimplementation, per this turn's own explicit instruction:**
+the actual rolling-window pooling arithmetic --
+`(confirmed + reported) / cards_drafted` pooled across every `runs[]` row
+in a trailing window, with a division-by-zero guard that returns `None`
+rather than raising or fabricating `0.0` when a window drafted no cards at
+all -- is `scripts.reconcile_run.rolling_pass_rate`, imported and called
+directly (proven by object identity in the test suite,
+`mod.rolling_pass_rate is reconcile_run_mod.rolling_pass_rate`), not
+reimplemented. That function already existed, built during the Phase 2
+reconciler commit specifically to pre-stage this exact need (its own
+docstring says as much -- see `IMPROVEMENT_BACKLOG.md`'s new entry for the
+full quote). `auditor/trend.py` calls it three times per run: once for the
+rolling 7-day figure (`as_of=today`), once for the rolling 30-day figure
+(`as_of=today`), and once more for "the prior week's rate"
+(`as_of=today - timedelta(days=7)`, i.e. the adjacent, non-overlapping
+7-day window immediately before the current one) -- there is no second,
+parallel window-pooling loop anywhere in this module. `audit_trend()`'s
+`stats=None` default path likewise reuses
+`scripts.reconcile_run.load_verifier_stats` directly (same identity-proof
+convention) rather than a second, independent file-reading/validation
+path.
+
+**Two spec-silent numeric/naming judgment calls, both logged in full in
+`IMPROVEMENT_BACKLOG.md`:** (1) the trend labels are `rising`/`falling`/
+`flat` per this turn's own task text, plus a fourth `insufficient_data`
+state (kept distinct from `flat`, not folded into it) for whenever either
+side of the comparison is `None` -- "no rate to compare" is a different
+finding from "the rate held steady," and the task's own wording treats the
+threshold classification and the drafted=0 guard as two separate things to
+prove; (2) the flat-band threshold itself, `TREND_FLAT_EPSILON = 0.03`
+(three percentage points), a round, conservative, unstated-by-the-task
+number, since no real `verifier_stats.json` history exists yet to
+calibrate against.
+
+**New test file `tests/test_auditor_trend.py`** (24 tests): the two
+reuse-by-identity checks (`rolling_pass_rate`, `load_verifier_stats`);
+`classify_trend`'s ordinary rising/falling/flat cases; bit-exact boundary
+tests at both `+TREND_FLAT_EPSILON` and `-TREND_FLAT_EPSILON` (constructed
+via subtraction from `0.0`, always exact in IEEE-754, plus
+`math.nextafter`-constructed just-past-the-boundary cases on both sides,
+so the inclusive-band behavior is proven precisely rather than
+approximately); the three-way `None`-guard matrix; a hand-built two-week
+synthetic history (`WEEK_1` a steady 0.75 daily pass rate, three
+differently-shaped second weeks for the rising/falling/flat scenarios)
+exercised end-to-end through `compute_pass_rate_trend`, including an
+independent re-derivation of the pooled 30-day rate straight from the raw
+rows (not merely re-deriving one result from another); the all-skip-prior-
+week division-by-zero guard exercised through the *full* rolling-window
+pipeline rather than only re-testing the already-covered
+`rolling_pass_rate` helper in isolation; an as-of-before-any-history case;
+and `audit_trend()`'s explicit-`stats`, missing-`runs`-key, and
+`stats=None`-default paths (the last proven via `monkeypatch` to route
+through the exact bound `scripts.reconcile_run.load_verifier_stats` name),
+plus a real-file integration smoke test confirming `audit_trend()` runs
+cleanly against this repo's actual, currently-empty
+`data/verifier_stats.json` (`runs: []` today -- no analyst run has
+happened for real yet), returning `"insufficient_data"` throughout rather
+than raising.
+
+**Verification:** `python -m pytest` -- **768 passed, 2 deselected** (up
+from 744 immediately before this turn's own additions, i.e. +24 new
+tests, exactly this turn's own count; nothing else changed or broke). No
+file outside `auditor/trend.py` and `tests/test_auditor_trend.py` was
+touched by this turn's own code changes (this file and
+`IMPROVEMENT_BACKLOG.md` are documentation-only). Per this turn's own
+instruction, no commit was made -- another agent integrates this alongside
+the other Phase 5 `auditor/` files already sitting uncommitted in this
+same working tree.
+
+---
+
 ## 2026-07-11 — Phase 5: `auditor/duplicates.py`, the duplicate-topic checker
 
 Fourth file landed in `auditor/` this same day (see the `lexicon_audit.py`

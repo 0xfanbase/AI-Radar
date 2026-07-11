@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "run_id": "audit-20260711T233000Z",
+  "generated_at": "2026-07-11T23:30:00Z",
+  "window": {
+    "days": 7,
+    "start": "2026-07-05",
+    "end": "2026-07-11"
+  },
+  "link_rot": {
+    "checked_at": "2026-07-11T23:30:01Z",
+    "total_urls": 2,
+    "counts": { "ok": 1, "dead": 1, "unreachable": 0 },
+    "results": [
+      {
+        "url": "https://example.com/ok",
+        "status": "ok",
+        "http_status": 200,
+        "method": "HEAD",
+        "detail": null
+      },
+      {
+        "url": "https://example.com/gone",
+        "status": "dead",
+        "http_status": 404,
+        "method": "HEAD",
+        "detail": null
+      }
+    ]
+  },
+  "lexicon": {
+    "coverage_gaps": [
+      { "card_id": "2026-07-11-example-card", "missing_terms": ["RAG"] }
+    ],
+    "orphans": ["quantization"]
+  },
+  "verifier_trend": {
+    "as_of": "2026-07-11",
+    "rolling_7d_pass_rate": 0.82,
+    "rolling_30d_pass_rate": 0.79,
+    "prior_week_pass_rate": 0.9,
+    "trend": "falling"
+  },
+  "missed_stories": {
+    "checked_at": "2026-07-11T23:30:02Z",
+    "window_hours": 168,
+    "top_n": 20,
+    "total_checked": 2,
+    "counts": { "covered": 1, "seen_but_dropped": 0, "missed": 1 },
+    "missed_stories": [
+      {
+        "title": "New open-weights model released",
+        "url": "https://example.com/new-model",
+        "points": 120,
+        "classification": "missed",
+        "matched_card_id": null,
+        "matched_cluster_hash": null,
+        "dropped_reason": null
+      }
+    ],
+    "seen_but_dropped_stories": [],
+    "results": [
+      {
+        "title": "Existing covered story",
+        "url": "https://example.com/covered",
+        "points": 200,
+        "classification": "covered",
+        "matched_card_id": "2026-07-11-example-card",
+        "matched_cluster_hash": null,
+        "dropped_reason": null
+      },
+      {
+        "title": "New open-weights model released",
+        "url": "https://example.com/new-model",
+        "points": 120,
+        "classification": "missed",
+        "matched_card_id": null,
+        "matched_cluster_hash": null,
+        "dropped_reason": null
+      }
+    ]
+  },
+  "duplicates": {
+    "duplicate_pairs": [
+      {
+        "card_a": "2026-07-10-earlier-card",
+        "card_b": "2026-07-11-example-card",
+        "headline_a": "Earlier headline",
+        "headline_b": "Later similar headline",
+        "similarity": 0.42,
+        "shared_topics": ["funding"]
+      }
+    ]
+  },
+  "findings_appended_to_backlog": 3
+}

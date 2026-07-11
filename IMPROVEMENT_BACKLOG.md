@@ -2390,3 +2390,442 @@ documentation-only). Per this turn's own explicit instruction, no commit
 was made — another agent integrates this alongside the other Phase 5
 `auditor/` files already sitting uncommitted in this same working tree.
 
+---
+
+## Phase 5: `auditor/trend.py` -- the verifier pass-rate trend check (2026-07-11)
+
+Fifth file landed in `auditor/` this same day (see the `lexicon_audit.py`,
+`linkrot.py`, and `duplicates.py` entries directly above), implementing
+CLAUDE.md's/the approved plan's `audit.yml` "verifier pass-rate trend
+(rolling 7d/30d from `data/verifier_stats.json`)" bullet. Several
+spec-silent judgment calls made, logged here:
+
+- **The rolling-window pooling math is reused directly from
+  `scripts.reconcile_run.rolling_pass_rate`, not reimplemented.** That
+  function already existed (built during the Phase 2 reconciler commit)
+  specifically pre-staging this exact need — its own docstring says so in
+  as many words: "this directly pre-stages the data shape Phase 5's
+  weekly `audit.yml` will need for its own 'verifier pass-rate trend
+  (rolling 7d/30d)' check ... the auditor itself is out of this turn's
+  scope, but the helper operates purely on this module's own
+  `verifier_stats.json` shape, so it lives here rather than duplicating
+  that shape's field names a second time in a not-yet-built module."
+  `auditor/trend.py` is that not-yet-built module, and it imports and
+  calls `rolling_pass_rate` by name rather than re-deriving the pooled
+  `(confirmed + reported) / cards_drafted`-over-a-trailing-window
+  arithmetic (including its own division-by-zero-guards-to-`None`
+  behavior) a second time. Proven by direct object identity in the test
+  suite (`mod.rolling_pass_rate is reconcile_run_mod.rolling_pass_rate`),
+  matching `auditor/duplicates.py`'s own established identity-proof
+  convention for its reused Jaccard function, not merely trusting the
+  `from ... import ...` line.
+- **The "drafted=0 guard" this turn's task explicitly asked to be tested
+  is entirely inherited from `rolling_pass_rate`, not a second guard
+  written in `trend.py` itself.** `rolling_pass_rate` already returns
+  `None` (never raises `ZeroDivisionError`, never fabricates `0.0`) when
+  every run in a window drafted zero cards. `auditor/trend.py` adds no
+  additional division anywhere — `compute_pass_rate_trend` only calls
+  `rolling_pass_rate` three times and hands its `float | None` results
+  straight through — so there was no new division-by-zero site to guard
+  in this module's own code. The guard is exercised end-to-end by
+  `tests/test_auditor_trend.py::test_compute_pass_rate_trend_all_skip_prior_week_guards_division_by_zero`
+  (an all-zero-`cards_drafted` prior week, confirmed to `None` rather
+  than crashing, alongside a real, non-`None` current-week rate) rather
+  than only unit-testing `rolling_pass_rate` a second time (already
+  covered by `tests/test_verifier_stats.py`'s own suite).
+- **Trend labels are `rising`/`falling`/`flat`, plus a fourth
+  `insufficient_data` state — read from this turn's own task text, not
+  invented independently.** The task names exactly three states,
+  `rising`/`falling`/`flat` — deliberately not reusing
+  `watcher/velocity.py`'s own `accelerating`/`cooling`/`flat` naming for
+  its different (HN-mention-count) trend check, since no
+  `schemas/audit.schema.json` exists yet to lock in verbatim wording for
+  *this* check the way `whats_moving.schema.json`'s enum already locks in
+  its own. A fourth state was still needed for the "no rate to compare"
+  case (either side `None`) and is kept distinct from `flat` rather than
+  folded into it — an untested rate genuinely isn't the same claim as "the
+  rate held steady," and this turn's own task text lists "the trend
+  classification thresholds" and "the drafted=0 guard" as two separate
+  things to prove with tests, read here as confirming the guard is its
+  own outcome rather than a fourth way to reach `flat`.
+- **The flat-band threshold, `TREND_FLAT_EPSILON = 0.03` (three
+  percentage points of pooled pass rate), is this module's own numeric
+  choice** — the task names the three-state classification but not an
+  exact delta threshold ("the trend classification thresholds" to be
+  tested, without specifying the number). Unlike `watcher/velocity.py`'s
+  own `_classify_trend` (strict `>`/`<`/exact-`==` on integer HN-mention
+  daily counts, where exact equality is a common, meaningful outcome for
+  small integers), a pooled pass rate is a continuous ratio of two
+  integers; requiring bit-for-bit equality to ever call it `flat` would
+  make that label practically unreachable against real data. A small,
+  symmetric, inclusive band around zero delta is the simplest reasonable
+  rule that still lets a genuinely-near-unchanged week read as `flat`
+  rather than a noise-driven coin flip between `rising`/`falling`. 0.03
+  was picked as a round, conservative number with no further calibration
+  data available yet (no analyst run has happened for real in this repo);
+  revisit once real `verifier_stats.json` history exists to see whether
+  it over- or under-fires in practice.
+- **"The prior week's rate" (per this turn's task text) is read as the
+  immediately-preceding, non-overlapping 7-day window** —
+  `rolling_pass_rate(runs, window_days=7, as_of=today - timedelta(days=7))`
+  — compared against the current rolling-7d window
+  (`rolling_pass_rate(runs, window_days=7, as_of=today)`), so the two
+  windows partition the trailing 14 days exactly in half with no day
+  double-counted and none skipped. Two other readings were considered and
+  rejected: (a) a single same-weekday-last-week day-over-day comparison —
+  rejected because it would make the trend label sensitive to one day's
+  noise rather than a real week's worth of pooled evidence, exactly the
+  problem the "pooled, not averaged" design of `rolling_pass_rate` itself
+  already exists to avoid; (b) comparing the rolling-7d figure against
+  the rolling-30d figure instead of a genuine "prior week" — rejected
+  because the 30-day window already includes the current 7 days inside
+  it, so that comparison would always be biased toward `flat` by the
+  current week's own data being counted on both sides of the comparison.
+  Covered by a dedicated test
+  (`test_compute_pass_rate_trend_prior_and_current_windows_are_adjacent_non_overlapping`)
+  independently re-deriving the pooled 30-day rate straight from the raw
+  rows and confirming it matches, rather than only checking the function
+  agrees with its own two sub-calls.
+- **`audit_trend()`'s `stats=None` convenience-wrapper convention**
+  matches `auditor.linkrot.audit_link_rot` / `auditor.lexicon_audit.audit_lexicon`
+  / `auditor.duplicates.audit_duplicates`'s own already-established
+  pattern — not a new judgment call, just consistency: an explicit `stats`
+  dict for testability, falling back to the real on-disk
+  `data/verifier_stats.json` via `scripts.reconcile_run.load_verifier_stats`
+  (reused directly — same identity-proof convention as above,
+  `mod.load_verifier_stats is reconcile_run_mod.load_verifier_stats`) only
+  when omitted. `today` has no such fallback and no default at all — it is
+  always a required, explicit argument on every function in this module,
+  per this turn's own explicit instruction ("never a live `now()` call").
+- **Test file added: `tests/test_auditor_trend.py`** (24 tests) — the two
+  identity-reuse proofs; `classify_trend`'s three ordinary cases (clearly
+  rising/falling/flat) plus dedicated bit-exact boundary tests at both
+  `+TREND_FLAT_EPSILON` and `-TREND_FLAT_EPSILON` (constructed via
+  subtraction from `0.0`, which IEEE-754 performs exactly, so these are
+  genuine boundary proofs rather than approximate ones) and the
+  immediately-adjacent just-past-the-boundary cases (via `math.nextafter`,
+  guaranteed strictly past by construction rather than by a decimal
+  literal floating point might round unpredictably); the three-state
+  `None`-guard matrix (`current` `None`, `prior` `None`, both `None`); a
+  hand-built two-week synthetic history exercised through
+  `compute_pass_rate_trend` end-to-end for all three rising/falling/flat
+  scenarios plus the adjacent-non-overlapping-windows proof described
+  above; the all-skip-prior-week division-by-zero guard exercised through
+  the full pipeline (not just at the reused helper's own, separately
+  already-tested level); an as-of-before-any-history case; and
+  `audit_trend()`'s explicit-`stats`, missing-`runs`-key, and
+  `stats=None`-default paths (the last proven via `monkeypatch` to route
+  through the exact bound `scripts.reconcile_run.load_verifier_stats`
+  name), plus a real-file integration smoke test against this repo's
+  actual, currently-empty `data/verifier_stats.json`.
+
+Verification: `python -m pytest` — **768 passed, 2 deselected** (up from
+744; +24 new tests, nothing else changed or broken). No file outside
+`auditor/trend.py` and `tests/test_auditor_trend.py` was touched by this
+turn's own code changes (`PROGRESS.md` and this file are
+documentation-only). Per this turn's own explicit instruction, no commit
+was made — another agent integrates this alongside the other Phase 5
+`auditor/` files already sitting uncommitted in this same working tree.
+
+## Phase 5: `auditor/missed_story.py` -- the missed-story checker (2026-07-11)
+
+Sixth file landed in `auditor/` this same day (see the `lexicon_audit.py`,
+`linkrot.py`, `duplicates.py`, and `trend.py` entries directly above, at
+least some built concurrently in this same working tree). Implements
+CLAUDE.md's `audit.yml` "weekly" bullet ('"missed-story" check (top-20 HN
+AI stories of the week vs cards; misses logged as findings, not
+failures)') and the approved build plan's section 6 equivalent ("HN
+top-20 AI stories of the week vs. published + ledger-dropped clusters —
+genuine misses vs. correctly-declined-per-corroboration-rule are
+distinguished, both logged as findings, not failures"). Spec-silent
+judgment calls made, logged here:
+
+- **The single biggest judgment call this turn: how to "Jaccard-match"
+  an HN story against `data/ledger.json`'s own entries, given
+  `ledger.schema.json`'s `ledger_entry` object carries no title/headline
+  field at all** (`additionalProperties: false`, fields are only
+  `card_id`, `status`, `first_seen`, `last_seen`, `member_urls`,
+  `verifier_outcome`). The task instruction's literal wording asked to
+  "Jaccard-match each against both published cards' titles AND
+  `data/ledger.json`'s entries," but there is no text on the ledger side
+  for a Jaccard comparison to run against — only `member_urls` (already-
+  normalized source URLs the `cluster_hash` was derived from). Resolved
+  by applying the *other* tier of `watcher/clustering.py`'s own two-tier
+  matching algorithm to the ledger side instead: exact
+  `watcher.models.normalize_url()` equality between the HN story's own
+  URL and any of a ledger entry's `member_urls` — this is literally
+  clustering.py's own first-choice mechanism (checked before Jaccard is
+  ever computed, per its own module docstring: "Exact match: if
+  `normalize_url(item.url)` equals the normalized URL of any existing
+  cluster's member, join that cluster ... this short-circuits before
+  Jaccard is even computed"), not a new invention for this module, so
+  "reuse clustering.py's similarity function" is honored in spirit even
+  though the literal word "Jaccard" doesn't apply to this specific
+  target. Published cards, by contrast, get *both* tiers: exact-URL match
+  against the card's own `citations[].url` (the story was literally one
+  of the analyst's cited sources) OR Jaccard match of the raw HN title
+  against the card's own `headline` (`story_matches_card()`). Covered by
+  dedicated tests for each tier on each target, including one proving the
+  exact-URL tier is genuinely `normalize_url`-based (a `www.`-prefixed,
+  trailing-slash story URL matches a bare citation/member URL) rather
+  than raw string equality.
+- **The Jaccard threshold reused for the card-title tier is
+  `watcher.config.JACCARD_SIMILARITY_THRESHOLD` (0.35), the same general
+  bar `auditor/duplicates.py` already reuses for its own card-vs-card
+  check — but the reasoning here is actually stronger than "the same
+  default a sibling module picked."** An HN story is never
+  `source_type == "lab"` (`watcher/clustering.py`'s
+  `LAB_LAB_JACCARD_SIMILARITY_THRESHOLD` only ever applies to a
+  lab-vs-lab comparison), so 0.35 is literally the exact bar
+  `watcher/clustering.py`'s own daily clustering pass would have applied
+  to this very same HN `Item`'s title had it been compared against any
+  non-lab cluster seed during the original watch run. This module is
+  asking, after the fact, "would this story's title have clustered with
+  something the Wire already has" — reusing the one constant that
+  already answers that exact question for this exact `Item` type isn't
+  merely convenient consistency with a sibling module, it is the correct
+  constant on first-principles grounds.
+- **Classification priority: a published-card match always wins over any
+  ledger match, and among ledger matches, any non-`"dropped"` status
+  (`"queued"` or `"published"`) always wins over a `"dropped"` match.**
+  The task named exactly three buckets (`missed` / `seen_but_dropped` /
+  implicitly "covered" for everything else) but didn't specify a
+  tie-break for a story that happens to match more than one thing at
+  once (e.g. a card via one signal and a separate, unrelated dropped
+  ledger entry via another). Resolved by treating "covered" as strictly
+  the strongest, least-interesting-to-report signal — any evidence for it
+  (a real card, or a ledger entry the pipeline hasn't declined) takes
+  priority over "seen_but_dropped," which itself only applies when *no*
+  stronger signal exists anywhere. `classify_story()` implements this by
+  checking every card first (returning immediately on the first card
+  match), then scanning *every* ledger entry rather than short-circuiting
+  on the first "dropped" hit — so a `"dropped"` match found before a
+  `"queued"`/`"published"` match elsewhere in the same ledger dict does
+  not incorrectly win. Covered by dedicated tests for both entry-
+  iteration orders (dropped-entry-first and dropped-entry-second in the
+  dict) proving the outcome is order-independent, plus a test proving a
+  genuine card match beats a separately-matching dropped ledger entry for
+  the very same story.
+- **A ledger entry matching with `status: "published"` reports
+  `matched_card_id` from the ledger entry's own `card_id` field directly**
+  (not from independently re-matching the corresponding card in `cards`
+  by title/citation). This is a deliberate, cheap safety net: the ledger
+  already carries the authoritative `cluster_hash -> card_id` link for a
+  published entry (`ledger.schema.json`'s own stated purpose), so trusting
+  it directly is more precise than requiring the HN story's raw title to
+  *also* separately clear the Jaccard bar against that same card's
+  (possibly quite differently worded) headline, or its URL to appear
+  among that card's citations. A story whose only signal is a `"queued"`
+  ledger match (the pipeline has seen it but not yet decided) is also
+  `covered` for the same "the pipeline already knows about this, it's not
+  a gap" reasoning, with `matched_card_id` simply `None` in that case
+  since `card_id` stays `null` until publication.
+- **HN fetch reuse**: `fetch_weekly_top_hn_stories()` is a thin wrapper
+  around `watcher.sources.hn.fetch_hn_items()`, widening only
+  `lookback_hours` to `MISSED_STORY_HN_LOOKBACK_HOURS = 24 * 7` (168h,
+  CLAUDE.md's own "of the week" wording) and slicing the result to
+  `MISSED_STORY_TOP_N = 20` (CLAUDE.md's own "top-20"). No part of
+  `fetch_hn_items`'s own broad-pool/keyword-filter/final-candidacy/
+  windowed-pagination/robots-gate/ETag-caching logic is reimplemented or
+  duplicated — every other parameter is left at `fetch_hn_items`'s own
+  real default. Proven both by a monkeypatched-stub test (capturing the
+  exact `lookback_hours=168` kwarg passed through) and, more importantly,
+  by a genuine end-to-end test reusing the same real captured Algolia
+  fixture `tests/test_hn_fetch.py` already uses for its own 48h/4-window
+  daily-watcher test — widened here to 168h, producing 14 (not 4)
+  windowed requests, and yielding the identical three real AI-relevant
+  stories that fixture actually contains.
+- **`audit_missed_stories()`'s return shape** (`{checked_at, window_hours,
+  top_n, total_checked, counts: {covered, seen_but_dropped, missed},
+  missed_stories: [...], seen_but_dropped_stories: [...], results: [...]}`)
+  is this module's own provisional convention, matching the same
+  "not yet locked to a real `schemas/audit.schema.json`" caveat already
+  logged for `auditor.linkrot.audit_link_rot`,
+  `auditor.lexicon_audit.audit_lexicon`,
+  `auditor.duplicates.audit_duplicates`, and `auditor.trend.audit_trend`'s
+  own summary-dict shapes — that schema doesn't exist yet (later Phase 5
+  scope, `auditor/report.py`'s job). `missed_stories`/
+  `seen_but_dropped_stories` are pre-filtered views of `results` included
+  directly in the summary (rather than left for a caller to re-filter),
+  since CLAUDE.md's own wording is explicit that *both* get "logged as
+  findings."
+- **Test file added: `tests/test_auditor_missed_story.py`** (33 tests) —
+  four reuse-by-identity proofs (`watcher.sources.hn` module itself,
+  `_jaccard`, `tokenize_title`, `normalize_url`) plus the constant-value
+  checks (168h/20/0.35); `fetch_weekly_top_hn_stories`'s widened-window
+  behavior via both a monkeypatched stub and a genuine fixture-based
+  end-to-end run; `load_ledger`'s missing-file and real-file paths;
+  `story_matches_card`/`story_matches_ledger_entry` correctness on each
+  matching tier plus graceful handling of missing citation/member-url
+  fields, including a `>=`-inclusive threshold-boundary check reusing the
+  same exactly-representable 0.5 Jaccard pair
+  `test_auditor_duplicates.py` already established; `classify_story`
+  across all three buckets, the card-beats-dropped-ledger priority case,
+  and the ledger-iteration-order-independence case; and
+  `audit_missed_stories()`'s explicit-data path, its `cards=None`/
+  `ledger=None` default-loading paths (each proven via `monkeypatch` of
+  the exact bound name), its empty-input clean-zero-report shape, and an
+  integration-flavored smoke test exercising the real live-fetch default
+  wiring (via `requests_mock`) against this repo's real, currently empty/
+  all-`"queued"` `content/cards/`/`data/ledger.json` disk state.
+
+Verification: `python -m pytest` — **801 passed, 2 deselected** at the
+moment this turn's own suite was last run in isolation (744, recorded
+above before `trend.py` landed, + 24 from the concurrently-landed
+`auditor/trend.py`/`tests/test_auditor_trend.py` + 33 from this turn's
+own new tests = 801). No file outside `auditor/missed_story.py` and
+`tests/test_auditor_missed_story.py` was touched by this turn's own code
+changes (`PROGRESS.md` and this file are documentation-only). Per this
+turn's own explicit instruction, no commit was made — another agent
+integrates this alongside the other Phase 5 `auditor/` files already
+sitting uncommitted in this same working tree.
+
+## Phase 5: `auditor/report.py` + `auditor/cli.py` + `scripts/append_backlog_findings.py` + `schemas/audit.schema.json` -- report assembler, CLI, backlog-append (2026-07-11)
+
+- **Severity mapping for `scripts/append_backlog_findings.py` (this
+  turn's own explicit instruction, logged here in full per that same
+  instruction):** declining verifier pass-rate trend
+  (`verifier_trend.trend == "falling"`) = **high**; a missed story
+  (`missed_stories.missed_stories[]`) or a duplicate-topic pair
+  (`duplicates.duplicate_pairs[]`) = **medium**; a dead citation link
+  (`link_rot.results[].status == "dead"`) or a lexicon orphan
+  (`lexicon.orphans[]`) = **low**. Lexicon *coverage gaps*
+  (`lexicon.coverage_gaps[]`) were not explicitly named in the given
+  mapping (only "orphans" was) -- extended here to **low** as well,
+  grouped with the sibling check it lives alongside in `auditor.
+  lexicon_audit`'s own combined `audit_lexicon()` return, rather than
+  left unmapped/silently dropped. This is `scripts/append_backlog_findings.
+  py`'s own default for what severity tag to print on a line -- it is
+  not the fortnightly `improve.yml`'s picker logic (`scripts/
+  pick_backlog_item.py`, out of this turn's scope), which will decide how
+  to actually pick a target from the accumulated, severity-tagged
+  checkboxes this file produces.
+- **Only `status == "dead"` link-rot results are promoted to a finding,
+  not `unreachable` ones.** `auditor.linkrot`'s own docstring already
+  treats `unreachable` (5xx/timeout/403/401/429/etc.) as "retry next week,
+  not confirmed yet" -- this project's own real fetch history already
+  shows several legitimate lab domains 403'ing ordinary requests for
+  bot-management reasons unrelated to the resource being gone (see the
+  Phase 3 Frontier Board entries above). Treating every `unreachable` URL
+  as an actionable weekly finding would be noise, not signal; only a
+  server-confirmed 404/410 is.
+- **Only a `falling` verifier trend is promoted; `rising`/`flat`/
+  `insufficient_data` are not.** Nothing needs fixing on a rising or flat
+  trend, and there's nothing to act on yet when there isn't enough data
+  (an empty `data/verifier_stats.json` history, this repo's own real
+  state today, correctly produces zero findings from this check).
+- **Only `missed_stories.missed_stories[]` (never
+  `seen_but_dropped_stories[]`) is promoted to a finding.** CLAUDE.md's
+  own `audit.yml` bullet explicitly requires the two outcomes be
+  "distinguished" -- a story the pipeline saw and correctly declined per
+  the corroboration rule is the system working as designed, not a
+  finding needing action.
+- **Spec-silent guard, logged in full: lexicon-orphan findings are
+  suppressed (not merely demoted) from the backlog-append step whenever
+  zero cards have been published yet (`has_cards=False`), even though the
+  raw `auditor.lexicon_audit.find_orphans()` check itself is left
+  completely unchanged and still reports the full, honest orphan list in
+  `data/audit/latest.json`.** This repo's own real, current state is
+  exactly this case: `content/cards/` doesn't exist (no analyst run has
+  happened for real yet) and all 30 real `content/lexicon.json` entries
+  have `seen_in: []` (Phase 3's seed content, none of it referenced by any
+  card yet since none exist). Running the promotion step unconditionally
+  against that real state would flag all 30 seed lexicon terms as
+  individual "orphan" findings on literally the first audit run ever --
+  not a real signal that the analyst's own lexicon auto-growth rule
+  (CLAUDE.md's corroboration procedure step 7) is failing, just the
+  expected, uninteresting fact that publishing hasn't started. Verified
+  directly this turn via a real, live end-to-end `python -m auditor.cli
+  run` invocation against this repo's actual current state (see
+  `PROGRESS.md`'s matching entry): the raw report's `lexicon.orphans`
+  correctly listed all 30 real terms, while `findings_appended_to_backlog`
+  counted only the run's genuine `missed_story` findings (12), zero of
+  which were lexicon-orphan noise. Coverage-gap findings need no
+  equivalent guard -- they are already structurally empty whenever
+  `cards` is empty, so there's nothing to suppress there.
+- **`schemas/audit.schema.json`'s top-level `window` field (`{days, start,
+  end}`, fixed at 7 days) is a report-level "what period does this weekly
+  audit cover" annotation only -- it is never itself fed into any of the
+  five checkers, each of which computes its own window (or has none) fully
+  independently.** `link_rot`/`lexicon`/`duplicates` check the *current*
+  state of citations/the lexicon/published cards (no window at all);
+  `verifier_trend` already carries its own `as_of` + rolling 7d/30d
+  figures; `missed_stories` already carries its own `window_hours` (168).
+  A single top-level field exists purely so a reader of `data/audit/
+  latest.json` gets one quick answer without inferring it from `missed_
+  stories.window_hours` alone. Spec-silent (neither CLAUDE.md nor the
+  approved plan names a top-level `window` shape), logged here rather
+  than left undocumented.
+- **`run_id` (`"audit-<compact UTC timestamp>"`, e.g.
+  `"audit-20260711T233000Z"`) is derived from `generated_at`, not a random
+  UUID.** This project uses no UUID dependency anywhere else; a
+  timestamp-derived id is already unique per real invocation (`audit.yml`
+  runs at most weekly) while staying sortable and human-legible, matching
+  this repo's existing `cluster_hash`/`card_id`/`proposed_card_id`
+  convention of deriving ids from data rather than opaque randomness.
+- **`auditor/cli.py`'s `run` subcommand exposes `--out`, `--backlog-path`,
+  and `--no-backlog-append`, none of which are named by CLAUDE.md or the
+  approved plan.** `--out` matches the literal invocation this turn's own
+  task text names (`python -m auditor.cli run --out
+  data/audit/latest.json`); `--backlog-path`/`--no-backlog-append` were
+  added specifically so this repo's own real `IMPROVEMENT_BACKLOG.md`
+  could be exercised against by a real, live end-to-end verification run
+  this same turn without being mutated by that one-off run's own
+  now-ephemeral, will-go-stale live-fetched HN story titles -- see
+  `PROGRESS.md`'s matching entry for that real run's actual results and
+  the reasoning for not committing its output. The real, unflagged
+  invocation (`python -m auditor.cli run --out data/audit/latest.json`,
+  no `--backlog-path`/`--no-backlog-append`) is exactly what a genuine
+  scheduled weekly run would use.
+- **`run_audit()` accepts an explicit `hn_items` passthrough straight to
+  `auditor.missed_story.audit_missed_stories`'s own parameter of the same
+  name**, added specifically so a caller/test can exercise the *entire*
+  audit pipeline (not just `missed_story.py` in isolation) fully offline
+  and deterministically, without needing a `requests_mock` HN fixture
+  wired through every layer -- the real CLI path (`hn_items` left `None`)
+  is unaffected and still does a genuine live fetch.
+- **`auditor/__init__.py` added, reversing the earlier logged "`auditor/`
+  ships with no `__init__.py`" decision from the `lexicon_audit.py` entry
+  above.** That choice matched `scripts/`'s own `__init__.py`-free
+  convention and was correct for what existed at the time -- there was no
+  package-level CLI entrypoint yet, and Python's implicit namespace-
+  package handling already made (and still makes) every `from
+  auditor.<module> import ...` resolve correctly with no `__init__.py`
+  present. This turn adds one back **per this turn's own explicit
+  instruction** ("Create auditor/__init__.py if missing"), now that
+  `auditor/` has a real `cli.py` entrypoint (`python -m auditor.cli run`)
+  -- the same shape `watcher/__init__.py` already backs for `watcher/
+  cli.py`'s own `python -m watcher.cli run`, making `auditor/` symmetric
+  with `watcher/` (a package backing a real CLI) rather than `scripts/` (a
+  flat collection of standalone scripts). Nothing functional required this
+  reversal -- `python -m pytest` stayed green both before and after adding
+  the file -- so this is a consistency/explicitness choice, logged
+  transparently as an explicit reversal of a prior, also-reasoned decision
+  rather than silently overwritten without comment.
+- **Real, live verification performed this turn (not merely unit tests
+  against fixtures/mocks):** `python -m auditor.cli run` was actually
+  executed against this repo's real, current `content/`/`data/` state --
+  zero published cards, the real 30-entry `content/lexicon.json`, the
+  real 104-entry `data/ledger.json`, and a genuine live HTTP fetch of this
+  week's top-20 HN AI stories via the real Algolia endpoint (confirmed
+  network access first with a standalone live GET before relying on it
+  here, rather than assuming it would work) -- producing a schema-valid
+  report in ~10.7s wall time (dominated by the HN fetch's 14 windowed
+  sub-queries) with real counts (`missed_stories`: 8 covered / 0
+  seen-but-dropped / 12 missed; `lexicon.orphans`: 30, correctly zero of
+  which were promoted per the guard above; `link_rot`/`duplicates`: both
+  empty, correctly, since zero cards exist to carry citations or be
+  compared against each other; `verifier_trend`: `insufficient_data`,
+  correctly, since `data/verifier_stats.json` still has `runs: []`) and
+  12 real, correctly-formatted checkbox findings written to a **scratch**
+  backlog file (never the real, committed `IMPROVEMENT_BACKLOG.md` --
+  `--out`/`--backlog-path` both pointed at a scratchpad directory for this
+  run). This scratch run's own output is deliberately not committed to
+  the real repo (matching the `data/run_plan.json` precedent from the
+  Phase 2 PM checkpoint entry above: seeding a data artifact from a
+  one-off manual verification, whose content -- this week's specific live
+  HN stories -- will go stale, is dead weight compared to letting a real
+  scheduled run produce and commit its own first one); `git status` was
+  independently checked afterward and confirmed the real repo's working
+  tree carries no incidental changes from this verification beyond this
+  turn's own intentional file additions.
