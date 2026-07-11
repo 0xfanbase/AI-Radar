@@ -26,7 +26,7 @@ Two-step build usage:
    verbatim in this particular prose string. Callers must not treat
    ``unmatched_terms`` as an error: an empty ``content/cards/`` directory
    today means this path is only exercised against synthetic fixtures
-   (see ``tests/test_linkify.py``) until the real Wire builder runs;
+   (see ``site/tests/test_linkify.py``) until the real Wire builder runs;
    real analyst-written prose is expected to hit the fallback path
    occasionally and that is by design, not a bug.
 """

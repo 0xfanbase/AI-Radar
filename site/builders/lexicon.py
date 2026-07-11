@@ -79,7 +79,7 @@ def _load_module_by_path(name: str, path: Path):
     """Load a module from an explicit file path, registering it in
     `sys.modules` *before* `exec_module` runs -- matches the convention
     every other Phase 4 module/test already uses (`site/builders/wire.py`,
-    `tests/test_linkify.py`, `tests/test_board_builder.py`): `site/` is
+    `site/tests/test_linkify.py`, `site/tests/test_board_builder.py`): `site/` is
     deliberately never turned into an importable package (it would shadow
     the stdlib `site` module), so every cross-file reference within
     `site/` loads its target by path instead of via a package import. The

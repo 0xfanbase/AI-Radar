@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SVG_SPARKLINE_PATH = REPO_ROOT / "site" / "lib" / "svg_sparkline.py"
 
 SVG_NS = "{http://www.w3.org/2000/svg}"

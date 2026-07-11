@@ -2,8 +2,8 @@
 Frontier Board "observatory status wall" (Phase 4, build-plan section 5).
 
 Loaded by explicit file path (matching site/tests/test_build.py's own
-convention for site/generate.py, and tests/test_linkify.py /
-tests/test_svg_sparkline.py's convention for site/lib modules) rather
+convention for site/generate.py, and site/tests/test_linkify.py /
+site/tests/test_svg_sparkline.py's convention for site/lib modules) rather
 than an `import site.builders.board` package import, since `site` is also
 a stdlib module name and this directory is deliberately not turned into
 an importable package -- see IMPROVEMENT_BACKLOG.md.
@@ -27,7 +27,7 @@ from pathlib import Path
 
 import pytest
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 BOARD_PATH = REPO_ROOT / "site" / "builders" / "board.py"
 FRONTIER_BOARD_CONTENT_PATH = REPO_ROOT / "content" / "frontier_board.json"
 
@@ -42,7 +42,7 @@ def _load_board_module():
     # (combined with `from __future__ import annotations`) need their own
     # module registered under `cls.__module__` for dataclasses' internal
     # annotation resolution to find it -- same requirement documented in
-    # tests/test_linkify.py / tests/test_svg_sparkline.py.
+    # site/tests/test_linkify.py / site/tests/test_svg_sparkline.py.
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module

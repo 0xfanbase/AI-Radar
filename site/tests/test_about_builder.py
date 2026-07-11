@@ -9,7 +9,7 @@ is actually present in the rendered output (not just that the page
 "renders something"), plus the shared landmarks every other page also
 carries.
 
-Loaded by explicit file path (matching `tests/test_board_builder.py`'s
+Loaded by explicit file path (matching `site/tests/test_board_builder.py`'s
 own convention), since `site/` is deliberately not an importable package
 -- see IMPROVEMENT_BACKLOG.md.
 """
@@ -19,7 +19,7 @@ import importlib.util
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 ABOUT_BUILDER_PATH = REPO_ROOT / "site" / "builders" / "about.py"
 
 

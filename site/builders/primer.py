@@ -107,7 +107,7 @@ def build_steps(
     themselves (both are hand-authored seed content, not user input), so
     this fails loudly at build time rather than silently skipping a step
     or rendering a broken link. All 10 of the real, committed primer
-    slugs resolve today -- see `tests/test_primer_builder.py`.
+    slugs resolve today -- see `site/tests/test_primer_builder.py`.
     """
     slug_to_entry = build_slug_to_entry(lexicon_entries)
     total = len(primer_terms)

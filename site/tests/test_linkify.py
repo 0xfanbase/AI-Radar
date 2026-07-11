@@ -20,7 +20,7 @@ from pathlib import Path
 
 from markupsafe import Markup
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 LINKIFY_PATH = REPO_ROOT / "site" / "lib" / "linkify.py"
 
 

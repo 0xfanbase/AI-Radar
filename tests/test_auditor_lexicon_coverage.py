@@ -17,9 +17,9 @@ has no `__init__.py` (an implicit namespace package is enough; no other
 module here needs `auditor` importable as a real package yet), so the
 directory is added to `sys.path` and the module imported by its bare
 name, rather than loaded via `importlib.util.spec_from_file_location`
-(that heavier approach is what `site/tests` and `tests/test_linkify.py`
-use instead, specifically because `site` collides with a stdlib module
-name -- `auditor` has no such collision).
+(that heavier approach is what `site/tests` -- including
+`site/tests/test_linkify.py` -- uses instead, specifically because `site`
+collides with a stdlib module name -- `auditor` has no such collision).
 """
 from __future__ import annotations
 

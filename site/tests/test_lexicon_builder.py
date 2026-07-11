@@ -11,8 +11,8 @@ than a broken empty list. A couple of small synthetic fixtures cover the
 non-empty `seen_in[]` path and defensive fallbacks that the real seed
 content doesn't happen to exercise.
 
-Loaded by explicit file path (matching `tests/test_board_builder.py`'s /
-`tests/test_wire_builder.py`'s own convention), since `site/` is
+Loaded by explicit file path (matching `site/tests/test_board_builder.py`'s /
+`site/tests/test_wire_builder.py`'s own convention), since `site/` is
 deliberately not an importable package -- see IMPROVEMENT_BACKLOG.md.
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ from pathlib import Path
 import pytest
 from markupsafe import Markup
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 LEXICON_BUILDER_PATH = REPO_ROOT / "site" / "builders" / "lexicon.py"
 LEXICON_CONTENT_PATH = REPO_ROOT / "content" / "lexicon.json"
 
@@ -40,7 +40,7 @@ def _load_module_by_path(name: str, path: Path):
     # with `from __future__ import annotations`) need their own module
     # registered under `cls.__module__` for dataclasses' internal
     # annotation resolution to find it -- same requirement documented in
-    # tests/test_linkify.py / tests/test_board_builder.py.
+    # site/tests/test_linkify.py / site/tests/test_board_builder.py.
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module

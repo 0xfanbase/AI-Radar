@@ -7,7 +7,7 @@ analyst run has happened for real yet in this environment) -- every
 function here is written to handle an empty (or missing) card list
 gracefully, rendering an honest "no cards yet" message rather than
 crashing or producing a broken-looking page. See
-`tests/test_wire_builder.py` for the zero-cards proof.
+`site/tests/test_wire_builder.py` for the zero-cards proof.
 
 This module deliberately does *not* wire itself into `site/generate.py`
 (out of this turn's scope -- another turn integrates it); it exposes a
@@ -51,8 +51,8 @@ def _load_module_by_path(name: str, path: Path):
     `sys.modules` *before* `exec_module` runs.
 
     Matches the convention every other Phase 4 module/test already uses
-    (`site/generate.py`'s own test, `tests/test_linkify.py`,
-    `tests/test_svg_sparkline.py`): `site/` is deliberately never turned
+    (`site/generate.py`'s own test, `site/tests/test_linkify.py`,
+    `site/tests/test_svg_sparkline.py`): `site/` is deliberately never turned
     into an importable package (it would shadow the stdlib `site` module
     for anything else sharing the interpreter's `sys.path`), so every
     cross-file reference within `site/` loads its target by path instead

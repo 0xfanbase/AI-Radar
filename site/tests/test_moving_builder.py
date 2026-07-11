@@ -12,8 +12,8 @@ completely absent from a sibling page's render (e.g. `/board/`), proving
 the `base.html` edit is backward-compatible with every already-committed
 builder.
 
-Loaded by explicit file path (matching `tests/test_board_builder.py`'s /
-`tests/test_primer_builder.py`'s own convention), since `site/` is
+Loaded by explicit file path (matching `site/tests/test_board_builder.py`'s /
+`site/tests/test_primer_builder.py`'s own convention), since `site/` is
 deliberately not an importable package -- see IMPROVEMENT_BACKLOG.md.
 """
 from __future__ import annotations
@@ -24,7 +24,7 @@ import re
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 MOVING_BUILDER_PATH = REPO_ROOT / "site" / "builders" / "moving.py"
 BOARD_BUILDER_PATH = REPO_ROOT / "site" / "builders" / "board.py"
 WHATS_MOVING_CONTENT_PATH = REPO_ROOT / "data" / "whats_moving.json"
@@ -39,7 +39,7 @@ def _load_module_by_path(name: str, path: Path):
     # with `from __future__ import annotations`) need their own module
     # registered under `cls.__module__` for dataclasses' internal
     # annotation resolution to find it -- same requirement documented in
-    # tests/test_board_builder.py / tests/test_linkify.py.
+    # site/tests/test_board_builder.py / site/tests/test_linkify.py.
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
@@ -214,5 +214,5 @@ def test_masthead_strip_absent_from_a_sibling_page_that_does_not_opt_in():
     html = board.render_board_page(board_rows, today=date(2026, 7, 9))
     assert "masthead-strip" not in html
     # Sanity: board.html's own content is unaffected -- still exactly one
-    # <h1>, matching tests/test_board_builder.py's own assertion.
+    # <h1>, matching site/tests/test_board_builder.py's own assertion.
     assert html.count("<h1") == 1

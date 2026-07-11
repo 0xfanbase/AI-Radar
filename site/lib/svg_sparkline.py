@@ -95,7 +95,7 @@ def classify_trend(daily_counts: Sequence[int]) -> str:
     ``data/whats_moving.json`` snapshot as of this module's writing: this
     method reproduces that file's own precomputed "accelerating" ->
     rising / "flat" -> flat labels for all 9 topics currently on record
-    (see ``tests/test_svg_sparkline.py``).
+    (see ``site/tests/test_svg_sparkline.py``).
     """
     counts = list(daily_counts)
     if len(counts) < 2:

@@ -9,7 +9,7 @@ actually empty `cards` list) renders a clear, honest empty state rather
 than crashing or looking broken.
 
 Loaded by explicit file path (matching `site/tests/test_build.py`'s and
-`tests/test_linkify.py`'s own convention for everything under `site/`),
+`site/tests/test_linkify.py`'s own convention for everything under `site/`),
 since `site/` is deliberately never turned into an importable package --
 see IMPROVEMENT_BACKLOG.md.
 """
@@ -25,7 +25,7 @@ import jsonschema
 import pytest
 from markupsafe import escape
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 WIRE_PATH = REPO_ROOT / "site" / "builders" / "wire.py"
 CARD_SCHEMA_PATH = REPO_ROOT / "schemas" / "card.schema.json"
 

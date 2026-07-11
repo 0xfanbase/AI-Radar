@@ -17,7 +17,7 @@ current-state data doesn't happen to exercise (a non-empty
 verifier_stats run, and -- defensively -- a hypothetical present
 `data/audit/latest.json`).
 
-Loaded by explicit file path (matching `tests/test_board_builder.py`'s
+Loaded by explicit file path (matching `site/tests/test_board_builder.py`'s
 own convention), since `site/` is deliberately not an importable package
 -- see IMPROVEMENT_BACKLOG.md.
 """
@@ -31,7 +31,7 @@ from pathlib import Path
 import pytest
 from markupsafe import escape
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 METHOD_BUILDER_PATH = REPO_ROOT / "site" / "builders" / "method.py"
 LEDGER_CONTENT_PATH = REPO_ROOT / "data" / "ledger.json"
 VERIFIER_STATS_CONTENT_PATH = REPO_ROOT / "data" / "verifier_stats.json"
@@ -119,7 +119,7 @@ def test_render_method_page_with_missing_audit_shows_placeholder_not_a_crash():
     assert html.count("<h1") == 1
     # Jinja autoescapes the message (e.g. "hasn't" -> "hasn&#39;t"), so
     # compare against the same escaped form -- matching
-    # tests/test_primer_builder.py's own established convention for
+    # site/tests/test_primer_builder.py's own established convention for
     # asserting rendered prose containing apostrophes.
     assert str(escape(method.NO_AUDIT_MESSAGE)) in html
     assert "Phase 5" in html

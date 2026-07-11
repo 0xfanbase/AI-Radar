@@ -10,7 +10,7 @@ crash or a broken-looking page. A synthetic multi-entry fixture covers
 the non-empty list-rendering/sort-order path the real, current-state data
 doesn't happen to exercise.
 
-Loaded by explicit file path (matching `tests/test_board_builder.py`'s
+Loaded by explicit file path (matching `site/tests/test_board_builder.py`'s
 own convention), since `site/` is deliberately not an importable package
 -- see IMPROVEMENT_BACKLOG.md.
 """
@@ -23,7 +23,7 @@ from pathlib import Path
 
 from markupsafe import escape
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 CORRECTIONS_BUILDER_PATH = REPO_ROOT / "site" / "builders" / "corrections.py"
 CORRECTIONS_CONTENT_PATH = REPO_ROOT / "content" / "corrections.json"
 
@@ -36,7 +36,7 @@ def _load_module_by_path(name: str, path: Path):
     # with `from __future__ import annotations`) need their own module
     # registered under `cls.__module__` for dataclasses' internal
     # annotation resolution to find it -- same requirement documented in
-    # tests/test_board_builder.py / tests/test_linkify.py.
+    # site/tests/test_board_builder.py / site/tests/test_linkify.py.
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module
@@ -143,7 +143,7 @@ def test_render_corrections_page_shows_every_synthetic_correction():
     for entry in SYNTHETIC_CORRECTIONS:
         # Autoescaped by Jinja same as any other plain-text field (an
         # apostrophe becomes `&#39;` etc.) -- compare against the escaped
-        # form, matching tests/test_primer_builder.py's own convention.
+        # form, matching site/tests/test_primer_builder.py's own convention.
         assert str(escape(entry["original_claim"])) in html
         assert str(escape(entry["corrected_claim"])) in html
         assert str(escape(entry["reason"])) in html

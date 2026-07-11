@@ -8,8 +8,8 @@ seeded terms) throughout: every primer slug must resolve to a real
 generated lexicon page, in the fixed order, reusing each term's own
 `one_liner` verbatim rather than inventing new copy.
 
-Loaded by explicit file path (matching `tests/test_board_builder.py`'s /
-`tests/test_lexicon_builder.py`'s own convention), since `site/` is
+Loaded by explicit file path (matching `site/tests/test_board_builder.py`'s /
+`site/tests/test_lexicon_builder.py`'s own convention), since `site/` is
 deliberately not an importable package -- see IMPROVEMENT_BACKLOG.md.
 """
 from __future__ import annotations
@@ -22,7 +22,7 @@ from pathlib import Path
 import pytest
 from markupsafe import escape
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 PRIMER_BUILDER_PATH = REPO_ROOT / "site" / "builders" / "primer.py"
 LEXICON_BUILDER_PATH = REPO_ROOT / "site" / "builders" / "lexicon.py"
 PRIMER_CONTENT_PATH = REPO_ROOT / "content" / "primer.json"
@@ -37,7 +37,7 @@ def _load_module_by_path(name: str, path: Path):
     # with `from __future__ import annotations`) need their own module
     # registered under `cls.__module__` for dataclasses' internal
     # annotation resolution to find it -- same requirement documented in
-    # tests/test_linkify.py / tests/test_lexicon_builder.py.
+    # site/tests/test_linkify.py / site/tests/test_lexicon_builder.py.
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     return module

@@ -87,7 +87,7 @@ def _load_module_by_path(name: str, path: Path):
 
     Matches the convention every Phase 4 module/test in this repo already
     uses (`site/builders/wire.py`, `site/builders/lexicon.py`,
-    `tests/test_board_builder.py`, etc.): `site/` is deliberately never
+    `site/tests/test_board_builder.py`, etc.): `site/` is deliberately never
     turned into an importable package (it would shadow the stdlib `site`
     module for anything else sharing the interpreter's `sys.path`), so
     every cross-file reference within `site/` loads its target by path
