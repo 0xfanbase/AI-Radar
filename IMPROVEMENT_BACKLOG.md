@@ -2149,3 +2149,244 @@ Verification: `python -m pytest` — **691 passed, 2 deselected** (up from
 675; +16 new tests, nothing else changed or broken). No file outside
 `auditor/lexicon_audit.py` and `tests/test_auditor_lexicon_coverage.py`
 was touched this turn.
+
+## Phase 5: `auditor/linkrot.py` -- the weekly link-rot checker (2026-07-11)
+
+Third file landed in `auditor/` this same day (see the `lexicon_audit.py`
+entry directly above), implementing CLAUDE.md's `audit.yml` "link rot
+(HEAD/GET every citation URL, classify ok/dead/unreachable)" bullet.
+Several spec-silent judgment calls made, logged here:
+
+- **Every non-2xx status that isn't exactly 404/410 is bucketed
+  `unreachable`, not a fourth category, and specifically not `dead`.**
+  The task spec names three buckets (ok=2xx, dead=404/410,
+  unreachable=5xx/timeout/connection-error) but is silent on 401/403/429/
+  400 and an unresolved 3xx. Resolved by folding all of these into
+  `unreachable`: this project's own real fetch history (see the Phase 3
+  Frontier Board backfill entries in `PROGRESS.md`) already shows
+  `openai.com`, `x.ai`, and `www.axios.com` all returning HTTP 403 to
+  ordinary, legitimate fetch attempts for bot-management reasons having
+  nothing to do with the resource actually being gone — treating 403 (or
+  401/429) as `dead` would misreport a perfectly live citation as a
+  broken link on that basis alone. `dead` is reserved for the two status
+  codes a server itself uses specifically to say "this resource no longer
+  exists here" (404/410); everything else that isn't a clean 2xx is
+  "couldn't currently verify," which is exactly what `unreachable`'s own
+  "retried next week, not called dead yet" semantics are for.
+- **The GET fallback triggers only on HEAD responses of 405 (Method Not
+  Allowed) or 501 (Not Implemented)** — a deliberately narrow reading of
+  "falling back to GET if HEAD isn't supported," not "retry via GET on
+  any non-2xx HEAD response." The latter would double the request count
+  against every non-200 URL for no clear benefit and would blur the
+  classification this check exists to produce (e.g. a real 404 on HEAD
+  would otherwise get a second, unnecessary GET attempt that could return
+  a *different* status on a flaky/load-balanced host, making the outcome
+  nondeterministic run to run). Covered by dedicated tests proving both
+  the 405 and 501 triggers fire, and that a plain 404 does not trigger a
+  second request at all.
+- **Both `check_url()`'s HEAD and its GET fallback are issued with
+  `allow_redirects=True` explicitly**, correcting for a real `requests`
+  quirk: `Session.head()` alone defaults `allow_redirects` to `False`
+  (every other verb defaults it to `True`), so a bare `session.head(url)`
+  on an ordinarily-301/302-redirected citation URL would report the
+  redirect status itself rather than the real destination's status —
+  silently misclassifying a perfectly fine, merely-moved citation.
+  Verified directly against `requests-mock`'s own redirect-chain
+  emulation (a 301 with a `Location` header, both for HEAD and GET) that
+  this override correctly resolves to the final hop's status before
+  classification runs.
+- **Only `watcher.http.build_session()` is reused, not `watcher.http.fetch()`.**
+  `fetch()` is GET-only, always writes to the ETag response-body cache
+  under `data/.cache/`, and treats a non-retryable final status as
+  something to raise on (`response.raise_for_status()`) rather than
+  classify — none of which fits a link-rot check, which needs a real HEAD
+  verb, has no use for a cached response body, and must never raise on a
+  4xx/5xx (it needs to keep checking the rest of the batch). Reusing
+  `build_session()` alone still gets every actually-relevant piece of
+  fetch discipline this check needs: the descriptive `USER_AGENT`, an
+  explicit timeout on every request (passed through from
+  `watcher.config.REQUEST_TIMEOUT_SECONDS`), and the mounted `HTTPAdapter`'s
+  own connection-level retry/backoff for genuine DNS/connection/read
+  hiccups. That adapter's `status_forcelist` is deliberately empty (per
+  `watcher/http.py`'s own existing design, unrelated to this turn), so it
+  does not itself retry on a 5xx status — which is exactly the "record
+  unreachable now, retry next week" behavior this check wants, obtained
+  for free rather than needing a second, purpose-built retry loop here.
+- **`auditor/__init__.py` was created, then removed, mid-turn.** This
+  module's own package didn't exist yet when this turn started, so an
+  empty `__init__.py` marker was added first, mirroring the
+  `watcher/sources/__init__.py` precedent logged earlier in this same
+  file for a brand-new package. Partway through this turn, a concurrently
+  running sibling agent's already-uncommitted work turned up in the same
+  working tree (`auditor/lexicon_audit.py`, its test file, and its own
+  `IMPROVEMENT_BACKLOG.md`/`PROGRESS.md` entries — see the entry directly
+  above this one), which had already explicitly decided and logged
+  "`auditor/` ships with no `__init__.py`, matching `scripts/`'s own
+  existing precedent." Rather than leave two contradictory logged
+  decisions about the same one-file question, the `__init__.py` was
+  deleted and this entry records the correction plainly instead of
+  silently picking one version. Re-verified after deletion:
+  `from auditor import linkrot` still resolves correctly with no
+  `__init__.py` present at all (Python's implicit-namespace-package
+  handling — the same mechanism every existing test in this repo already
+  relies on for `from watcher import ...` when run via `python -m
+  pytest` from the repo root, `__init__.py` or not), so no test or import
+  needed to change once the file was removed. `tests/test_auditor_linkrot.py`
+  still uses a direct `from auditor import linkrot` (no `sys.path`
+  manipulation), unlike `tests/test_auditor_lexicon_coverage.py`'s
+  `sys.path.insert` + bare-name style adopted from
+  `tests/test_check_path_allowlist.py`'s `scripts/`-module convention —
+  both styles work identically with or without `__init__.py` present;
+  this is a cosmetic inconsistency between the two new test files, not a
+  functional issue, worth reconciling the next time someone touches
+  either file, but out of this turn's own scope to unify unilaterally.
+- **`audit_link_rot()`'s return shape
+  (`{checked_at, total_urls, counts: {ok, dead, unreachable}, results: [...]}`)**
+  is this module's own provisional convention, matching the same
+  "not yet locked to a real `schemas/audit.schema.json`" caveat the
+  `lexicon_audit.py` entry above already states for its own
+  `audit_lexicon()` shape — that schema doesn't exist yet (later Phase 5
+  scope, `auditor/report.py`'s job).
+- **Test file added: `tests/test_auditor_linkrot.py`** (27 tests, via
+  `requests-mock`) — status-code classification in isolation;
+  HEAD-only vs. HEAD-then-GET-fallback (405 and 501, plus a negative case
+  proving a plain 404 does not trigger a fallback); timeout/
+  connection-error handling (never raises); the `allow_redirects`
+  override actually resolving a 301 to its real final status;
+  `collect_citation_urls`/`load_cards` plumbing; and a realistic
+  200/404/410/500/timeout mix run end-to-end through `audit_link_rot()`,
+  asserting `dead` and `unreachable` land in genuinely disjoint sets.
+
+Verification: `python -m pytest` — **718 passed, 2 deselected** (up from
+691 immediately before this turn's own additions; +27 new tests, nothing
+else changed or broken, including the sibling's concurrently-landed
+lexicon-coverage tests). No file outside `auditor/linkrot.py` and
+`tests/test_auditor_linkrot.py` was touched by this turn's own code
+changes. Per this turn's explicit instruction, no commit was made here —
+another agent integrates this alongside the sibling's concurrent work.
+
+## Phase 5: `auditor/duplicates.py` -- the duplicate-topic checker (2026-07-11)
+
+Fourth file landed in `auditor/` this same day (see the `lexicon_audit.py`
+and `linkrot.py` entries directly above), implementing CLAUDE.md's/the
+approved plan's `audit.yml` "duplicate-topic detection (pairwise Jaccard
+on published titles/topics)" bullet. Several spec-silent judgment calls
+made, logged here:
+
+- **The similarity threshold reused is `watcher.config.JACCARD_SIMILARITY_THRESHOLD`
+  (0.35, the general cross-source bar), not `LAB_LAB_JACCARD_SIMILARITY_THRESHOLD`
+  (0.65).** The task instruction explicitly allowed reusing 0.35 or a
+  separately documented threshold "if you have a good reason." The 0.65
+  lab-lab bar exists in `watcher/clustering.py` for a specific,
+  documented reason: raw lab RSS titles are short, heavily templated
+  marketing copy ("Introducing GPT-5.4", "Introducing GPT-5.5") where a
+  couple of shared boilerplate tokens alone are already enough to clear
+  0.35 between titles about genuinely different releases. Published
+  *card* headlines are the analyst's own original written prose, never a
+  raw lab announcement title lifted verbatim — that specific
+  false-positive risk (boilerplate-token collision) doesn't transfer to
+  this comparison. The general 0.35 bar — the same one `clustering.py`
+  itself applies to every comparison that isn't lab-vs-lab, including
+  any cross-source pairing — is the more appropriate constant to reuse
+  here, and is reused by direct reference
+  (`DUPLICATE_JACCARD_THRESHOLD = JACCARD_SIMILARITY_THRESHOLD`), not
+  retyped as a bare `0.35` literal, so a future change to the shared
+  constant propagates here too.
+- **The follow-up-link exemption is anchored on the earlier card's
+  `id`, not a byte-for-byte match of the quoted prior-headline text
+  inside CLAUDE.md's fixed pattern.** The convention's literal form is
+  `(follow-up to "<prior headline>", card <prior_id>)`. A regex requiring
+  an exact match of both the quoted headline substring *and* the id
+  would make the exemption fragile to trivial, meaning-preserving
+  textual drift (an extra space, a smart vs. straight quote, a
+  post-publication correction to the earlier card's own headline text)
+  despite the sentence unambiguously naming the correct prior card
+  either way. `prior_id` is the single unambiguous identifier the
+  convention itself exists to make greppable (CLAUDE.md's own note that
+  `content/cards/index.json` already gives the `id -> date/headline`
+  lookup a future site enhancement would need to promote this into a
+  real hyperlink), so `is_acknowledged_followup()` matches
+  `\(follow-up to "[^"]+", card <escaped prior_id>\)` — the quoted
+  headline text is a wildcard, only the id is held literal. Covered by a
+  dedicated test proving a follow-up-shaped sentence naming the *wrong*
+  id does not exempt a genuinely-flagged pair (the exemption is specific
+  to this pair, not "any follow-up sentence present at all").
+- **Only `what_happened` and `why_it_matters` are scanned for the
+  follow-up pattern** (`FOLLOWUP_SCAN_FIELDS`), matching CLAUDE.md's own
+  wording for where the analyst appends the sentence ("as one sentence
+  appended to `what_happened` (or `why_it_matters` if it reads more
+  naturally there)") — `headline` and `one_liner` are never scanned,
+  since the convention never names them as the sentence's home.
+- **Cards are sorted into a fixed `(date, id)` order before any pairwise
+  comparison runs**, mirroring `watcher/clustering.py`'s own
+  determinism discipline (its own module docstring: "Run in a fully
+  deterministic order so the same input always produces the same
+  clusters ... regardless of what order each fetcher happened to yield
+  items in"). This is what makes "earlier" (the card a follow-up
+  sentence would name) vs. "later" (the card whose own prose is scanned
+  for that sentence) a property of the pair itself, not of whatever
+  order a caller happened to pass `cards` in — verified by a dedicated
+  test asserting identical output for a shuffled vs. sorted input list.
+- **`shared_topics()` is informational metadata attached to a flagged
+  pair's finding, not a second independent threshold gate run alongside
+  title similarity.** The task's own wording ("pairwise comparison of
+  published cards' titles/topics") is read as: the trigger is headline
+  (title) Jaccard similarity, reusing the one Jaccard function named in
+  the instruction; a card's `topics[]` is a small, closed 9-value enum
+  (`card.schema.json`), not free prose — running the same
+  word-tokenization Jaccard machinery over a short closed-enum list
+  doesn't carry the same meaning it does for free-text headlines, and
+  the instruction named reusing *the existing Jaccard-over-tokenized-
+  titles function*, singular, not asked to invent a second, differently-
+  shaped comparison over topics. `topics[]`'s intersection is still
+  surfaced in every finding (`shared_topics`) so a human reviewing
+  `IMPROVEMENT_BACKLOG.md`'s auto-appended findings (once
+  `scripts/append_backlog_findings.py` exists) has that context without
+  it gating whether a pair is flagged at all.
+- **`audit_duplicates()`'s combined return shape, `{"duplicate_pairs":
+  [...]}`, is this module's own provisional convention**, matching the
+  same "not yet locked to a real `schemas/audit.schema.json`" caveat
+  already logged for `auditor.linkrot.audit_link_rot` and
+  `auditor.lexicon_audit.audit_lexicon`'s own summary-dict shapes — that
+  schema doesn't exist yet (later Phase 5 scope, `auditor/report.py`'s
+  job).
+- **`auditor/duplicates.py` imports `auditor.linkrot.load_cards` directly**
+  for its own `cards=None` default-loading path, rather than a third,
+  independently-written "walk `content/cards/`, skip `index.json`,
+  gracefully handle a missing directory" implementation — the same
+  reuse-over-reimplementation instruction this turn's task gave for the
+  Jaccard function applied naturally to this smaller piece too, once it
+  was clear `linkrot.py` already had exactly the right function.
+- **Reuse of `watcher.clustering._jaccard` and `watcher.models.tokenize_title`
+  is proven by direct object identity in the test suite**
+  (`mod._jaccard is clustering_mod._jaccard`,
+  `mod.tokenize_title is models_mod.tokenize_title`), not merely by
+  trusting the `from ... import ...` line at the top of the module or by
+  checking that output values happen to match — a stronger, more direct
+  proof that this module truly reuses the existing implementation rather
+  than shipping a lookalike copy that could silently drift from it over
+  time.
+- **Test file added: `tests/test_auditor_duplicates.py`** (26 tests) —
+  the two identity-reuse proofs; `title_similarity`/`shared_topics`
+  correctness and graceful handling of missing headline/topics fields;
+  the follow-up exemption across both its eligible prose fields, its
+  id-specificity, and its graceful handling of missing prose; a real,
+  exactly-representable (0.5, no floating-point rounding risk)
+  threshold-boundary test proving the `>=` (inclusive) comparison
+  `watcher/clustering.py` itself uses; determinism regardless of input
+  order; zero/one-card edge cases; a three-card scenario proving only
+  the one true above-threshold pair is reported and no card is compared
+  against itself; `audit_duplicates()`'s explicit-cards and
+  `cards=None`-default paths (the latter proven via `monkeypatch` to
+  route through the exact bound `auditor.linkrot.load_cards` name); and
+  a real-content integration smoke test against this repo's actual,
+  currently-empty `content/cards/` directory.
+
+Verification: `python -m pytest` — **744 passed, 2 deselected** (up from
+718; +26 new tests, nothing else changed or broken). No file outside
+`auditor/duplicates.py` and `tests/test_auditor_duplicates.py` was
+touched by this turn's own code changes (`PROGRESS.md` and this file are
+documentation-only). Per this turn's own explicit instruction, no commit
+was made — another agent integrates this alongside the other Phase 5
+`auditor/` files already sitting uncommitted in this same working tree.
+

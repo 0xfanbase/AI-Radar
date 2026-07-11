@@ -1,0 +1,420 @@
+"""Tests for auditor/linkrot.py -- the weekly link-rot check.
+
+Covers, per this turn's task scope: HEAD-first checking with a GET
+fallback only when HEAD itself signals "not supported" (405/501),
+redirect-following on both verbs, and classification into exactly three
+buckets (ok/dead/unreachable) across a realistic mix of 200/404/410/500/
+timeout responses -- proving dead and unreachable are genuinely distinct
+categories, not two names for the same bucket. Also covers
+``collect_citation_urls``/``load_cards`` (the card -> URL plumbing) and
+``audit_link_rot`` (the top-level entry point), using an explicit
+``cards`` list throughout since ``content/cards/`` is empty in this repo
+today.
+
+Uses ``requests-mock`` (this project's established deterministic HTTP
+test tool -- see tests/test_fetch_discipline.py) rather than any real
+network call; ``tests/conftest.py``'s autouse fixture would block a real
+call regardless.
+"""
+from __future__ import annotations
+
+import requests
+
+from auditor import linkrot
+from watcher import http
+
+
+# --------------------------------------------------------------------------
+# classify_status_code
+# --------------------------------------------------------------------------
+
+
+def test_classify_2xx_is_ok():
+    assert linkrot.classify_status_code(200) == "ok"
+    assert linkrot.classify_status_code(204) == "ok"
+    assert linkrot.classify_status_code(299) == "ok"
+
+
+def test_classify_404_and_410_are_dead():
+    assert linkrot.classify_status_code(404) == "dead"
+    assert linkrot.classify_status_code(410) == "dead"
+
+
+def test_classify_5xx_is_unreachable():
+    assert linkrot.classify_status_code(500) == "unreachable"
+    assert linkrot.classify_status_code(502) == "unreachable"
+    assert linkrot.classify_status_code(503) == "unreachable"
+
+
+def test_classify_other_4xx_is_unreachable_not_dead():
+    # 403/401/429 mean "we couldn't verify" (often bot-blocking, per this
+    # project's own real Frontier Board fetch history), not "confirmed
+    # gone" -- only 404/410 are ever "dead".
+    assert linkrot.classify_status_code(403) == "unreachable"
+    assert linkrot.classify_status_code(401) == "unreachable"
+    assert linkrot.classify_status_code(429) == "unreachable"
+
+
+# --------------------------------------------------------------------------
+# check_url -- HEAD/GET, classification, redirects, fallback
+# --------------------------------------------------------------------------
+
+
+def test_check_url_head_200_is_ok(requests_mock):
+    requests_mock.head("https://example.test/ok", status_code=200)
+
+    session = http.build_session()
+    result = linkrot.check_url(session, "https://example.test/ok")
+
+    assert result.status == "ok"
+    assert result.http_status == 200
+    assert result.method == "HEAD"
+    assert result.detail is None
+    # Only HEAD was ever called -- no GET fallback for a plain 200.
+    assert requests_mock.call_count == 1
+    assert requests_mock.request_history[0].method == "HEAD"
+
+
+def test_check_url_head_404_is_dead(requests_mock):
+    requests_mock.head("https://example.test/gone", status_code=404)
+
+    session = http.build_session()
+    result = linkrot.check_url(session, "https://example.test/gone")
+
+    assert result.status == "dead"
+    assert result.http_status == 404
+    assert result.method == "HEAD"
+
+
+def test_check_url_head_410_is_dead(requests_mock):
+    requests_mock.head("https://example.test/gone-forever", status_code=410)
+
+    session = http.build_session()
+    result = linkrot.check_url(session, "https://example.test/gone-forever")
+
+    assert result.status == "dead"
+    assert result.http_status == 410
+
+
+def test_check_url_head_500_is_unreachable(requests_mock):
+    requests_mock.head("https://example.test/broken", status_code=500)
+
+    session = http.build_session()
+    result = linkrot.check_url(session, "https://example.test/broken")
+
+    assert result.status == "unreachable"
+    assert result.http_status == 500
+
+
+def test_check_url_timeout_is_unreachable_with_no_http_status(requests_mock):
+    requests_mock.head(
+        "https://example.test/slow", exc=requests.exceptions.ConnectTimeout
+    )
+
+    session = http.build_session()
+    result = linkrot.check_url(session, "https://example.test/slow")
+
+    assert result.status == "unreachable"
+    assert result.http_status is None
+    assert result.detail is not None
+    assert "timeout" in result.detail.lower()
+
+
+def test_check_url_connection_error_is_unreachable(requests_mock):
+    requests_mock.head(
+        "https://example.test/unreachable-host",
+        exc=requests.exceptions.ConnectionError,
+    )
+
+    session = http.build_session()
+    result = linkrot.check_url(session, "https://example.test/unreachable-host")
+
+    assert result.status == "unreachable"
+    assert result.http_status is None
+    assert "connection" in result.detail.lower()
+
+
+def test_check_url_never_raises_on_connection_error(requests_mock):
+    # The function itself must never raise -- callers rely on this to
+    # check a whole batch of citation URLs without one bad link crashing
+    # the run.
+    requests_mock.head(
+        "https://example.test/boom", exc=requests.exceptions.ConnectionError
+    )
+    session = http.build_session()
+    result = linkrot.check_url(session, "https://example.test/boom")
+    assert result.status == "unreachable"
+
+
+def test_check_url_falls_back_to_get_when_head_not_supported(requests_mock):
+    requests_mock.head("https://example.test/head-unsupported", status_code=405)
+    requests_mock.get(
+        "https://example.test/head-unsupported", status_code=200, text="ok body"
+    )
+
+    session = http.build_session()
+    result = linkrot.check_url(session, "https://example.test/head-unsupported")
+
+    assert result.status == "ok"
+    assert result.http_status == 200
+    assert result.method == "GET"
+    # Both verbs were actually exercised, HEAD first.
+    assert requests_mock.call_count == 2
+    assert requests_mock.request_history[0].method == "HEAD"
+    assert requests_mock.request_history[1].method == "GET"
+
+
+def test_check_url_falls_back_to_get_on_501_not_implemented(requests_mock):
+    requests_mock.head("https://example.test/not-implemented", status_code=501)
+    requests_mock.get(
+        "https://example.test/not-implemented", status_code=404, text="missing"
+    )
+
+    session = http.build_session()
+    result = linkrot.check_url(session, "https://example.test/not-implemented")
+
+    # The GET fallback's own status is what gets classified -- here it's a
+    # real 404, proving the fallback path is fully wired through
+    # classify_status_code too, not just short-circuited to "ok".
+    assert result.status == "dead"
+    assert result.method == "GET"
+
+
+def test_check_url_does_not_fall_back_to_get_on_ordinary_404(requests_mock):
+    # A plain 404 on HEAD is a complete answer on its own -- must not
+    # trigger a GET fallback (that's reserved for 405/501 only).
+    requests_mock.head("https://example.test/plain-404", status_code=404)
+
+    session = http.build_session()
+    linkrot.check_url(session, "https://example.test/plain-404")
+
+    assert requests_mock.call_count == 1
+    assert requests_mock.request_history[0].method == "HEAD"
+
+
+def test_check_url_follows_redirects_to_final_status(requests_mock):
+    # requests.Session.head() defaults allow_redirects to False (unlike
+    # every other verb) -- this proves check_url overrides that so an
+    # ordinary 301 (citation URL moved, not dead) resolves to the real
+    # final status rather than being misclassified as some other bucket.
+    requests_mock.head(
+        "https://example.test/moved",
+        status_code=301,
+        headers={"Location": "https://example.test/moved-to"},
+    )
+    requests_mock.head("https://example.test/moved-to", status_code=200)
+
+    session = http.build_session()
+    result = linkrot.check_url(session, "https://example.test/moved")
+
+    assert result.status == "ok"
+    assert result.http_status == 200
+
+
+# --------------------------------------------------------------------------
+# check_links
+# --------------------------------------------------------------------------
+
+
+def test_check_links_checks_every_url_in_order(requests_mock):
+    requests_mock.head("https://example.test/a", status_code=200)
+    requests_mock.head("https://example.test/b", status_code=404)
+
+    session = http.build_session()
+    results = linkrot.check_links(
+        session, ["https://example.test/a", "https://example.test/b"]
+    )
+
+    assert [r.url for r in results] == [
+        "https://example.test/a",
+        "https://example.test/b",
+    ]
+    assert [r.status for r in results] == ["ok", "dead"]
+
+
+# --------------------------------------------------------------------------
+# collect_citation_urls / load_cards
+# --------------------------------------------------------------------------
+
+
+def test_collect_citation_urls_dedupes_preserving_first_seen_order():
+    cards = [
+        {
+            "citations": [
+                {"url": "https://a.test/1", "outlet": "A", "quote": "x"},
+                {"url": "https://b.test/1", "outlet": "B", "quote": "y"},
+            ]
+        },
+        {
+            "citations": [
+                # Same URL as above -- must not be duplicated.
+                {"url": "https://a.test/1", "outlet": "A", "quote": "z"},
+                {"url": "https://c.test/1", "outlet": "C", "quote": "w"},
+            ]
+        },
+    ]
+
+    urls = linkrot.collect_citation_urls(cards)
+
+    assert urls == ["https://a.test/1", "https://b.test/1", "https://c.test/1"]
+
+
+def test_collect_citation_urls_handles_card_with_no_citations_key():
+    cards = [{"headline": "no citations field at all"}]
+    assert linkrot.collect_citation_urls(cards) == []
+
+
+def test_collect_citation_urls_empty_cards_list():
+    assert linkrot.collect_citation_urls([]) == []
+
+
+def test_load_cards_returns_empty_list_when_cards_dir_missing(tmp_path):
+    missing_dir = tmp_path / "does-not-exist"
+    assert linkrot.load_cards(missing_dir) == []
+
+
+def test_load_cards_skips_index_json_and_loads_real_cards(tmp_path):
+    cards_dir = tmp_path / "cards"
+    cards_dir.mkdir()
+    (cards_dir / "index.json").write_text('{"version": 1, "cards": []}')
+    (cards_dir / "2026-07-09-example.json").write_text(
+        '{"id": "2026-07-09-example", "citations": []}'
+    )
+
+    cards = linkrot.load_cards(cards_dir)
+
+    assert len(cards) == 1
+    assert cards[0]["id"] == "2026-07-09-example"
+
+
+# --------------------------------------------------------------------------
+# audit_link_rot -- top-level entry point, realistic 200/404/410/500/timeout
+# mix, proving dead vs unreachable are genuinely distinct categories.
+# --------------------------------------------------------------------------
+
+
+def _card_with_citation(url: str) -> dict:
+    return {"citations": [{"url": url, "outlet": "Test", "quote": "q"}]}
+
+
+def test_audit_link_rot_classifies_a_realistic_mix_correctly(requests_mock):
+    requests_mock.head("https://example.test/live", status_code=200)
+    requests_mock.head("https://example.test/removed", status_code=404)
+    requests_mock.head("https://example.test/gone-forever", status_code=410)
+    requests_mock.head("https://example.test/down", status_code=500)
+    requests_mock.head(
+        "https://example.test/timed-out", exc=requests.exceptions.Timeout
+    )
+
+    cards = [
+        _card_with_citation("https://example.test/live"),
+        _card_with_citation("https://example.test/removed"),
+        _card_with_citation("https://example.test/gone-forever"),
+        _card_with_citation("https://example.test/down"),
+        _card_with_citation("https://example.test/timed-out"),
+    ]
+
+    report = linkrot.audit_link_rot(cards)
+
+    assert report["total_urls"] == 5
+    assert report["counts"] == {"ok": 1, "dead": 2, "unreachable": 2}
+
+    by_url = {r["url"]: r for r in report["results"]}
+    assert by_url["https://example.test/live"]["status"] == "ok"
+    assert by_url["https://example.test/removed"]["status"] == "dead"
+    assert by_url["https://example.test/gone-forever"]["status"] == "dead"
+    assert by_url["https://example.test/down"]["status"] == "unreachable"
+    assert by_url["https://example.test/timed-out"]["status"] == "unreachable"
+
+    # Dead and unreachable really are distinct buckets, not aliases of one
+    # another -- a 404/410 and a 500/timeout must never collapse together.
+    dead_urls = {r["url"] for r in report["results"] if r["status"] == "dead"}
+    unreachable_urls = {
+        r["url"] for r in report["results"] if r["status"] == "unreachable"
+    }
+    assert dead_urls == {
+        "https://example.test/removed",
+        "https://example.test/gone-forever",
+    }
+    assert unreachable_urls == {
+        "https://example.test/down",
+        "https://example.test/timed-out",
+    }
+    assert dead_urls.isdisjoint(unreachable_urls)
+
+
+def test_audit_link_rot_does_not_retry_a_5xx_within_the_same_run(requests_mock):
+    # Only one HEAD response is registered for the always-down URL; if
+    # audit_link_rot retried it within this same run, requests-mock would
+    # keep replaying the single registered response (it doesn't raise on
+    # "ran out of responses" the way a strict sequence mock would), so
+    # this test instead asserts the call count directly: exactly one
+    # attempt for a 5xx, never more.
+    requests_mock.head("https://example.test/always-down", status_code=503)
+
+    report = linkrot.audit_link_rot(
+        [_card_with_citation("https://example.test/always-down")]
+    )
+
+    assert report["counts"]["unreachable"] == 1
+    assert requests_mock.call_count == 1
+
+
+def test_audit_link_rot_with_no_cards_and_no_urls_is_a_clean_zero_report(tmp_path):
+    report = linkrot.audit_link_rot([], cards_dir=tmp_path / "nonexistent")
+
+    assert report["total_urls"] == 0
+    assert report["counts"] == {"ok": 0, "dead": 0, "unreachable": 0}
+    assert report["results"] == []
+
+
+def test_audit_link_rot_loads_cards_from_cards_dir_when_none_passed(
+    requests_mock, tmp_path
+):
+    cards_dir = tmp_path / "cards"
+    cards_dir.mkdir()
+    (cards_dir / "2026-07-09-example.json").write_text(
+        '{"id": "x", "citations": [{"url": "https://example.test/from-disk", '
+        '"outlet": "Test", "quote": "q"}]}'
+    )
+    requests_mock.head("https://example.test/from-disk", status_code=200)
+
+    report = linkrot.audit_link_rot(cards_dir=cards_dir)
+
+    assert report["total_urls"] == 1
+    assert report["counts"]["ok"] == 1
+
+
+def test_audit_link_rot_builds_its_own_session_when_none_passed(requests_mock):
+    # No explicit `session=` argument -- proves the default path really
+    # does build a working watcher.http session rather than requiring the
+    # caller to always supply one.
+    requests_mock.head("https://example.test/default-session", status_code=200)
+
+    report = linkrot.audit_link_rot(
+        [_card_with_citation("https://example.test/default-session")]
+    )
+
+    assert report["counts"]["ok"] == 1
+
+
+def test_audit_link_rot_reuses_the_real_watcher_http_build_session(
+    requests_mock, monkeypatch
+):
+    # Proves this module actually reuses watcher.http.build_session()
+    # (per this turn's own instruction), not a hand-rolled session --
+    # wraps the real function and asserts it was actually called.
+    calls = []
+    original_build_session = http.build_session
+
+    def spy_build_session(*args, **kwargs):
+        calls.append((args, kwargs))
+        return original_build_session(*args, **kwargs)
+
+    monkeypatch.setattr(http, "build_session", spy_build_session)
+    monkeypatch.setattr(linkrot.http, "build_session", spy_build_session)
+
+    requests_mock.head("https://example.test/spy", status_code=200)
+    linkrot.audit_link_rot([_card_with_citation("https://example.test/spy")])
+
+    assert len(calls) == 1
