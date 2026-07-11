@@ -7,6 +7,91 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Phase 4 PM checkpoint round 1: Lighthouse gap logged honestly, contrast-ratio regression test added
+
+The Phase 4 sign-off PM review independently re-ran both test suites
+(675 passed / 2 deselected root; 17 passed `site/tests`), ran the real
+`python site/generate.py -v` against this repo's actual `content/`/`data/`
+end to end, and independently recomputed every WCAG contrast ratio the
+entry directly below claims — confirming the site itself, its templates,
+tokens, and generator needed no changes at all (see that review's own
+findings; nothing under `site/builders/`, `site/templates/`,
+`site/static/css/`, or `site/generate.py` is touched by this checkpoint).
+Two real gaps were found in the Phase 4 sign-off entry's own record-keeping
+and test coverage, both closed by this entry:
+
+**1. The Lighthouse gap (documentation-only, no code fix possible).** The
+approved build plan's section 5 explicitly calls for a manual Lighthouse
+accessibility run with the resulting numeric score recorded in this file.
+No such run, and no mention of Lighthouse at all, existed anywhere in this
+repo before this entry — a silent omission, not a deliberate one: the
+Phase 4 sign-off entry directly below documented an extensive structural
+accessibility pass (one `<h1>`/page, one `<main id="main-content">`/page,
+skip-link ordering, status-chip literal text, sparkline `aria-label`s,
+reduced-motion gating — all real and all still correct) but never stated
+that this is *not* the same thing as the plan's own Lighthouse requirement,
+and never added the missing Lighthouse run to its "what remains for the
+human" list. That entry's own accessibility-pass paragraph and its
+"what remains" list are both amended in place, directly above this entry,
+to state plainly that Lighthouse was not run — confirmed this round: no
+Chrome, Chromium, or Firefox binary exists anywhere in this environment,
+and Lighthouse (Chrome DevTools' own audit tool, or the `lighthouse` npm
+package) has no browserless/headless-without-a-browser mode, so this is a
+genuine environment limitation, not a shortcut taken under time pressure —
+and to add the concrete follow-up: once GitHub Pages is enabled (or
+`public/` is served locally via `python -m http.server`), run Lighthouse
+and record the numeric accessibility score here, treating anything below
+90 as a defect requiring a fix, never as a number to merely note and move
+past. This checkpoint does not, and must not, represent the structural
+checks already in place as a substitute score — there is no Lighthouse
+number anywhere in this repo today, and none is invented here.
+
+**2. The missing contrast-ratio regression test.** The build plan promised
+an automated test reading tokens.css's hex values directly rather than
+re-hardcoding them (tokens.css's own header comment already said as much:
+"A future automated contrast-ratio test ... should read the hex values
+below directly rather than re-hardcoding them"). Commit 27's own backlog
+entry deferred writing it to a later Phase 4 commit, and no later commit
+ever picked it up — `site/tests/test_build.py` only asserted the literal
+string `--color-signal-cyan: #43E5C4` is present in the generated CSS,
+which proves the token exists, not that it's contrast-safe. Fixed this
+round: new `site/tests/test_contrast_ratios.py` parses every `--color-*`
+custom property directly out of the real, on-disk
+`site/static/css/tokens.css` at test-collection time (no hex value is
+typed a second time anywhere in the new test file), computes WCAG 2.x
+relative luminance and contrast ratios in Python, and asserts every
+text-role token (`ink`, `signal-cyan`, `star-white`, `reported-amber`,
+`corrected-red`) clears 4.5:1 against both background tokens (`bg`,
+`panel`). A dedicated pair of tests locks in that `hairline` is never
+treated as a text-role color by this test — both structurally (asserting
+it's excluded from the text-role token set) and empirically (asserting
+its own measured ratio against both backgrounds is genuinely below 4.5:1,
+matching tokens.css's own "1.26:1" header-comment claim), so the exclusion
+is enforced, not merely assumed. The computed ratios were independently
+verified this round to match tokens.css's header-comment claims exactly
+(signal-cyan 12.16/11.13, reported-amber 8.29/7.59, corrected-red
+5.30/4.85, ink and star-white both >14:1 against either background) — no
+palette value needed to change.
+
+**Verification performed this round:**
+- `python -m pytest` (root) — **675 passed, 2 deselected**, unchanged (no
+  file under `tests/` was touched this round).
+- `python -m pytest site/tests` — **22 passed** (up from 17: the 5 new
+  tests in `site/tests/test_contrast_ratios.py`).
+- `python site/generate.py -v` re-run against this repo's real
+  `content/`/`data/` — same clean build as the entry below, unaffected by
+  this round's test-only and documentation-only changes.
+
+Per this checkpoint's own PM directive: with both items above landed and
+pytest green, **Phase 5 (`audit.yml` + `improve.yml`) may now proceed.**
+The Lighthouse number itself, enabling GitHub Pages, merging this branch
+to `main`, and the base-path/custom-domain decision remain on the "what
+remains for the human" list, verbatim, in the entry directly below — none
+of them are resolved by this round, and none of them can be from this
+session.
+
+---
+
 ## 2026-07-09 — Phase 4: builders wired together, end-to-end site build verified, accessibility pass, deploy.yml
 
 This is the Phase 4 **integration** checkpoint: four builder units that
@@ -67,6 +152,20 @@ turn and by 9 new automated tests added to `site/tests/test_build.py`
 inside `@media (prefers-reduced-motion: no-preference)` (already correct
 from `board.py`'s own commit, re-checked here as part of this pass, not
 changed).
+
+**Stated plainly (amended by the Phase 4 PM checkpoint round 1 entry
+below, which found this checkpoint had originally left this unsaid): the
+approved build plan's own section 5 additionally calls for a manual
+Lighthouse accessibility run, recorded as a numeric score in this file.
+That measurement was NOT performed as part of this checkpoint, and could
+not have been — no Chrome/Chromium/Firefox binary exists in this
+environment, and Lighthouse has no browserless mode (Node/`npx` alone
+cannot run it). Everything verified above (one `<h1>`/page, one
+`<main id="main-content">`/page, skip-link ordering, status-chip text,
+sparkline `aria-label`s, reduced-motion gating) is a structural,
+automated-test-backed check, not a Lighthouse score, and must never be
+represented as one. The actual Lighthouse number is carried on the
+"what remains for the human" list below.**
 
 **`public/404.html`** is a real, fully-shelled not-found page (extends
 `base.html`, one `<h1>Page not found</h1>`, links back to every major
@@ -132,19 +231,28 @@ manual step happens.
   introduced by this file).
 
 **What remains for the human (unchanged from every earlier checkpoint,
-restated in full since this is the Phase 4 sign-off point):** add the
+restated in full since this is the Phase 4 sign-off point; amended by the
+Phase 4 PM checkpoint round 1 entry below to add a fifth item this
+checkpoint should have listed here itself):** add the
 `CLAUDE_CODE_OAUTH_TOKEN` repo secret and set `vars.CLAUDE_MODEL` before
 `analyze.yml` can ever run end-to-end; enable GitHub Pages (Settings →
 Pages → Source: "GitHub Actions") before `deploy.yml`'s own `deploy` job
 can succeed; review and merge this branch to `main` (both `watch.yml`'s
 `analyze.yml` dispatch and `deploy.yml`'s own push trigger target
-`main`, so nothing here fires automatically until then); and — newly
-flagged by this checkpoint specifically — decide whether this project
-will use a custom domain (a `CNAME` file mapped to serve from the
-domain root) or accept the default `github.io/AI-Radar/` project
-subpath, since every internal link this site renders assumes root
-serving and does not yet handle the latter case. None of these four are
-things any session can do or fake from here.
+`main`, so nothing here fires automatically until then); decide whether
+this project will use a custom domain (a `CNAME` file mapped to serve
+from the domain root) or accept the default `github.io/AI-Radar/`
+project subpath, since every internal link this site renders assumes
+root serving and does not yet handle the latter case; and **— the item
+this checkpoint originally omitted, per the PM checkpoint round 1 entry
+directly below — after Pages is enabled (or by serving `public/` locally
+with `python -m http.server`), run Lighthouse (Chrome DevTools' own Audits
+panel, or `npx lighthouse <url> --only-categories=accessibility`) against
+the real built site and record the resulting numeric accessibility score
+in this file, treating any score below 90 as a defect to fix, not a
+number to merely report.** None of these five are things any session can
+do or fake from here — the last one specifically requires a real browser
+engine, which this environment does not have.
 
 ---
 

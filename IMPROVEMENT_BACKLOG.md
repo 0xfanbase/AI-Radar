@@ -1960,3 +1960,88 @@ notes.
   (`yaml.safe_load`) and matches this repo's own established `on:`-as-
   boolean quirk already present in every other workflow file here (a
   PyYAML 1.1 parsing artifact of an unquoted `on:` key, not a new issue).
+
+## Phase 4 PM checkpoint, round 1 (2026-07-11)
+
+The PM's Phase 4 sign-off review found the site build, templates, tokens,
+and generator all correct against real generated HTML and needing no
+changes at all — the two items below are the only real gaps, both
+documentation/test-coverage only.
+
+- **Lighthouse accessibility measurement: confirmed genuinely impossible
+  in this environment, not skipped for convenience.** Checked directly
+  this round: no `google-chrome`, `chromium`, `chromium-browser`, or
+  `firefox` binary exists anywhere on `$PATH` or in any of the usual
+  install locations, and Lighthouse (both the Chrome DevTools panel and
+  the `lighthouse` npm CLI) requires driving an actual browser via the
+  Chrome DevTools Protocol — there is no "headless, browserless" mode
+  that only needs Node. This means the approved build plan's section 5
+  Lighthouse requirement structurally cannot be satisfied by any session
+  running in this environment, today or in any future turn, until the
+  environment itself gains a browser binary. Resolution: state this
+  plainly, in both `PROGRESS.md`'s amended Phase 4 sign-off entry and this
+  round's own new checkpoint entry, rather than silently omitting it or
+  (worse) letting the structural accessibility-test pass stand in for a
+  score it is not. The follow-up ("run Lighthouse once Pages is enabled
+  or `public/` is served locally, record the numeric accessibility score
+  in PROGRESS.md, treat <90 as a defect") is added to the "what remains
+  for the human" list in both the amended entry and this one — it was
+  never there before this round, which is itself the gap this round
+  fixes.
+- **New `site/tests/test_contrast_ratios.py` — reads tokens.css itself,
+  computes ratios, doesn't re-hardcode hex values.** The only prior
+  contrast-related test (`site/tests/test_build.py::
+  test_generate_produces_tokens_css`) asserted the literal string
+  `--color-signal-cyan: #43E5C4` is present in generated output — proof
+  the token exists, not that it's contrast-safe. The new file parses every
+  `--color-*` custom property directly out of the real, on-disk
+  `tokens.css` via regex at test-collection time, computes WCAG 2.x
+  relative luminance/contrast ratios in Python, and asserts every
+  text-role token (`ink`, `signal-cyan`, `star-white`, `reported-amber`,
+  `corrected-red`) clears 4.5:1 against both backgrounds (`bg`, `panel`).
+  Spec-silent judgment calls made writing this test, logged here:
+  - **Which tokens count as "text-role" vs. "background" vs.
+    "border-only" is encoded as a small Python set of token *names*
+    (`BACKGROUND_TOKENS = {"bg", "panel"}`, `BORDER_ONLY_TOKENS =
+    {"hairline"}`), not inferred mechanically from the parsed hex
+    values.** This is deliberate, not a second hardcoding of the thing the
+    PM asked to stop hardcoding — the hex *values* are never re-typed
+    anywhere in the test (they're parsed fresh every run), but *which
+    role a token plays* is design intent recorded only in tokens.css's own
+    prose header comment, which isn't machine-parseable data. Every token
+    not named as a background or border-only is treated as text-role by
+    default, so a newly-added `--color-*` token automatically gets tested
+    without this file needing an edit — only removing/renaming `hairline`,
+    `bg`, or `panel` themselves would require touching this set.
+  - **`hairline`'s exclusion from the text-role set is tested two ways,
+    not asserted once and trusted.** One test asserts `"hairline" not in
+    text_role_tokens` (the exclusion is real, not accidental); a second,
+    independent test asserts hairline's own *measured* contrast ratio
+    against both backgrounds is actually below 4.5:1 (currently 1.26:1
+    against `--color-panel`, matching tokens.css's own header-comment
+    claim) — so if a future edit ever changed hairline's hex to something
+    that *would* pass AA, this second test would start failing as a
+    prompt for a human to reconsider the exclusion, rather than the
+    exclusion silently continuing to hide an now-inaccurate assumption.
+  - **A guard against a silently-empty parse.** The module-scoped
+    `color_tokens` fixture asserts at least 5 tokens were parsed and that
+    both `BACKGROUND_TOKENS` and `BORDER_ONLY_TOKENS` are present in the
+    parsed set, before any contrast assertion runs — so a future
+    tokens.css reformat that broke the regex (e.g. multi-line custom
+    property declarations) fails loudly with a clear message, instead of
+    every downstream test vacuously passing over zero token pairs.
+  - Verified this round: the computed ratios match tokens.css's own
+    header-comment claims exactly (signal-cyan 12.16:1/11.13:1,
+    reported-amber 8.29:1/7.59:1, corrected-red 5.30:1/4.85:1, ink and
+    star-white both >14:1 against either background, hairline 1.26:1
+    against panel) — no palette value needed to change to pass this new
+    test.
+- No file under `site/builders/`, `site/templates/`, `site/static/`
+  (other than the new test file, which lives under `site/tests/`), or
+  `site/generate.py` was touched this round, per the PM checkpoint's own
+  explicit scope.
+- Verification: `python -m pytest` (root) — 675 passed, 2 deselected,
+  unchanged. `python -m pytest site/tests` — 22 passed (up from 17: 5 new
+  tests in `test_contrast_ratios.py`). `python site/generate.py -v`
+  re-run against this repo's real `content/`/`data/` — unaffected, still a
+  clean build.
