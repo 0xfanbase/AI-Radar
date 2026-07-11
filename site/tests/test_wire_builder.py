@@ -216,6 +216,17 @@ def test_prepare_card_view_fallback_terms_for_unmatched_and_unlisted():
     assert fallback_by_term["unlisted term"] is None
 
 
+def test_prepare_card_view_topics_use_shared_display_names():
+    # T7: card topic chips must go through the exact same
+    # site/lib/topics.py::display_name mapping site/builders/moving.py's
+    # /moving/ page rows use, so a raw enum value like "chips/compute"
+    # never leaks onto the rendered page verbatim.
+    slug_map = wire.linkify.build_slug_map(SYNTHETIC_LEXICON)
+    card = {**CARD_CONFIRMED, "topics": ["chips/compute", "open-source", "models"]}
+    view = wire.prepare_card_view(card, slug_map)
+    assert view["topics"] == ["Chips / Compute", "Open Source", "Models"]
+
+
 def test_prepare_card_view_no_lexicon_terms_yields_no_fallback():
     slug_map = wire.linkify.build_slug_map(SYNTHETIC_LEXICON)
     view = wire.prepare_card_view(CARD_REPORTED, slug_map)
@@ -282,9 +293,12 @@ def test_render_wire_index_sources_are_a_real_link_list_with_outlet_names(env):
 
 
 def test_render_wire_index_topic_chips_are_text_labeled(env):
+    # T7: chips render the shared friendly display name (site/lib/topics.py),
+    # never the raw card.schema.json enum value verbatim.
     html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
     for topic in CARD_CONFIRMED["topics"]:
-        assert f'<span class="chip">{topic}</span>' in html
+        display_name = wire.topics_lib.display_name(topic)
+        assert f'<span class="chip">{display_name}</span>' in html
 
 
 def test_render_wire_index_lexicon_fallback_chip_rendered(env):

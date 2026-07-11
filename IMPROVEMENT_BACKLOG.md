@@ -3460,3 +3460,44 @@ entry, since `card.schema.json`'s `id` field is always `YYYY-MM-DD-slug`
 and `write_wire_pages` always emits one `/wire/<YYYY-MM>/` archive page
 per month any card exists in -- there is no card whose month page could
 be missing.
+
+## Shared topic display names + mentions/7d pluralization (T7, 2026-07-11)
+
+Two dormant-but-launch-visible defects: `site/builders/moving.py` already
+had its own `TOPIC_DISPLAY_NAMES` (raw `card.schema.json`/
+`whats_moving.schema.json` topic enum -> friendly label, e.g.
+`"chips/compute"` -> `"Chips / Compute"`) but `site/builders/wire.py`'s
+`prepare_card_view` passed a card's raw `topics[]` straight through to
+`card.html`'s chip loop, so any card ever tagged `chips/compute` or
+`open-source` would render a chip reading the raw enum value verbatim;
+and `moving.html`'s `{{ row.total_mentions }} mentions / 7d` was
+unconditional, so a topic with exactly one 7-day mention read the
+ungrammatical "1 mentions / 7d" (the live Products row, before any card
+content exists).
+
+Fixed by extracting the mapping to a new `site/lib/topics.py`
+(`TOPIC_DISPLAY_NAMES` + `display_name()`), loaded by both builders via
+the existing `_load_module_by_path` convention rather than either
+importing the other -- `moving.py` and `wire.py` are siblings under
+`site/builders/`, and this repo's established pattern (documented in both
+files' own docstrings) is that nothing under `site/` imports another
+`site/` module directly, everything loads by explicit file path, so a
+shared mapping belongs in `site/lib/`, not owned by whichever builder
+found the bug first. `moving.py` keeps its own `_display_name` as a thin
+delegate so none of its existing callers (or `site/tests/test_moving_builder.py`,
+which calls `moving._display_name` directly) needed to change.
+`TopicRowView` gained a precomputed `mentions_label` field
+(`f"{n} mention{'s' if n != 1 else ''} / 7d"`) rather than pushing the
+pluralization branch into the Jinja template, matching this builder's own
+established "all Jinja logic lives in Python" convention.
+
+Judgment call, spec-silent: the task's fix plan didn't say whether the
+existing `test_render_wire_index_topic_chips_are_text_labeled` test
+(which asserted a raw topic value like `"models"` renders verbatim as
+chip text) should be treated as the old, now-incorrect behavior or left
+untouched since it wasn't explicitly named alongside the new test the
+plan did ask for. Treated it as the old behavior this task explicitly
+changes -- per this repo's own testing rule ("fix your change, not the
+test, unless the test asserts the old, wrong behavior your task is
+explicitly changing") -- and updated it to assert the shared display name
+instead.

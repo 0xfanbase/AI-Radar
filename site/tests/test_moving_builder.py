@@ -111,6 +111,37 @@ def test_build_topic_rows_preserves_daily_counts_and_totals():
         assert row.trend == raw["trend"]
 
 
+def test_build_topic_row_mentions_label_singular_for_a_total_of_one():
+    raw = {
+        "topic": "products",
+        "daily_counts": [0, 0, 0, 0, 0, 0, 1],
+        "trend": "flat",
+    }
+    row = moving.build_topic_row(raw)
+    assert row.total_mentions == 1
+    assert row.mentions_label == "1 mention / 7d"
+
+
+def test_build_topic_row_mentions_label_plural_for_totals_other_than_one():
+    raw_multiple = {
+        "topic": "products",
+        "daily_counts": [1, 1, 0, 0, 0, 0, 1],
+        "trend": "flat",
+    }
+    row = moving.build_topic_row(raw_multiple)
+    assert row.total_mentions == 3
+    assert row.mentions_label == "3 mentions / 7d"
+
+    raw_zero = {
+        "topic": "products",
+        "daily_counts": [0, 0, 0, 0, 0, 0, 0],
+        "trend": "flat",
+    }
+    row_zero = moving.build_topic_row(raw_zero)
+    assert row_zero.total_mentions == 0
+    assert row_zero.mentions_label == "0 mentions / 7d"
+
+
 def test_build_topic_rows_display_names_cover_every_real_topic():
     rows = moving.build_topic_rows(REAL_TOPICS)
     for row in rows:
@@ -152,6 +183,18 @@ def test_render_moving_page_has_one_sparkline_per_topic_in_the_main_list_only():
     # top-of-file docstring), so /moving/ renders exactly one <svg> per
     # topic, from its own main list, and no masthead-strip copy on top.
     assert html.count("<svg") == len(REAL_TOPICS)
+
+
+def test_render_moving_page_mentions_label_pluralizes_correctly():
+    # Real data/whats_moving.json 7-day totals (see
+    # test_build_masthead_sparklines_returns_exactly_five_ordered_by_descending_total's
+    # own comment): products totals exactly 1 -- the live bug this test
+    # guards against was this row rendering the ungrammatical "1 mentions
+    # / 7d". models totals 10, so its row must read the ordinary plural.
+    html = moving.render_moving_page(REAL_WHATS_MOVING)
+    assert "1 mention / 7d" in html
+    assert "1 mentions / 7d" not in html
+    assert "10 mentions / 7d" in html
 
 
 def test_render_moving_page_empty_topics_shows_honest_message_not_a_crash():

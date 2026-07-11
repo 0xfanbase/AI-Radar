@@ -91,23 +91,16 @@ svg_sparkline = _load_module_by_path(
     "frontier_wire_site_lib_svg_sparkline", LIB_DIR / "svg_sparkline.py"
 )
 
-
 # Human-readable display names for whats_moving.schema.json's nine fixed
-# topic-tag enum values -- mirrors site/builders/board.py's own
-# REGION_HEADINGS convention, for the identical reason: a couple of the
-# raw enum values ("chips/compute", "open-source") read awkwardly as page
-# copy verbatim. Spec-silent, logged in IMPROVEMENT_BACKLOG.md.
-TOPIC_DISPLAY_NAMES: dict[str, str] = {
-    "models": "Models",
-    "research": "Research",
-    "chips/compute": "Chips / Compute",
-    "policy": "Policy",
-    "products": "Products",
-    "safety": "Safety",
-    "open-source": "Open Source",
-    "China": "China",
-    "funding": "Funding",
-}
+# topic-tag enum values -- the exact same raw values as card.schema.json's
+# `topics` enum, so this module loads the one shared mapping
+# (site/lib/topics.py) rather than keeping its own copy, which would risk
+# drifting from site/builders/wire.py's own card-topic-chip display names.
+# See topics.py's own docstring. Spec-silent choice to centralize, logged
+# in IMPROVEMENT_BACKLOG.md.
+topics_lib = _load_module_by_path(
+    "frontier_wire_site_lib_topics", LIB_DIR / "topics.py"
+)
 
 # Human display text for data/whats_moving.json's own precomputed trend
 # enum (accelerating/cooling/flat). Deliberately distinct from
@@ -148,7 +141,10 @@ EMPTY_MOVING_MESSAGE = (
 
 
 def _display_name(topic: str) -> str:
-    return TOPIC_DISPLAY_NAMES.get(topic, topic)
+    """Thin delegate to the shared `site/lib/topics.py::display_name` --
+    kept as its own function so every existing caller in this module (and
+    in `site/tests/test_moving_builder.py`) is untouched."""
+    return topics_lib.display_name(topic)
 
 
 def _trend_label(trend: str) -> str:
@@ -166,6 +162,7 @@ class TopicRowView:
     trend: str
     trend_label: str
     total_mentions: int
+    mentions_label: str
     daily_counts: tuple[int, ...]
     sparkline_svg: Markup
 
@@ -185,12 +182,15 @@ def build_topic_row(raw: Mapping[str, Any]) -> TopicRowView:
     daily_counts = tuple(int(c) for c in raw["daily_counts"])
     trend = str(raw["trend"])
     rendered = svg_sparkline.render_sparkline(display_name, daily_counts)
+    total_mentions = sum(daily_counts)
+    mentions_label = f"{total_mentions} mention{'s' if total_mentions != 1 else ''} / 7d"
     return TopicRowView(
         topic=topic,
         display_name=display_name,
         trend=trend,
         trend_label=_trend_label(trend),
-        total_mentions=sum(daily_counts),
+        total_mentions=total_mentions,
+        mentions_label=mentions_label,
         daily_counts=daily_counts,
         sparkline_svg=Markup(rendered.svg),
     )

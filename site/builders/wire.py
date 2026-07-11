@@ -71,6 +71,7 @@ def _load_module_by_path(name: str, path: Path):
 
 
 linkify = _load_module_by_path("frontier_wire_site_lib_linkify", LIB_DIR / "linkify.py")
+topics_lib = _load_module_by_path("frontier_wire_site_lib_topics", LIB_DIR / "topics.py")
 
 
 DEFAULT_WINDOW_DAYS = 14
@@ -222,7 +223,7 @@ def prepare_card_view(card: Mapping[str, Any], slug_map: Mapping[str, str]) -> d
         "one_liner": card["one_liner"],
         "what_happened_html": linked_fields["what_happened"],
         "why_it_matters_html": linked_fields["why_it_matters"],
-        "topics": list(card.get("topics", [])),
+        "topics": [topics_lib.display_name(t) for t in card.get("topics", [])],
         "citations": list(card.get("citations", [])),
         "lexicon_fallback_terms": fallback_terms,
         "correction_note": card.get("correction_note"),
