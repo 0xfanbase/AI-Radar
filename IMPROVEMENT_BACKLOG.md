@@ -3292,3 +3292,50 @@ convention noted in the entry directly above), not retroactively edited.
   Significance for the same row at once) or drastically truncating
   columns, whereas per-row disclosure cards are legible at any viewport
   width with zero overflow anywhere.
+
+- **Masthead nav condensed to 4 items, meta pages moved to a footer nav,
+  masthead sparkline strip scoped to the Wire home page only, capped to
+  the top 5 topics (2026-07-11, owner-reported "too many tabs;
+  condense/reduce").** `base.html`'s masthead had grown to 7 nav items
+  (Wire/Board/Lexicon/Primer/What's Moving/Method/About) plus, on every
+  page, the 9-topic masthead sparkline strip -- roughly 16 chrome
+  elements above any actual content on a 390px phone screen, for a
+  target reader who is not a technical expert and just wants the news.
+  Supersedes this file's own earlier "site-wide" judgment call (the
+  `env.globals["masthead_sparklines"]` entry from the Phase 4
+  integration commit): that call was reasonable read against build-plan
+  section 5's literal "+ a thin masthead sparkline strip site-wide"
+  text, but the owner's own readability complaint takes precedence over
+  the plan's literal wording per this repo's target-reader standard.
+  Kept: exactly 4 masthead nav items (Wire/Board/Lexicon/Primer -- the
+  reader's actual content destinations), each now carrying a real
+  `aria-current="page"` on the active page (computed from a per-template
+  `{% set active_nav = "..." %}` Jinja variable, guarded with
+  `| default('')` for `StrictUndefined` pages like `404.html` that never
+  set it). Moved: What's Moving/Method/About/Corrections into a new
+  `<nav class="site-footer__nav">` in the footer, below the content
+  instead of above it -- still one tap from every page, just no longer
+  competing with the 4 primary destinations for above-the-fold space.
+  Narrowed: the masthead sparkline strip now renders only on the Wire
+  home page (`site/builders/wire.py::build_wire_context`, wired through
+  `site/generate.py` -> `wire.write_wire_pages(..., masthead_sparklines=
+  ...)` as an explicit keyword argument, not a Jinja environment global
+  any more -- the global was a reasonable mechanism for a site-wide
+  strip, but an explicit per-page parameter is the more honest shape
+  once only one page opts in) and capped to the
+  `moving.MASTHEAD_TOPIC_LIMIT` (5) topics with the highest 7-day
+  mention totals (`site/builders/moving.py::build_masthead_sparklines`,
+  stable sort so tied topics keep the schema's own fixed nine-topic file
+  order) -- 9 topics' worth of sparklines never fit a 390px viewport
+  without silent horizontal cutoff, so the cap matters as much as the
+  page-scoping does. `/moving/`'s own page no longer sets
+  `masthead_sparklines` either (`build_moving_context`'s return no
+  longer includes that key) -- it was rendering the same nine
+  sparklines twice on the one page that needs the shortcut least (its
+  own main list already shows every topic at full size). Judgment call,
+  spec-silent: the exact 5-topic cap number and the choice to rank by
+  raw 7-day total (rather than, say, the precomputed
+  accelerating/cooling/flat trend label) -- a raw total is simpler to
+  explain to a non-expert reader ("the 5 busiest topics this week") than
+  a rate-of-change ranking would be, and keeps the strip's own ordering
+  legible without a second, competing sort concept.

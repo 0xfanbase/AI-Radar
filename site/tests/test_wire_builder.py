@@ -294,6 +294,27 @@ def test_render_wire_index_links_archive_months(env):
     assert '<a href="/wire/2026-05/">May 2026</a>' in html
 
 
+def test_render_wire_index_masthead_sparklines_present_when_passed(env):
+    # The masthead sparkline strip is scoped to the Wire home page only
+    # (nav-condense pass, see IMPROVEMENT_BACKLOG.md) -- render_wire_index
+    # includes it exactly when a caller (site/generate.py, in real use)
+    # passes a non-empty masthead_sparklines list.
+    from markupsafe import Markup
+
+    fake_sparklines = [
+        {"topic": "models", "display_name": "Models", "sparkline_svg": Markup("<svg>fake</svg>")}
+    ]
+    html = wire.render_wire_index(
+        env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY, masthead_sparklines=fake_sparklines
+    )
+    assert "masthead-strip" in html
+
+
+def test_render_wire_index_masthead_sparklines_absent_when_not_passed(env):
+    html = wire.render_wire_index(env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY)
+    assert "masthead-strip" not in html
+
+
 def test_render_wire_index_empty_state_when_no_cards_renders_sensibly(env):
     html = wire.render_wire_index(env, [], SYNTHETIC_LEXICON, today=TODAY)
     assert wire.EMPTY_WIRE_MESSAGE in html

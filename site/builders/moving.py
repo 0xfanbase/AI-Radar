@@ -1,5 +1,7 @@
-"""What's Moving builder (Phase 4, build-plan section 5) -- the site's
-topic-velocity strip, plus the thin, site-wide masthead sparkline partial.
+"""What's Moving builder (Phase 4, build-plan section 5; masthead scope
+narrowed in the nav-condense pass -- see ``IMPROVEMENT_BACKLOG.md``) --
+the site's topic-velocity strip, plus the thin masthead sparkline view
+model consumed by the Wire home page only.
 
 Reads the pure-code, no-AI ``data/whats_moving.json`` snapshot (see
 ``schemas/whats_moving.schema.json`` / ``IMPROVEMENT_BACKLOG.md`` for its
@@ -10,35 +12,39 @@ trend label) and renders:
 * ``/moving/`` -- one row per topic, each with its own inline SVG
   sparkline (``site/lib/svg_sparkline.py``, already implemented -- this
   module never draws its own chart, only calls that one).
-* the thin, site-wide masthead sparkline strip
+* the thin masthead sparkline strip
   (``templates/_masthead_moving_strip.html``), which ``templates/base.html``
-  now conditionally ``{% include %}``s on every page once a caller's
-  render context carries a non-empty ``masthead_sparklines`` list. Every
-  other already-committed Phase 4
-  builder (``board.py``/``lexicon.py``/``primer.py``/``wire.py``) never
-  sets that variable, so ``base.html``'s own
+  conditionally ``{% include %}``s once a caller's render context carries
+  a non-empty ``masthead_sparklines`` list. Only the Wire home page
+  (``site/builders/wire.py::build_wire_context``, wired up by
+  ``site/generate.py``) ever sets that variable now -- every other page
+  (including this module's own ``/moving/``) leaves it unset, so
+  ``base.html``'s own
   ``{% if masthead_sparklines is defined and masthead_sparklines %}``
-  guard keeps every one of their already-tested renders byte-for-byte
-  unchanged -- the strip only ever appears on a page whose own builder
-  opts in (today, that's only this module's own ``/moving/`` page, via
-  :func:`build_moving_context`). Wiring every other builder up to pass
-  this same context is a future ``site/generate.py`` integration turn's
-  job, not this one's -- see ``IMPROVEMENT_BACKLOG.md``.
+  guard keeps it off everywhere except the home page. :func:`build_masthead_sparklines`
+  is this module's contribution to that: it caps the strip to the
+  ``MASTHEAD_TOPIC_LIMIT`` (5) topics with the highest 7-day mention
+  totals, so the strip fits a narrow mobile viewport without silently
+  clipping the long tail. ``build_moving_context`` (the ``/moving/`` page's
+  own context) does *not* include ``masthead_sparklines`` any more --
+  ``/moving/`` already shows every topic's own full-size sparkline in its
+  main list, so the strip would have been the same content rendered
+  twice on that one page.
 
 Two-step build usage (mirrors ``site/builders/board.py``'s own
 convention):
 
 1. Call :func:`build_moving_context` once, passing the loaded
    ``data/whats_moving.json`` dict, to get the fully-computed
-   ``/moving/`` template context (which also carries
-   ``masthead_sparklines``, for the reason above).
+   ``/moving/`` template context.
 2. Render via :func:`render_moving_page` (accepts a Jinja ``Environment``
    the caller supplies, or builds its own minimal one via
    :func:`build_jinja_env` when none is given).
 
-This module deliberately does *not* wire itself into ``site/generate.py``
-(out of this turn's scope -- another turn integrates every Phase 4
-builder together); see ``IMPROVEMENT_BACKLOG.md``.
+:func:`build_masthead_sparklines` is called directly by
+``site/generate.py`` (not through this module's own page context) to
+build the Wire home page's masthead-strip view models; see that
+function's own docstring.
 """
 from __future__ import annotations
 
@@ -124,6 +130,17 @@ TREND_DISPLAY: dict[str, str] = {
 MASTHEAD_SPARKLINE_WIDTH = 56
 MASTHEAD_SPARKLINE_HEIGHT = 14
 
+# The masthead strip is scoped to the Wire home page only (see this
+# module's own top-of-file docstring) and must fit a narrow (390px)
+# mobile viewport without silently clipping topics off the right edge --
+# so it shows only the topics with the most 7-day HN mentions, not all
+# nine. Named as its own constant (rather than an inline literal) so a
+# future change to this cap is a one-line, logged decision -- matching
+# this repo's own established convention (e.g. the reputable-outlet
+# table in CLAUDE.md) of naming a cutoff explicitly rather than leaving
+# it to be rediscovered from a bare number.
+MASTHEAD_TOPIC_LIMIT = 5
+
 EMPTY_MOVING_MESSAGE = (
     "No topic-velocity data yet -- check back once watch.yml has run and "
     "produced data/whats_moving.json."
@@ -192,11 +209,18 @@ def build_topic_rows(topics: Sequence[Mapping[str, Any]]) -> list[TopicRowView]:
 def build_masthead_sparklines(
     topics: Sequence[Mapping[str, Any]],
 ) -> list[MastheadSparklineView]:
-    """The thin masthead strip's own view models -- one small sparkline
-    per topic, reusing the same file data `build_topic_rows` does but at
-    the masthead's smaller `MASTHEAD_SPARKLINE_*` dimensions."""
+    """The Wire home page's masthead strip view models -- one small
+    sparkline per topic, reusing the same file data `build_topic_rows`
+    does but at the masthead's smaller `MASTHEAD_SPARKLINE_*` dimensions,
+    capped to the `MASTHEAD_TOPIC_LIMIT` topics with the highest 7-day
+    mention totals (descending), so the strip fits a narrow mobile
+    viewport without silently clipping topics off the right edge. Ties
+    keep `topics`' own original (fixed nine-topic, per-schema) relative
+    order -- `sorted(..., reverse=True)` is guaranteed stable in Python,
+    so this never depends on dict/JSON key order beyond that guarantee."""
+    ranked = sorted(topics, key=lambda raw: sum(int(c) for c in raw["daily_counts"]), reverse=True)
     views: list[MastheadSparklineView] = []
-    for raw in topics:
+    for raw in ranked[:MASTHEAD_TOPIC_LIMIT]:
         topic = str(raw["topic"])
         display_name = _display_name(topic)
         daily_counts = tuple(int(c) for c in raw["daily_counts"])
@@ -217,17 +241,19 @@ def build_masthead_sparklines(
 
 
 def build_moving_context(whats_moving: Mapping[str, Any]) -> dict[str, Any]:
-    """Full Jinja context for `/moving/` (`moving.html`) -- also carries
-    `masthead_sparklines`, so rendering this page through
-    `templates/base.html` lights up the shared masthead strip (see this
-    module's own top-of-file docstring)."""
+    """Full Jinja context for `/moving/` (`moving.html`). Deliberately
+    does *not* carry `masthead_sparklines` -- the masthead strip is
+    scoped to the Wire home page only (see this module's own
+    top-of-file docstring); `/moving/`'s own main list already shows
+    every topic's full-size sparkline, so repeating a second, smaller
+    copy of the same nine sparklines above it would just be the same
+    content shown twice on the one page that needs it least."""
     topics = list(whats_moving.get("topics", []))
     return {
         "topics": build_topic_rows(topics),
         "generated_at": whats_moving.get("generated_at"),
         "window_days": whats_moving.get("window_days", 7),
         "empty_message": EMPTY_MOVING_MESSAGE,
-        "masthead_sparklines": build_masthead_sparklines(topics),
     }
 
 

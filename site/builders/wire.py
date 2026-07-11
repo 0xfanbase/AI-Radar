@@ -233,8 +233,20 @@ def build_wire_context(
     lexicon_entries: Iterable[Mapping[str, Any]],
     window_days: int = DEFAULT_WINDOW_DAYS,
     today: date | None = None,
+    masthead_sparklines: Any = None,
 ) -> dict[str, Any]:
-    """Full Jinja context for the Wire home page (`wire_index.html`)."""
+    """Full Jinja context for the Wire home page (`wire_index.html`).
+
+    `masthead_sparklines` (a list of
+    `site/builders/moving.py::MastheadSparklineView`, or `None`) is the
+    Wire home page's own opt-in to `templates/base.html`'s shared masthead
+    sparkline strip -- the strip is scoped to this page only (see
+    `moving.py`'s top-of-file docstring for why), so `build_month_context`
+    below deliberately has no equivalent parameter. `None`/falsy collapses
+    to `[]`, matching `base.html`'s own
+    `{% if masthead_sparklines is defined and masthead_sparklines %}`
+    guard (an empty list renders nothing, same as never setting the key).
+    """
     cards = list(cards)
     slug_map = linkify.build_slug_map(lexicon_entries)
     windowed = cards_in_window(cards, window_days=window_days, today=today)
@@ -244,6 +256,7 @@ def build_wire_context(
         "window_days": window_days,
         "empty_message": EMPTY_WIRE_MESSAGE,
         "archive_months": [{"key": m, "label": month_label(m)} for m in months],
+        "masthead_sparklines": masthead_sparklines or [],
     }
 
 
@@ -279,8 +292,15 @@ def render_wire_index(
     lexicon_entries: Iterable[Mapping[str, Any]],
     window_days: int = DEFAULT_WINDOW_DAYS,
     today: date | None = None,
+    masthead_sparklines: Any = None,
 ) -> str:
-    context = build_wire_context(cards, lexicon_entries, window_days=window_days, today=today)
+    context = build_wire_context(
+        cards,
+        lexicon_entries,
+        window_days=window_days,
+        today=today,
+        masthead_sparklines=masthead_sparklines,
+    )
     return env.get_template("wire_index.html").render(**context)
 
 
@@ -301,19 +321,30 @@ def write_wire_pages(
     public_dir: Path,
     window_days: int = DEFAULT_WINDOW_DAYS,
     today: date | None = None,
+    masthead_sparklines: Any = None,
 ) -> list[Path]:
     """Render + write the Wire home page (`<public_dir>/index.html`) and
     every month's archive page (`<public_dir>/wire/<YYYY-MM>/index.html`)
-    for every month any card exists in. Convenience entry point for a
-    future `site/generate.py` integration -- not called by this module
-    itself, and not called from `generate.py` yet (out of this turn's
-    scope; see this module's own top-of-file docstring)."""
+    for every month any card exists in.
+
+    `masthead_sparklines` is passed through to the home page only (see
+    `build_wire_context`'s own docstring) -- month archive pages
+    (`render_wire_month`/`build_month_context`) never take or render it,
+    so the masthead sparkline strip stays scoped to the Wire home page,
+    never any archive page."""
     cards = list(cards)
     lexicon_entries = list(lexicon_entries)
     public_dir = Path(public_dir)
     written: list[Path] = []
 
-    index_html = render_wire_index(env, cards, lexicon_entries, window_days=window_days, today=today)
+    index_html = render_wire_index(
+        env,
+        cards,
+        lexicon_entries,
+        window_days=window_days,
+        today=today,
+        masthead_sparklines=masthead_sparklines,
+    )
     index_path = public_dir / "index.html"
     index_path.parent.mkdir(parents=True, exist_ok=True)
     index_path.write_text(index_html, encoding="utf-8")

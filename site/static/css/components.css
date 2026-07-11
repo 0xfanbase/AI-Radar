@@ -166,6 +166,16 @@ a {
   text-decoration: underline;
 }
 
+/* Current-page indicator -- the 4 masthead nav items are the only ones
+ * ever marked `aria-current="page"` (set per-page via base.html's
+ * `active_nav` context variable); this rule only adds a color/underline
+ * accent on top of that real, screen-reader-visible attribute, never a
+ * color-only signal. */
+.masthead__nav a[aria-current="page"] {
+  color: var(--color-star-white);
+  text-decoration: underline;
+}
+
 /* --- Masthead sparkline strip ------------------------------------------
  * Thin, site-wide "what's moving" strip -- see
  * site/templates/_masthead_moving_strip.html for when/why it renders.
@@ -223,6 +233,22 @@ a {
 
 .site-footer .disclaimer {
   color: var(--color-ink);
+}
+
+/* Footer secondary nav -- the meta/transparency pages (What's Moving,
+ * Method, About, Corrections), moved here from the masthead (see
+ * IMPROVEMENT_BACKLOG.md) so every page still carries one-tap access to
+ * them without adding to the above-content masthead's own item count. A
+ * compact horizontal, wrapping link row -- no new color, just the
+ * existing footer type scale. */
+.site-footer__nav ul {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  font-size: 0.85rem;
 }
 
 /* --- Status chips --------------------------------------------------------

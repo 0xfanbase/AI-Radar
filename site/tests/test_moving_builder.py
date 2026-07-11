@@ -1,16 +1,18 @@
 """Tests for site/builders/moving.py + site/templates/moving.html + the
 thin masthead sparkline-strip partial (`_masthead_moving_strip.html`),
-now wired into `site/templates/base.html` (Phase 4, build-plan section
-5).
+which `site/templates/base.html` renders only on the Wire home page
+(Phase 4 build-plan section 5, scope narrowed by the nav-condense pass --
+see IMPROVEMENT_BACKLOG.md).
 
 Exercises the REAL, committed `data/whats_moving.json` (the pure-code,
 no-AI 7-day topic-velocity snapshot -- 9 fixed topics, per
 `schemas/whats_moving.schema.json`) throughout: every topic gets its own
-inline SVG sparkline, and the masthead strip partial renders for a page
-whose builder opts in (this module's own `/moving/` page) while staying
-completely absent from a sibling page's render (e.g. `/board/`), proving
-the `base.html` edit is backward-compatible with every already-committed
-builder.
+inline SVG sparkline in `/moving/`'s own main list, the masthead strip's
+own `build_masthead_sparklines` caps itself to the top
+`MASTHEAD_TOPIC_LIMIT` topics by 7-day mention total, and the masthead
+strip itself is absent from both `/moving/` and a sibling page (e.g.
+`/board/`) -- it is the Wire home page's own opt-in now, exercised in
+`site/tests/test_wire_builder.py`, not this module's.
 
 Loaded by explicit file path (matching `site/tests/test_board_builder.py`'s /
 `site/tests/test_primer_builder.py`'s own convention), since `site/` is
@@ -143,13 +145,13 @@ def test_render_moving_page_lists_every_topic_display_name():
         assert display_name in html
 
 
-def test_render_moving_page_has_one_sparkline_per_topic_in_the_main_list_plus_the_masthead_strip():
+def test_render_moving_page_has_one_sparkline_per_topic_in_the_main_list_only():
     html = moving.render_moving_page(REAL_WHATS_MOVING)
-    # This page's own render context also carries masthead_sparklines
-    # (see build_moving_context), so base.html's masthead strip renders
-    # too -- one <svg> per topic there, on top of one per topic in the
-    # main /moving/ list itself.
-    assert html.count("<svg") == 2 * len(REAL_TOPICS)
+    # build_moving_context no longer carries masthead_sparklines (the
+    # strip is scoped to the Wire home page only -- see this module's
+    # top-of-file docstring), so /moving/ renders exactly one <svg> per
+    # topic, from its own main list, and no masthead-strip copy on top.
+    assert html.count("<svg") == len(REAL_TOPICS)
 
 
 def test_render_moving_page_empty_topics_shows_honest_message_not_a_crash():
@@ -164,13 +166,33 @@ def test_render_moving_page_empty_topics_shows_honest_message_not_a_crash():
 # ---------------------------------------------------------------------------
 
 
-def test_build_masthead_sparklines_against_real_content_one_per_topic():
+def test_build_masthead_sparklines_against_real_content_capped_to_the_limit():
     views = moving.build_masthead_sparklines(REAL_TOPICS)
-    assert len(views) == len(REAL_TOPICS)
+    assert len(views) == moving.MASTHEAD_TOPIC_LIMIT
     for view in views:
         svg = str(view.sparkline_svg)
         assert svg.startswith("<svg")
         assert 'role="img"' in svg
+
+
+def test_build_masthead_sparklines_returns_exactly_five_ordered_by_descending_total():
+    # Real data/whats_moving.json 7-day totals: models=10, open-source=2,
+    # products=1, China=1, everything else=0. Ties (products vs. China,
+    # both 1; the four 0-total topics) keep the topics list's own
+    # original relative order -- Python's sorted(..., reverse=True) is
+    # guaranteed stable.
+    views = moving.build_masthead_sparklines(REAL_TOPICS)
+    assert len(views) == 5
+    assert [v.topic for v in views] == [
+        "models",
+        "open-source",
+        "products",
+        "China",
+        "research",
+    ]
+    totals = {t["topic"]: sum(t["daily_counts"]) for t in REAL_TOPICS}
+    ranked_totals = [totals[v.topic] for v in views]
+    assert ranked_totals == sorted(ranked_totals, reverse=True)
 
 
 def test_masthead_sparklines_render_smaller_than_the_full_page_sparklines():
@@ -185,7 +207,9 @@ def test_masthead_sparklines_render_smaller_than_the_full_page_sparklines():
 def test_render_masthead_strip_standalone_links_to_moving_page():
     html = moving.render_masthead_strip(REAL_WHATS_MOVING)
     assert 'href="/moving/"' in html
-    assert html.count("<svg") == len(REAL_TOPICS)
+    # Capped to MASTHEAD_TOPIC_LIMIT, not one per real topic -- see
+    # build_masthead_sparklines.
+    assert html.count("<svg") == moving.MASTHEAD_TOPIC_LIMIT
 
 
 def test_render_masthead_strip_standalone_handles_empty_topics_gracefully():
@@ -195,15 +219,15 @@ def test_render_masthead_strip_standalone_handles_empty_topics_gracefully():
 
 
 # ---------------------------------------------------------------------------
-# base.html wiring: the masthead strip only appears on a page whose own
-# builder opts in -- proving this turn's base.html edit doesn't change
-# any already-committed sibling page's rendered output.
+# base.html wiring: the masthead strip is scoped to the Wire home page
+# only now -- /moving/ (this module's own page) no longer opts in, same
+# as every other non-home page.
 # ---------------------------------------------------------------------------
 
 
-def test_masthead_strip_present_on_the_moving_page():
+def test_masthead_strip_absent_from_the_moving_page():
     html = moving.render_moving_page(REAL_WHATS_MOVING)
-    assert "masthead-strip" in html
+    assert "masthead-strip" not in html
 
 
 def test_masthead_strip_absent_from_a_sibling_page_that_does_not_opt_in():

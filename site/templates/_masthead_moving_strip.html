@@ -1,18 +1,25 @@
-{# Thin, site-wide "what's moving" sparkline strip.
+{# Thin masthead sparkline strip, scoped to the Wire home page only.
 
    templates/base.html includes this partial directly, inside the
    masthead, once a caller's render context carries a non-empty
    `masthead_sparklines` list (see
    site/builders/moving.py::build_masthead_context /
-   build_moving_context). Every builder that predates this commit
-   (board.py/lexicon.py/primer.py/wire.py) never sets that variable at
-   all, so base.html's own
+   build_masthead_sparklines). Only the Wire home page's own context
+   (site/builders/wire.py::build_wire_context, fed by
+   site/generate.py) ever sets that variable now -- every other page
+   (board.py/lexicon.py/primer.py/moving.py's own /moving/ page/etc.)
+   leaves it unset, so base.html's own
    `{% if masthead_sparklines is defined and masthead_sparklines %}`
-   guard keeps every one of their already-tested renders byte-for-byte
-   unchanged -- this strip only ever appears on a page whose own builder
-   opts in (today, only /moving/ itself). Full site-wide wiring (every
-   builder passing this same context) is a future site/generate.py
-   integration turn's job -- see IMPROVEMENT_BACKLOG.md.
+   guard keeps the strip off everywhere except the home page. This is a
+   deliberate narrowing from an earlier "site-wide" design -- see
+   IMPROVEMENT_BACKLOG.md for the nav-condense decision that made this
+   call, including why `/moving/` itself no longer opts in (it already
+   shows every topic's own full-size sparkline in its main list).
+
+   `masthead_sparklines` itself is already capped to the top
+   MASTHEAD_TOPIC_LIMIT topics by 7-day mention total
+   (site/builders/moving.py::build_masthead_sparklines) so this strip
+   fits a narrow mobile viewport.
 
    Each sparkline is svg_sparkline.py's own fully-labeled output (aria-label
    + <title> + a visible trend word) at the masthead's smaller dimensions --
