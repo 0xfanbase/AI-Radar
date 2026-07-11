@@ -555,6 +555,33 @@ def test_no_script_tag_anywhere_in_any_generated_html_page(built_site):
         )
 
 
+def test_no_hardcoded_decimal_rgb_color_literal_anywhere_in_built_html(built_site):
+    # Regression test for a real bug an independent verification pass
+    # caught: site/templates/board.html's pulse-dot glow hardcoded a
+    # decimal RGB triple equal to the pre-Matrix-theme signal-accent
+    # token's own old hex value. The Matrix-theme palette rename's own
+    # greps (for the old token's name, and for "#RRGGBB"-style hex
+    # literals) never matched that decimal-triple encoding, so it
+    # silently kept glowing the old color after everything else had
+    # re-themed (see IMPROVEMENT_BACKLOG.md for the full account -- this
+    # comment deliberately avoids repeating the old token name/hex
+    # verbatim, since those strings are themselves checked to be fully
+    # gone from site/ elsewhere). Every color on this site must come
+    # from a tokens.css custom property (directly, or via color-mix() on
+    # one), never a second hardcoded copy in any encoding -- this test
+    # scans the actual rendered HTML of every generated page for a bare
+    # rgb()/rgba() literal with a numeric first channel, which no
+    # legitimate token-sourced declaration ever produces.
+    rgb_re = re.compile(r"rgba?\(\s*\d")
+    for page in _all_html_files(built_site):
+        html = page.read_text(encoding="utf-8")
+        assert not rgb_re.search(html), (
+            f"{page.relative_to(built_site)} contains a hardcoded decimal "
+            f"rgb()/rgba() color literal -- colors must derive from a "
+            f"tokens.css custom property, never a second hardcoded copy"
+        )
+
+
 def test_matrix_css_declares_pointer_events_none_and_a_negative_z_index():
     css = (generate.STATIC_DIR / "css" / "matrix.css").read_text(encoding="utf-8")
     assert "pointer-events: none" in css

@@ -7,6 +7,72 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — T6: independent end-to-end verification of the Matrix theme workstream (one real bug found and fixed)
+
+Verified the T1-T5 Matrix-theme workstream from scratch, trusting none of
+the prior tasks' own self-reports -- re-ran every command and re-derived
+every grep target live rather than reusing a previously reported number.
+
+**Everything that passed clean on the first pass:** `python -m pytest`
+(709 passed, 2 deselected); `python -m pytest site/tests` (290 passed,
+pre-fix baseline); `python site/generate.py` (clean build, no warnings);
+zero `<script` anywhere in `public/`; all 39 built HTML pages carry
+`<div class="matrix-rain" aria-hidden="true">` on the same tag,
+immediately after the skip-link, which itself remains the first element
+inside `<body>`; `matrix.css`'s `pointer-events: none`, `z-index: -1`,
+and exactly one `animation:` declaration positioned after the
+reduced-motion media query opens; `matrix-tiles.css` containing
+`%2339FF6E` -- the live-parsed `--color-signal-green` hex, never a
+pasted literal; every `<link>` to `matrix.css`/`matrix-tiles.css`
+correctly base-path-rewritten to `/AI-Radar/static/css/...`; opaque
+`background: var(--color-bg)` on `.masthead`, `.site-footer`, and `main`;
+`grep -rn "signal-cyan" site/` and every old-palette hex literal grep
+returning nothing; `tokens.css`'s header table already restated with the
+new ratios; every page still carrying exactly one `main-content` landmark
+and one `<h1>`; `git status` clean with `public/` correctly gitignored;
+8 consecutive commits all authored as `frontier-wire-bot
+<bot@users.noreply.github.com>`; no repo-local `git config user.name`/
+`user.email` override; and the full `6f1c3a6..HEAD` diff touching only
+`site/`, `PROGRESS.md`, and `IMPROVEMENT_BACKLOG.md` -- no `.github/`,
+`watcher/`, `scripts/`, or `CLAUDE.md` changes anywhere in the
+workstream.
+
+**One real bug did not surface from any of the above and needed a
+different grep to catch:** `site/templates/board.html`'s pulse-dot
+`box-shadow` (inside `@keyframes board-pulse`) hardcoded a literal
+decimal `rgba(67, 229, 196, ...)` triple -- `67, 229, 196` in hex is
+`43, E5, C4`, the *old*, pre-rename signal-accent token's own hex value,
+predating this whole workstream. T1's rename swept every reference
+findable via a `signal-cyan` name grep and hex-literal (`#RRGGBB`) greps,
+but a decimal RGB triple with no `#` and no hex digits structurally
+cannot match either pattern, so it silently survived: the dot itself
+correctly rendered green (`background: var(--color-signal-green)`) while
+its own animated glow kept tinting the old color underneath. Fixed by
+switching both `box-shadow` declarations to
+`color-mix(in srgb, var(--color-signal-green) <pct>%, transparent)` --
+deriving the alpha-blended glow directly from the live token, rather than
+hardcoding the new color's decimal equivalent and recreating the same
+class of bug for the next palette change. `color-mix()` has shipped in
+every evergreen browser since early 2023, well inside this project's
+zero-JS/no-polyfill static-site baseline. Added two regression tests
+(`site/tests/test_board_builder.py` and `site/tests/test_build.py`,
+the latter scanning all 39 built pages) that fail on any future
+reintroduction of a hardcoded decimal `rgb()`/`rgba()` color literal
+anywhere on the site, not just this one instance.
+
+**Verification, re-run after the fix, from the same clean tree:**
+- `python -m pytest -q` -- 709 passed, 2 deselected.
+- `python -m pytest -q site/tests` -- 292 passed (290 + 2 new).
+- `python site/generate.py` -- clean build, no new warnings.
+- Every structural/consistency grep above re-run against the rebuilt
+  `public/` and re-checked green.
+
+Full reasoning (why `color-mix()` over a decimal-equivalent hardcode, and
+why the new tests ban the whole pattern rather than pinning one stale
+value) is logged in `IMPROVEMENT_BACKLOG.md`.
+
+---
+
 ## 2026-07-11 — Matrix digital-rain theme (zero-JS site-wide reskin)
 
 Prompted by the owner asking to "turn this into a matrix theme so that it

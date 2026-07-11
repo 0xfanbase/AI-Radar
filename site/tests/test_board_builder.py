@@ -496,3 +496,28 @@ def test_pulse_animation_keyframes_only_inside_reduced_motion_media_query():
     # document appears after the media query opens.
     animation_pos = html.index("animation:")
     assert media_pos < animation_pos
+
+
+def test_pulse_box_shadow_derives_from_the_signal_green_token_not_a_hardcoded_rgb_triple():
+    # Regression test for a real bug an independent verification pass
+    # caught: the pulse-dot's box-shadow glow used to hardcode a decimal
+    # RGB triple equal to the pre-Matrix-theme signal-accent token's own
+    # old hex value (see IMPROVEMENT_BACKLOG.md for the full account --
+    # this comment deliberately avoids repeating the old token name/hex
+    # verbatim, since those strings are themselves checked to be fully
+    # gone from site/ elsewhere). The Matrix-theme palette rename's own
+    # greps (for the old token's name, and for hex literals) never
+    # matched this decimal-triple form, so it silently kept glowing the
+    # old color after the dot itself (`background:
+    # var(--color-signal-green)`) had already re-themed to green. Assert
+    # both that the fix (color-mix() referencing the live token) is in
+    # place and that no bare decimal rgb()/rgba() color literal sneaks
+    # back in.
+    today = date(2026, 7, 9)
+    html = board.render_board_page([_synthetic_row()], today=today)
+    assert "color-mix(in srgb, var(--color-signal-green)" in html
+    assert not re.search(r"rgba?\(\s*\d", html), (
+        "found a hardcoded decimal rgb()/rgba() color literal in the "
+        "rendered board page -- colors must derive from a tokens.css "
+        "custom property, never a second hardcoded copy of one"
+    )

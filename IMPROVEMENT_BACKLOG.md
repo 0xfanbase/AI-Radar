@@ -3839,3 +3839,77 @@ reasoned through in T1-T2's own entries above:
   an equivalent) to `site/lib/` so both `matrix_rain.py` and
   `svg_sparkline.py` share one real tokens.css parser instead of the
   latter keeping a hand-maintained duplicate constant.
+
+## T6 independent verification pass: a hardcoded-decimal-RGB duplicate the rename swept never caught (2026-07-11)
+
+Ran the full T1-T5 gate list from scratch (not trusting any prior task's
+self-report): `python -m pytest` (709 passed / 2 deselected),
+`python -m pytest site/tests` (290 passed before this task's own two new
+tests, 292 after), `python site/generate.py` (clean build, no warnings),
+every structural grep against the real built `public/` output (zero
+`<script`, all 39 generated pages carry a single
+`<div class="matrix-rain" aria-hidden="true">` tag right after the
+skip-link, `matrix.css`'s `pointer-events: none` / `z-index: -1` /
+single reduced-motion-gated `animation:` / `matrix-tiles.css`'s live
+signal-green hex, base-path-rewritten `<link>` hrefs, opaque
+masthead/footer/main backgrounds), and every consistency grep against
+`site/` source (`signal-cyan` gone, every old-palette hex literal gone,
+`tokens.css`'s header table restated with the new ratios). All of that
+passed clean on the first pass.
+
+One real bug did *not* show up in any of those checks and needed a
+different grep to find: `site/templates/board.html`'s pulse-dot
+`box-shadow` (inside its `@keyframes board-pulse` rule) hardcoded a
+literal decimal `rgba(67, 229, 196, ...)` triple. `67, 229, 196` in hex
+is `43, E5, C4` -- the *old*, pre-rename signal-accent token's own hex
+value, predating this whole workstream (introduced with the Frontier
+Board's pulse-dot feature itself, well before T1). T1's rename swept
+every reference it could find via `grep -rn "signal-cyan" site/` (the
+token's old name) and via hex-literal greps (`#43E5C4`, `#[0-9A-Fa-f]{6}`
+patterns) -- both of which this decimal-RGB encoding structurally cannot
+match, since it spells the same color out as three base-10 numbers with
+no `#` and no hex digits anywhere. The result: after T1-T5, the
+pulse-dot itself correctly rendered green (`background:
+var(--color-signal-green)`), but its own animated glow was still
+tinting the old teal/cyan -- a real, live, easy-to-miss visual
+inconsistency that would have shipped unnoticed.
+
+Fix, not just a value swap: rather than hardcode the *new* color's
+decimal equivalent (which would just recreate the identical class of bug
+the next time the palette changes), both `box-shadow` declarations now
+use `color-mix(in srgb, var(--color-signal-green) <pct>%, transparent)`
+to derive the alpha-blended glow color directly from the live token at
+render time. This is the first use of CSS `color-mix()` anywhere in this
+codebase; it's been supported in all evergreen browsers since early 2023
+(Chrome 111, Firefox 113, Safari 16.4), well within this project's
+implicit "modern static site, zero JS, no polyfills" baseline, so no
+compatibility judgment call was needed beyond confirming that baseline.
+No new hardcoded color of any kind was introduced anywhere in this fix.
+
+Two new regression tests close the gap the original rename's greps
+couldn't reach: `site/tests/test_board_builder.py::
+test_pulse_box_shadow_derives_from_the_signal_green_token_not_a_hardcoded_rgb_triple`
+(rendered board-page-scoped: asserts the `color-mix()` call is present
+and that no decimal `rgb(`/`rgba(` literal appears anywhere in the
+rendered page) and a broader
+`site/tests/test_build.py::test_no_hardcoded_decimal_rgb_color_literal_anywhere_in_built_html`
+(scans every one of the site's 39 built HTML pages, not just the Board,
+for the same pattern) -- so any future reintroduction of this exact bug
+class, on any page, fails the suite immediately rather than requiring a
+human to think to grep for decimal RGB triples again. Both tests'
+own explanatory comments deliberately avoid quoting the old token's name
+or hex value verbatim, since those exact strings are independently
+checked (by this same verification pass's gate list) to be completely
+absent from `site/` -- a test asserting an invariant should not itself
+be the one live reference that breaks it.
+
+Judgment call, spec-silent: whether to also hardcode the *specific* old
+decimal triple into a test as a "never regress to exactly this" pin, versus
+the general "no decimal rgb literal at all" pattern implemented above.
+Chose the general pattern deliberately -- this codebase has zero
+legitimate uses of `rgb()`/`rgba()` with a literal numeric first channel
+anywhere today (the one prior instance was this bug), so banning the
+pattern outright is strictly stronger than pinning one specific stale
+value, and it also catches a *different* future hardcoded color someone
+might introduce for an unrelated reason, not just a reintroduction of
+this exact one.
