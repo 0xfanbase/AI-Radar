@@ -2829,3 +2829,140 @@ sitting uncommitted in this same working tree.
   independently checked afterward and confirmed the real repo's working
   tree carries no incidental changes from this verification beyond this
   turn's own intentional file additions.
+
+## Phase 5: `.github/workflows/audit.yml` (weekly, no LLM) + `scripts/pick_backlog_item.py` (fortnightly-improve-loop backlog-item picker) (2026-07-11)
+
+- **`audit.yml` runs the CI path-allowlist / schema-validation gate
+  scripts (`scripts/check_path_allowlist.py` /
+  `scripts/validate_changed_schemas.py`) NOT AT ALL, unlike the
+  analyst/verifier pipeline documented in `analyze.yml`.** Logged here in
+  full, per this turn's own explicit instruction, not left as a bare
+  workflow-comment claim: the path-allowlist gate exists for exactly one
+  reason (CLAUDE.md's own "/content vs /data" section) -- to contain
+  prompt-injection risk from an LLM step that fetched untrusted network
+  text and then got to choose which files to write. `audit.yml` has zero
+  LLM surface anywhere in it; `python -m auditor.cli run` does fetch live
+  network content (citation-URL HEAD/GET checks, a live HN Algolia query),
+  but every byte of what comes back is consumed by plain, reviewed,
+  deterministic Python (an HTTP-status classification, a Jaccard/word-
+  boundary comparison, a count) -- never handed to a model as an
+  instruction or as freeform text that decides what gets written where.
+  The set of files this workflow can ever touch is fixed by its own two
+  hardcoded commands, not by anything a fetched page's content could
+  influence, so there is structurally nothing for the gate to gate. This
+  is also exactly why the workflow's commit step is allowed to touch
+  `IMPROVEMENT_BACKLOG.md` -- a path the allowlist's own
+  `ALLOWED_PREFIXES = ("content/", "data/")` would otherwise reject
+  outright -- since the allowlist's boundary is about LLM-authorship/
+  licensing provenance (content vs. data), not about which directories
+  pure code may ever write to; CLAUDE.md's own `audit.yml` bullet already
+  names "findings auto-append IMPROVEMENT_BACKLOG.md" as this workflow's
+  job. The gate scripts remain unchanged and still run, exactly as
+  documented in `analyze.yml`, ahead of the one place in this whole
+  pipeline an LLM with `Write`/`Edit` access actually sits between
+  untrusted fetched text and a git commit -- the daily analyst/verifier
+  run (now a Claude Code Remote Routine, per the architecture-change entry
+  above).
+- **`audit.yml` has exactly one step that both runs the five checkers and
+  appends backlog findings (`python -m auditor.cli run --out
+  data/audit/latest.json`), not two separate steps for "run the audit" and
+  "run `scripts/append_backlog_findings.py`."** This turn's own task text
+  described the workflow as needing a second, standalone
+  `scripts/append_backlog_findings.py` step -- checked directly against
+  that file's real, already-committed source (see the `auditor/report.py`
+  entry above) and confirmed it defines no `if __name__ == "__main__":`
+  block, no `argparse` entrypoint, nothing executed at module scope at
+  all: it is a pure library of functions (`derive_findings`,
+  `format_finding_line`, `append_findings_to_backlog`) consumed by
+  `auditor/cli.py::run_audit`, which already calls
+  `append_findings_to_backlog` internally with `append_to_backlog=True`
+  by default -- exactly what `python -m auditor.cli run` (no
+  `--no-backlog-append` flag) already does. A second workflow step
+  literally invoking `python scripts/append_backlog_findings.py` would
+  import the module, execute nothing, and exit 0 having accomplished
+  nothing -- a no-op kept only for surface-level fidelity to a plan
+  description that doesn't match the module's real, tested shape.
+  Following the instruction to be "honest and precise... verify claims
+  before writing them down" over the instruction's literal step count,
+  `audit.yml` has one step doing what the code actually does, with this
+  reasoning documented both in the workflow file's own top comment and
+  here.
+- **`scripts/pick_backlog_item.py` parses the real, already-shipped
+  `scripts/append_backlog_findings.py` output format
+  (`"- [ ] **[SEVERITY]** <summary>"`, grouped under a
+  `"## Audit findings -- <run_id> (<generated_at>)"` section header), not
+  the illustrative `"- [ ] [audit:DATE][severity:high] ..."` shape given
+  in this turn's own task text.** Verified directly against
+  `format_finding_line`/`append_findings_to_backlog`'s real source (both
+  quoted in full in the `auditor/report.py` entry above) before writing
+  the parser -- the task text's own wording said to parse "the format
+  `scripts/append_backlog_findings.py` writes," and that module's real,
+  tested code is the authoritative source, not the task text's shorthand
+  paraphrase of it. Documented in the module's own docstring as a
+  correction, not silently reconciled without comment -- the same
+  "verify before writing a claim down" discipline this turn's own
+  instructions called for.
+- **A finding line has no date of its own** (`format_finding_line` never
+  writes one per-line) **-- "oldest first on ties" is resolved using the
+  enclosing `"## Audit findings -- ..."` section header's shared
+  `generated_at` timestamp instead**, since every finding
+  `append_findings_to_backlog` appends in one run shares exactly that one
+  timestamp already. A checkbox line found with no section header above
+  it at all (a hand-edited/malformed file -- never produced by the real
+  generator) still parses as a valid candidate, but is treated as having
+  an unknown date that sorts *after* every genuinely-dated candidate at
+  the same severity, so missing metadata can never win a tie purely by
+  being missing. A final tie-break (same severity, same section date) is
+  the item's own line number in the file -- lower wins -- making selection
+  fully deterministic even within one single audit run's own findings.
+- **Unrecognized/future severity labels rank below every label
+  `scripts.append_backlog_findings.SEVERITY_LABELS` currently defines
+  (`high`/`medium`/`low`), rather than raising.** `SEVERITY_RANK` is
+  derived directly from `SEVERITY_LABELS`'s own insertion order (reuse,
+  not a second independently-maintained severity list that could drift),
+  so a future fourth severity that module might add would automatically
+  slot in at the correct relative rank with no change needed here; an
+  entirely unknown label (e.g. a hand-typed line) still parses as a valid,
+  selectable candidate rather than being silently dropped, just at the
+  lowest rank.
+- **Scope decision, per this turn's own explicit instruction: only lines
+  matching the real checkbox+severity-tag shape are ever candidates --
+  every one of this file's own pre-existing plain-bullet decision-log
+  entries (the `"- **DATE -- decision text.**"` shape every entry in this
+  very file, including this one, uses) is structurally never selectable,
+  with no special-case "is this an old-style entry" exclusion logic
+  needed at all.** The checkbox regex (`^- \[( |x|X)\] \*\*\[LABEL\]\*\*
+  ...`) simply never matches a line that doesn't start with `"- [ ]"`/
+  `"- [x]"` in the first place -- proven, not merely asserted, by
+  `tests/test_pick_backlog_item.py`'s fixtures, which mix real-shaped
+  plain-bullet lines alongside checkbox lines and assert the plain ones
+  contribute zero parsed items.
+- **No `improve.yml` trigger, GitHub Actions Routine, or Claude Code
+  Remote Routine was created or activated this turn, per this turn's own
+  explicit, binding instruction.** The daily analyst refresh's Routine
+  (see the architecture-change entry above) is a narrower authorization
+  than a fortnightly loop empowered to touch arbitrary files including
+  code/workflows/schemas (per the approved plan's own §6: "unlike the
+  daily analyst, this step *may* touch code/workflows/schemas ... its
+  whole output is a PR, not an auto-commit") -- the user has not granted
+  that broader authorization, and this turn does not assume it implicitly.
+  `improve.yml` itself, the fortnight-parity guard script
+  (`scripts/fortnight_guard.py`), and any live scheduling mechanism for
+  either remain explicit, unbuilt future work for the user to activate,
+  exactly as `PROGRESS.md`'s matching entry states plainly.
+- **Verified this turn, not merely assumed:** `data/audit/` is not listed
+  in `.gitignore` (only `data/.cache/`, `__pycache__/`, `.venv/`, `*.pyc`,
+  and `public/` are) -- confirmed by direct inspection before writing
+  `audit.yml`'s commit step, so `git add data/audit/` in that step
+  actually stages `data/audit/latest.json` once `auditor.report.
+  save_report` creates it, rather than silently being a no-op against a
+  gitignored path.
+- **`auditor.linkrot`'s HEAD/GET checks and `auditor.missed_story`'s HN
+  fetch call `requests.Session.head`/`.get`/`watcher.sources.hn.
+  fetch_hn_items` directly, not `watcher.http.fetch()`'s own ETag-cached
+  wrapper** (confirmed by reading both modules' real source before
+  deciding this) -- so `audit.yml`, unlike `watch.yml`, has no
+  `actions/cache` step for `data/.cache/`: there is nothing in this
+  workflow's own fetch path that would ever read or benefit from that
+  cache. Not adding an unused cache step is a deliberate omission, not an
+  oversight.

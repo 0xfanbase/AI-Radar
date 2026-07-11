@@ -7,6 +7,167 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Phase 5: `.github/workflows/audit.yml` (weekly, no LLM) + `scripts/pick_backlog_item.py` (fortnightly-improve-loop backlog-item picker)
+
+Wires the auditor package built across the five entries directly below
+(`auditor/lexicon_audit.py`, `linkrot.py`, `duplicates.py`, `trend.py`,
+`missed_story.py`, `report.py`, `cli.py`, `scripts/append_backlog_findings.py`)
+into a real, scheduled GitHub Actions workflow, and builds the
+deterministic selection rule the (not-yet-built) fortnightly `improve.yml`
+will use to pick its next self-improvement target. Per this turn's own
+explicit, binding scope: no `improve.yml` file, fortnight-parity guard, or
+live trigger/Routine of any kind is created this turn — only `audit.yml`
+(which needs neither) and the backlog picker.
+
+**`.github/workflows/audit.yml`** (new): weekly cron `"0 0 * * 0"` (Sunday
+00:00 UTC = 08:00 HKT exactly, matching CLAUDE.md's documented cadence
+verbatim — an intentional exact-top-of-hour cron, not an off-hour
+placeholder, consistent with the precedent `watch.yml`'s own Phase 1 PM
+checkpoint already set by moving from an off-hour congestion-avoidance
+placeholder to the literal documented target hour) plus
+`workflow_dispatch`; `permissions: contents: write`; checkout with
+`fetch-depth: 0` (this repo's established convention); `setup-python`;
+`pip install -r requirements.txt`; one step, `python -m auditor.cli run
+--out data/audit/latest.json`, which — confirmed by reading
+`auditor/cli.py::run_audit`'s real source, not assumed — already performs
+*both* halves of CLAUDE.md's "audit.yml — weekly" bullet in one call
+(runs all five checkers into a schema-valid `data/audit/latest.json`, then
+derives and appends this run's actionable findings as checkbox lines to
+the real `IMPROVEMENT_BACKLOG.md`, since `append_to_backlog=True` is
+`run_audit`'s own default); then a commit+push step (`git add data/audit/
+IMPROVEMENT_BACKLOG.md`, bot identity, skip if nothing changed) matching
+`watch.yml`'s existing pattern exactly.
+
+**No `scripts/check_path_allowlist.py` / `scripts/validate_changed_schemas.py`
+gate in this workflow — a deliberate omission, documented in both the
+workflow's own top comment and `IMPROVEMENT_BACKLOG.md` in full, not a
+silent gap.** That gate exists specifically to contain prompt-injection
+risk from an LLM step that fetched untrusted content and then chose what
+to write; `audit.yml` has no LLM anywhere in it, so there is nothing for
+that gate to contain — the set of files this workflow can ever touch is
+fixed by its own two hardcoded commands, never influenced by anything a
+fetched citation page or HN story title says. This is also why the
+workflow is allowed to touch `IMPROVEMENT_BACKLOG.md`, a path outside
+`content/`/`data/` the allowlist would otherwise reject: the allowlist's
+boundary is about LLM-authorship/licensing provenance, not about which
+directories pure code may write to, and CLAUDE.md's own `audit.yml`
+bullet already names the backlog-append as this workflow's job.
+
+**A documentation-accuracy correction against this turn's own task
+framing, made honestly rather than papered over:** the task described
+`audit.yml` as needing a second, separate `scripts/append_backlog_findings.py`
+step. Checked directly against that file's real, already-committed source
+before writing the workflow (not assumed): it defines no
+`if __name__ == "__main__":` block and no argparse entrypoint at all —
+it's a pure function library `auditor/cli.py::run_audit` already calls
+internally. A second step literally invoking that file would import it
+and execute nothing, a no-op kept only for surface fidelity to a
+description that doesn't match the module's real shape. `audit.yml` has
+one step that does what the code actually does instead, with the
+reasoning recorded in both places rather than adding a step that
+accomplishes nothing to satisfy a literal reading.
+
+**`scripts/pick_backlog_item.py`** (new): parses the real, already-shipped
+`scripts/append_backlog_findings.py` output format —
+`"- [ ] **[SEVERITY]** <summary>"` lines grouped under
+`"## Audit findings -- <run_id> (<generated_at>)"` section headers — not
+the `"[audit:DATE][severity:high]"` shape this turn's own task text used
+as an illustrative example, which doesn't match any line the real,
+committed generator emits (verified against that module's real source
+before writing the parser, per this turn's own "verify before writing a
+claim down" directive). `parse_backlog_items()` walks the file tracking
+the nearest enclosing "Audit findings" section header (any other `## `
+heading resets that context, so a checkbox line under an unrelated later
+heading never inherits a stale timestamp); `pick_next_item()` selects the
+highest-severity **unchecked** item (severity order reused directly from
+`scripts.append_backlog_findings.SEVERITY_LABELS`, so it can never
+silently drift from what that module actually emits), tie-broken by the
+enclosing section's oldest `generated_at` (a checkbox line with no
+preceding header at all parses as a valid candidate but is treated as
+having an unknown date, which can never win a tie against a genuinely
+dated one), with a final tie-break on the item's own line number for full
+determinism. `pick_backlog_item()` is the one disk-reading entry point;
+`main()` is a small CLI (`--path` override) printing the picked item or a
+clean "nothing to pick" message, exit code 0 either way.
+
+**Scope decision, proven by test not just asserted:** this file's own
+pre-existing plain-bullet decision-log entries (`"- **DATE -- decision
+text.**"`, used by every entry in `IMPROVEMENT_BACKLOG.md` including this
+one) are structurally invisible to the checkbox regex — no special-case
+"is this an old-style entry" exclusion was needed. `tests/
+test_pick_backlog_item.py::test_parse_ignores_pre_existing_plain_bullet_decision_log_entries`
+and the mixed-fixture end-to-end test both assert this directly.
+
+**New test file `tests/test_pick_backlog_item.py`** (28 tests): reuse-by-
+identity checks (`SEVERITY_LABELS`/`BACKLOG_PATH` both imported, not
+copied, from `scripts.append_backlog_findings`); `parse_backlog_items`
+correctness across empty input, plain-bullet-only input (zero items),
+a single section's checked/unchecked/severity/summary/line-number fields,
+both-case checked-box parsing (`[x]`/`[X]`), an unrecognized severity
+label still parsing, a header-less checkbox line, an unrelated `##`
+heading resetting section context, and multiple sections each keeping
+their own date; `pick_next_item`'s empty-list/all-checked-null cases,
+severity-preference, checked-item-losing-to-unchecked-lower-severity,
+oldest-date tie-break, line-number tie-break, header-less-item-never-
+winning-a-tie, unrecognized-severity-ranking-lowest (both losing to a real
+severity and being selectable when it's the only candidate), and one
+larger mixed-fixture end-to-end proof (old-style plain bullets + three
+audit-findings sections + mixed severities/checked-state — exactly one
+correct item selected out of 7 real candidates); `pick_backlog_item`'s
+missing-file/no-checkbox-lines-found/real-file-read paths against
+`tmp_path`; `main()`'s CLI plumbing (found/not-found cases, both via
+`capsys`, plus the real-file default-path case); and one integration
+smoke test against this repo's own real, current `IMPROVEMENT_BACKLOG.md`
+confirming it parses cleanly with zero checkbox lines today (no real
+audit run has ever happened) and `pick_backlog_item()` correctly returns
+`None` against it.
+
+**Verified this turn, not assumed:** `data/audit/` is not in `.gitignore`
+(only `data/.cache/`, `__pycache__/`, `.venv/`, `*.pyc`, `public/` are), so
+`audit.yml`'s `git add data/audit/` step actually stages
+`data/audit/latest.json` once it's written, rather than silently no-oping
+against a gitignored path; `auditor.linkrot`/`auditor.missed_story` call
+`requests.Session.head`/`.get`/`watcher.sources.hn.fetch_hn_items`
+directly rather than `watcher.http.fetch()`'s ETag-cached wrapper
+(confirmed by reading both modules), so `audit.yml` deliberately carries
+no `actions/cache` step for `data/.cache/` — nothing in this workflow's
+own fetch path would ever read or benefit from it. Both workflow YAML
+files this turn touched (`audit.yml`, freshly written) were re-validated
+with `yaml.safe_load` after every edit.
+
+**Verification:** `python -m pytest` — **886 passed, 2 deselected** (up
+from 858 immediately before this turn; +28 new tests, exactly
+`tests/test_pick_backlog_item.py`'s own count; nothing else changed or
+broke). No file outside `.github/workflows/audit.yml`,
+`scripts/pick_backlog_item.py`, and `tests/test_pick_backlog_item.py` was
+touched by this turn's own code changes (`PROGRESS.md` and
+`IMPROVEMENT_BACKLOG.md` are documentation-only). The real, live
+end-to-end `python -m auditor.cli run` pipeline itself was not
+re-exercised this turn against the real repo tree (it was already proven
+live, end-to-end, in the entry directly below this one, into a scratch
+directory specifically so that run's own ephemeral live-fetched HN story
+titles never landed in the real, committed `IMPROVEMENT_BACKLOG.md`) —
+running it again for real, against the real tree, is exactly what the
+newly-added `audit.yml` cron will do on its own first real Sunday
+firing.
+
+**What remains, stated plainly, for the user:** `improve.yml` itself, the
+`scripts/fortnight_guard.py` ISO-week-parity guard, and any live
+scheduling mechanism for the fortnightly loop (a second Claude Code Remote
+Routine, or a real `improve.yml` + repo secret, per the two paths
+`analyze.yml`'s own architecture note already discusses) are **not**
+built or activated by this turn, per this turn's own explicit, binding
+instruction — a live process empowered to touch arbitrary files including
+code/workflows/schemas is a materially broader authorization than the
+narrower daily-analyst-refresh Routine the user has already granted, and
+this turn does not assume that broader grant implicitly. `audit.yml`
+itself also cannot be observed actually firing on its real Sunday cron
+from within this session, for the same reason no session can observe
+`watch.yml`'s or the daily Routine's real firings — that requires this
+branch to be merged and the schedule to actually elapse in real time.
+
+---
+
 ## 2026-07-11 — Phase 5: `auditor/report.py`, `auditor/cli.py`, `schemas/audit.schema.json`, `scripts/append_backlog_findings.py` -- report assembler, CLI entrypoint, backlog-append step
 
 Integration commit landing the last four pieces of the Phase 5 `auditor/`

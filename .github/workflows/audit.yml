@@ -1,0 +1,137 @@
+name: audit
+
+# Phase 5 weekly audit half of CLAUDE.md's self-learning loop -- NO LLM
+# ANYWHERE IN THIS WORKFLOW. Every step below runs deterministic Python
+# (the `auditor/` package: link rot, lexicon coverage/orphans, verifier
+# pass-rate trend, missed-story check, duplicate-topic detection) and
+# commits its own output under the bot identity, exactly like watch.yml's
+# pure-code daily half of the loop -- no `claude-code-action` step, no
+# `CLAUDE_CODE_OAUTH_TOKEN` secret, no repo variable this workflow needs to
+# read. See CLAUDE.md's "daily self-learning loop" diagram (the
+# `[audit.yml -- weekly]` box) and its architecture note on the daily
+# analyst run moving to a Claude Code Remote Routine -- that note is about
+# the DAILY analyst/verifier run only; this workflow was never part of
+# that move, since it has no LLM step to move in the first place.
+#
+# Cron targets CLAUDE.md's documented "weekly ... Sunday 00:00 UTC / 08:00
+# HKT" cadence exactly (Hong Kong is UTC+8 with no DST, so 00:00 UTC
+# Sunday is already 08:00 HKT Sunday -- no day-boundary shift to account
+# for, unlike watch.yml's 23:00 UTC / 07:00 HKT-next-day cron). This is a
+# deliberate exact-top-of-hour cron, not an off-hour-minute placeholder --
+# matching the precedent watch.yml's own Phase 1 PM checkpoint already set
+# (its cron moved from an off-hour "17 6 * * *" congestion-avoidance
+# placeholder to the literal documented target hour, "0 23 * * *", per
+# PROGRESS.md), rather than reintroducing an off-hour offset this project
+# has already decided against once.
+#
+# Why this workflow does NOT run scripts/check_path_allowlist.py or
+# scripts/validate_changed_schemas.py (the CI gate analyze.yml's own
+# reference documentation uses before its commit step), even though it
+# writes to two artifacts and one of them (IMPROVEMENT_BACKLOG.md) sits
+# outside the content/+data/ allowlist those two scripts enforce:
+#
+#   The path-allowlist gate exists for exactly one reason, per CLAUDE.md's
+#   own "/content vs /data" section: to contain PROMPT-INJECTION risk from
+#   an LLM step that fetched untrusted network content and then got to
+#   choose which files to write. That risk requires two ingredients this
+#   workflow structurally lacks -- (a) an LLM in the loop at all, and (b)
+#   that LLM being handed fetched, untrusted text as something it acts on.
+#   `python -m auditor.cli run` fetches network content too (HEAD/GET on
+#   citation URLs for link rot, a live HN Algolia query for the
+#   missed-story check), but every byte of what comes back is consumed by
+#   plain, reviewed, deterministic Python -- classified into an HTTP status
+#   bucket, tokenized/Jaccard-compared, counted -- never handed to a model
+#   as an instruction or as freeform text that decides what gets written
+#   where. The set of files this workflow can ever touch
+#   (`data/audit/latest.json` + `IMPROVEMENT_BACKLOG.md`) is fixed by this
+#   workflow's own two commands, not by anything a fetched page's content
+#   could influence. There is nothing for the path-allowlist gate to gate.
+#   (This is also exactly why CLAUDE.md's own `audit.yml` bullet already
+#   has this pure-code job append straight to IMPROVEMENT_BACKLOG.md, a
+#   file the allowlist would otherwise reject outright -- the boundary the
+#   allowlist enforces is about LLM-authorship/licensing provenance
+#   [CLAUDE.md's own "/content vs /data" section], not about which
+#   directories pure code may ever touch.)
+#
+# This is a deliberate, logged design decision (see IMPROVEMENT_BACKLOG.md,
+# "Phase 5: audit.yml"), not an oversight -- the gate scripts still run,
+# unchanged, ahead of the DAILY analyst/verifier commit (documented in
+# analyze.yml), which is the one place in this pipeline an LLM with
+# Write/Edit access actually sits between untrusted fetched text and a
+# git commit.
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          # Full history, not the default shallow (depth-1) clone -- same
+          # repo-wide convention every other workflow here follows (a
+          # depth-1 checkout broke a real `git diff ... HEAD~1` call in
+          # ci.yml despite passing locally; see PROGRESS.md). Nothing in
+          # this workflow's own steps needs deep history today, but a
+          # future auditor check might (e.g. diffing against last week's
+          # data/audit/history/*.json via git log), so this stays uniform
+          # rather than being the one workflow that's shallow-clone-only
+          # by accident.
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # `python -m auditor.cli run` (auditor/cli.py::run_audit) already
+      # performs BOTH halves of CLAUDE.md's "audit.yml -- weekly" bullet in
+      # one call, in this order: runs all five checkers (link rot, lexicon
+      # coverage/orphans, verifier pass-rate trend, missed-story check,
+      # duplicate-topic detection) and assembles their output into
+      # data/audit/latest.json (schemas/audit.schema.json); THEN -- still
+      # inside this same call, via scripts.append_backlog_findings.
+      # derive_findings/append_findings_to_backlog, which run_audit()
+      # invokes directly with append_to_backlog=True by default -- derives
+      # and appends this run's actionable findings as checkbox lines to
+      # IMPROVEMENT_BACKLOG.md.
+      #
+      # Note for anyone expecting a *second*, separate
+      # "run scripts/append_backlog_findings.py" step here: that module
+      # exposes no standalone CLI or `if __name__ == "__main__"` entrypoint
+      # at all (confirmed by reading the file, not assumed) -- it is a
+      # library of pure functions consumed by auditor/cli.py::run_audit,
+      # which already calls its append_findings_to_backlog() as part of
+      # the one command below. Invoking `python scripts/
+      # append_backlog_findings.py` directly as its own workflow step would
+      # import the module and do nothing else -- no side effect, no error,
+      # just a step that runs and accomplishes nothing -- since it defines
+      # functions but never calls any of them at module scope. Rather than
+      # add that no-op step for literal appearance's sake, this workflow
+      # has one step that does both, matching what the code actually does;
+      # logged in IMPROVEMENT_BACKLOG.md as a documentation-accuracy
+      # correction rather than left silently inconsistent with the plan's
+      # own shorthand description of this step.
+      - name: Run the weekly audit (data/audit/latest.json + backlog findings)
+        run: python -m auditor.cli run --out data/audit/latest.json
+
+      - name: Commit and push audit report + backlog changes (bot identity)
+        run: |
+          git add data/audit/ IMPROVEMENT_BACKLOG.md
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git -c user.name="frontier-wire-bot" \
+                -c user.email="bot@users.noreply.github.com" \
+                commit -m "chore(audit): weekly audit report + backlog findings [skip ci]"
+            git push
+          fi
