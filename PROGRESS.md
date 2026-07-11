@@ -7,6 +7,113 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — UI/UX + editorial-compliance audit and fix pass (Fable-directed)
+
+Prompted by the owner looking at the live Frontier Board page and reporting
+two concrete problems: the model table was hard to read and oddly narrow,
+and the site had too many nav tabs for a reader with "keen interest in AI
+but not a tech expert." Ran a Fable-directed multi-agent workflow: four
+parallel read-only audits (UX for that exact reader persona, editorial
+compliance against CLAUDE.md's hard rules, code quality, content clarity),
+then a Fable synthesis pass turned the combined findings into one
+prioritized, concrete 9-task plan, implemented one task at a time
+(sequential, to avoid concurrent edits to shared files like `base.html`/
+`components.css`), then an independent Fable verification pass (rebuild,
+full pytest run, grep the actual rendered HTML -- not just trust each
+task's own self-report) confirmed everything held on the first round, no
+second fix round needed. I then independently re-verified again myself
+before pushing anything: re-ran `python -m pytest` (709 passed, 2
+deselected) and `python site/generate.py` (clean build, zero warnings) from
+scratch, and re-screenshotted the built site at both 1280px and 390px
+before opening a PR.
+
+**Root causes confirmed (not just reported, actually inspected against the
+rendered site):**
+- `board.html`'s `<table class="board-table data">` applied the
+  monospace/tabular-numeral `.data` utility to the *entire* table,
+  including free-text columns (Lab/Model/Access/Significance) that were
+  never meant to be tabular data; combined with a fixed
+  `min-width: 18rem` column holding 60-124-word prose paragraphs, this
+  produced the exact broken, narrow, monospace word-fragment wrapping the
+  owner saw.
+- The masthead nav carried 7 top-level items, and a sparkline strip
+  (originally a deliberate Phase-4 "site-wide" design choice, logged in
+  `IMPROVEMENT_BACKLOG.md` at the time) was wired as a Jinja environment
+  global, so it rendered on every single page -- roughly 16 navigational
+  elements above the fold before any actual page content, on every page.
+- The Wire homepage's empty-state copy read "...the daily analyst has not
+  run live in this environment yet" -- internal dev language, live on the
+  public production site right now since no analyst run has happened yet.
+- `board.py` never linkified its jargon-dense prose into the Lexicon, unlike
+  Wire cards.
+- `schemas/primer.schema.json` didn't exist at all, despite CLAUDE.md's
+  blanket "every persisted JSON file has a schema" rule and `generate.py`
+  printing a real "loaded unvalidated" warning on every build.
+- Hard Rule 5 ("Per card: generated timestamp, model, verification status")
+  wasn't visually surfaced on cards, and Corrections was only linked from
+  the site-wide footer, not per-card.
+
+**Fixes shipped (9 commits, `frontier-wire-bot` identity, all within
+`site/`, `schemas/`, `content/`, `scripts/validate_changed_schemas.py`,
+tests, and docs -- nothing in `.github/workflows/` or `watcher/` touched):**
+1. Frontier Board rebuilt as per-model `<details>`/`<summary>` row-cards
+   (zero JavaScript) instead of an 8-column table -- a compact always-visible
+   summary line (Lab / Model+pulse / Released / Access) plus an expandable
+   body (Modality, Context window, linkified Significance prose, Source).
+   Monospace (`.font-data`) now applies only to the Released date and
+   Context-window number, never to prose. `board.py` now calls
+   `site/lib/linkify.py` the same way `wire.py` already does.
+2. Masthead nav condensed from 7 items to exactly 4 (Wire, Board, Lexicon,
+   Primer); What's Moving/Method/About/Corrections moved to a real footer
+   nav row (`aria-label="More"`) -- one tap away on every page, never
+   crowding the fold. Added `aria-current="page"` per-page. The sparkline
+   strip is no longer a site-wide Jinja global -- it now renders only on
+   the Wire home page, capped to the top 5 topics by 7-day mentions so it
+   can't overflow a 390px viewport.
+3. All reader-facing dev-language empty-state strings (Wire, What's
+   Moving, Method) rewritten in plain reader language, with a new
+   `site/tests/test_reader_copy.py` copy-lint test that fails the build if
+   dev-facing phrasing regresses into a `*_MESSAGE` constant.
+4. Cards now show a small `.wire-card__meta` disclosure line (generated
+   timestamp + model + a direct `/corrections/` link) beneath the date,
+   and carry a stable `id="card-<id>"` anchor; a `correction_note` now also
+   links straight to `/corrections/`. "Why it matters" got its own
+   visually distinct block (cyan left rule + label) so the payoff
+   paragraph reads differently from plain narration.
+5. `schemas/primer.schema.json` authored and wired into
+   `scripts/validate_changed_schemas.py` -- the "loaded unvalidated"
+   warning is gone.
+6. Corrections now cross-link both directions (card footer -> Corrections
+   page; each correction entry -> the exact original card via its new
+   `id="card-<id>"` anchor).
+7. Wire-card topic display names and What's Moving's topic names now share
+   one `site/lib/topics.py` source of truth; fixed "1 mentions / 7d"
+   pluralization.
+8. Lexicon "Seen in" now resolves card ids to real headlines (falling back
+   to the bare id only if a headline can't be resolved); chips that aren't
+   clickable are now visually/semantically marked inert
+   (`chip--inert` + a `title` explaining why) rather than looking like a
+   broken link.
+9. The 12 bare "Author et al., Year"-style citation anchors in
+   `content/lexicon.json` rewritten into plain-language source
+   descriptions.
+
+Verification: `python -m pytest` -- 709 passed, 2 deselected (live tests
+excluded by default) both inside the workflow's own Fable verification
+pass and independently, again, by me afterward from a clean rebuild.
+`python site/generate.py` -- clean build, no warnings. Screenshots taken
+before and after (desktop 1280px + mobile 390px, Chromium via the
+environment's pre-installed Playwright browser) confirm the Board is now
+fully readable with no monospace-on-prose and no forced narrow column, and
+the primary nav is now 4 items instead of 7.
+
+Full plan rationale and every judgment call made along the way (why
+`<details>`/`<summary>` over a second table variant, why the sparkline
+strip scopes to the Wire home page specifically, etc.) are logged in
+`IMPROVEMENT_BACKLOG.md`.
+
+---
+
 ## 2026-07-11 — Fix: internal links and static assets were 404ing on the real live site (GitHub Pages project-subpath vs. root-relative hrefs)
 
 `claude/phase-1-watcher-build-fsc12w` was merged to `main` and GitHub Pages
