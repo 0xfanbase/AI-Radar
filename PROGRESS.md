@@ -7,6 +7,67 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Fix: internal links and static assets were 404ing on the real live site (GitHub Pages project-subpath vs. root-relative hrefs)
+
+`claude/phase-1-watcher-build-fsc12w` was merged to `main` and GitHub Pages
+was enabled with Source: GitHub Actions. `deploy.yml` ran and reported
+success, and the site came up live at
+`https://0xfanbase.github.io/AI-Radar/` -- but every internal link (nav,
+footer, static CSS, lexicon auto-links, "seen in" card links) actually
+404'd. Confirmed directly: `curl -o /dev/null -w '%{http_code}'
+https://0xfanbase.github.io/static/css/tokens.css` -> 404;
+`https://0xfanbase.github.io/AI-Radar/static/css/tokens.css` -> 200.
+
+**Root cause**: this is a GitHub Pages *project* site
+(`https://<owner>.github.io/<repo>/`), not a custom domain mapped to its
+root, but every internal href/src this site renders was root-relative by
+every page builder's own, otherwise-correct design (`href="/board/"`,
+not `href="/AI-Radar/board/"`) -- a real risk `site/generate.py`'s own
+Phase 4 scaffold-commit comment had already flagged, unresolved, as
+depending on exactly this deployment detail (see that commit's entry
+below and `IMPROVEMENT_BACKLOG.md`). It went from a documented risk to a
+live, user-facing bug the moment Pages actually started serving from the
+subpath.
+
+**Fix**: `site/generate.py` gained `BASE_PATH` (derived from the path
+component of the already-existing `SITE_BASE_URL` constant -- today
+`"/AI-Radar"`, automatically `""` if this project ever moves to a bare
+custom domain, so there is exactly one place to change, not two that
+could drift out of sync) and `apply_base_path()`, a single deterministic
+find-and-replace pass over every generated `*.html` file's literal
+`href="/`/`src="/` prefixes, run once at the end of `generate()`. This
+was chosen over threading a base-path parameter through all seven
+independently-tested page builders plus `site/lib/linkify.py`'s
+baked-in lexicon-term anchors and `site/builders/lexicon.py`'s
+`seen_in_href` -- a much larger, riskier change touching every builder's
+existing tests -- because a literal string rewrite over already-rendered
+output fixes every one of those call sites at once without touching any
+of their internals or existing (still-correct, still-passing)
+assertions. `generate()` also now removes and recreates `public_dir`
+fresh on every call (previously only `mkdir(exist_ok=True)`), both to
+fix a latent stale-file risk and, critically, to guarantee
+`apply_base_path()` is never applied twice to an already-rewritten file
+(which would double-prefix every link).
+
+Verified directly: regenerated the real site into a scratch directory
+with the real `content/`/`data/`; every internal link and CSS `<link>`
+href now reads `/AI-Radar/...`; the one real external citation link
+(`https://arxiv.org/...`) and the skip-link fragment (`#main-content`)
+are both untouched; `sitemap.xml`/`robots.txt` (already absolute,
+`.xml`/`.txt` not `.html`) are unaffected; re-running `generate()` twice
+into the same directory does not double-prefix anything. 6 new tests
+added to `site/tests/test_build.py` covering all of the above. Full
+suite: 701 passed, 2 deselected (root); 233 passed (site, up from 227).
+
+Manually re-triggered `deploy.yml` (`workflow_dispatch`) after this fix
+lands and merges; the live site should then serve every internal link
+and asset correctly. This closes the "base-path/custom-domain decision"
+item on every earlier checkpoint's "what remains for the human" list --
+no further owner decision is needed unless a custom domain is added
+later, in which case updating `SITE_BASE_URL` alone is sufficient.
+
+---
+
 ## 2026-07-11 — Correction: 10 site-dependent test files were misplaced under repo-root `tests/`, silently breaking real GitHub Actions CI despite every local `pytest` run passing
 
 **What was wrong.** `tests/test_about_builder.py`, `test_board_builder.py`,

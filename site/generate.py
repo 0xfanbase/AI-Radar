@@ -43,6 +43,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 from xml.sax.saxutils import escape as xml_escape
 
 import jsonschema
@@ -60,25 +61,35 @@ PUBLIC_DIR = REPO_ROOT / "public"
 
 log = logging.getLogger("frontier_wire.site.generate")
 
-# GitHub Pages' default project-site URL for this repo once Pages is
-# enabled with Source: GitHub Actions and no custom domain configured --
-# https://<owner>.github.io/<repo>/ (confirmed against this repo's own
-# identity: watcher/config.py's user-agent string names
-# "github.com/0xfanbase/AI-Radar" as this project's real GitHub
-# location). Used only for sitemap.xml's absolute <loc> values and
-# robots.txt's Sitemap: line -- every *internal* link this site renders
-# stays root-relative (`/board/`, `/lexicon/<slug>/`, etc.), matching
-# every route the build plan itself writes as an absolute root path.
-# That root-relative convention was already flagged, unresolved, in
-# IMPROVEMENT_BACKLOG.md's Phase 4 scaffold entry as a real risk *if*
-# GitHub Pages ends up serving this repo from a project subpath
-# (`/AI-Radar/`) rather than a custom domain -- this integration commit
-# does not fix that (it would mean touching href-generation code in
-# every one of the four independently-built, already-tested builder
-# modules, well beyond "wire them together and fix integration
-# glue"-scope), it only re-confirms and restates the gap plainly here so
-# it isn't lost. See IMPROVEMENT_BACKLOG.md's entry for this commit.
+# GitHub Pages' default project-site URL for this repo, with Source:
+# GitHub Actions and no custom domain configured --
+# https://<owner>.github.io/<repo>/ (confirmed live: this repo is in fact
+# served from this exact URL as of 2026-07-11). Used for sitemap.xml's
+# absolute <loc> values, robots.txt's Sitemap: line, AND -- since this
+# repo is a GitHub Pages *project* site, not a custom domain -- as the
+# single source of truth for BASE_PATH below, which every internal
+# root-relative link this site renders gets prefixed with post-render.
+# If this project ever moves to a custom domain mapped to its root (a
+# CNAME file + DNS), update ONLY this one constant to the bare domain
+# (e.g. "https://example.com", empty path) and BASE_PATH below becomes ""
+# automatically -- no other code changes needed.
 SITE_BASE_URL = "https://0xfanbase.github.io/AI-Radar"
+
+# Derived, not hand-maintained: the path component of SITE_BASE_URL
+# ("/AI-Radar" today), stripped of any trailing slash. Confirmed live
+# 2026-07-11 that every internal link this site renders (nav, footer,
+# lexicon auto-links, "seen in" card links, static asset hrefs -- all
+# root-relative by every builder module's own, still-correct, design) was
+# actually broken (real 404s) once GitHub Pages started serving this repo
+# from this project subpath rather than a domain root -- see PROGRESS.md
+# for the incident. Rather than thread a base-path parameter through
+# every one of the seven independently-tested builder modules plus
+# site/lib/linkify.py's baked-in anchor hrefs (a much larger, riskier
+# change touching every builder's tests), _apply_base_path() below does
+# one deterministic find-and-replace pass over the fully-rendered HTML
+# output -- see that function's own docstring for exactly what it
+# rewrites and why it's safe.
+BASE_PATH = urlparse(SITE_BASE_URL).path.rstrip("/")
 
 
 def _load_module_by_path(name: str, path: Path):
@@ -243,6 +254,52 @@ def copy_static(public_dir: Path) -> None:
     shutil.copytree(STATIC_DIR, dest)
 
 
+def apply_base_path(public_dir: Path, base_path: str = BASE_PATH) -> int:
+    """Rewrite every root-relative `href="/...`/`src="/...` in every
+    generated `*.html` file under `public_dir` to `href="{base_path}/...`,
+    so the site works when served from a GitHub Pages project subpath
+    (e.g. `/AI-Radar/`) rather than a domain root. A no-op (returns 0
+    immediately) when `base_path` is empty -- the correct behavior for a
+    custom domain mapped to its root, or for local testing against a bare
+    `python -m http.server`.
+
+    Deliberately a post-render find-and-replace over already-written HTML,
+    not a parameter threaded through every builder/template: every one of
+    the seven page builders, `site/lib/linkify.py`'s baked-in lexicon
+    anchors, and `site/builders/lexicon.py`'s `seen_in_href` all
+    independently, correctly render root-relative internal links by
+    design (matching the build plan's own route table) -- rewriting the
+    literal `href="/`/`src="/` prefix they all share, once, here, fixes
+    every one of them without touching any of their already-tested
+    internals or existing test expectations (which correctly keep
+    asserting bare root-relative hrefs, the correct default for
+    base_path="").
+
+    Only ever rewrites a *literal* `href="/` / `src="/` immediately
+    following the attribute name and an opening quote -- an external,
+    already-absolute link (`href="https://..."`) or a same-page fragment
+    link (`href="#main-content"`) never matches this exact substring, so
+    neither needs any special-casing to stay untouched.
+
+    Safe to call on a freshly-generated `public_dir` only: `generate()`
+    always removes and recreates `public_dir` before rendering (see its
+    own docstring), specifically so this function is never applied twice
+    to the same already-rewritten file and cannot double-prefix a path.
+    """
+    if not base_path:
+        return 0
+    rewritten = 0
+    for html_path in public_dir.rglob("*.html"):
+        text = html_path.read_text(encoding="utf-8")
+        new_text = text.replace('href="/', f'href="{base_path}/').replace(
+            'src="/', f'src="{base_path}/'
+        )
+        if new_text != text:
+            html_path.write_text(new_text, encoding="utf-8")
+            rewritten += 1
+    return rewritten
+
+
 def collect_routes(cards: list[dict], lexicon_entries: list[dict]) -> list[str]:
     """Every route this build produces, root-relative, for sitemap.xml.
     Order roughly matches the masthead nav's own route order (build plan
@@ -373,12 +430,21 @@ def generate(public_dir: Path = PUBLIC_DIR) -> Path:
     """Run the full build: load+validate content/data, render every page,
     copy static assets, write everything under `public_dir`. Returns the
     output directory. Safely re-runnable into the same directory (CI
-    re-runs, local iteration)."""
-    public_dir.mkdir(parents=True, exist_ok=True)
+    re-runs, local iteration) -- `public_dir` is removed and recreated
+    fresh on every call (rather than merely `mkdir(exist_ok=True)`-ed) so
+    a re-run can never leave a stale page (e.g. a since-removed lexicon
+    term's old file) lingering, and so `apply_base_path()` below is
+    guaranteed to run against exactly one generation's worth of freshly
+    root-relative hrefs -- never a previous run's already-rewritten
+    output, which would double-prefix every internal link."""
+    if public_dir.exists():
+        shutil.rmtree(public_dir)
+    public_dir.mkdir(parents=True)
     content = load_and_validate_content()
     env = build_jinja_env()
     render_pages(env, content, public_dir)
     copy_static(public_dir)
+    apply_base_path(public_dir)
     return public_dir
 
 

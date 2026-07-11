@@ -156,6 +156,85 @@ def test_generate_is_rerunnable_into_the_same_directory(tmp_path):
     assert (tmp_path / "static" / "css" / "tokens.css").is_file()
 
 
+# --- base-path rewriting (GitHub Pages project-subpath fix) -----------------
+#
+# Real incident: this site's internal links and static-asset hrefs were all
+# root-relative by design (every builder module's own, still-correct,
+# convention), which broke -- real 404s, confirmed live -- the moment GitHub
+# Pages actually started serving this repo from its project subpath
+# (https://0xfanbase.github.io/AI-Radar/) rather than a domain root. See
+# PROGRESS.md for the incident and generate.py's own BASE_PATH/
+# apply_base_path() docstrings for the fix.
+
+
+def test_apply_base_path_rewrites_internal_hrefs_and_srcs(tmp_path):
+    page = tmp_path / "page.html"
+    page.write_text(
+        '<link rel="stylesheet" href="/static/css/tokens.css">'
+        '<img src="/static/img/foo.png">'
+        '<a href="/board/">Board</a>'
+        '<a href="https://arxiv.org/abs/123">External</a>'
+        '<a href="#main-content">Skip</a>',
+        encoding="utf-8",
+    )
+    rewritten = generate.apply_base_path(tmp_path, base_path="/AI-Radar")
+    assert rewritten == 1
+    html = page.read_text(encoding="utf-8")
+    assert 'href="/AI-Radar/static/css/tokens.css"' in html
+    assert 'src="/AI-Radar/static/img/foo.png"' in html
+    assert 'href="/AI-Radar/board/"' in html
+    # External and fragment-only links are untouched.
+    assert 'href="https://arxiv.org/abs/123"' in html
+    assert 'href="#main-content"' in html
+
+
+def test_apply_base_path_is_a_noop_when_base_path_is_empty(tmp_path):
+    page = tmp_path / "page.html"
+    original = '<a href="/board/">Board</a>'
+    page.write_text(original, encoding="utf-8")
+    rewritten = generate.apply_base_path(tmp_path, base_path="")
+    assert rewritten == 0
+    assert page.read_text(encoding="utf-8") == original
+
+
+def test_base_path_is_derived_from_site_base_url(monkeypatch):
+    # Not hand-maintained: BASE_PATH is a pure function of SITE_BASE_URL,
+    # so a future custom-domain move (SITE_BASE_URL -> a bare domain, no
+    # path) automatically stops prefixing internal links, with no other
+    # code change required.
+    assert generate.BASE_PATH == "/AI-Radar"
+
+
+def test_generate_applies_the_real_derived_base_path_to_actual_output(tmp_path):
+    generate.generate(public_dir=tmp_path)
+    html = (tmp_path / "index.html").read_text(encoding="utf-8")
+    assert f'href="{generate.BASE_PATH}/board/"' in html
+    assert f'href="{generate.BASE_PATH}/static/css/tokens.css"' in html
+    # The skip-link fragment and (if present) any external link must never
+    # be prefixed.
+    assert 'href="#main-content"' in html
+    assert generate.BASE_PATH + generate.BASE_PATH not in html
+
+
+def test_generate_rerun_does_not_double_prefix_base_path(tmp_path):
+    generate.generate(public_dir=tmp_path)
+    generate.generate(public_dir=tmp_path)
+    html = (tmp_path / "index.html").read_text(encoding="utf-8")
+    assert generate.BASE_PATH + generate.BASE_PATH not in html
+    assert f'href="{generate.BASE_PATH}/board/"' in html
+
+
+def test_sitemap_and_robots_are_not_touched_by_base_path_rewriting(tmp_path):
+    # sitemap.xml/robots.txt already use absolute SITE_BASE_URL values and
+    # are not *.html -- apply_base_path()'s glob must never touch them.
+    generate.generate(public_dir=tmp_path)
+    sitemap = (tmp_path / "sitemap.xml").read_text(encoding="utf-8")
+    robots = (tmp_path / "robots.txt").read_text(encoding="utf-8")
+    assert generate.SITE_BASE_URL + generate.BASE_PATH not in sitemap
+    assert f"<loc>{generate.SITE_BASE_URL}/</loc>" in sitemap
+    assert f"Sitemap: {generate.SITE_BASE_URL}/sitemap.xml" in robots
+
+
 # --- Integration: every named route exists ---------------------------------
 #
 # One shared build per test session (a module-scoped fixture, not
