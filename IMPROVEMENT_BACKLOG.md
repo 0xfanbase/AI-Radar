@@ -3574,3 +3574,59 @@ occupy. Logged here rather than silently expanding scope, since a future
 pass may reasonably decide `inference` should be fixed too for the same
 non-expert-reader rationale (the surname "Pope" is just as opaque as
 "Shazeer" was in the MoE entry this pass did fix).
+
+## Matrix-theme palette swap + `signal-cyan` -> `signal-green` token rename (T1, 2026-07-11)
+
+Replaced every hex value in `site/static/css/tokens.css`'s `:root` block
+with the pre-verified Matrix-green palette (`bg` #000000, `panel`
+#04120A, `hairline` #0E3320, `ink` #8FE3A8, the renamed signal token
+#39FF6E, `star-white` #D8FFE4, `reported-amber` #E8B23D, `corrected-red`
+#FF5C4D) and refreshed the header comment's contrast-ratio table to the
+real, pre-computed WCAG numbers (all text-role tokens 6.89:1 or higher
+against both `bg` and `panel`; `hairline` correctly stays sub-AA at
+1.51:1 / 1.38:1, border-only). `site/tests/test_contrast_ratios.py`
+parses `tokens.css` live and re-grades whatever palette is present, so no
+test hardcodes these numbers a second time.
+
+Judgment call, spec-silent (decision made, not left open): renamed
+`--color-signal-cyan` to `--color-signal-green` in the same commit,
+rather than keeping the old name with a new (now green, not cyan) value.
+First grepped actual usage to size the blast radius before deciding: the
+token appears in exactly two CSS declarations in `components.css` (link
+color, one-liner color, focus-ring outline, `.chip--confirmed`,
+`.wire-card__why` left rule -- five `var()` references total across that
+one file), one inline style in `board.html` (the pulse-dot background),
+a hardcoded duplicate hex in `site/lib/svg_sparkline.py`
+(`SIGNAL_CYAN`/now `SIGNAL_GREEN`), and prose-only mentions in
+`tokens.css`'s own header comment, `card.html`'s template comments,
+`matrix_rain.py`'s docstring, and two test files
+(`test_contrast_ratios.py`, `test_build.py`). That's a small, fully
+enumerated surface -- every reference was found by `grep -rn
+"signal-cyan" site/` and renamed in the same pass, so there is no
+lingering mix of old and new names anywhere in `site/`. Renaming now
+matches this project's own established bias (flagged repeatedly in
+earlier PM checkpoints in this file) that a token's name should describe
+what it actually holds -- `signal-cyan` describing a color that is now
+unambiguously green would itself be exactly the kind of name/meaning
+drift this project's audits treat as a real bug, and it only gets harder
+to justify renaming later as more templates/CSS accumulate references to
+it. The token's *role* (link/accent color, one-liner color, `chip--
+confirmed`, and -- unchanged -- the site's one and only focus-ring color)
+is untouched; only its name and hex value changed.
+
+Also fixed the one already-logged hardcoded-hex duplicate
+(`site/lib/svg_sparkline.py`'s `SIGNAL_CYAN` constant, renamed to
+`SIGNAL_GREEN` with the new hex, since this module emits raw SVG with no
+CSS custom-property access) and confirmed via `grep -rnoE
+"#[0-9A-Fa-f]{6}" site/ --include="*.py" --include="*.css"
+--include="*.html" | grep -v tokens.css` that no *other* module has a
+similar undocumented duplicate -- the only hex literals outside
+`tokens.css` are that one documented constant and literal expected-value
+assertions inside the test files themselves, both already accounted for.
+
+`site/lib/matrix_rain.py` (the deterministic zero-JS digital-rain SVG
+tile generator this same palette work builds toward) was already
+complete and untouched apart from one docstring mention of the renamed
+token; it is not yet wired into any template/`generate.py`/`matrix.css`
+-- that integration is explicitly a separate task, not part of this
+palette-and-rename sweep.

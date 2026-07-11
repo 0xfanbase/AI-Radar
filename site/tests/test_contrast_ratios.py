@@ -12,7 +12,7 @@ directly out of the real, on-disk `tokens.css` at test-collection time, and
 WCAG 2.x relative-luminance contrast ratios are computed here, in Python,
 from those parsed values. If a future edit changes a hex code in
 tokens.css, this test recomputes against the new value automatically --
-there is no second copy of "#43E5C4" etc. anywhere in this file.
+there is no second copy of "#39FF6E" etc. anywhere in this file.
 
 Design-system role classification (which token is a *background*, which is
 *border-only*, which is a *text* color) is not something that can be
@@ -31,7 +31,7 @@ own documented intent:
     future edit ever pushed hairline's hex to something that *would* pass
     AA, that would not silently justify reclassifying it as text-safe
     without a human revisiting this file.
-  - Every other `--color-*` token (ink, signal-cyan, star-white,
+  - Every other `--color-*` token (ink, signal-green, star-white,
     reported-amber, corrected-red, and any token added later) is treated
     as a text-role color and must clear 4.5:1 against both backgrounds.
 """
@@ -55,7 +55,7 @@ _TOKEN_RE = re.compile(r"--color-([a-z0-9-]+):\s*(#[0-9A-Fa-f]{6})\b")
 def _parse_color_tokens(css_text: str) -> dict[str, str]:
     """Parse every `--color-<name>: #RRGGBB` custom property out of the
     real tokens.css text. Returns {name: "#RRGGBB"} (name lowercase, as
-    written -- e.g. "signal-cyan", not the full "--color-signal-cyan")."""
+    written -- e.g. "signal-green", not the full "--color-signal-green")."""
     tokens = {}
     for name, hex_value in _TOKEN_RE.findall(css_text):
         tokens[name] = hex_value
@@ -153,7 +153,7 @@ def test_at_least_the_five_documented_text_roles_are_present(text_role_tokens):
     # used to.
     expected_role_names = {
         "ink",
-        "signal-cyan",
+        "signal-green",
         "star-white",
         "reported-amber",
         "corrected-red",

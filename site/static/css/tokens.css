@@ -7,22 +7,33 @@
  * values or font names, so the palette/type system stays defined in
  * exactly one place.
  *
- * Contrast ratios verified at build-plan time (WCAG AA, normal text):
- *   --color-signal-cyan on --color-bg    12.16:1
- *   --color-signal-cyan on --color-panel 11.13:1
- *   --color-reported-amber on --color-bg  8.29:1
- *   --color-reported-amber on --color-panel 7.59:1
- *   --color-corrected-red on --color-bg   5.30:1
- *   --color-corrected-red on --color-panel 4.85:1
- *   --color-ink / --color-star-white on both backgrounds: >14:1
- * All pass AA for normal text; no palette changes needed. A future
- * automated contrast-ratio test (build plan section 5, "Tests") should
- * read the hex values below directly rather than re-hardcoding them.
+ * Contrast ratios verified at build-plan time (WCAG AA, normal text) --
+ * recomputed for the Matrix-theme palette swap (real, computed ratios, not
+ * eyeballed):
+ *   --color-ink on --color-bg            13.72:1
+ *   --color-ink on --color-panel         12.52:1
+ *   --color-signal-green on --color-bg   15.70:1
+ *   --color-signal-green on --color-panel 14.33:1
+ *   --color-star-white on --color-bg     19.34:1
+ *   --color-star-white on --color-panel  17.65:1
+ *   --color-reported-amber on --color-bg 10.87:1
+ *   --color-reported-amber on --color-panel 9.91:1
+ *   --color-corrected-red on --color-bg   6.89:1
+ *   --color-corrected-red on --color-panel 6.29:1
+ *   --color-hairline on --color-bg        1.51:1 (sub-AA by design)
+ *   --color-hairline on --color-panel     1.38:1 (sub-AA by design)
+ * All text-role tokens pass AA for normal text; no further palette changes
+ * needed. An automated contrast-ratio test
+ * (site/tests/test_contrast_ratios.py) reads the hex values below directly
+ * rather than re-hardcoding them, so it re-grades whatever palette is here.
  *
  * --color-hairline is a border/divider color ONLY -- never used for text
  * or focus rings anywhere in this codebase (it fails AA on its own, by
- * design: 1.26:1 against --color-panel). --color-signal-cyan is the
- * site's one and only focus-ring color (see components.css).
+ * design: 1.38:1 against --color-panel). --color-signal-green is the
+ * site's one and only focus-ring color (see components.css). (This token
+ * was renamed as part of the Matrix-theme palette swap -- the value is
+ * now genuinely green, not the teal/cyan its previous name described; see
+ * IMPROVEMENT_BACKLOG.md for the rename rationale.)
  *
  * Fonts: this commit does NOT self-host font files (Space Grotesk, Inter,
  * JetBrains Mono) -- that's a later nice-to-have. Each --font-* stack
@@ -32,14 +43,14 @@
 
 :root {
   /* Palette */
-  --color-bg: #0B0E17;             /* page background */
-  --color-panel: #131829;          /* card/panel background */
-  --color-hairline: #232B45;       /* border / divider ONLY -- never text or focus rings */
-  --color-ink: #E9ECF5;            /* body text */
-  --color-signal-cyan: #43E5C4;    /* status + live accents, one-liners, AND the focus-ring color */
-  --color-star-white: #F4F6FF;     /* headlines */
-  --color-reported-amber: #D9A036; /* status: reported */
-  --color-corrected-red: #E4574F;  /* status: corrected */
+  --color-bg: #000000;             /* page background */
+  --color-panel: #04120A;          /* card/panel background */
+  --color-hairline: #0E3320;       /* border / divider ONLY -- never text or focus rings */
+  --color-ink: #8FE3A8;            /* body text */
+  --color-signal-green: #39FF6E;   /* status + live accents, one-liners, AND the focus-ring color */
+  --color-star-white: #D8FFE4;     /* headlines */
+  --color-reported-amber: #E8B23D; /* status: reported */
+  --color-corrected-red: #FF5C4D;  /* status: corrected */
 
   /* Type -- system-font fallback stacks; self-hosted webfont files are a
      later nice-to-have (see IMPROVEMENT_BACKLOG.md). */

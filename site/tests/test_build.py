@@ -81,8 +81,8 @@ def test_generate_produces_tokens_css(tmp_path):
     tokens = tmp_path / "static" / "css" / "tokens.css"
     assert tokens.is_file()
     css = tokens.read_text(encoding="utf-8")
-    assert "--color-bg: #0B0E17" in css
-    assert "--color-signal-cyan: #43E5C4" in css
+    assert "--color-bg: #000000" in css
+    assert "--color-signal-green: #39FF6E" in css
 
 
 def test_generate_produces_components_css(tmp_path):

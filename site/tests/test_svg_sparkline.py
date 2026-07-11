@@ -166,7 +166,7 @@ def test_svg_has_polyline_using_signal_cyan():
     root = _parse_svg(result.svg)
     polyline = root.find(f"{SVG_NS}polyline")
     assert polyline is not None
-    assert polyline.get("stroke") == spark.SIGNAL_CYAN
+    assert polyline.get("stroke") == spark.SIGNAL_GREEN
     # every point must be a real "x,y" numeric pair -- a well-formed
     # points attribute proves the plotted data actually round-tripped.
     points = polyline.get("points")
