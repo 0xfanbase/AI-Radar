@@ -105,8 +105,8 @@ def test_build_audit_section_for_none_reports_unavailable_with_honest_message():
     section = method.build_audit_section(None)
     assert section["available"] is False
     assert section["message"] == method.NO_AUDIT_MESSAGE
-    assert "Phase 5" in section["message"]
-    assert "audit.yml" in section["message"]
+    assert "self-audit" in section["message"]
+    assert "weekly" in section["message"]
 
 
 def test_build_method_context_with_missing_audit_does_not_crash():
@@ -122,7 +122,7 @@ def test_render_method_page_with_missing_audit_shows_placeholder_not_a_crash():
     # site/tests/test_primer_builder.py's own established convention for
     # asserting rendered prose containing apostrophes.
     assert str(escape(method.NO_AUDIT_MESSAGE)) in html
-    assert "Phase 5" in html
+    assert "self-audit" in html
 
 
 def test_full_real_environment_render_end_to_end_with_the_actual_missing_file():
@@ -134,7 +134,7 @@ def test_full_real_environment_render_end_to_end_with_the_actual_missing_file():
     audit_latest = method.load_audit_latest()
     assert audit_latest is None
     html = method.render_method_page(ledger, verifier_stats, audit_latest)
-    assert "No audit has run yet" in html
+    assert "No self-audit has been published yet" in html
 
 
 # ---------------------------------------------------------------------------

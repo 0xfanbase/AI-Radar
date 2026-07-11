@@ -142,8 +142,8 @@ MASTHEAD_SPARKLINE_HEIGHT = 14
 MASTHEAD_TOPIC_LIMIT = 5
 
 EMPTY_MOVING_MESSAGE = (
-    "No topic-velocity data yet -- check back once watch.yml has run and "
-    "produced data/whats_moving.json."
+    "No topic data yet -- check back soon. This snapshot updates daily "
+    "from Hacker News activity."
 )
 
 

@@ -3339,3 +3339,52 @@ convention noted in the entry directly above), not retroactively edited.
   explain to a non-expert reader ("the 5 busiest topics this week") than
   a rate-of-change ranking would be, and keeps the strip's own ordering
   legible without a second, competing sort concept.
+
+## Reader-copy fix: dev-facing empty-state messages + copy-lint test (T3, 2026-07-11)
+
+Rewrote three reader-facing empty-state constants that leaked internal
+build/ops vocabulary to real readers: `site/builders/wire.py`'s
+`EMPTY_WIRE_MESSAGE` (named "the daily analyst" and "this environment"),
+`site/builders/moving.py`'s `EMPTY_MOVING_MESSAGE` (named `watch.yml` and
+`data/whats_moving.json`), and `site/builders/method.py`'s
+`NO_AUDIT_MESSAGE` (named `audit.yml`, "Phase 5", and "this environment").
+All three now read like `corrections.py`'s own already-correct
+`EMPTY_CORRECTIONS_MESSAGE` -- honest about the empty state, silent about
+internal file/workflow names or build-phase numbering, since the target
+reader is explicitly someone with a keen interest in AI news who is not a
+technical expert (per CLAUDE.md), not a contributor to this repo.
+
+Added `site/tests/test_reader_copy.py` to make this class of regression a
+test failure instead of a silent re-introduction. Two spec-silent judgment
+calls made in that test, logged here:
+
+- **Which modules/constants count as "reader-facing."** The task named
+  `{wire,moving,method,corrections,board,lexicon,primer,about}.py` and
+  "every module-level constant whose name ends in `_MESSAGE`." I scan
+  exactly those eight modules and select constants by `name.isupper() and
+  name.endswith("_MESSAGE") and isinstance(value, str)` -- i.e. any
+  future `..._MESSAGE` constant in any of these eight files is
+  automatically covered without the test needing an update, rather than
+  hard-coding today's four known constant names
+  (`EMPTY_WIRE_MESSAGE`/`EMPTY_MOVING_MESSAGE`/`NO_AUDIT_MESSAGE`/
+  `EMPTY_CORRECTIONS_MESSAGE`/`EMPTY_SEEN_IN_MESSAGE`). `board.py`,
+  `primer.py`, and `about.py` currently export no such constant, which is
+  fine -- the test asserts only that the *combined* scan across all eight
+  modules finds at least one, not that every individual module does, so
+  it can't quietly start scanning nothing without failing.
+- **Token matching is a plain case-sensitive substring check**, exactly as
+  the five banned tokens were specified (`environment`, `.yml`, `.json`,
+  `Phase ` (capital P, trailing space -- deliberately distinct from the
+  ordinary English word "phase"), `analyst has not run`). This will not
+  catch a differently-capitalized dev-language leak (e.g. "Environment")
+  that isn't one of the five listed tokens; broadening the token list or
+  case-folding it is a candidate for a future pass if a new leak shape
+  shows up, but the five tokens named in this task are the ones known to
+  have actually leaked, so I matched the spec literally rather than
+  guessing at a broader net now.
+
+Also updated `site/builders/method.py`'s own top-of-file docstring
+(developer-facing, not reader-facing) to stop quoting the old literal
+`NO_AUDIT_MESSAGE` text verbatim, since a docstring that echoes stale copy
+verbatim is exactly the kind of drift this task exists to prevent from
+recurring.

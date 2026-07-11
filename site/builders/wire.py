@@ -99,9 +99,8 @@ STATUS_CHIP_CLASS = {
 }
 
 EMPTY_WIRE_MESSAGE = (
-    "No cards published yet -- the daily analyst has not run live in this "
-    "environment yet. Once it does, the newest fact-checked stories will "
-    "appear here, newest first."
+    "No stories published yet -- check back soon. New fact-checked AI "
+    "stories are added here daily, newest first."
 )
 
 
