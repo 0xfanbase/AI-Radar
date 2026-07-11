@@ -36,8 +36,23 @@ body {
   line-height: 1.55;
 }
 
+/* --- Opaque chrome-background invariant ----------------------------------
+ * The decorative fixed rain layer (site/static/css/matrix.css, arriving in
+ * the next commit) is `position: fixed; inset: 0; z-index: -1` -- it paints
+ * above the body's own canvas background but below anything in-flow that
+ * sets its own background. Every text-bearing chrome surface (masthead,
+ * footer, this main reading column, .skip-link elsewhere in this file, and
+ * every wire-card/board/lexicon/primer/method/corrections/moving panel via
+ * its own template styles) MUST keep an opaque token background so rain is
+ * only ever visible in the gutters / empty chrome space around them --
+ * reading text must never have moving rain scrolling behind it. At 375px
+ * the reading column (.container, max-width 40rem) is full viewport width,
+ * so the rain is intentionally almost invisible on phones there --
+ * readability wins over ambience (logged in IMPROVEMENT_BACKLOG.md).
+ */
 main {
   flex: 1 1 auto;
+  background: var(--color-bg);
 }
 
 /* Fluid container -- relative max-width, never a fixed pixel width, so
@@ -128,6 +143,7 @@ a {
  * broken on its own.
  */
 .masthead {
+  background: var(--color-bg);
   border-bottom: 1px solid var(--color-hairline);
 }
 
@@ -226,6 +242,7 @@ a {
 }
 
 .site-footer {
+  background: var(--color-bg);
   border-top: 1px solid var(--color-hairline);
   padding-block: 1.25rem;
   font-size: 0.9rem;

@@ -3629,4 +3629,36 @@ tile generator this same palette work builds toward) was already
 complete and untouched apart from one docstring mention of the renamed
 token; it is not yet wired into any template/`generate.py`/`matrix.css`
 -- that integration is explicitly a separate task, not part of this
+## Opaque chrome backgrounds ahead of the rain layer (T2, 2026-07-11)
+
+Added `background: var(--color-bg);` to `.masthead`, `.site-footer`, and
+`main` in `site/static/css/components.css`, plus a short invariant
+comment above `main` explaining why: the upcoming fixed rain layer
+(`site/static/css/matrix.css`, `position: fixed; inset: 0; z-index: -1`,
+next task) paints above the body's own background but below any in-flow
+element with its own background, so any text-bearing chrome surface left
+transparent would have moving rain scrolling behind its text. Every
+wire-card/board/lexicon/primer/method/corrections/moving panel already
+sets its own `background: var(--color-panel)` in its template's inline
+`<style>` (verified by inspection before making this change, per the
+task brief), and `.skip-link` already had `var(--color-panel)`, so
+neither needed touching here.
+
+Judgment call, spec-silent but flagged explicitly by the task brief to be
+logged either way: at 375px, `.container` (main's own class, max-width
+40rem) is full viewport width, so main's new opaque background covers the
+entire visible page and the rain effect will be essentially invisible on
+phones -- only wider viewports show it in the gutters either side of the
+reading column. Kept it this way rather than, say, leaving a narrow
+transparent margin on mobile or lowering main's opacity to let a hint of
+rain show through: readability of the actual reading column must never be
+put at risk for ambience, on any viewport size, and the rain effect is
+explicitly a progressive-enhancement flourish for wider screens, not a
+core feature mobile readers need to see. No hex literals were added --
+`var(--color-bg)` is the only new declaration in all three rules, and a
+new regression test (`site/tests/test_build.py`,
+`test_masthead_site_footer_and_main_have_opaque_token_backgrounds` /
+`test_components_css_has_no_hardcoded_hex_colors`) parses the real built
+`components.css` to hold both of those invariants going forward instead
+of relying on manual review alone.
 palette-and-rename sweep.

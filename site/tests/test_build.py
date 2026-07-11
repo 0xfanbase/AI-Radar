@@ -91,6 +91,52 @@ def test_generate_produces_components_css(tmp_path):
     assert components.is_file()
 
 
+# --- Opaque chrome-background invariant (Matrix-theme rain layer, T2) ------
+#
+# The decorative fixed rain layer (site/static/css/matrix.css) is
+# `position: fixed; inset: 0; z-index: -1` -- it paints above the body's own
+# canvas background but below anything in-flow with its own background.
+# .masthead, .site-footer, and main must each set an opaque
+# `background: var(--color-bg)` so rain is only ever visible in gutters /
+# empty chrome space, never behind reading text. This test parses the real
+# built components.css rather than re-asserting a hardcoded string, so it
+# actually checks the CSS rule the browser will use, not just substring
+# presence anywhere in the file.
+
+
+def _css_rule_body(css_text: str, selector: str) -> str:
+    """Return the `{ ... }` body text of the first rule whose selector list
+    is exactly `selector` (e.g. "main", ".masthead"). Raises AssertionError
+    if no such rule is found."""
+    pattern = re.compile(
+        r"(?:^|\})\s*" + re.escape(selector) + r"\s*\{([^}]*)\}", re.MULTILINE
+    )
+    match = pattern.search(css_text)
+    assert match is not None, f"no CSS rule found for selector {selector!r}"
+    return match.group(1)
+
+
+def test_masthead_site_footer_and_main_have_opaque_token_backgrounds(tmp_path):
+    generate.generate(public_dir=tmp_path)
+    css = (tmp_path / "static" / "css" / "components.css").read_text(encoding="utf-8")
+    for selector in ("main", ".masthead", ".site-footer"):
+        body = _css_rule_body(css, selector)
+        assert "background: var(--color-bg);" in body, (
+            f"{selector} rule is missing an opaque background: var(--color-bg) "
+            "declaration -- the fixed rain layer would show through it"
+        )
+
+
+def test_components_css_has_no_hardcoded_hex_colors(tmp_path):
+    generate.generate(public_dir=tmp_path)
+    css = (tmp_path / "static" / "css" / "components.css").read_text(encoding="utf-8")
+    hex_literals = re.findall(r"#[0-9A-Fa-f]{3,8}\b", css)
+    assert hex_literals == [], (
+        f"components.css must source every color from tokens.css custom "
+        f"properties, found hardcoded hex literal(s): {hex_literals}"
+    )
+
+
 def test_load_cards_handles_empty_cards_dir_gracefully():
     # content/cards/ has no real analyst output yet -- must not crash, and
     # must return an empty list rather than None or raise.
