@@ -128,7 +128,7 @@ a {
 }
 
 /* --- Focus visibility ---------------------------------------------------
- * Signal-cyan is the site's one and only focus-ring color (never the
+ * Signal-green is the site's one and only focus-ring color (never the
  * hairline color -- see tokens.css). A visible offset keeps the ring from
  * touching small text/chip edges.
  */
