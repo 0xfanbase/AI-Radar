@@ -7,6 +7,70 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Phase 5: `auditor/lexicon_audit.py`, the lexicon coverage/orphan checker
+
+First file in the new `auditor/` package (`auditor/linkrot.py`, `trend.py`,
+`missed_story.py`, `duplicates.py`, `report.py`, `cli.py` — the rest of
+the approved plan's Phase 5 file layout — remain unbuilt; out of this
+turn's explicit scope). Implements CLAUDE.md's `audit.yml` "weekly" bullet
+"lexicon orphan/coverage check (terms used vs defined)" as pure,
+filesystem-free Python: given an explicit list of cards (`content/cards/`
+is still empty — no analyst run has happened for real yet, so this is
+tested against fixtures, per this turn's own instruction) and a loaded
+`content/lexicon.json` (the real, seeded 30 entries), it reports:
+
+- **Coverage gaps** (`find_coverage_gaps` / `audit_coverage`): a lexicon
+  term genuinely used (word-boundary, case-insensitive) in a card's own
+  prose fields (`headline`, `what_happened`, `why_it_matters`,
+  `one_liner`) but missing from that card's own `lexicon_terms[]` —
+  exactly the miss CLAUDE.md's lexicon auto-growth rule (corroboration
+  procedure step 7) is supposed to prevent on every real analyst run.
+- **Orphans** (`find_orphans`): a lexicon entry whose `seen_in[]` is empty
+  *and* whose term is never referenced in any of the passed-in cards'
+  prose either. A non-empty `seen_in[]` always overrides — it's the
+  analyst's own auto-grown historical record, which may span more cards
+  than one audit run's own `cards` argument.
+- `audit_lexicon()` combines both into one
+  `{"coverage_gaps": [...], "orphans": [...]}` dict — a provisional shape
+  for whoever later builds `schemas/audit.schema.json` and
+  `scripts/append_backlog_findings.py`, not yet a locked contract.
+
+Word-boundary matching (`\bterm\b`, case-insensitive) reuses the same
+technique already established twice elsewhere in this repo
+(`watcher/sources/hn.py`'s `HN_KEYWORDS`, `site/lib/linkify.py`'s own
+term regex), specifically so a short term like `"RAG"` never
+false-positive-matches as a bare substring inside an unrelated longer
+word such as `"storage"` or `"average"` — both literally contain the
+three characters "r", "a", "g" in sequence, and both are exercised as a
+dedicated test case on both the coverage-gap and orphan side.
+
+**New test file `tests/test_auditor_lexicon_coverage.py`** (16 tests):
+fixture cards + a small fixture lexicon covering a genuine coverage gap,
+a correctly-listed term, case-insensitive listed-term comparison, orphan
+detection (both the plain empty-`seen_in`-and-unmentioned case and the
+non-empty-`seen_in`-overrides-a-narrower-`cards`-subset case), the
+`"RAG"` word-boundary edge case, and one integration-flavored smoke test
+against the real, on-disk `content/lexicon.json` (asserts it still has
+30 entries and scans cleanly against synthetic cards without raising).
+Every spec-silent judgment call made while writing this module (which
+card fields count as scannable "prose," the case-insensitive
+already-listed check, the orphan-decision rule, `auditor/`'s
+`__init__.py`-free package convention matching `scripts/`'s own
+precedent, and the provisional `audit_lexicon()` return shape) is logged
+in full in `IMPROVEMENT_BACKLOG.md` under "Phase 5:
+`auditor/lexicon_audit.py`."
+
+**Verification:** `python -m pytest` — **691 passed, 2 deselected** (up
+from 675 before this turn; +16 new tests, nothing else changed or broke).
+No file outside `auditor/lexicon_audit.py` and
+`tests/test_auditor_lexicon_coverage.py` was touched this turn — in
+particular, no workflow, schema, or `CLAUDE.md` change, consistent with
+this turn's narrow, explicit scope (the lexicon coverage/orphan checker
+only; the rest of `audit.yml`'s checks, `improve.yml`, and the
+fortnight-parity guard are separate, not-yet-built Phase 5 pieces).
+
+---
+
 ## 2026-07-11 — Architecture change: daily analyst run moves from `analyze.yml`/GitHub secret to a Claude Code Remote Routine
 
 The owner does not have, and does not want to manage, a

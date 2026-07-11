@@ -2070,3 +2070,82 @@ documentation/test-coverage only.
   here rather than left as an undocumented judgment call; see
   `CLAUDE.md`'s "Daily self-learning loop" section and `PROGRESS.md` for
   the corresponding narrative entry.
+
+## Phase 5: `auditor/lexicon_audit.py` -- lexicon coverage/orphan checker (2026-07-11)
+
+New `auditor/` package (first file in it; `auditor/linkrot.py`,
+`trend.py`, `missed_story.py`, `duplicates.py`, `report.py`, `cli.py` per
+the approved plan's file layout are all still unbuilt, later Phase 5
+scope, not touched this turn) implementing CLAUDE.md's `audit.yml`
+"lexicon orphan/coverage check (terms used vs defined)" bullet as pure,
+filesystem-free logic — given an explicit list of cards (since
+`content/cards/` is empty, no real cards exist to load) and
+`content/lexicon.json`'s real 30 entries, it finds (1) **coverage gaps**:
+a lexicon term used in a card's own prose but missing from that card's
+`lexicon_terms[]`, and (2) **orphans**: a lexicon entry with empty
+`seen_in[]` whose term is never referenced in any card's prose either.
+Several spec-silent judgment calls made, logged here:
+
+- **Which card fields count as "prose" to scan (`CARD_PROSE_FIELDS =
+  (headline, what_happened, why_it_matters, one_liner)`).** The plan
+  names no exact field list for this check. Deliberately excludes
+  `topics[]` (a closed enum, not free prose a lexicon term could
+  incidentally appear in), `citations[].quote` (verbatim source text
+  under the ≤15-word quote rule, not the analyst's own words — a term
+  appearing only inside a quote was never "used" by the card's own prose
+  in the sense CLAUDE.md's lexicon auto-growth rule, step 7, means), and
+  `correction_note` (a short pointer string, not substantive body text).
+- **The "already listed in this card's `lexicon_terms[]`" check is
+  case-insensitive**, matching `find_coverage_gaps`'s own case-insensitive
+  prose scan — a card listing `"rag"` is treated as already covering the
+  canonical lexicon term `"RAG"`, since `lexicon_terms[]`'s job is naming
+  a real entry, not preserving its exact casing.
+- **Orphan status is decided by `seen_in[]` OR prose-mention, not
+  `seen_in[]` alone** — a term with empty `seen_in[]` that nonetheless
+  shows up in a passed-in card's prose is *not* an orphan (it's a
+  "used but not yet recorded" case, which `audit_coverage`'s own
+  coverage-gap check would separately flag on that same card). Reusing
+  the identical `_term_pattern` word-boundary helper for both checks
+  keeps "used" meaning the same thing on both sides of this module.
+  Conversely, a term with a *non-empty* `seen_in[]` is never an orphan
+  regardless of whether the specific `cards` list a caller passes to a
+  given audit run happens to include the referencing card(s) —
+  `seen_in[]` is the analyst's own auto-grown historical record
+  (CLAUDE.md step 7), which may span more cards than whatever subset one
+  audit invocation is given.
+- **Word-boundary matching (`\bterm\b`, case-insensitive) reuses the
+  same technique already established twice elsewhere in this repo**
+  (`watcher/sources/hn.py`'s `HN_KEYWORDS` whole-word matching;
+  `site/lib/linkify.py`'s own term-matching regex) rather than a third,
+  independently-tuned implementation — specifically so a short term like
+  `"RAG"` never false-positive-matches as a bare substring inside an
+  unrelated longer word such as `"storage"` or `"average"` (both contain
+  the literal three characters "r","a","g" in sequence); covered by a
+  dedicated test on both the coverage-gap and the orphan side.
+- **`audit_lexicon()`'s combined return shape,
+  `{"coverage_gaps": [...], "orphans": [...]}`, is this module's own
+  provisional convention, not yet locked to a real `schemas/audit.schema.json`**
+  (that schema doesn't exist yet — later Phase 5 scope). Whoever builds
+  `audit.schema.json` / `scripts/append_backlog_findings.py` should treat
+  this shape as a starting point, not a frozen contract.
+- **`auditor/` ships with no `__init__.py`**, matching `scripts/`'s own
+  existing precedent (also `__init__.py`-free, imported in its own tests
+  via a `sys.path.insert` + bare-name import) rather than
+  `site/lib/linkify.py`'s heavier `importlib.util.spec_from_file_location`
+  loading (only needed there because `site` collides with a stdlib module
+  name — `auditor` has no such collision, so the simpler pattern applies).
+- **Test file added: `tests/test_auditor_lexicon_coverage.py`** (16
+  tests) — fixture cards + a small fixture lexicon covering a genuine
+  coverage gap, a correctly-listed term, case-insensitive listed-term
+  comparison, orphan detection (both the empty-`seen_in`-and-unmentioned
+  case and the non-empty-`seen_in`-overrides-a-narrower-`cards`-subset
+  case), the `"RAG"`-vs-`"storage"`/`"average"` word-boundary edge case on
+  *both* the coverage-gap and orphan side, and one integration-flavored
+  smoke test that loads the real, on-disk `content/lexicon.json` (30
+  entries) and runs it through every function in this module against
+  synthetic cards without raising.
+
+Verification: `python -m pytest` — **691 passed, 2 deselected** (up from
+675; +16 new tests, nothing else changed or broken). No file outside
+`auditor/lexicon_audit.py` and `tests/test_auditor_lexicon_coverage.py`
+was touched this turn.
