@@ -3535,3 +3535,42 @@ raising, since a stale link is still better than a crash or a silently
 vanished "Seen in" entry, and this mirrors how `RelatedTermView`/`rel.slug
 is None` already handles an unresolvable related-term name elsewhere in
 this same file.
+
+## Lexicon citation anchors rewritten to plain language (T9, 2026-07-11)
+
+Twelve of `content/lexicon.json`'s 30 entries (RLHF, MoE, RAG, scaling
+laws, tokenization, chain-of-thought, multimodal, compute, foundation
+model, red teaming, test-time compute, frontier model) closed their
+`deeper` field's single inline `<a>` citation with a bare academic
+in-text-citation as the anchor's visible text (`Ouyang et al., 2022`,
+`Kaplan et al., 2020`, `Sennrich et al.`, `Anderljung et al.`, etc.) --
+opaque to this site's stated non-expert reader, who has no way to know
+who "Ouyang" or "Anderljung" is. The other 18 entries already used
+self-describing anchor text (a paper title, or a phrase like "Anthropic's
+documentation on context windows"). Rewrote each of the 12 anchors'
+visible text only -- href byte-identical, surrounding sentence and every
+other field (`term`, `one_liner`, `related`, `seen_in`) untouched -- to a
+short plain-language description derived from that entry's own sentence
+(e.g. RLHF's sentence already names "OpenAI's InstructGPT work", so the
+anchor became "OpenAI's InstructGPT paper"; scaling laws' and compute's
+anchors already carried the real paper title in the surrounding text, so
+those just dropped the "Kaplan et al., " author-name prefix and kept the
+title). No description was invented beyond what the existing sentence or
+the paper's already-quoted title supported.
+
+Judgment call, spec-silent: `content/lexicon.json` actually has 13
+entries whose anchor text contains the string "et al", not 12 --
+`inference`'s anchor reads "Pope et al.'s work on efficiently scaling
+Transformer inference". The fix plan's own scope explicitly named exactly
+12 entries and `inference` was not among them, even though a blind grep
+for `et al` also turns it up. Left `inference` unchanged rather than
+"completing" the set to 13, on the reasoning that the plan's explicit,
+named enumeration is the authoritative scope for this task -- and that
+`inference`'s anchor, unlike the 12 fixed here, already trails a
+descriptive clause ("work on efficiently scaling Transformer inference")
+rather than ending bare on a name-and-year, so it's closer to (if not
+fully inside) the "already self-describing" bucket the other 18 entries
+occupy. Logged here rather than silently expanding scope, since a future
+pass may reasonably decide `inference` should be fixed too for the same
+non-expert-reader rationale (the surname "Pope" is just as opaque as
+"Shazeer" was in the MoE entry this pass did fix).

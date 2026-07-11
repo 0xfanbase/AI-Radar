@@ -50,6 +50,34 @@ FRONTIER_BOARD_ACTUAL_ROWS = 13
 LEXICON_TARGET_COUNT = 30
 
 _HREF_RE = re.compile(r"<a\s+href=", re.IGNORECASE)
+_ANCHOR_TEXT_RE = re.compile(r'<a\s+href="[^"]+">([^<]+)</a>')
+# A bare in-text academic citation used as a link's *entire* visible text,
+# e.g. "Ouyang et al., 2022" or "Sennrich et al." -- opaque to CLAUDE.md's
+# stated non-expert reader, who has no way to know who "Ouyang" is.
+_BARE_ET_AL_CITATION_RE = re.compile(r"^[A-Z][A-Za-z\-']*\s+et al\.?,?\s*\d{0,4}\.?$")
+
+# The 12 lexicon entries whose `deeper` citation anchor used to end on a
+# bare "Author et al., Year" citation (see IMPROVEMENT_BACKLOG.md's
+# "Lexicon citation anchors rewritten to plain language" entry, T9) and were
+# rewritten to short plain-language source descriptions instead. `inference`
+# also contains "et al" in its anchor text ("Pope et al.'s work on
+# efficiently scaling Transformer inference") but was deliberately left out
+# of that fix's scope -- see the same backlog entry for why -- so it is
+# intentionally *not* in this set.
+_TERMS_FIXED_FOR_PLAIN_LANGUAGE_CITATIONS = {
+    "RLHF",
+    "MoE",
+    "RAG",
+    "scaling laws",
+    "tokenization",
+    "chain-of-thought",
+    "multimodal",
+    "compute",
+    "foundation model",
+    "red teaming",
+    "test-time compute",
+    "frontier model",
+}
 
 
 def _load(path: Path):
@@ -137,6 +165,21 @@ def test_every_lexicon_entry_deeper_field_has_at_least_one_href():
     lexicon = _load(LEXICON_PATH)
     offenders = [e["term"] for e in lexicon if not _HREF_RE.search(e["deeper"])]
     assert offenders == [], f"entries missing an <a href> citation in deeper: {offenders}"
+
+
+def test_named_entries_no_longer_use_bare_et_al_citation_anchor_text():
+    # Regression lock for T9: these 12 entries' single inline citation
+    # anchor must read as a short plain-language source description, not a
+    # bare "Author et al., Year" in-text citation.
+    lexicon = _load(LEXICON_PATH)
+    by_term = {e["term"]: e for e in lexicon}
+    offenders = []
+    for term in _TERMS_FIXED_FOR_PLAIN_LANGUAGE_CITATIONS:
+        deeper = by_term[term]["deeper"]
+        for anchor_text in _ANCHOR_TEXT_RE.findall(deeper):
+            if _BARE_ET_AL_CITATION_RE.match(anchor_text.strip()):
+                offenders.append((term, anchor_text))
+    assert offenders == [], f"bare 'et al' citation anchor text remains: {offenders}"
 
 
 def test_every_lexicon_related_term_resolves_within_the_same_file():
