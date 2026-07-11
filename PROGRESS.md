@@ -7,6 +7,80 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-11 — Architecture exception: canvas + JavaScript rain, replacing the static CSS/SVG tiles as the primary effect
+
+The owner shared a reference site of theirs (a live Bitcoin dashboard) whose
+own digital-rain background they wanted this site's Matrix theme to match,
+saying the retuned CSS/SVG version (see the addendum below) still "looks too
+fake." Inspecting the reference's actual source (an .mhtml save) showed why:
+its rain is a `<canvas>` element redrawn every frame by JavaScript --
+genuine per-glyph randomness each frame, plus a real alpha-blended
+translucent-black repaint every frame that produces smooth, continuously
+varying fade trails -- a technique a static, pre-rendered, repeating CSS/SVG
+background tile cannot reproduce, no matter how much its per-glyph opacity
+cycle is tuned (see the addendum entry below for that attempt).
+
+This is a real architectural fork, not a style tweak: AI Frontier Wire has
+been zero-JavaScript since Phase 4, stated in `CLAUDE.md`, in every
+stylesheet's own header comment, and enforced by a live pytest test
+(`test_no_script_tag_anywhere_in_any_generated_html_page`). Rather than
+silently drop that constraint, this was surfaced to the owner directly as an
+explicit choice: port the reference's actual canvas+JS technique (accepting
+one narrow, isolated JavaScript exception), or keep pushing the zero-JS
+CSS/SVG approach further knowing it likely can't fully match. The owner
+chose the former.
+
+**What shipped, keeping the exception as narrow and safe as possible:**
+- `site/static/js/matrix-rain.js` -- a single, self-contained IIFE
+  implementing the classic canvas rain algorithm (per-frame translucent-black
+  repaint for the fade trail, a random glyph drawn per column each frame,
+  occasionally in a brighter "head" color). Every color it draws with is
+  read from the live `tokens.css` custom properties at runtime
+  (`getComputedStyle(...).getPropertyValue(...)`) -- never a second
+  hardcoded hex/rgba copy, the same rule every stylesheet on this site
+  already follows. Respects `prefers-reduced-motion` on load *and* on a live
+  OS-level toggle while the page is open (no animation loop starts at all
+  when reduced motion is preferred; a single static frame is drawn instead).
+- `--color-rain-fade` added to `tokens.css` (an `rgba()` value -- the
+  per-frame alpha-blend fade amount, not a text/background color role, so
+  it's deliberately not `#RRGGBB` and `test_contrast_ratios.py`'s hex-only
+  token parser correctly ignores it).
+- `base.html`: a `<canvas id="matrix-rain-canvas" aria-hidden="true">` is
+  now the primary rain layer on every page, immediately followed by the
+  original static CSS/SVG rain layer (unchanged from the redesign +
+  retuning below), now wrapped in `<noscript>` -- a REAL fallback, not dead
+  code: whenever JavaScript is disabled, blocked, or fails for any reason,
+  the CSS/SVG version renders instead, so nothing about the site's actual
+  content or navigation ever depends on the script executing.
+- `matrix.css` gained `#matrix-rain-canvas`'s own positioning rule
+  (`position: fixed; inset: 0; z-index: -1; pointer-events: none;`,
+  `background: var(--color-bg)`) and an updated header comment explaining
+  both layers' relationship.
+- `test_no_script_tag_anywhere_in_any_generated_html_page` replaced with
+  `test_exactly_one_script_tag_and_it_is_the_matrix_rain_canvas` -- the
+  zero-JavaScript invariant isn't deleted, it's narrowed to its one
+  deliberate exception: any *other* `<script>` tag anywhere is still a hard
+  failure. New tests also confirm the canvas comes before the `<noscript>`
+  fallback in document order, the fallback still contains the real
+  CSS/SVG rain markup, and `matrix-rain.js` itself contains no hardcoded
+  color literal and genuinely handles `prefers-reduced-motion` (including
+  the live-toggle `addEventListener("change", ...)` path).
+
+Verification: `python -m pytest` (709 passed, 2 deselected) and
+`python -m pytest site/tests` (296 passed, 4 new) both green. Rebuilt the
+site and confirmed with Playwright (real Chromium): with JavaScript
+enabled, the canvas renders genuinely organic, per-frame-randomized rain
+with visible bright-head/fading-tail trails, no console errors beyond an
+unrelated pre-existing missing-favicon 404; with JavaScript explicitly
+disabled (a separate browser context), the `<noscript>` CSS/SVG fallback
+renders correctly in its place. Mobile (390px) unchanged either way -- the
+content column still fills the viewport there, so no rain is visible, the
+same previously-logged trade-off. All reading content remains exactly as
+legible as before in every configuration -- the opaque-panel + z-index
+legibility mechanism was untouched by any of this.
+
+---
+
 ## 2026-07-11 — Addendum: the opacity/glow fix above overshot -- retuned to the classic "movie screen" look
 
 Immediately after the fix below shipped (opacity 0.15 -> 0.6, a double

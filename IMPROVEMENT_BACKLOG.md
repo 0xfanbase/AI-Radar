@@ -3977,3 +3977,26 @@ of undocumented drift this project's own audits exist to catch. T1's and
 T6's entries are left exactly as written -- both are honest records of a
 real grep that genuinely came back clean against its own (too narrow)
 pattern -- and this entry is the correction of record.
+
+- **2026-07-11 — One deliberate, isolated JavaScript exception: canvas-based
+  Matrix rain, replacing the static CSS/SVG tiles as the primary effect.**
+  Not spec-silent in the usual sense -- this reverses an explicit, repeatedly
+  stated architectural rule (zero JavaScript, stated in `CLAUDE.md` and every
+  stylesheet's own header comment, previously enforced by a test asserting
+  literally zero `<script>` tags anywhere) -- so it was surfaced to the
+  owner directly as an explicit choice rather than made unilaterally: match
+  a reference site's canvas+JS rain technique exactly (one narrow exception),
+  or keep pushing the zero-JS CSS/SVG approach knowing it likely can't fully
+  match a real per-frame-randomized, alpha-blended fade. The owner chose the
+  former. Scoped as narrowly as possible: exactly one `<script>` tag,
+  loading exactly one small self-contained script
+  (`site/static/js/matrix-rain.js`), which draws to exactly one `<canvas>`
+  element and touches nothing else on the page (no other element gains a
+  JS dependency; every other page interaction remains pure CSS/HTML). The
+  original static CSS/SVG rain layer is not removed -- it becomes the real
+  `<noscript>` fallback, so the site's actual content and navigation still
+  work identically with JavaScript fully disabled. The zero-JS test
+  (`test_no_script_tag_anywhere_in_any_generated_html_page`) is replaced,
+  not deleted, with one that asserts exactly this one exception and fails
+  on any other `<script>` tag appearing anywhere. Full account in
+  `PROGRESS.md`'s "Architecture exception" entry.

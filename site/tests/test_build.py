@@ -542,17 +542,96 @@ def test_matrix_rain_wrapper_opening_tag_carries_class_and_aria_hidden_together(
         )
 
 
-def test_no_script_tag_anywhere_in_any_generated_html_page(built_site):
-    # The hard, site-wide zero-JavaScript constraint has no dedicated test
-    # anywhere else -- this is the one that actually enforces it across
-    # every generated page, not just the rain layer's own markup.
-    script_re = re.compile(r"<script", re.IGNORECASE)
+def test_exactly_one_script_tag_and_it_is_the_matrix_rain_canvas(built_site):
+    # AI Frontier Wire's zero-JavaScript architecture has exactly ONE
+    # deliberate, narrow exception (see IMPROVEMENT_BACKLOG.md): the
+    # canvas-based Matrix rain effect, a progressive enhancement over the
+    # always-present <noscript> CSS/SVG fallback (see the tests below).
+    # This is the test that keeps that exception singular and narrow --
+    # any OTHER <script> tag anywhere, on any page, is still a hard
+    # failure, exactly like the test this one replaces.
+    script_re = re.compile(r"<script\b[^>]*>", re.IGNORECASE)
     for page in _all_html_files(built_site):
         html = page.read_text(encoding="utf-8")
-        assert not script_re.search(html), (
-            f"{page.relative_to(built_site)} contains a <script> tag -- this "
-            f"site must stay zero-JavaScript"
+        matches = script_re.findall(html)
+        assert len(matches) == 1, (
+            f"{page.relative_to(built_site)} contains {len(matches)} <script> "
+            f"tag(s) -- exactly one (the matrix-rain canvas script) is allowed"
         )
+        # "static/js/matrix-rain.js" rather than an anchored "/static/..."
+        # prefix: apply_base_path() legitimately rewrites every src="/...
+        # to include the site's base path (e.g. "/AI-Radar/static/...") --
+        # see site/generate.py -- so only the path's own tail is asserted.
+        assert 'src="' in matches[0] and "static/js/matrix-rain.js" in matches[0], (
+            f"{page.relative_to(built_site)}'s one <script> tag must be the "
+            f"matrix-rain canvas script, got: {matches[0]!r}"
+        )
+        assert "defer" in matches[0], (
+            f"{page.relative_to(built_site)}'s matrix-rain script tag must "
+            f"carry defer so it never blocks parsing/first paint"
+        )
+
+
+def test_matrix_rain_canvas_present_on_every_page_before_the_noscript_fallback(
+    built_site,
+):
+    for page in _all_html_files(built_site):
+        html = page.read_text(encoding="utf-8")
+        canvas_pos = html.index('id="matrix-rain-canvas"')
+        noscript_pos = html.index("<noscript>")
+        assert 'aria-hidden="true"' in html[canvas_pos : canvas_pos + 80], (
+            f"{page.relative_to(built_site)}'s matrix-rain canvas must carry "
+            f"aria-hidden=\"true\""
+        )
+        assert canvas_pos < noscript_pos, (
+            f"{page.relative_to(built_site)}: the live canvas must come "
+            f"before the <noscript> CSS/SVG fallback in document order"
+        )
+
+
+def test_old_css_rain_layer_now_lives_inside_the_noscript_fallback(built_site):
+    # The static CSS/SVG rain layer built by the earlier Matrix-theme
+    # redesign is NOT dead code -- it's the real fallback for when
+    # JavaScript doesn't run. This asserts it's specifically inside the
+    # <noscript> element, not just present somewhere on the page.
+    html = (built_site / "index.html").read_text(encoding="utf-8")
+    noscript_start = html.index("<noscript>")
+    noscript_end = html.index("</noscript>")
+    noscript_body = html[noscript_start:noscript_end]
+    assert 'class="matrix-rain"' in noscript_body
+    assert 'class="matrix-rain__col"' in noscript_body
+
+
+def test_matrix_rain_js_reads_every_color_from_a_css_custom_property():
+    # No hardcoded hex/rgba color literal anywhere in the script -- every
+    # color it draws with must come from getComputedStyle(...).getPropertyValue
+    # against a real tokens.css custom property, exactly like every
+    # stylesheet on this site is already required to do.
+    js = (generate.STATIC_DIR / "js" / "matrix-rain.js").read_text(encoding="utf-8")
+    assert not re.search(r"#[0-9A-Fa-f]{6}\b", js), (
+        "matrix-rain.js contains a hardcoded hex color literal -- colors "
+        "must be read from tokens.css custom properties at runtime"
+    )
+    assert not re.search(r"rgba?\(\s*\d", js), (
+        "matrix-rain.js contains a hardcoded rgb()/rgba() color literal -- "
+        "colors must be read from tokens.css custom properties at runtime"
+    )
+    for custom_property in (
+        "--color-bg",
+        "--color-rain-fade",
+        "--color-signal-green",
+        "--color-star-white",
+    ):
+        assert custom_property in js, f"matrix-rain.js never reads {custom_property}"
+
+
+def test_matrix_rain_js_respects_reduced_motion_including_a_live_toggle():
+    js = (generate.STATIC_DIR / "js" / "matrix-rain.js").read_text(encoding="utf-8")
+    assert "prefers-reduced-motion: reduce" in js
+    # Must react to the OS-level preference changing while the page is
+    # open, not just its value at first paint -- matches this file's own
+    # docstring claim.
+    assert "addEventListener" in js and "change" in js
 
 
 def test_no_hardcoded_decimal_rgb_color_literal_anywhere_in_built_html(built_site):

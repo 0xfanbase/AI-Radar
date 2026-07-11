@@ -13,9 +13,22 @@
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
 
+  <!-- Progressive enhancement: matrix-rain.js draws the live canvas rain
+       below (this site's one deliberate, narrow exception to an otherwise
+       zero-JavaScript architecture -- see IMPROVEMENT_BACKLOG.md). The
+       no-script-wrapped block further down is the REAL fallback, not an
+       afterthought: the existing static CSS/SVG rain layer (unchanged from
+       the Matrix-theme redesign) renders whenever JavaScript is
+       unavailable for any reason -- disabled, blocked, unsupported -- so
+       nothing about this site's actual content or navigation ever depends
+       on script executing. -->
+  <canvas id="matrix-rain-canvas" aria-hidden="true"></canvas>
+
+  <noscript>
   {% if matrix_rain_columns is defined and matrix_rain_columns %}
   {% include "_matrix_rain.html" %}
   {% endif %}
+  </noscript>
 
   <header class="masthead">
     <div class="container masthead__inner">
@@ -60,5 +73,7 @@
       </nav>
     </div>
   </footer>
+
+  <script src="/static/js/matrix-rain.js" defer></script>
 </body>
 </html>
