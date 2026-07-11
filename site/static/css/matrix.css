@@ -1,30 +1,51 @@
 /*
  * AI Frontier Wire -- Matrix-theme digital-rain decorative layer.
  *
- * Decorative only: this stylesheet contains ZERO color values. The glyph
- * color lives inside the SVG tiles themselves (baked at build time from
- * the live tokens.css --color-signal-green value -- see
- * site/generate.py::read_color_token / site/lib/matrix_rain.py), and this
- * file only ever positions/sizes/animates those tiles. Do not add a
- * hardcoded hex value here; if this layer ever needs a color of its own
- * (e.g. a scrim), source it from a tokens.css custom property like every
- * other stylesheet in this codebase must.
+ * Two layers, one visible at a time depending on whether JavaScript runs:
  *
- * The ONLY animation on this layer lives inside
+ * 1. #matrix-rain-canvas -- the real, JS-driven canvas rain
+ *    (site/static/js/matrix-rain.js), this site's one deliberate, narrow
+ *    exception to an otherwise zero-JavaScript architecture. This
+ *    stylesheet only positions/sizes it; every color it draws with is read
+ *    from tokens.css custom properties at runtime by the script itself,
+ *    never hardcoded here or there.
+ * 2. .matrix-rain / .matrix-rain__col -- the original static CSS/SVG rain
+ *    (unchanged from the Matrix-theme redesign), now wrapped in
+ *    <noscript> in base.html -- the REAL fallback when JavaScript is
+ *    unavailable for any reason, not dead code. Its glyph color lives
+ *    inside the SVG tiles themselves (baked at build time from the live
+ *    tokens.css --color-signal-green value -- see
+ *    site/generate.py::read_color_token / site/lib/matrix_rain.py), and
+ *    this file only ever positions/sizes/animates those tiles. Do not add
+ *    a hardcoded hex value to either layer's rules below; source any new
+ *    color from a tokens.css custom property like every other stylesheet
+ *    in this codebase must.
+ *
+ * The ONLY animation the CSS/SVG fallback layer has lives inside
  * `@media (prefers-reduced-motion: no-preference)`, with no fallback
  * animation outside it -- matching board.html's pulse-dot convention
  * exactly (see components.css). Under reduced motion, `.matrix-rain__col`
  * still renders (a static tiled backdrop at its fixed background-position)
- * but never animates.
+ * but never animates. The canvas layer enforces the same rule itself, in
+ * script (matrix-rain.js checks prefers-reduced-motion before starting its
+ * own animation loop, including on a live OS-level toggle).
  *
- * .matrix-rain itself is `position: fixed; inset: 0; z-index: -1;
- * pointer-events: none;` -- strictly behind every in-flow element,
- * including the opaque `background: var(--color-bg)` chrome panels
- * (.masthead, .site-footer, main; see components.css) that keep it from
- * ever showing behind actual reading text. `aria-hidden="true"` (set in
- * the _matrix_rain.html partial, not here) removes it from the
- * accessibility tree entirely.
+ * Both layers share the same box model: `position: fixed; inset: 0;
+ * z-index: -1; pointer-events: none;` -- strictly behind every in-flow
+ * element, including the opaque `background: var(--color-bg)` chrome
+ * panels (.masthead, .site-footer, main; see components.css) that keep
+ * either layer from ever showing behind actual reading text.
+ * `aria-hidden="true"` (set directly on each layer's root element in the
+ * markup, not here) removes both from the accessibility tree entirely.
  */
+
+#matrix-rain-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--color-bg);
+}
 
 .matrix-rain {
   position: fixed;

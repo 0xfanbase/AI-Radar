@@ -51,6 +51,10 @@
   --color-star-white: #D8FFE4;     /* headlines */
   --color-reported-amber: #E8B23D; /* status: reported */
   --color-corrected-red: #FF5C4D;  /* status: corrected */
+  --color-rain-fade: rgba(0, 0, 0, 0.055); /* matrix-rain.js's per-frame trail
+    fade -- an alpha-compositing value, not a text/background role, so it's
+    deliberately NOT #RRGGBB (test_contrast_ratios.py's token parser only
+    matches hex tokens and correctly ignores this one). */
 
   /* Type -- system-font fallback stacks; self-hosted webfont files are a
      later nice-to-have (see IMPROVEMENT_BACKLOG.md). */
