@@ -32,7 +32,11 @@
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
-  opacity: 0.15; /* ambient only -- must never compete with foreground contrast */
+  opacity: 0.6; /* still strictly decorative and behind opaque chrome/panels
+                   (components.css), but rendered near-full strength so the
+                   rain itself reads as vivid, saturated green -- legibility
+                   comes from z-order + opaque panels, not from washing out
+                   the rain's own color. */
 }
 
 .matrix-rain__col {
@@ -42,6 +46,10 @@
   width: var(--rain-tile-w);
   background-repeat: repeat-y;
   background-position: 0 0;
+  /* Glow/bloom, matching the source material's phosphor-CRT look. Sourced
+     from the same --color-signal-green token every other accent on this
+     site uses -- never a hardcoded hex, per this file's own header rule. */
+  filter: drop-shadow(0 0 3px var(--color-signal-green)) drop-shadow(0 0 6px var(--color-signal-green));
 }
 
 @media (prefers-reduced-motion: no-preference) {
