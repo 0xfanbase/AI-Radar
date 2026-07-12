@@ -360,13 +360,15 @@ def test_main_reports_no_item_found_and_returns_zero(tmp_path, capsys):
 
 
 def test_main_defaults_to_the_real_backlog_path_when_no_path_given(capsys):
-    """No `--path` given -> reads the real, current `IMPROVEMENT_BACKLOG.md`
-    (which has zero checkbox lines today -- see the integration smoke test
-    below), so this must report "no item found," not raise or crash."""
+    """No `--path` given -> reads the real, current `IMPROVEMENT_BACKLOG.md`.
+    Its checkbox contents churn as `audit.yml` appends findings over time, so
+    this only asserts the CLI runs cleanly and reports zero exit -- not which
+    branch (item found vs. none) it lands on. See the integration smoke test
+    below for the same live-file caveat."""
     exit_code = mod.main([])
     assert exit_code == 0
     out = capsys.readouterr().out
-    assert "No unaddressed backlog item found" in out
+    assert out.strip() != ""
 
 
 # ---------------------------------------------------------------------------
@@ -374,17 +376,20 @@ def test_main_defaults_to_the_real_backlog_path_when_no_path_given(capsys):
 # ---------------------------------------------------------------------------
 
 
-def test_real_improvement_backlog_parses_cleanly_and_has_no_checkbox_lines_yet():
-    """This repo's own real `IMPROVEMENT_BACKLOG.md` today is entirely
-    plain-bullet decision-log prose -- no `audit.yml` run has ever
-    happened for real, so `scripts.append_backlog_findings` has never
-    appended a checkbox section to it. Confirms the real parser runs
-    cleanly (no exception) against the real, current file and correctly
-    finds nothing to select yet."""
+def test_real_improvement_backlog_parses_cleanly():
+    """This repo's own real `IMPROVEMENT_BACKLOG.md` gains new checkbox
+    sections over time as `audit.yml` appends findings, so this deliberately
+    does not assert a specific item count or emptiness (that would be a
+    time-bomb against the file's own designed mutation). It only confirms
+    the real parser runs cleanly (no exception) against the real, current
+    file and returns a well-formed result."""
     real_path = REPO_ROOT / "IMPROVEMENT_BACKLOG.md"
     assert real_path.is_file()
     text = real_path.read_text(encoding="utf-8")
 
     items = parse_backlog_items(text)
-    assert items == []
-    assert pick_backlog_item(real_path) is None
+    assert isinstance(items, list)
+    assert all(isinstance(item, BacklogItem) for item in items)
+
+    picked = pick_backlog_item(real_path)
+    assert picked is None or isinstance(picked, BacklogItem)
