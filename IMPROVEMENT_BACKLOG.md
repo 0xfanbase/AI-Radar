@@ -4000,3 +4000,14 @@ pattern -- and this entry is the correction of record.
   not deleted, with one that asserts exactly this one exception and fails
   on any other `<script>` tag appearing anywhere. Full account in
   `PROGRESS.md`'s "Architecture exception" entry.
+
+## Audit findings -- audit-20260712T012433Z (2026-07-12T01:24:33Z)
+
+- [ ] **[MEDIUM]** Missed story: "GLM 5.2 and the coming AI margin collapse" (https://martinalderson.com/posts/the-upcoming-ai-margin-collapse-part-1-glm-5-2/) -- not covered by any published card or ledger entry.
+- [ ] **[MEDIUM]** Missed story: "GPT-5.6 Sol Ultra will be in Codex" (https://twitter.com/thsottiaux/status/2073933490513752151) -- not covered by any published card or ledger entry.
+- [ ] **[MEDIUM]** Missed story: "AI 2040: Plan A" (https://ai-2040.com/) -- not covered by any published card or ledger entry.
+- [ ] **[MEDIUM]** Missed story: "AMD Ryzen AI Halo – $4k AI Dev Kit" (https://www.lttlabs.com/articles/2026/07/06/amd-ryzen-ai-halo) -- not covered by any published card or ledger entry.
+- [ ] **[MEDIUM]** Missed story: "Small AI Models Gain Traction In places with unreliable networks" (https://spectrum.ieee.org/small-language-models-ai-pharmaceuticals) -- not covered by any published card or ledger entry.
+- [ ] **[MEDIUM]** Missed story: "Anthropic's Method to Losing Goodwill in a Few Easy Steps" (https://raheeljunaid.com/blog/anthropics-method-to-losing-goodwill-in-a-few-easy-steps/) -- not covered by any published card or ledger entry.
+- [ ] **[MEDIUM]** Missed story: "AI content is everywhere on social media, especially LinkedIn" (https://www.pangram.com/blog/ai-in-your-feed) -- not covered by any published card or ledger entry.
+
