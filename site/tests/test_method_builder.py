@@ -2,20 +2,23 @@
 the Method & Audit page (Phase 4, build-plan section 5).
 
 The important edge case this file exists to prove: `data/audit/latest.json`
-does not exist yet in this repo (Phase 5's `audit.yml` has never run), and
-site/builders/method.py must render an honest placeholder for that --
-never raise `FileNotFoundError`, never crash the page build. Every test in
-the "MISSING data/audit/latest.json" section below exercises that path
-explicitly, both at the loader level and all the way through a full page
-render.
+may or may not exist at any point in this repo's history -- absent until
+`audit.yml`'s first real weekly run lands, present from then on -- and
+site/builders/method.py must render an honest placeholder for the missing
+case, never raise `FileNotFoundError`, never crash the page build either
+way. The "MISSING data/audit/latest.json" section below exercises the
+missing-file path explicitly via synthetic tmp_path fixtures (so it holds
+regardless of the real file's current state), while the "real current
+path" tests assert against whichever state is actually on disk right now.
 
-Also exercises the REAL, committed `data/ledger.json` (104 entries, all
-`status: "queued"` -- no analyst run has happened for real yet) and
-`data/verifier_stats.json` (`runs: []`) for the "basic pipeline stats"
-half of the page, plus synthetic fixtures for the paths the real,
-current-state data doesn't happen to exercise (a non-empty
-verifier_stats run, and -- defensively -- a hypothetical present
-`data/audit/latest.json`).
+Also exercises the REAL, committed `data/ledger.json` and
+`data/verifier_stats.json` for the "basic pipeline stats" half of the
+page -- both grow/shift as the daily watcher and (once actually
+publishing) analyst/verifier loop run, so assertions against them check
+internal consistency rather than a point-in-time snapshot -- plus
+synthetic fixtures for the paths the real, current-state data doesn't
+happen to exercise (a non-empty verifier_stats run, and a hypothetical
+present `data/audit/latest.json` with specific contents).
 
 Loaded by explicit file path (matching `site/tests/test_board_builder.py`'s
 own convention), since `site/` is deliberately not an importable package
@@ -69,17 +72,19 @@ REAL_VERIFIER_STATS = _load_real_verifier_stats()
 # ---------------------------------------------------------------------------
 
 
-def test_data_audit_latest_json_does_not_exist_in_this_repo_yet():
-    # This is the precondition the rest of this section proves method.py
-    # handles gracefully -- if this ever starts failing because Phase 5's
-    # audit.yml has landed and produced a real file, that's good news,
-    # but it means this test (and the module's own docstring) needs an
-    # update, not that the graceful-missing-file path stops mattering.
-    assert not AUDIT_LATEST_CONTENT_PATH.is_file()
-
-
-def test_load_audit_latest_returns_none_for_the_real_missing_path():
-    assert method.load_audit_latest() is None
+def test_load_audit_latest_against_the_real_current_path():
+    """`data/audit/latest.json` starts absent and is written the first
+    time `audit.yml`'s real weekly run lands (per CLAUDE.md) -- so its
+    presence is a fact about repo history, not something to hardcode.
+    Whichever state is real right now, `load_audit_latest()` must return
+    `None` for a missing file or the parsed dict for a present one, never
+    raise."""
+    result = method.load_audit_latest()
+    if AUDIT_LATEST_CONTENT_PATH.is_file():
+        with AUDIT_LATEST_CONTENT_PATH.open("r", encoding="utf-8") as fh:
+            assert result == json.load(fh)
+    else:
+        assert result is None
 
 
 def test_load_audit_latest_returns_none_for_an_explicit_nonexistent_path(tmp_path):
@@ -87,12 +92,15 @@ def test_load_audit_latest_returns_none_for_an_explicit_nonexistent_path(tmp_pat
     assert method.load_audit_latest(missing_path) is None
 
 
-def test_load_audit_latest_does_not_raise_file_not_found_error():
+def test_load_audit_latest_does_not_raise_file_not_found_error(tmp_path):
     # The actual regression this test guards against: a naive
     # `path.open()` with no existence check would raise
-    # FileNotFoundError here instead of returning None.
+    # FileNotFoundError here instead of returning None. Uses an explicit
+    # synthetic missing path rather than the real one, so this stays
+    # correct whether or not data/audit/latest.json currently exists.
+    missing_path = tmp_path / "does" / "not" / "exist.json"
     try:
-        result = method.load_audit_latest()
+        result = method.load_audit_latest(missing_path)
     except FileNotFoundError:
         pytest.fail(
             "load_audit_latest() must return None for a missing "
@@ -125,16 +133,19 @@ def test_render_method_page_with_missing_audit_shows_placeholder_not_a_crash():
     assert "self-audit" in html
 
 
-def test_full_real_environment_render_end_to_end_with_the_actual_missing_file():
+def test_full_real_environment_render_end_to_end_regardless_of_audit_file_presence():
     # The full, real, no-mocking path: load every real data file exactly
-    # as a caller would (data/audit/latest.json genuinely absent from
-    # disk), and confirm the whole page still renders successfully.
+    # as a caller would, whether or not data/audit/latest.json currently
+    # exists on disk, and confirm the whole page renders successfully
+    # either way.
     ledger = method.load_ledger()
     verifier_stats = method.load_verifier_stats()
     audit_latest = method.load_audit_latest()
-    assert audit_latest is None
     html = method.render_method_page(ledger, verifier_stats, audit_latest)
-    assert "No self-audit has been published yet" in html
+    if audit_latest is None:
+        assert "No self-audit has been published yet" in html
+    else:
+        assert "No self-audit has been published yet" not in html
 
 
 # ---------------------------------------------------------------------------
@@ -178,14 +189,14 @@ def test_render_method_page_with_a_present_audit_shows_its_summary():
 
 
 def test_build_ledger_stats_against_real_ledger():
+    # data/ledger.json keeps growing (new clusters) and, once the daily
+    # analyst/verifier loop actually publishes, its status breakdown will
+    # keep shifting too -- assert internal consistency against whatever
+    # the real, current data says rather than a point-in-time count.
     stats = method.build_ledger_stats(REAL_LEDGER)
     assert stats["total_clusters"] == len(REAL_LEDGER["entries"])
-    assert stats["total_clusters"] == 104
-    # As of this build stage the analyst has never run for real, so every
-    # real entry is still queued.
-    assert stats["queued"] == 104
-    assert stats["published"] == 0
-    assert stats["dropped"] == 0
+    assert stats["queued"] + stats["published"] + stats["dropped"] == stats["total_clusters"]
+    assert min(stats["queued"], stats["published"], stats["dropped"]) >= 0
 
 
 def test_build_ledger_stats_counts_every_status_from_a_synthetic_ledger():
@@ -279,4 +290,5 @@ def test_render_method_page_explains_confirmed_reported_and_the_verifier():
 
 def test_render_method_page_shows_ledger_stats():
     html = method.render_method_page(REAL_LEDGER, REAL_VERIFIER_STATS, None)
-    assert ">104<" in html
+    stats = method.build_ledger_stats(REAL_LEDGER)
+    assert f">{stats['total_clusters']}<" in html
