@@ -186,15 +186,17 @@ def test_render_moving_page_has_one_sparkline_per_topic_in_the_main_list_only():
 
 
 def test_render_moving_page_mentions_label_pluralizes_correctly():
-    # Real data/whats_moving.json 7-day totals (see
-    # test_build_masthead_sparklines_returns_exactly_five_ordered_by_descending_total's
-    # own comment): products totals exactly 1 -- the live bug this test
-    # guards against was this row rendering the ungrammatical "1 mentions
-    # / 7d". models totals 10, so its row must read the ordinary plural.
+    # data/whats_moving.json's 7-day totals shift daily as the watcher
+    # runs, so derive every topic's expected label from the real, current
+    # data rather than a point-in-time snapshot of which topic happened to
+    # total exactly 1. The live bug this test guards against was a total
+    # of 1 rendering the ungrammatical "1 mentions / 7d".
     html = moving.render_moving_page(REAL_WHATS_MOVING)
-    assert "1 mention / 7d" in html
     assert "1 mentions / 7d" not in html
-    assert "10 mentions / 7d" in html
+    for raw in REAL_TOPICS:
+        total = sum(int(c) for c in raw["daily_counts"])
+        expected = f"{total} mention{'s' if total != 1 else ''} / 7d"
+        assert expected in html
 
 
 def test_render_moving_page_empty_topics_shows_honest_message_not_a_crash():
@@ -219,21 +221,20 @@ def test_build_masthead_sparklines_against_real_content_capped_to_the_limit():
 
 
 def test_build_masthead_sparklines_returns_exactly_five_ordered_by_descending_total():
-    # Real data/whats_moving.json 7-day totals: models=10, open-source=2,
-    # products=1, China=1, everything else=0. Ties (products vs. China,
-    # both 1; the four 0-total topics) keep the topics list's own
-    # original relative order -- Python's sorted(..., reverse=True) is
-    # guaranteed stable.
+    # data/whats_moving.json's 7-day totals shift daily as the watcher
+    # runs, so derive the expected top-5 ordering from the real, current
+    # data rather than a point-in-time snapshot. Ties keep the topics
+    # list's own original relative order -- Python's sorted(...,
+    # reverse=True) is guaranteed stable, and so is this expectation
+    # (built via a plain, unreversed sort by descending total).
     views = moving.build_masthead_sparklines(REAL_TOPICS)
     assert len(views) == 5
-    assert [v.topic for v in views] == [
-        "models",
-        "open-source",
-        "products",
-        "China",
-        "research",
-    ]
-    totals = {t["topic"]: sum(t["daily_counts"]) for t in REAL_TOPICS}
+
+    totals = {t["topic"]: sum(int(c) for c in t["daily_counts"]) for t in REAL_TOPICS}
+    original_order = [t["topic"] for t in REAL_TOPICS]
+    expected_order = sorted(original_order, key=lambda topic: -totals[topic])[:5]
+
+    assert [v.topic for v in views] == expected_order
     ranked_totals = [totals[v.topic] for v in views]
     assert ranked_totals == sorted(ranked_totals, reverse=True)
 
