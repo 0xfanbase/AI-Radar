@@ -66,6 +66,31 @@ class RunResult:
     lab_urls: frozenset[str] = field(default_factory=frozenset)
 
 
+def _fetch_source(name: str, fetch_fn, *args, **kwargs) -> list[Item]:
+    """Call one top-level source fetcher, isolating its failure from the
+    other two so a single source's outage never aborts the whole run.
+
+    Each fetcher already degrades to ``[]`` on a ``robots.txt`` disallow
+    (see their own docstrings), and ``fetch_all_lab_items`` already isolates
+    each *individual* lab this same way (``watcher/sources/labs/registry.py``).
+    But a genuine fetch failure surviving ``watcher.http.fetch``'s retries
+    (e.g. arXiv's API returning a sustained 429) previously propagated
+    straight out of HN/arXiv's fetchers, uncaught, and crashed the entire
+    ``watch`` job -- so a transient rate-limit on one source zeroed out
+    every source for the day, not just that one. This extends the same
+    "skip a source cleanly rather than crash the whole run" rule one level
+    up, across HN/arXiv/labs themselves, matching the registry's own
+    per-lab precedent. Logged in IMPROVEMENT_BACKLOG.md.
+    """
+    try:
+        return fetch_fn(*args, **kwargs)
+    except Exception:
+        logger.exception(
+            "%s fetcher failed unexpectedly; skipping it for this run.", name
+        )
+        return []
+
+
 def run(
     *,
     now: datetime | None = None,
@@ -78,15 +103,15 @@ def run(
 
     Order, matching CLAUDE.md's daily-loop diagram exactly:
 
-    1. Fetch all three source categories (HN, arXiv, each registered lab).
-       Each fetcher already degrades to ``[]`` rather than raising on a
-       ``robots.txt`` disallow or an unexpected per-lab failure (see their
-       own docstrings) -- this function does not add a second safety net
-       around fetching, only around the pipeline stages after it. Lab
-       items are also windowed to ``config.LAB_RECENCY_WINDOW_DAYS`` here
-       (``fetch_all_lab_items(session, now=now)`` -- Phase 1 PM checkpoint
-       fix so an un-windowed archive-serving lab RSS feed can't flood the
-       candidate pool; see ``watcher/sources/labs/registry.py``).
+    1. Fetch all three source categories (HN, arXiv, each registered lab)
+       via :func:`_fetch_source`, which isolates each one's failure from
+       the other two (see its own docstring) -- this function does not add
+       any further safety net around fetching, only around the pipeline
+       stages after it. Lab items are also windowed to
+       ``config.LAB_RECENCY_WINDOW_DAYS`` here (``fetch_all_lab_items(session,
+       now=now)`` -- Phase 1 PM checkpoint fix so an un-windowed
+       archive-serving lab RSS feed can't flood the candidate pool; see
+       ``watcher/sources/labs/registry.py``).
     2. Cluster every fetched item (``watcher.clustering.cluster_items``).
     3. Rank the *full* cluster pool -- deliberately uncapped
        (``limit=len(clusters)``), not ``MAX_QUEUE_SIZE``. Capping here
@@ -112,9 +137,11 @@ def run(
     now = now or datetime.now(timezone.utc)
     session = session or build_session()
 
-    hn_items: list[Item] = fetch_hn_items(session, now=now)
-    arxiv_items: list[Item] = fetch_arxiv_items(session)
-    lab_items: list[Item] = fetch_all_lab_items(session, now=now)
+    hn_items: list[Item] = _fetch_source("HN", fetch_hn_items, session, now=now)
+    arxiv_items: list[Item] = _fetch_source("arXiv", fetch_arxiv_items, session)
+    lab_items: list[Item] = _fetch_source(
+        "labs", fetch_all_lab_items, session, now=now
+    )
     all_items: list[Item] = [*hn_items, *arxiv_items, *lab_items]
 
     clusters = cluster_items(all_items)
