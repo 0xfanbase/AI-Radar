@@ -56,7 +56,7 @@
     ],
     "context_window": 1000000,
     "access": "open-weights",
-    "significance": "NVIDIA's newest and largest Nemotron 3 release, Ultra is a 550-billion-parameter (55 billion active) Mixture-of-Experts hybrid Mamba-Attention model built for long-running agentic workloads. NVIDIA's own benchmarks put its inference throughput at 1.6x to 5.9x that of three comparably-sized open models, varying by which one it's measured against, at matching accuracy, plus strong long-context retrieval at its 1M-token window.",
+    "significance": "NVIDIA's newest and largest Nemotron 3 release, Ultra is a 550-billion-parameter (55 billion active) Mixture-of-Experts hybrid Mamba-Attention model built for long-running agentic workloads. NVIDIA's own benchmarks put its inference throughput at 1.6x to 5.9x that of three other open models (GLM-5.1-754B-A40B, Kimi-K2.6-1T-A32B, and Qwen-3.5-397B-17B), varying by which one it's measured against, at matching accuracy, plus strong long-context retrieval at its 1M-token window.",
     "source_url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
     "last_verified": "2026-07-09"
   },
@@ -70,11 +70,11 @@
       "text",
       "image"
     ],
-    "context_window": null,
+    "context_window": 1050000,
     "access": "api",
-    "significance": "OpenAI began a limited preview of its GPT-5.6 family on June 26, 2026, led by Sol, the line's new flagship, alongside the mid-tier Terra and the fast, low-cost Luna. Per OpenAI's own preview system card, Sol pushes coding, biology, and cybersecurity capability further than any prior OpenAI release and adds new \"max\"/\"ultra\" reasoning and multi-subagent modes for long, complex problems, alongside a hardened safety stack with activation-classifier monitoring. Because of its cybersecurity strength, OpenAI initially limited the preview to a small group of trusted partners coordinated with the U.S. government, with broader availability to follow.",
-    "source_url": "https://deploymentsafety.openai.com/gpt-5-6-preview",
-    "last_verified": "2026-07-09"
+    "significance": "OpenAI began a limited preview of its GPT-5.6 family on June 26, 2026, led by Sol, the line's new flagship, alongside the mid-tier Terra and the fast, low-cost Luna. Per OpenAI's own preview system card, Sol pushes coding, biology, and cybersecurity capability further than any prior OpenAI release and adds new \"max\"/\"ultra\" reasoning and multi-subagent modes for long, complex problems, alongside a hardened safety stack with activation-classifier monitoring. OpenAI initially limited the preview to a small group of trusted partners coordinated with the U.S. government; that restriction lifted on July 9, 2026, when all three variants -- Sol, Terra, and Luna -- reached general availability across ChatGPT, Codex, and the OpenAI API.",
+    "source_url": "https://techcrunch.com/2026/07/09/openai-launches-its-new-family-of-models-with-gpt-5-6/",
+    "last_verified": "2026-07-13"
   },
   {
     "lab": "Google DeepMind",
@@ -88,7 +88,7 @@
     ],
     "context_window": null,
     "access": "api",
-    "significance": "Gemini 3.5 Flash, released May 19, 2026 as the first model in Google's new 3.5 family, is built for agentic workflows and coding rather than general chat; Google's own benchmark table has it outperforming Gemini 3.1 Pro on coding and multi-step agentic tasks while running roughly four times faster on output tokens per second than prior frontier models. It shipped broadly at once across the free Gemini app and Search's AI Mode, the Gemini API in Google AI Studio and Android Studio, the new Antigravity developer platform, and Gemini Enterprise. A larger 3.5 Pro sibling remains in development.",
+    "significance": "Gemini 3.5 Flash, released May 19, 2026 as the first model in Google's new 3.5 family, is built for agentic workflows and coding rather than general chat; Google's own benchmark table has it outperforming Gemini 3.1 Pro on coding and multi-step agentic tasks while running roughly four times faster on output tokens per second than prior frontier models. It shipped broadly at once across the free Gemini app and Search's AI Mode, the Gemini API in Google AI Studio and Android Studio, the new Antigravity developer platform, and Gemini Enterprise. A larger 3.5 Pro sibling remains in development. Google DeepMind is itself headquartered in London, UK -- a distinct entity from Google/Alphabet's Mountain View corporate HQ -- but this Board, per this project's own logged taxonomy decision, buckets it into the US section alongside its US-headquartered parent, since the Board's three tracked lanes are US, China, and notable open-weights releases, not a geography-complete list of every lab's home country.",
     "source_url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/",
     "last_verified": "2026-07-09"
   },
@@ -108,6 +108,23 @@
     "significance": "Muse Spark, unveiled April 8, 2026, is the first model in a new series built by Meta Superintelligence Labs, capping a nine-month, ground-up rebuild of Meta's AI stack, and is built to reason over text, images, and live camera or video input while answering in text, images, or code. It is rolling out primarily through consumer surfaces -- the Meta AI app, WhatsApp, Instagram, Facebook, Messenger, and Ray-Ban Meta glasses -- with only a private API preview open to select partners so far rather than a broad developer API. Meta says it hopes to open-source future Muse-series models, though Spark itself remains proprietary.",
     "source_url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/",
     "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "Meta",
+    "region": "US",
+    "company_id": "meta-ai",
+    "model": "Muse Spark 1.1",
+    "release_date": "2026-07-09",
+    "modality": [
+      "text",
+      "image",
+      "video"
+    ],
+    "context_window": 1000000,
+    "access": "api",
+    "significance": "Muse Spark 1.1, released July 9, 2026, is Meta Superintelligence Labs' second release, adding gains in tool use, computer use, coding, and multimodal understanding over the original April Muse Spark. Unlike Muse Spark's private-partner-only preview, developers can now build with it directly via the new Meta Model API, now in public preview, and the model can actively manage a working context of 1 million tokens across a long agentic session. It also ships in \"Thinking\" mode in the Meta AI app and on meta.ai.",
+    "source_url": "https://ai.meta.com/blog/introducing-muse-spark-meta-model-api/",
+    "last_verified": "2026-07-13"
   },
   {
     "lab": "xAI (SpaceXAI)",
@@ -134,7 +151,7 @@
       "text",
       "image"
     ],
-    "context_window": null,
+    "context_window": 256000,
     "access": "open-weights",
     "significance": "Mistral Large 3, released December 2, 2025, is Mistral's flagship sparse mixture-of-experts model -- 675 billion total parameters with 41 billion active per token -- released fully open under the Apache 2.0 license alongside the smaller Ministral 3 family (14B/8B/3B). It adds image understanding on top of text, supports 40-plus languages, and Mistral's own announcement places it at #2 among open-weight non-reasoning models on the LMArena leaderboard at launch. Mistral is headquartered in the EU, not the US, but this Board -- per this project's own logged taxonomy decision -- buckets it into the US section rather than a third regional column, since the Board's three tracked lanes are US, China, and notable open-weights releases, not a geography-complete list of every lab's home country.",
     "source_url": "https://mistral.ai/news/mistral-3/",

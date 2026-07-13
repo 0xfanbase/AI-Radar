@@ -32,6 +32,11 @@
             "url": "https://en.wikipedia.org/wiki/DeepSeek",
             "outlet": "Wikipedia",
             "quote": "multi-head latent attention (MLA) architecture"
+          },
+          {
+            "url": "https://arxiv.org/abs/2412.19437",
+            "outlet": "DeepSeek-V3 Technical Report (arXiv)",
+            "quote": "671B total parameters with 37B activated for each token"
           }
         ]
       },
@@ -73,7 +78,7 @@
           {
             "url": "https://en.wikipedia.org/wiki/DeepSeek",
             "outlet": "Wikipedia",
-            "quote": "approximately $5.6 million"
+            "quote": "trained V3 for US$6 million"
           }
         ]
       }

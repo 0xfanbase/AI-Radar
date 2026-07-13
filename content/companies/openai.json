@@ -20,6 +20,11 @@
           "url": "https://techcrunch.com/2015/12/11/non-profit-openai-launches-with-backing-from-elon-musk-and-sam-altman/",
           "outlet": "TechCrunch",
           "quote": "Our goal is to advance digital intelligence"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/OpenAI",
+          "outlet": "Wikipedia",
+          "quote": "transitioned from nonprofit to \"capped\" for-profit"
         }
       ]
     },
@@ -53,6 +58,16 @@
             "quote": "find vulnerabilities and pieces of exploits"
           }
         ]
+      },
+      {
+        "text": "That restriction lifted on July 9, 2026, when GPT-5.6 Sol, Terra, and Luna all reached general availability across ChatGPT, Codex, and the OpenAI API.",
+        "citations": [
+          {
+            "url": "https://techcrunch.com/2026/07/09/openai-launches-its-new-family-of-models-with-gpt-5-6/",
+            "outlet": "TechCrunch",
+            "quote": "5.6 is now available across ChatGPT, Codex, and the OpenAI API"
+          }
+        ]
       }
     ],
     "strengths": [
@@ -62,7 +77,7 @@
           {
             "url": "https://deploymentsafety.openai.com/gpt-5-6-preview",
             "outlet": "OpenAI (official deployment-safety docs)",
-            "quote": "48.0% vs. 36.4% threshold"
+            "quote": "GPT-5.6 Sol scores the highest at 48.0%"
           }
         ]
       },
@@ -78,27 +93,21 @@
       }
     ],
     "current_focus": {
-      "text": "OpenAI's current public focus is the GPT-5.6 family, led by Sol, which its own preview documentation says pushes coding, biology and cybersecurity capability further than any prior OpenAI model and adds new higher-effort reasoning and multi-subagent modes for long, complex problems, paired with a hardened safety stack.",
+      "text": "OpenAI's current public focus is the GPT-5.6 family, now generally available and led by Sol, which its own preview documentation says pushes coding, biology and cybersecurity capability further than any prior OpenAI model and adds new higher-effort reasoning and multi-subagent modes for long, complex problems, paired with a hardened safety stack.",
       "citations": [
         {
           "url": "https://deploymentsafety.openai.com/gpt-5-6-preview",
           "outlet": "OpenAI (official deployment-safety docs)",
-          "quote": "go beyond the user's intent"
+          "quote": "find vulnerabilities and pieces of exploits"
+        },
+        {
+          "url": "https://techcrunch.com/2026/07/09/openai-launches-its-new-family-of-models-with-gpt-5-6/",
+          "outlet": "TechCrunch",
+          "quote": "5.6 is now available across ChatGPT, Codex, and the OpenAI API"
         }
       ]
     },
-    "roadmap": [
-      {
-        "text": "OpenAI says it plans broader availability of GPT-5.6 beyond the initial trusted-partner preview once its layered safeguards for the family's higher-risk capabilities are in place.",
-        "citations": [
-          {
-            "url": "https://deploymentsafety.openai.com/gpt-5-6-preview",
-            "outlet": "OpenAI (official deployment-safety docs)",
-            "quote": "trust-based access"
-          }
-        ]
-      }
-    ]
+    "roadmap": []
   },
   "status": "confirmed",
   "generated_at": "2026-07-13T00:00:00Z",

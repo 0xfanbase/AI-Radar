@@ -57,6 +57,16 @@
             "quote": "our most powerful model yet"
           }
         ]
+      },
+      {
+        "text": "It followed up on July 9, 2026 with Muse Spark 1.1, opening a public-preview Meta Model API for developers for the first time and giving the model a working context of 1 million tokens.",
+        "citations": [
+          {
+            "url": "https://ai.meta.com/blog/introducing-muse-spark-meta-model-api/",
+            "outlet": "Meta (official)",
+            "quote": "now in public preview"
+          }
+        ]
       }
     ],
     "strengths": [
@@ -72,12 +82,17 @@
       }
     ],
     "current_focus": {
-      "text": "Meta Superintelligence Labs' current focus is Muse Spark, which Meta describes as a deliberate, scientific step in model scaling where each generation is validated before a bigger one is built, while it continues developing larger successor models in private.",
+      "text": "Meta Superintelligence Labs' current focus is the Muse Spark line, which Meta describes as a deliberate, scientific step in model scaling where each generation is validated before a bigger one is built. With Muse Spark 1.1 the lab opened a public-preview developer API for the first time, alongside the model's continued rollout through Meta's own consumer apps, while larger successor models are developed in private.",
       "citations": [
         {
           "url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/",
           "outlet": "Meta (official newsroom)",
           "quote": "a deliberate and scientific approach to model scaling"
+        },
+        {
+          "url": "https://ai.meta.com/blog/introducing-muse-spark-meta-model-api/",
+          "outlet": "Meta (official)",
+          "quote": "Developers can begin building with Muse Spark 1.1"
         }
       ]
     },

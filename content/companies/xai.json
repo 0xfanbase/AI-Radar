@@ -53,6 +53,11 @@
             "url": "https://docs.x.ai/developers/models",
             "outlet": "xAI (official docs)",
             "quote": "the most intelligent and fastest model we've built"
+          },
+          {
+            "url": "https://cursor.com/blog/grok-4-5",
+            "outlet": "Cursor (official blog)",
+            "quote": "Training included trillions of tokens of Cursor data"
           }
         ]
       }
@@ -76,6 +81,11 @@
           "url": "https://en.wikipedia.org/wiki/SpaceXAI",
           "outlet": "Wikipedia",
           "quote": "a wholly owned subsidiary of SpaceX"
+        },
+        {
+          "url": "https://techcrunch.com/2026/07/08/spacexai-releases-grok-4-5-which-elon-describes-as-an-opus-class-model/",
+          "outlet": "TechCrunch",
+          "quote": "faster, more token-efficient and lower cost"
         }
       ]
     },

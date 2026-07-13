@@ -51,7 +51,7 @@
           {
             "url": "https://huggingface.co/moonshotai/Kimi-K2.6",
             "outlet": "Moonshot AI (official model card)",
-            "quote": "scale horizontally to 300 sub-agents executing 4,000 coordinated steps"
+            "quote": "Scaling horizontally to 300 sub-agents executing 4,000 coordinated steps"
           }
         ]
       }
@@ -84,7 +84,7 @@
         {
           "url": "https://huggingface.co/moonshotai/Kimi-K2.6",
           "outlet": "Moonshot AI (official model card)",
-          "quote": "production-ready deployment"
+          "quote": "adopts the same native int4 quantization method"
         }
       ]
     },
