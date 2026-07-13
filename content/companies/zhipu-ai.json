@@ -1,0 +1,98 @@
+{
+  "id": "zhipu-ai",
+  "name": "Zhipu AI",
+  "aliases": [
+    "Z.ai",
+    "Zhipu AI"
+  ],
+  "hq_country": "CN",
+  "hq_city": "Beijing",
+  "hq_lat": 39.9042,
+  "hq_lng": 116.4074,
+  "official_domains": [
+    "zhipuai.cn",
+    "z.ai"
+  ],
+  "founded": "2019",
+  "profile": {
+    "overview": {
+      "text": "Zhipu AI, also branded Z.ai, is a Beijing AI company founded in 2019 as a spin-out from Tsinghua University research led by Tang Jie and Li Juanzi, known for its GLM family of language models, many released open-weight.",
+      "citations": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Zhipu_AI",
+          "outlet": "Wikipedia",
+          "quote": "began from Tsinghua University"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "Zhipu's researchers published the original GLM training algorithm in 2022, then shipped GLM-4-Plus in August 2024 and an end-to-end speech model, GLM-4-Voice, that October.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Zhipu_AI",
+            "outlet": "Wikipedia",
+            "quote": "autoregressive blank infilling"
+          }
+        ]
+      },
+      {
+        "text": "It released GLM-4.5 and GLM-4.5 Air in July 2025, GLM-4.6 running on domestic Chinese chips that September, and GLM-5 in February 2026 followed by the open-source GLM-5.1 that April.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Zhipu_AI",
+            "outlet": "Wikipedia",
+            "quote": "GLM-4.6 using China's domestic chips"
+          }
+        ]
+      },
+      {
+        "text": "In June 2026 it released GLM-5.2, a roughly 753-billion-parameter mixture-of-experts model with a stable 1-million-token context window built around a new IndexShare sparse-attention mechanism.",
+        "citations": [
+          {
+            "url": "https://huggingface.co/blog/zai-org/glm-52-blog",
+            "outlet": "Zhipu AI / Z.ai (official model card)",
+            "quote": "reducing per-token FLOPs by 2.9× at a 1M context length"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "GLM-5.2 sustains a solid 1-million-token context for long-horizon work and offers multiple thinking-effort levels to balance coding performance against latency.",
+        "citations": [
+          {
+            "url": "https://huggingface.co/blog/zai-org/glm-52-blog",
+            "outlet": "Zhipu AI / Z.ai (official model card)",
+            "quote": "stably sustains long-horizon work"
+          }
+        ]
+      },
+      {
+        "text": "It is released under the MIT license with, per Zhipu's own description, no regional restrictions on access.",
+        "citations": [
+          {
+            "url": "https://huggingface.co/blog/zai-org/glm-52-blog",
+            "outlet": "Zhipu AI / Z.ai (official model card)",
+            "quote": "no regional limits, technical access without borders"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "Zhipu's current focus with GLM-5.2 is engineering reliability for long coding-agent workflows -- large-scale implementation, automated research, performance optimization and complex debugging -- over raw token-context capacity alone, including building anti-hacking mechanisms into its reinforcement-learning training to stop agents from gaming evaluations.",
+      "citations": [
+        {
+          "url": "https://huggingface.co/blog/zai-org/glm-52-blog",
+          "outlet": "Zhipu AI / Z.ai (official model card)",
+          "quote": "large-scale implementation, automated research, performance optimization"
+        }
+      ]
+    },
+    "roadmap": []
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

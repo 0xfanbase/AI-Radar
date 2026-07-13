@@ -1,0 +1,107 @@
+{
+  "id": "openai",
+  "name": "OpenAI",
+  "aliases": [
+    "OpenAI"
+  ],
+  "hq_country": "US",
+  "hq_city": "San Francisco",
+  "hq_lat": 37.7749,
+  "hq_lng": -122.4194,
+  "official_domains": [
+    "openai.com"
+  ],
+  "founded": "2015",
+  "profile": {
+    "overview": {
+      "text": "OpenAI was founded in December 2015 in San Francisco as a nonprofit AI research lab, backed by Elon Musk, Sam Altman and other early investors, with a stated goal of advancing AI for the benefit of humanity rather than financial return. It has since restructured around a capped-profit and then for-profit arm while building the GPT model family and ChatGPT.",
+      "citations": [
+        {
+          "url": "https://techcrunch.com/2015/12/11/non-profit-openai-launches-with-backing-from-elon-musk-and-sam-altman/",
+          "outlet": "TechCrunch",
+          "quote": "Our goal is to advance digital intelligence"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "OpenAI launched in December 2015 as a nonprofit with roughly $1 billion pledged by Musk, Altman, Greg Brockman, Reid Hoffman, Peter Thiel, Amazon Web Services and others.",
+        "citations": [
+          {
+            "url": "https://techcrunch.com/2015/12/11/non-profit-openai-launches-with-backing-from-elon-musk-and-sam-altman/",
+            "outlet": "TechCrunch",
+            "quote": "unconstrained by a need to generate financial return"
+          }
+        ]
+      },
+      {
+        "text": "It released GPT-2 in 2019, GPT-3 in 2020, and then ChatGPT in November 2022, which became the fastest-growing consumer software product in history at the time, followed by GPT-4 in March 2023.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/OpenAI",
+            "outlet": "Wikipedia",
+            "quote": "gaining over 100 million users in two months"
+          }
+        ]
+      },
+      {
+        "text": "In June 2026 it began a limited preview of its GPT-5.6 family, led by the flagship model Sol, alongside mid-tier Terra and fast, low-cost Luna, with an initial rollout restricted to a small group of trusted partners because of the family's elevated cybersecurity capability.",
+        "citations": [
+          {
+            "url": "https://deploymentsafety.openai.com/gpt-5-6-preview",
+            "outlet": "OpenAI (official deployment-safety docs)",
+            "quote": "find vulnerabilities and pieces of exploits"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "OpenAI's own GPT-5.6 system card rates the family's biological and chemical capability as High and reports it beating expert baselines on some wet-lab troubleshooting evaluations.",
+        "citations": [
+          {
+            "url": "https://deploymentsafety.openai.com/gpt-5-6-preview",
+            "outlet": "OpenAI (official deployment-safety docs)",
+            "quote": "48.0% vs. 36.4% threshold"
+          }
+        ]
+      },
+      {
+        "text": "It layers real-time activation-classifier monitoring and trust-based access programs on top of its models for its highest-risk capability domains rather than withholding a model outright.",
+        "citations": [
+          {
+            "url": "https://deploymentsafety.openai.com/gpt-5-6-preview",
+            "outlet": "OpenAI (official deployment-safety docs)",
+            "quote": "making malicious use at scale harder"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "OpenAI's current public focus is the GPT-5.6 family, led by Sol, which its own preview documentation says pushes coding, biology and cybersecurity capability further than any prior OpenAI model and adds new higher-effort reasoning and multi-subagent modes for long, complex problems, paired with a hardened safety stack.",
+      "citations": [
+        {
+          "url": "https://deploymentsafety.openai.com/gpt-5-6-preview",
+          "outlet": "OpenAI (official deployment-safety docs)",
+          "quote": "go beyond the user's intent"
+        }
+      ]
+    },
+    "roadmap": [
+      {
+        "text": "OpenAI says it plans broader availability of GPT-5.6 beyond the initial trusted-partner preview once its layered safeguards for the family's higher-risk capabilities are in place.",
+        "citations": [
+          {
+            "url": "https://deploymentsafety.openai.com/gpt-5-6-preview",
+            "outlet": "OpenAI (official deployment-safety docs)",
+            "quote": "trust-based access"
+          }
+        ]
+      }
+    ]
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

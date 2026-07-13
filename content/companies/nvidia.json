@@ -1,0 +1,97 @@
+{
+  "id": "nvidia",
+  "name": "NVIDIA",
+  "aliases": [
+    "NVIDIA"
+  ],
+  "hq_country": "US",
+  "hq_city": "Santa Clara",
+  "hq_lat": 37.3541,
+  "hq_lng": -121.9552,
+  "official_domains": [
+    "nvidia.com",
+    "research.nvidia.com"
+  ],
+  "founded": "1993-04-05",
+  "profile": {
+    "overview": {
+      "text": "NVIDIA is a Santa Clara, California semiconductor and computing company founded on April 5, 1993 by Jensen Huang, Chris Malachowsky and Curtis Priem. Originally a graphics-chip maker for video games, it has become the dominant supplier of GPUs used to train and run AI models and now also publishes its own open AI models under the Nemotron line.",
+      "citations": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Nvidia",
+          "outlet": "Wikipedia",
+          "quote": "Nvidia was founded on April 5, 1993"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "NVIDIA was founded in 1993 with $40,000 in starting capital and nearly failed after its first product, the NV1, missed the market before the company rebuilt around the RIVA 128, which sold about a million units within four months in 1997.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Nvidia",
+            "outlet": "Wikipedia",
+            "quote": "sold about a million RIVA 128 units within four months"
+          }
+        ]
+      },
+      {
+        "text": "By 2025 it controlled more than 80% of the market for GPUs used in training and deploying AI models, and it has since extended into publishing its own AI model line, Nemotron.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Nvidia",
+            "outlet": "Wikipedia",
+            "quote": "controlled more than 80% of the market for GPUs"
+          }
+        ]
+      },
+      {
+        "text": "On June 4, 2026 NVIDIA released Nemotron 3 Ultra, a 550-billion-parameter (55-billion-active) Mixture-of-Experts hybrid Mamba-Attention model with a 1-million-token context window, released open-weight with training checkpoints and datasets included.",
+        "citations": [
+          {
+            "url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
+            "outlet": "NVIDIA Research (official)",
+            "quote": "Mixture-of-Experts Hybrid Mamba-Attention architecture"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "NVIDIA reports Nemotron 3 Ultra matching state-of-the-art open models on accuracy while delivering up to 5.9x higher inference throughput on some benchmarks, plus strong long-context retrieval at its 1-million-token window.",
+        "citations": [
+          {
+            "url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
+            "outlet": "NVIDIA Research (official)",
+            "quote": "5.9x, 4.8x, and 1.6x higher inference throughput"
+          }
+        ]
+      },
+      {
+        "text": "It releases the full training stack behind Nemotron models -- pretrained, post-trained and quantized checkpoints plus the underlying datasets -- rather than weights alone.",
+        "citations": [
+          {
+            "url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
+            "outlet": "NVIDIA Research (official)",
+            "quote": "releasing the pre-trained, post-trained, and quantized checkpoints"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "NVIDIA's current AI-model focus is Nemotron 3 Ultra, built for long-running agentic workloads with inference-time reasoning budget control, released open-weight alongside its full training data and post-training methodology combining supervised fine-tuning, reinforcement learning and multi-teacher distillation.",
+      "citations": [
+        {
+          "url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
+          "outlet": "NVIDIA Research (official)",
+          "quote": "Supports inference time reasoning budget control"
+        }
+      ]
+    },
+    "roadmap": []
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

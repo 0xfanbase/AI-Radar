@@ -1,0 +1,109 @@
+{
+  "id": "google-deepmind",
+  "name": "Google DeepMind",
+  "aliases": [
+    "DeepMind",
+    "Google DeepMind"
+  ],
+  "hq_country": "GB",
+  "hq_city": "London",
+  "hq_lat": 51.5074,
+  "hq_lng": -0.1278,
+  "official_domains": [
+    "deepmind.google",
+    "blog.google"
+  ],
+  "founded": "2010",
+  "profile": {
+    "overview": {
+      "text": "Google DeepMind is Google's unified AI research and product lab, formed in April 2023 by merging DeepMind -- a London AI lab founded in 2010 by Demis Hassabis, Shane Legg and Mustafa Suleyman and acquired by Google in 2014 -- with Google's own Google Brain team, under Hassabis as CEO.",
+      "citations": [
+        {
+          "url": "https://deepmind.google/about/",
+          "outlet": "Google DeepMind (official)",
+          "quote": "Build AI responsibly to benefit humanity"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "DeepMind was founded in the UK in 2010 and built early deep-reinforcement-learning systems including AlphaGo, while Google Brain, started in 2011, invented the Transformer architecture underlying most modern large language models.",
+        "citations": [
+          {
+            "url": "https://deepmind.google/about/",
+            "outlet": "Google DeepMind (official)",
+            "quote": "Google DeepMind brings together two of the world's leading AI labs"
+          }
+        ]
+      },
+      {
+        "text": "Google merged DeepMind and Google Brain into a single organization, Google DeepMind, in April 2023 to consolidate its AI research after the rise of ChatGPT.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Google_DeepMind",
+            "outlet": "Wikipedia",
+            "quote": "founded by Demis Hassabis, Shane Legg and Mustafa Suleyman in November 2010"
+          }
+        ]
+      },
+      {
+        "text": "In May 2026 it released Gemini 3.5 Flash, the first model in a new 3.5 family built for agentic and coding workloads, shipping at once across the free Gemini app, Search's AI Mode, the Gemini API, the new Antigravity developer platform and Gemini Enterprise.",
+        "citations": [
+          {
+            "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/",
+            "outlet": "Google (official blog)",
+            "quote": "outperforming Gemini 3.1 Pro on challenging coding and agentic benchmarks"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "Google DeepMind combines two of the field's longest-running research groups -- one that pioneered deep reinforcement learning, one that invented the Transformer -- under a single research and product organization.",
+        "citations": [
+          {
+            "url": "https://deepmind.google/about/",
+            "outlet": "Google DeepMind (official)",
+            "quote": "world-class talent"
+          }
+        ]
+      },
+      {
+        "text": "Its Gemini 3.5 Flash release runs roughly four times faster on output tokens per second than prior frontier models by Google's own benchmark comparison, while also beating its own Gemini 3.1 Pro on coding and agentic tasks.",
+        "citations": [
+          {
+            "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/",
+            "outlet": "Google (official blog)",
+            "quote": "4 times faster than other frontier models"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "Google DeepMind's current public focus is the Gemini 3.5 model family, oriented toward agentic workflows and coding rather than general chat, distributed broadly through Google's consumer and developer surfaces at once, while a larger Gemini 3.5 Pro sibling remains in development.",
+      "citations": [
+        {
+          "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/",
+          "outlet": "Google (official blog)",
+          "quote": "our strongest agentic and coding model yet"
+        }
+      ]
+    },
+    "roadmap": [
+      {
+        "text": "Google says it is already using a larger Gemini 3.5 Pro model internally and plans to roll it out the following month.",
+        "citations": [
+          {
+            "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/",
+            "outlet": "Google (official blog)",
+            "quote": "we look forward to rolling it out next month"
+          }
+        ]
+      }
+    ]
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

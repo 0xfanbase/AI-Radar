@@ -1,0 +1,112 @@
+{
+  "id": "anthropic",
+  "name": "Anthropic",
+  "aliases": [
+    "Anthropic PBC",
+    "Anthropic"
+  ],
+  "hq_country": "US",
+  "hq_city": "San Francisco",
+  "hq_lat": 37.7749,
+  "hq_lng": -122.4194,
+  "official_domains": [
+    "anthropic.com"
+  ],
+  "founded": "2021",
+  "profile": {
+    "overview": {
+      "text": "Anthropic is a San Francisco-based AI company organized as a public benefit corporation, founded in January 2021 by a group of former OpenAI researchers including siblings Dario and Daniela Amodei. It builds the Claude family of models and describes itself as an AI safety and research company that treats safety as a systematic engineering discipline rather than an afterthought.",
+      "citations": [
+        {
+          "url": "https://www.anthropic.com/company",
+          "outlet": "Anthropic (official)",
+          "quote": "an AI safety and research company"
+        },
+        {
+          "url": "https://en.wikipedia.org/wiki/Anthropic",
+          "outlet": "Wikipedia",
+          "quote": "an American artificial intelligence (AI) company"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "Anthropic was founded in January 2021 by seven former OpenAI employees after disagreements over the direction of AI development there.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Anthropic",
+            "outlet": "Wikipedia",
+            "quote": "a focus on AI safety"
+          }
+        ]
+      },
+      {
+        "text": "It shipped its first public Claude model in March 2023 and has iterated through the Claude 2, 3, 3.5 and 4 generations since, each adding longer context, tool use and stronger coding performance.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Anthropic",
+            "outlet": "Wikipedia",
+            "quote": "to research AI systems' safety and reliability"
+          }
+        ]
+      },
+      {
+        "text": "In June 2026 it released Claude Sonnet 5, its most agentic mid-tier model yet, alongside the restricted Claude Fable 5 and Claude Mythos 5 as its current top-tier flagship pair, with Fable 5 becoming generally available on June 9, 2026 with a 1-million-token context window on by default.",
+        "citations": [
+          {
+            "url": "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5",
+            "outlet": "Anthropic (official docs)",
+            "quote": "a 1M token context window by default"
+          },
+          {
+            "url": "https://www.anthropic.com/news/claude-sonnet-5",
+            "outlet": "Anthropic (official)",
+            "quote": "built to be the most agentic Sonnet model yet"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "Anthropic trains its models under a published Constitutional AI methodology, aligning them to an explicit written set of principles rather than relying solely on human feedback.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Anthropic",
+            "outlet": "Wikipedia",
+            "quote": "to adhere to a set of principles called a constitution"
+          }
+        ]
+      },
+      {
+        "text": "Its Sonnet 5 release is built around agentic workflows -- planning, autonomous tool use across browsers and terminals, and long-running coding sessions -- rather than one-shot chat.",
+        "citations": [
+          {
+            "url": "https://www.anthropic.com/news/claude-sonnet-5",
+            "outlet": "Anthropic (official)",
+            "quote": "It can make plans, use tools like browsers and terminals"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "Anthropic's current lineup is led by the restricted Claude Fable 5 and Claude Mythos 5 as its top-tier models, with Claude Sonnet 5 positioned as a cheaper, still highly agentic mid-tier model that narrows the performance gap to the Opus-class flagship at a lower price, and the company's own developer guidance now points users who need maximum capability at Fable 5 rather than Opus 4.8.",
+      "citations": [
+        {
+          "url": "https://www.anthropic.com/news/claude-sonnet-5",
+          "outlet": "Anthropic (official)",
+          "quote": "its performance is close to that of Opus 4.8"
+        },
+        {
+          "url": "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5",
+          "outlet": "Anthropic (official docs)",
+          "quote": "become available on June 9, 2026"
+        }
+      ]
+    },
+    "roadmap": []
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

@@ -1,0 +1,97 @@
+{
+  "id": "mistral",
+  "name": "Mistral AI",
+  "aliases": [
+    "Mistral"
+  ],
+  "hq_country": "FR",
+  "hq_city": "Paris",
+  "hq_lat": 48.8566,
+  "hq_lng": 2.3522,
+  "official_domains": [
+    "mistral.ai"
+  ],
+  "founded": "2023-04-28",
+  "profile": {
+    "overview": {
+      "text": "Mistral AI is a Paris-based AI lab founded on April 28, 2023 by three French AI researchers, Arthur Mensch, Guillaume Lample and Timothee Lacroix, focused on building large language models and releasing many of them openly.",
+      "citations": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Mistral_AI",
+          "outlet": "Wikipedia",
+          "quote": "Mistral AI was established in April 2023"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "Mistral released its first open model, Mistral 7B, in September 2023, followed by the Mixtral 8x7B mixture-of-experts model that December and the Mistral Large / Mistral Small pair in February 2024.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Mistral_AI",
+            "outlet": "Wikipedia",
+            "quote": "Mixtral 8x7B launched"
+          }
+        ]
+      },
+      {
+        "text": "In December 2025 it released Mistral Large 3, a 675-billion-parameter sparse mixture-of-experts model with 41 billion active parameters, alongside the smaller Ministral 3 family, fully open under the Apache 2.0 license.",
+        "citations": [
+          {
+            "url": "https://mistral.ai/news/mistral-3/",
+            "outlet": "Mistral AI (official)",
+            "quote": "Frontier performance, open access"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "Mistral Large 3 adds image understanding on top of text, supports more than 40 languages, and Mistral's own announcement places it at #2 among open-weight non-reasoning models on the LMArena leaderboard at launch.",
+        "citations": [
+          {
+            "url": "https://mistral.ai/news/mistral-3/",
+            "outlet": "Mistral AI (official)",
+            "quote": "Multimodal and multilingual"
+          }
+        ]
+      },
+      {
+        "text": "It spans a wide parameter range, from the 3-billion-parameter Ministral 3 up to the 675-billion-parameter Mistral Large 3, so developers can pick a model sized for their deployment.",
+        "citations": [
+          {
+            "url": "https://mistral.ai/news/mistral-3/",
+            "outlet": "Mistral AI (official)",
+            "quote": "From 3B to 675B parameters, choose the model that fits your needs"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "Mistral's current focus is distributing the Mistral Large 3 / Ministral 3 family openly across major platforms -- Hugging Face, AWS Bedrock, Azure -- while optimizing it for partner hardware and offering enterprise fine-tuning services.",
+      "citations": [
+        {
+          "url": "https://mistral.ai/news/mistral-3/",
+          "outlet": "Mistral AI (official)",
+          "quote": "Best cost-to-performance ratio of any OSS model"
+        }
+      ]
+    },
+    "roadmap": [
+      {
+        "text": "Mistral says a reasoning version of Mistral Large 3 is coming soon, along with availability on NVIDIA NIM and AWS SageMaker.",
+        "citations": [
+          {
+            "url": "https://mistral.ai/news/mistral-3/",
+            "outlet": "Mistral AI (official)",
+            "quote": "coming soon on NVIDIA NIM and AWS SageMaker"
+          }
+        ]
+      }
+    ]
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

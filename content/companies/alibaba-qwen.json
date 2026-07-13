@@ -1,0 +1,89 @@
+{
+  "id": "alibaba-qwen",
+  "name": "Alibaba Qwen",
+  "aliases": [
+    "Qwen",
+    "Tongyi Qianwen",
+    "Alibaba Qwen"
+  ],
+  "hq_country": "CN",
+  "hq_city": "Hangzhou",
+  "hq_lat": 30.2741,
+  "hq_lng": 120.1551,
+  "official_domains": [
+    "qwen.ai",
+    "alibabacloud.com"
+  ],
+  "founded": "2023-04",
+  "profile": {
+    "overview": {
+      "text": "Qwen is Alibaba Cloud's large-language-model family, launched in beta as Tongyi Qianwen in April 2023 and opened for public use that September, developed out of Alibaba Cloud's Hangzhou headquarters and released under a mix of open and proprietary licenses.",
+      "citations": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Qwen",
+          "outlet": "Wikipedia",
+          "quote": "Alibaba launched a beta of Qwen in April 2023"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "Alibaba released Qwen 7B's weights in August 2023, then a set of 72B and 1.8B models that December, followed by Qwen2 in June 2024 and the Apache-2.0-licensed Qwen3 family in April 2025.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Qwen",
+            "outlet": "Wikipedia",
+            "quote": "all models licensed under the Apache 2.0 license"
+          }
+        ]
+      },
+      {
+        "text": "It released Qwen3.5 and Qwen3.5-Plus in February 2026, and then Qwen3.7-Max on May 21, 2026 as its coding- and office-agent flagship, sustaining a 35-hour autonomous kernel-optimization run with over 1,000 tool calls.",
+        "citations": [
+          {
+            "url": "https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154",
+            "outlet": "Alibaba Cloud (official blog)",
+            "quote": "a 35-hour, fully autonomous kernel optimization run"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "Qwen3.7-Max generalizes across different agent frameworks -- Claude Code, OpenClaw, and Alibaba's own Qwen Code -- rather than being tuned to perform well only inside one harness.",
+        "citations": [
+          {
+            "url": "https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154",
+            "outlet": "Alibaba Cloud (official blog)",
+            "quote": "generalizes across agent scaffolds"
+          }
+        ]
+      },
+      {
+        "text": "Alibaba reports Qwen3.7-Max leading its own comparison on GPQA Diamond, ahead of Anthropic's Opus-4.6, among other advanced reasoning benchmarks.",
+        "citations": [
+          {
+            "url": "https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154",
+            "outlet": "Alibaba Cloud (official blog)",
+            "quote": "92.4 vs. Opus-4.6's 91.3"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "Alibaba's current focus for Qwen is long-horizon agentic execution -- sustaining autonomous coding and office-automation sessions across hundreds or thousands of steps -- served as a closed API through Alibaba Cloud Model Studio rather than as downloadable weights for its top-tier Max model.",
+      "citations": [
+        {
+          "url": "https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154",
+          "outlet": "Alibaba Cloud (official blog)",
+          "quote": "sustaining autonomous execution across hundreds or thousands of steps"
+        }
+      ]
+    },
+    "roadmap": []
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

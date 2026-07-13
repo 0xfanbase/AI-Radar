@@ -1,0 +1,122 @@
+{
+  "version": 1,
+  "companies": [
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "hq_country": "US",
+      "hq_city": "San Francisco",
+      "hq_lat": 37.7749,
+      "hq_lng": -122.4194,
+      "status": "confirmed"
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "hq_country": "US",
+      "hq_city": "San Francisco",
+      "hq_lat": 37.7749,
+      "hq_lng": -122.4194,
+      "status": "confirmed"
+    },
+    {
+      "id": "google-deepmind",
+      "name": "Google DeepMind",
+      "hq_country": "GB",
+      "hq_city": "London",
+      "hq_lat": 51.5074,
+      "hq_lng": -0.1278,
+      "status": "confirmed"
+    },
+    {
+      "id": "meta-ai",
+      "name": "Meta AI",
+      "hq_country": "US",
+      "hq_city": "Menlo Park",
+      "hq_lat": 37.4529,
+      "hq_lng": -122.1817,
+      "status": "confirmed"
+    },
+    {
+      "id": "xai",
+      "name": "xAI",
+      "hq_country": "US",
+      "hq_city": "Palo Alto",
+      "hq_lat": 37.4419,
+      "hq_lng": -122.143,
+      "status": "confirmed"
+    },
+    {
+      "id": "mistral",
+      "name": "Mistral AI",
+      "hq_country": "FR",
+      "hq_city": "Paris",
+      "hq_lat": 48.8566,
+      "hq_lng": 2.3522,
+      "status": "confirmed"
+    },
+    {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "hq_country": "CN",
+      "hq_city": "Hangzhou",
+      "hq_lat": 30.2741,
+      "hq_lng": 120.1551,
+      "status": "confirmed"
+    },
+    {
+      "id": "alibaba-qwen",
+      "name": "Alibaba Qwen",
+      "hq_country": "CN",
+      "hq_city": "Hangzhou",
+      "hq_lat": 30.2741,
+      "hq_lng": 120.1551,
+      "status": "confirmed"
+    },
+    {
+      "id": "moonshot-ai",
+      "name": "Moonshot AI",
+      "hq_country": "CN",
+      "hq_city": "Beijing",
+      "hq_lat": 39.9042,
+      "hq_lng": 116.4074,
+      "status": "confirmed"
+    },
+    {
+      "id": "zhipu-ai",
+      "name": "Zhipu AI",
+      "hq_country": "CN",
+      "hq_city": "Beijing",
+      "hq_lat": 39.9042,
+      "hq_lng": 116.4074,
+      "status": "confirmed"
+    },
+    {
+      "id": "bytedance-seed",
+      "name": "ByteDance Seed",
+      "hq_country": "CN",
+      "hq_city": "Beijing",
+      "hq_lat": 39.9042,
+      "hq_lng": 116.4074,
+      "status": "confirmed"
+    },
+    {
+      "id": "ai2",
+      "name": "Ai2",
+      "hq_country": "US",
+      "hq_city": "Seattle",
+      "hq_lat": 47.6062,
+      "hq_lng": -122.3321,
+      "status": "confirmed"
+    },
+    {
+      "id": "nvidia",
+      "name": "NVIDIA",
+      "hq_country": "US",
+      "hq_city": "Santa Clara",
+      "hq_lat": 37.3541,
+      "hq_lng": -121.9552,
+      "status": "confirmed"
+    }
+  ]
+}

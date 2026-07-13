@@ -1,0 +1,97 @@
+{
+  "id": "moonshot-ai",
+  "name": "Moonshot AI",
+  "aliases": [
+    "Moonshot AI"
+  ],
+  "hq_country": "CN",
+  "hq_city": "Beijing",
+  "hq_lat": 39.9042,
+  "hq_lng": 116.4074,
+  "official_domains": [
+    "moonshot.ai",
+    "kimi.com"
+  ],
+  "founded": "2023-03",
+  "profile": {
+    "overview": {
+      "text": "Moonshot AI is a Beijing-based AI lab founded in March 2023 by Tsinghua University schoolmates Yang Zhilin, Zhou Xinyu and Wu Yuxin, best known for its Kimi assistant and model line, backed by investors including Alibaba and Tencent.",
+      "citations": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Moonshot_AI",
+          "outlet": "Wikipedia",
+          "quote": "schoolmates at Tsinghua University"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "Moonshot launched its Kimi assistant in October 2023 with long-context handling of up to 200,000 Chinese characters per conversation, expanded to 2 million characters by March 2024.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Moonshot_AI",
+            "outlet": "Wikipedia",
+            "quote": "2 million Chinese characters in a single prompt"
+          }
+        ]
+      },
+      {
+        "text": "It released the reasoning-focused Kimi K1.5 in January 2025, the trillion-parameter Kimi K2 that July, and Kimi K2 Thinking for advanced reasoning and agentic tasks in November 2025.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Moonshot_AI",
+            "outlet": "Wikipedia",
+            "quote": "advanced reasoning and agentic tasks"
+          }
+        ]
+      },
+      {
+        "text": "It shipped Kimi K2.6 as generally available around April 20, 2026, an open-weight trillion-parameter mixture-of-experts model whose Agent Swarm system can coordinate up to 300 sub-agents across roughly 4,000 steps in one run.",
+        "citations": [
+          {
+            "url": "https://huggingface.co/moonshotai/Kimi-K2.6",
+            "outlet": "Moonshot AI (official model card)",
+            "quote": "scale horizontally to 300 sub-agents executing 4,000 coordinated steps"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "Kimi K2.6 is built for long-horizon coding, achieving what Moonshot describes as significant improvements on complex, end-to-end coding tasks across languages including Rust, Go and Python.",
+        "citations": [
+          {
+            "url": "https://huggingface.co/moonshotai/Kimi-K2.6",
+            "outlet": "Moonshot AI (official model card)",
+            "quote": "achieves significant improvements on complex, end-to-end coding tasks"
+          }
+        ]
+      },
+      {
+        "text": "It is released open-weight on Hugging Face under a modified MIT license, supporting persistent background agents that can run for hours at a stretch.",
+        "citations": [
+          {
+            "url": "https://huggingface.co/moonshotai/Kimi-K2.6",
+            "outlet": "Moonshot AI (official model card)",
+            "quote": "persistent, 24/7 background agents"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "Moonshot's current focus is practical, production-ready agent deployment for Kimi K2.6 -- an official API, quantized versions, and integration with tools such as its own Kimi Code CLI -- rather than chasing benchmark scores alone.",
+      "citations": [
+        {
+          "url": "https://huggingface.co/moonshotai/Kimi-K2.6",
+          "outlet": "Moonshot AI (official model card)",
+          "quote": "production-ready deployment"
+        }
+      ]
+    },
+    "roadmap": []
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

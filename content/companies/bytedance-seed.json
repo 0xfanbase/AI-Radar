@@ -1,0 +1,87 @@
+{
+  "id": "bytedance-seed",
+  "name": "ByteDance Seed",
+  "aliases": [
+    "ByteDance"
+  ],
+  "hq_country": "CN",
+  "hq_city": "Beijing",
+  "hq_lat": 39.9042,
+  "hq_lng": 116.4074,
+  "official_domains": [
+    "seed.bytedance.com",
+    "bytedance.com"
+  ],
+  "founded": "2023",
+  "profile": {
+    "overview": {
+      "text": "ByteDance Seed is ByteDance's foundation-model research team, established in early 2023 as the company's response to the wave of large-language-model progress that followed ChatGPT, with offices across Beijing, Shanghai, Shenzhen and Hangzhou; ByteDance itself is headquartered in Beijing and was founded in March 2012 by Zhang Yiming and Liang Rubo.",
+      "citations": [
+        {
+          "url": "https://en.wikipedia.org/wiki/ByteDance",
+          "outlet": "Wikipedia",
+          "quote": "13 March 2012"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "ByteDance formed its Seed team in early 2023 to build large language, speech, vision and world models, and in 2025 fully merged its separate AI Lab into Seed to unify the company's AI research under one organization.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/ByteDance",
+            "outlet": "Wikipedia",
+            "quote": "ByteDance's AI team known as 'Seed' was established in 2023"
+          }
+        ]
+      },
+      {
+        "text": "On June 23, 2026 the Seed team released Seed 2.1 in Pro and lighter Turbo variants, built to carry out full multi-step tasks -- project planning, document processing, end-to-end coding across a codebase -- rather than answer single prompts.",
+        "citations": [
+          {
+            "url": "https://seed.bytedance.com/en/blog/seed2-1-officially-released-advancing-ai-productivity",
+            "outlet": "ByteDance Seed (official blog)",
+            "quote": "requirement analysis, feature implementation, bug fixing"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "Seed 2.1 delivers more reliable general-agent capabilities across tools and environments, and stronger multimodal understanding of documents, charts and video than the prior generation.",
+        "citations": [
+          {
+            "url": "https://seed.bytedance.com/en/blog/seed2-1-officially-released-advancing-ai-productivity",
+            "outlet": "ByteDance Seed (official blog)",
+            "quote": "enhanced cross-tool, cross-environment task delivery"
+          }
+        ]
+      },
+      {
+        "text": "It is served at scale through ByteDance's own Doubao consumer assistant and Volcano Engine cloud platform, giving Seed direct distribution to a very large consumer user base rather than relying on third-party API resellers.",
+        "citations": [
+          {
+            "url": "https://seed.bytedance.com/en/blog/seed2-1-officially-released-advancing-ai-productivity",
+            "outlet": "ByteDance Seed (official blog)",
+            "quote": "built for real-world productivity"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "ByteDance Seed's current focus is Seed 2.1 and real-world agent productivity -- prioritizing model performance in live workflows over static benchmark scores alone -- serving it primarily through ByteDance's own Doubao app and Volcano Engine rather than as downloadable weights or a broad third-party API.",
+      "citations": [
+        {
+          "url": "https://seed.bytedance.com/en/blog/seed2-1-officially-released-advancing-ai-productivity",
+          "outlet": "ByteDance Seed (official blog)",
+          "quote": "model performance in live workflows over static benchmark scores"
+        }
+      ]
+    },
+    "roadmap": []
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}
