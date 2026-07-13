@@ -32,6 +32,16 @@ does not resolve to a real page yet (Phase 8 builds `company.py` +
 `templates/company.html`) -- linking to it now is deliberate, per this
 build's own brief, not a bug.
 
+Map-rebuild note (owner follow-on to Phases 6-9): the map canvas itself
+is now a bigger, full-bleed, pannable/zoomable surface, but that is
+entirely a `site/templates/map_index.html` CSS layout change plus
+`site/static/js/map.js` client-side behavior -- this module's own output
+(projected country paths, marker percentage positions, popover data) is
+unchanged in shape, with the single addition of `MarkerView.anchor_right`
+below (a deterministic, build-time left/right popover-anchor flip, one
+part of the mobile-popover-overflow fix; see map_index.html's CSS
+comment for the rest of that fix).
+
 Dense HQ clusters (SF Bay Area; Beijing; Hangzhou) are handled with
 fixed, hand-computed per-marker pixel offsets (`MARKER_OFFSET_PX`) for
 this build's real ~13-company registry -- not a runtime clustering
@@ -350,6 +360,7 @@ class MarkerView:
     board_rows: tuple[BoardRowView, ...]
     cards: tuple[dict[str, Any], ...] = field(default_factory=tuple)
     empty_cards_message: str = EMPTY_CARDS_MESSAGE
+    anchor_right: bool = False
 
 
 def build_markers(
@@ -387,6 +398,7 @@ def build_markers(
             )
             for r in rows
         )
+        pct_x = round(px / width * 100, 3)
         markers.append(
             MarkerView(
                 id=company_id,
@@ -394,11 +406,21 @@ def build_markers(
                 profile_href=f"/companies/{company_id}/",
                 hq_city=str(company.get("hq_city", "")),
                 hq_country=str(company.get("hq_country", "")),
-                pct_x=round(px / width * 100, 3),
+                pct_x=pct_x,
                 pct_y=round(py / height * 100, 3),
                 open_weights=has_open_weights(company_id, board_rows),
                 board_rows=board_views,
                 cards=tuple(cards_for_company(company_id, cards)),
+                # A marker in the right half of the (now full-bleed, much
+                # wider) map opens its popover extending LEFTWARD instead
+                # of the default rightward-from-marker anchor, so a
+                # marker near the map's right edge can never push its
+                # popover off the page's right edge / force horizontal
+                # scroll -- a deterministic, build-time half of the
+                # narrow-viewport popover-overflow fix described in
+                # templates/map_index.html's own CSS comment (PROGRESS.md
+                # entry for the map rebuild has the full rationale).
+                anchor_right=pct_x > 50.0,
             )
         )
     return markers

@@ -22,6 +22,14 @@
 html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  /* Safety net for the map homepage's full-bleed breakout
+     (site/templates/map_index.html's .map-section, width: 100vw with
+     -50vw margins): on some browsers 100vw doesn't subtract a visible
+     vertical scrollbar's own width, which can otherwise introduce a
+     few px of horizontal page scroll. No page on this site ever needs
+     to scroll horizontally, so this is safe everywhere, not just on
+     the map page. */
+  overflow-x: hidden;
 }
 
 body {
