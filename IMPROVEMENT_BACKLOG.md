@@ -4027,6 +4027,21 @@ pattern -- and this entry is the correction of record.
   (`test_fetch_all_lab_items_skips_a_failing_lab_without_crashing`).
   `watcher.http.fetch`'s own retry/backoff logic is unchanged -- this fix
   is purely about what happens after retries are genuinely exhausted.
+- **2026-07-13 — `data/trusted_domains.json`'s `path_scoped[]` ships empty;
+  `huggingface.co` citations already in `content/frontier_board.json` are
+  not yet covered by the allowlist.** Two Board rows (Kimi K2.6, GLM-5.2)
+  already cite `huggingface.co` URLs, but the file's own rule -- never add
+  a bare `github.com`/`huggingface.co` to `hostnames[]`, since both are
+  multi-tenant hosts -- means only a `path_scoped` entry sourced from a
+  company's `official_repos[]` can cover them, and no
+  `content/companies/*.json` file has populated `official_repos[]` yet.
+  Rather than inventing a plausible-looking org path prefix not actually
+  drawn from a verified `official_repos[]` entry, left the gap open and
+  documented it in `trusted_domains.json`'s own `_meta.path_scoped_note`.
+  Next step: a future company-registry pass adds real `official_repos[]`
+  entries for Moonshot AI (`moonshotai` on Hugging Face) and Zhipu AI
+  (`zai-org` on Hugging Face), then a curation pass adds the matching
+  `path_scoped` rows.
 
 ## Audit findings -- audit-20260712T012433Z (2026-07-12T01:24:33Z)
 

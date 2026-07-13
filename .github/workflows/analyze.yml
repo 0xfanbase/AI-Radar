@@ -194,7 +194,18 @@ jobs:
             reporting a new model release, version update, or access-tier
             change, keyed on exact (lab, model) -- only from a PRIMARY
             source or, absent one, a confirmed-status card's corroborating
-            OUTLET sources; never from a reported-only card.
+            OUTLET sources; never from a reported-only card. If the
+            cluster is about a lab present in content/companies/index.json
+            (match against that lab's `name`/`aliases[]`, same matching
+            discipline as scripts/migrate_frontier_board_company_ids.py
+            uses for frontier_board.json rows), tag the card's own
+            `companies[]` (schemas/card.schema.json) with that lab's
+            company id(s) -- e.g. a card about a DeepSeek release gets
+            `companies: ["deepseek"]`. A card can name more than one
+            company (e.g. a joint release or a comparison story) -- list
+            every company id that genuinely applies, never just the first
+            match. Leave `companies[]` omitted or empty for a cluster that
+            isn't about a specific company on that registry.
 
             Hard constraints:
             - Never write or edit anything outside content/ and data/ --

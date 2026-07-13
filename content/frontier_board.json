@@ -95,7 +95,7 @@
   {
     "lab": "Meta",
     "region": "US",
-    "company_id": "meta",
+    "company_id": "meta-ai",
     "model": "Muse Spark",
     "release_date": "2026-04-08",
     "modality": [
@@ -190,7 +190,7 @@
   {
     "lab": "ByteDance",
     "region": "China",
-    "company_id": "bytedance",
+    "company_id": "bytedance-seed",
     "model": "Seed 2.1 Pro",
     "release_date": "2026-06-23",
     "modality": [

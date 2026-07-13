@@ -7,6 +7,122 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-13 -- Phase 6: entity foundation for the map-centric UI reshape (company registry, geography, link-trust allowlist)
+
+First of four phases (6-9) building toward a world-map-centric UI reshape
+(company markers at real HQ locations, click-to-expand news, click-name for
+a wiki-like fact-checked profile page). Phase 6 lays the entity foundation
+three commits/stages deep; this entry covers all three since only stage 3
+writes a PROGRESS.md entry.
+
+**Stage 1** added `schemas/company.schema.json` (id, name, aliases[],
+hq_country/hq_city/hq_lat/hq_lng, official_domains[], optional
+official_repos[], founded, a `profile` object of independently-cited
+overview/what_theyve_done/strengths/current_focus/roadmap text reusing
+`card.schema.json`'s exact `{url, outlet, quote<=15w}` citation shape,
+status/generated_at/model/last_verified) and wired the new entity link into
+two existing schemas: `frontier_board.schema.json` gained a required
+`company_id` FK (with `region` re-described as an editorial Board-grouping
+field only, never a geography source -- geography now lives solely on the
+company registry, resolved via `company_id`), and `card.schema.json` /
+`card_index.schema.json` both gained an optional `companies[]` array of
+company slugs for future map-centric cross-linking from a card to its
+company profile page(s).
+
+**Stage 2** researched and authored `content/companies/<slug>.json` for
+all 13 labs the Frontier Board already tracks (anthropic, openai,
+google-deepmind, meta-ai, xai, mistral, deepseek, alibaba-qwen,
+moonshot-ai, zhipu-ai, bytedance-seed, ai2, nvidia) plus a summary
+`content/companies/index.json` (id/name/hq fields only) for the map's
+marker list. Every profile follows CLAUDE.md's own-words + per-claim
+citation discipline (own-words prose, citations independently fetched and
+quoted <=15 words, max one per source). Each profile's `aliases[]`
+deliberately includes the exact `lab` string used in
+`content/frontier_board.json`, specifically so a later migration could
+resolve every Board row to exactly one company -- and that stage's own
+commit message already flagged that this would surface (and needed to fix)
+two pre-existing id mismatches from stage 1's placeholder wiring: Board
+rows using `"meta"`/`"bytedance"` where the real registry slugs are
+`"meta-ai"`/`"bytedance-seed"`.
+
+**Stage 3 (this one)** did the actual reconciliation plus the two other
+pieces of entity-foundation plumbing:
+
+1. **`scripts/migrate_frontier_board_company_ids.py`** -- a one-off
+   migration that rebuilds a case-insensitive `{name/alias -> company id}`
+   lookup from every `content/companies/*.json` file and re-stamps
+   `company_id` on every `content/frontier_board.json` row from that
+   lookup, overwriting whatever was there before. It hard-fails
+   (`LabResolutionError`, non-zero exit, nothing written) on any row whose
+   `lab` doesn't resolve to *exactly* one company, and separately hard-fails
+   if the registry itself has a name/alias collision across two different
+   companies. Run for real against the live data: all 13 rows resolved
+   cleanly, with 2 actually changing value --
+   `"Meta" -> company_id: "meta" => "meta-ai"` and
+   `"ByteDance" -> company_id: "bytedance" => "bytedance-seed"` -- exactly
+   the mismatch stage 2's commit message predicted. No row failed to
+   resolve, so no company needed to be added to the registry and no
+   judgment call was needed there.
+2. **`data/trusted_domains.json`** -- a new, human-curated, frozen
+   link-safety allowlist (`{hostnames[], path_scoped[]}`), explicitly out
+   of scope of `schemas/company.schema.json`'s own `official_domains[]`/
+   `official_repos[]` (those remain PRIMARY-classification inputs for the
+   analyst only, per that schema's own description -- this is a separate
+   outbound-link-vetting artifact). Populated `hostnames[]` as the
+   programmatically-computed union of CLAUDE.md's 14 reputable-outlet
+   domains, every `official_domains[]` entry across the registry, every
+   citation/`source_url` hostname actually present in
+   `content/frontier_board.json` and `content/companies/*.json` (44
+   hostnames total after dedup), plus `arxiv.org`/`export.arxiv.org`.
+   `path_scoped[]` shipped empty: no company file has populated
+   `official_repos[]` yet, so no GitHub/Hugging Face org path prefix could
+   be derived from real data, and the file's own rule bars ever adding a
+   bare `github.com`/`huggingface.co` to `hostnames[]` (both are
+   multi-tenant hosts). Two Board rows already cite `huggingface.co` URLs
+   (Kimi K2.6, GLM-5.2) that are therefore not yet covered by the
+   allowlist -- documented in the file's own `_meta.path_scoped_note` and
+   logged as a follow-up in `IMPROVEMENT_BACKLOG.md` rather than papered
+   over with an unsourced guess at a path prefix.
+3. **`.github/workflows/analyze.yml`** -- added one rule to the ANALYST
+   prompt's lexicon/board step: when a cluster is about a lab present in
+   `content/companies/index.json` (matched by name/alias, same discipline
+   the migration script uses), tag the card's own `companies[]` with that
+   lab's company id(s), allowing more than one for a joint-release or
+   comparison story.
+4. **`tests/test_company_registry.py`** (new, 44 tests) -- every real
+   `content/companies/*.json` file validates against
+   `schemas/company.schema.json`; every `content/frontier_board.json` row's
+   `company_id` resolves to a real company file (plus a named regression
+   lock against the two specific stale ids this migration fixed); every
+   company id in `content/companies/index.json` matches a real profile
+   file; `data/trusted_domains.json` has the expected shape, lowercase
+   unique hostnames, never a bare `github.com`/`huggingface.co`, and
+   contains every `official_domains[]` hostname across the registry plus
+   the full reputable-outlet table and arXiv hosts; unit coverage on the
+   migration script's own resolution/collision-detection logic
+   (name/alias match, unresolvable-lab hard-fail, registry-collision
+   hard-fail, and idempotency against the real committed data).
+
+**Verification:** `python -m pytest` from `/home/user/AI-Radar` ->
+**754 passed, 2 deselected, 0 failures** (baseline before this stage was
+710 passed/2 deselected; +44 new tests, no existing test weakened or
+skipped). `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/analyze.yml'))"`
+confirms the workflow YAML is still well-formed after the prompt edit.
+`git diff content/frontier_board.json` after running the migration script
+shows exactly the two expected `company_id` value changes and nothing
+else.
+
+**Judgment calls / limitations, stated plainly:** (1) the `path_scoped[]`
+gap above is a real, logged limitation, not a design choice -- the
+allowlist doesn't yet cover two citations already published on the site;
+(2) no lab-alias ambiguity turned up in the 13-company registry (every
+`lab` string in `content/frontier_board.json` matched exactly one
+company's `name`/`aliases[]`, so the migration script's hard-fail path was
+exercised only in tests, not against real data) -- if a future company is
+added whose name/alias collides with an existing one, the migration script
+and its tests are already in place to catch it rather than silently
+misattributing a Board row.
+
 ## 2026-07-11 — Fix: canvas rain fell too fast -- ported the reference site's actual stepped-speed algorithm
 
 Immediately after the canvas rain (below) shipped, the owner reported the
