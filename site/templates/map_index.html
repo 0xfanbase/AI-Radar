@@ -66,15 +66,80 @@
     pointer-events: auto;
   }
 
-  .map-wrap {
+  /*
+   * Full-bleed breakout (requirement 1): the map canvas is the only
+   * element on this page that escapes the shared `.container` max-width
+   * reading column (see base.html) -- everything else on the page
+   * (heading, intro copy, controls, legend, footer) stays inside it.
+   * This is the standard "break out of a centered max-width wrapper"
+   * CSS trick: a full-viewport-width box centered via negative margins
+   * computed from 50vw, independent of the current element's own
+   * ancestor width. `overflow-x: hidden` on <html> (added in
+   * components.css) is this page's safety net against the sub-pixel/
+   * scrollbar-width rounding that trick can introduce on some browsers.
+   */
+  .map-section {
     position: relative;
+    width: 100vw;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    margin-block: 1rem 1.5rem;
+  }
+
+  /*
+   * The pan/zoom "window" (requirement 1: real vertical presence, ~70-85%
+   * of viewport height on both desktop and mobile; requirement 3:
+   * `touch-action: none` so a one-finger drag pans the map instead of
+   * also scrolling the page). `overflow: hidden` is what actually clips
+   * the pannable/zoomable content -- see .map-wrap below.
+   */
+  .map-viewport {
+    position: relative;
+    width: 100%;
+    height: 76vh;
+    min-height: 22rem;
+    max-height: 50rem;
+    overflow: hidden;
+    touch-action: none;
+    background: var(--color-panel);
+    border-block: 1px solid var(--color-hairline);
+    cursor: grab;
+  }
+
+  .map-viewport.is-panning {
+    cursor: grabbing;
+  }
+
+  /*
+   * The pannable/zoomable content itself. Its CSS layout size is always
+   * the same simple "fit the viewport's width, aspect-ratio-locked
+   * height" box this page has always used (so a company marker's
+   * `left/top` percentage -- computed by site/builders/map.py against
+   * exactly this width/height ratio -- lines up with the SVG underneath
+   * it regardless of zoom, and so the no-JS default view, requirement 7,
+   * is completely unchanged). map.js drives everything past that with a
+   * single `transform: translate(...) scale(...)` on THIS element, plus
+   * the `--map-scale` custom property below, never by resizing it.
+   */
+  .map-wrap {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     aspect-ratio: {{ map_width }} / {{ map_height }};
     background: var(--color-panel);
-    border: 1px solid var(--color-hairline);
-    border-radius: 0.5rem;
-    overflow: visible;
-    margin-block: 1rem 1.5rem;
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+
+  /* Only animate transform changes that did NOT come from a live drag/
+     pinch (map.js toggles this class off for the duration of a pointer-
+     driven gesture so the transform tracks the pointer with zero lag,
+     and on for button/wheel/reset zooms and the initial fill-in). */
+  .map-wrap.map-transition {
+    transition: transform 0.18s ease-out;
   }
 
   .map-svg {
@@ -97,11 +162,55 @@
     inset: 0;
   }
 
+  /*
+   * `--map-scale` is written onto .map-wrap by map.js on every zoom
+   * change (defaults to 1 -- i.e. a no-op -- when map.js never runs, so
+   * the no-JS view is unaffected). Every marker counter-scales by its
+   * inverse so labels/dots/popovers stay a constant, legible on-screen
+   * size at any zoom level -- only each marker's POSITION spreads apart
+   * as the underlying map zooms in, which is the actually useful part of
+   * zooming a map of hand-offset marker clusters.
+   *
+   * `--dx`/`--dy` (set inline per marker by site/builders/map.py's
+   * MARKER_OFFSET_PX table, in real CSS pixels) are the fix for a dense
+   * HQ cluster (SF Bay Area, Beijing/Hangzhou) rendering as one
+   * unreadable jumble of overlapping labels: they nudge a clustered
+   * marker's whole box away from its true `left/top: N%` anchor point
+   * by a FIXED on-screen distance, composed into the same translate()
+   * as the existing -50%/-50% centering -- deliberately BEFORE the
+   * counter-scale, not after, so the nudge shrinks proportionally as
+   * the user zooms in (exactly like every other marker's own rendered
+   * size), converging back toward the marker's true position at high
+   * zoom rather than staying a fixed, increasingly-wrong-looking offset
+   * forever. This is a real fix for a bug in an earlier version of this
+   * rule, which folded the same declutter offset directly into
+   * `pct_x`/`pct_y` -- a PERCENTAGE of the map's own rendered box, which
+   * made the offset's real on-screen distance shrink on a narrower
+   * viewport instead of staying constant, so the exact same offset
+   * table that (mostly) worked on desktop rendered visibly tighter and
+   * more collision-prone on mobile, where the map box itself is
+   * smallest. A `var(--dx, 0px)` fixed-pixel transform has no such
+   * dependency on the map's own rendered size.
+   */
   .map-marker {
     position: absolute;
-    transform: translate(-50%, -50%);
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px)))
+      scale(calc(1 / var(--map-scale, 1)));
   }
 
+  /* NOT bumped to a 44px min touch target like the zoom/pan controls
+     below: this site's hand-picked marker-offset table
+     (site/builders/map.py's own MARKER_OFFSET_PX, now a real fixed-CSS-
+     pixel grid -- e.g. the US cluster's 2-column x 3-row layout, ~64px
+     column gap / ~36px row gap) was tuned against this glyph's small
+     footprint precisely so adjacent clustered markers stay individually
+     tappable -- a 44px touch target here would make neighboring
+     cluster members overlap and steal each other's taps (verified with
+     a real headless-browser bounding-box check across every marker in
+     both real dense clusters, at a 1440px desktop and a 390px mobile
+     viewport -- see this fix's own PROGRESS.md entry). Requirement 6's
+     44px floor is scoped to the zoom/pan controls, not every marker
+     glyph. */
   .map-marker__glyph {
     display: flex;
     align-items: center;
@@ -160,18 +269,52 @@
     opacity: 0.3;
   }
 
+  /*
+   * Mobile/edge popover-overflow fix (requirement 5). Two parts:
+   *   1. `.map-popover--anchor-right` (set at build time by
+   *      site/builders/map.py from each marker's own `pct_x`, see
+   *      `MarkerView.anchor_right`): a marker in the right half of the
+   *      map extends its popover LEFTWARD instead of the default
+   *      rightward-from-marker anchor, so a marker near the map's right
+   *      edge -- now much closer to the page's own right edge, since the
+   *      map is full-bleed -- can never push a popover past it.
+   *   2. `max-width: min(16rem, calc(100vw - 2rem))` and a capped,
+   *      internally-scrolling `max-height`: a general safety net
+   *      against the fixed 16rem box being wider than a very narrow
+   *      viewport (checked at 375px) or a popover with many Board rows
+   *      being taller than the map itself. Together these guarantee a
+   *      popover never renders partly off-screen and never forces
+   *      horizontal page scroll, without needing to relocate the
+   *      popover out of its marker (see PROGRESS.md's map-rebuild entry
+   *      for why a bottom-sheet reparent was considered and not judged
+   *      necessary on top of this).
+   */
   .map-popover {
     position: absolute;
     top: 1.1rem;
     left: 0;
     z-index: 5;
     width: max-content;
-    max-width: 16rem;
+    max-width: min(16rem, calc(100vw - 2rem));
+    max-height: min(22rem, 60vh);
+    overflow-y: auto;
+    /* Re-enable native vertical touch scrolling for this element's own
+       content specifically, overriding the ancestor .map-viewport's
+       `touch-action: none` (needed so a one-finger drag pans the map
+       elsewhere) -- and map.js's own pointerdown handler separately
+       excludes .map-popover from its pan-tracking so it never fights
+       this. */
+    touch-action: pan-y;
     background: var(--color-panel);
     border: 1px solid var(--color-hairline);
     border-radius: 0.4rem;
     padding: 0.6rem 0.75rem;
     font-size: 0.85rem;
+  }
+
+  .map-popover--anchor-right {
+    left: auto;
+    right: 0;
   }
 
   .map-popover[hidden] {
@@ -224,6 +367,67 @@
     margin: 0;
   }
 
+  /*
+   * Zoom/pan controls (requirement 2/6): real, keyboard-operable
+   * <button>s, each a >=44x44px touch target, overlaid on the map so
+   * they're reachable without scrolling on any viewport. Inert (dimmed,
+   * non-interactive) until map.js confirms it's running -- same
+   * progressive-enhancement convention as .map-toggle above (see that
+   * rule's own comment): with JavaScript unavailable there is no pan/
+   * zoom state for these buttons to drive, so they render but do
+   * nothing, exactly like a plain link the script layer never wired up.
+   */
+  .map-zoom-controls {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  body.map-js-ready .map-zoom-controls {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .map-zoom-btn {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    padding: 0.4em;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    line-height: 1;
+    color: var(--color-ink);
+    background: var(--color-panel);
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.4rem;
+    cursor: pointer;
+  }
+
+  .map-zoom-btn--reset {
+    font-size: 0.7rem;
+  }
+
+  .map-zoom-btn:hover,
+  .map-zoom-btn:focus-visible {
+    color: var(--color-star-white);
+  }
+
+  .map-hint {
+    position: absolute;
+    left: 0.75rem;
+    bottom: 0.75rem;
+    z-index: 6;
+    max-width: 14rem;
+    font-size: 0.75rem;
+    opacity: 0.65;
+    pointer-events: none;
+  }
+
   .map-legend {
     display: flex;
     flex-wrap: wrap;
@@ -250,10 +454,9 @@
 <p class="map-intro">Frontier AI labs, plotted at their real headquarters
   -- {{ total_markers }} tracked, {{ open_weights_count }} shipping at
   least one open-weights model. Click a marker's dot to see its latest
-  Frontier Board rows and wire stories, or click its name for a full
-  profile. See the <a href="/wire/">Wire</a> for the day-by-day story
-  feed, or the <a href="/board/">Frontier Board</a> for every tracked
-  model in one table.</p>
+  Frontier Board rows and wire stories right there in its popover, or
+  click its name (or see the full <a href="/companies/">Companies</a>
+  list) for a wiki-like fact-checked profile page.</p>
 
 <div class="map-controls">
   <button type="button" id="map-expand-all" class="map-toggle" aria-pressed="false">Expand all</button>
@@ -261,52 +464,69 @@
 </div>
 
 {% if markers %}
-<div class="map-wrap">
-  <svg class="map-svg" viewBox="0 0 {{ map_width }} {{ map_height }}" role="img" aria-label="World map with {{ total_markers }} markers for tracked AI labs at their headquarters" preserveAspectRatio="xMidYMid meet">
-    <g class="map-countries">
-      {% for country in country_paths %}
-      <path d="{{ country.d }}" class="map-country"{% if country.name %} data-name="{{ country.name }}"{% endif %}></path>
-      {% endfor %}
-    </g>
-  </svg>
+<div class="map-section">
+  <div class="map-viewport" id="map-viewport">
+    <div class="map-wrap" id="map-wrap">
+      <svg class="map-svg" viewBox="0 0 {{ map_width }} {{ map_height }}" role="img" aria-label="World map with {{ total_markers }} markers for tracked AI labs at their headquarters" preserveAspectRatio="xMidYMid meet">
+        <g class="map-countries">
+          {% for country in country_paths %}
+          <path d="{{ country.d }}" class="map-country"{% if country.name %} data-name="{{ country.name }}"{% endif %}></path>
+          {% endfor %}
+        </g>
+      </svg>
 
-  <div class="map-markers">
-    {% for marker in markers %}
-    <div class="map-marker{% if marker.open_weights %} map-marker--open-weights{% endif %}" style="left: {{ marker.pct_x }}%; top: {{ marker.pct_y }}%;" data-company="{{ marker.id }}" data-open-weights="{{ 'true' if marker.open_weights else 'false' }}">
-      <button type="button" class="map-marker__glyph" aria-expanded="false" aria-controls="map-popover-{{ marker.id }}">
-        <span class="map-marker__dot" aria-hidden="true"></span>
-        {% if marker.open_weights %}<span class="map-marker__badge" aria-hidden="true" title="Ships at least one open-weights model">OW</span>{% endif %}
-        <span class="visually-hidden">{{ marker.name }} -- show details</span>
-      </button><a class="map-marker__name" href="{{ marker.profile_href }}">{{ marker.name }}</a>
+      <div class="map-markers">
+        {% for marker in markers %}
+        <div class="map-marker{% if marker.open_weights %} map-marker--open-weights{% endif %}" style="left: {{ marker.pct_x }}%; top: {{ marker.pct_y }}%; --dx: {{ marker.offset_dx }}px; --dy: {{ marker.offset_dy }}px;" data-company="{{ marker.id }}" data-open-weights="{{ 'true' if marker.open_weights else 'false' }}">
+          <button type="button" class="map-marker__glyph" aria-expanded="false" aria-controls="map-popover-{{ marker.id }}">
+            <span class="map-marker__dot" aria-hidden="true"></span>
+            {% if marker.open_weights %}<span class="map-marker__badge" aria-hidden="true" title="Ships at least one open-weights model">OW</span>{% endif %}
+            <span class="visually-hidden">{{ marker.name }} -- show details</span>
+          </button><a class="map-marker__name" href="{{ marker.profile_href }}">{{ marker.name }}</a>
 
-      <div class="map-popover" id="map-popover-{{ marker.id }}" hidden>
-        <p class="map-popover__hq">{{ marker.hq_city }}, {{ marker.hq_country }}{% if marker.open_weights %} <span class="chip chip--confirmed">Open-weights</span>{% endif %}</p>
+          <div class="map-popover{% if marker.anchor_right %} map-popover--anchor-right{% endif %}" id="map-popover-{{ marker.id }}" hidden>
+            <p class="map-popover__hq">{{ marker.hq_city }}, {{ marker.hq_country }}{% if marker.open_weights %} <span class="chip chip--confirmed">Open-weights</span>{% endif %}</p>
 
-        {% if marker.board_rows %}
-        <dl class="map-popover__board">
-          {% for row in marker.board_rows %}
-          <div class="map-popover__row">
-            <dt class="font-data">{{ row.release_date }}</dt>
-            <dd>{{ row.model }} -- {{ row.access }}<br><span class="map-popover__verified">verified {{ row.last_verified }}</span></dd>
+            {% if marker.board_rows %}
+            <dl class="map-popover__board">
+              {% for row in marker.board_rows %}
+              <div class="map-popover__row">
+                <dt class="font-data">{{ row.release_date }}</dt>
+                <dd>{{ row.model }} -- {{ row.access }}<br><span class="map-popover__verified">verified {{ row.last_verified }}</span></dd>
+              </div>
+              {% endfor %}
+            </dl>
+            {% endif %}
+
+            {% if marker.cards %}
+            <ul class="map-popover__cards">
+              {% for card in marker.cards %}
+              {# Not a hyperlink: card.href points into the retired /wire/
+                 archive, which this trimmed build no longer generates -- see
+                 site/generate.py's module docstring. Shown as plain text
+                 (headline/date/status) rather than a link to a page that
+                 doesn't exist in this output. #}
+              <li>{{ card.headline }} <span class="font-data">{{ card.date }}</span> <span class="{{ card.status_chip_class }}">{{ card.status_label }}</span></li>
+              {% endfor %}
+            </ul>
+            {% else %}
+            <p class="map-popover__empty">{{ marker.empty_cards_message }}</p>
+            {% endif %}
+
+            <p class="map-popover__footer"><a href="{{ marker.profile_href }}">Full profile &rarr;</a></p>
           </div>
-          {% endfor %}
-        </dl>
-        {% endif %}
-
-        {% if marker.cards %}
-        <ul class="map-popover__cards">
-          {% for card in marker.cards %}
-          <li><a href="{{ card.href }}">{{ card.headline }}</a> <span class="font-data">{{ card.date }}</span> <span class="{{ card.status_chip_class }}">{{ card.status_label }}</span></li>
-          {% endfor %}
-        </ul>
-        {% else %}
-        <p class="map-popover__empty">{{ marker.empty_cards_message }}</p>
-        {% endif %}
-
-        <p class="map-popover__footer"><a href="{{ marker.profile_href }}">Full profile &rarr;</a></p>
+        </div>
+        {% endfor %}
       </div>
     </div>
-    {% endfor %}
+
+    <p class="map-hint">Scroll or pinch to zoom, drag to pan.</p>
+
+    <div class="map-zoom-controls" role="group" aria-label="Map zoom controls">
+      <button type="button" class="map-zoom-btn" id="map-zoom-in" aria-label="Zoom in">+</button>
+      <button type="button" class="map-zoom-btn" id="map-zoom-out" aria-label="Zoom out">&minus;</button>
+      <button type="button" class="map-zoom-btn map-zoom-btn--reset" id="map-zoom-reset" aria-label="Reset map view">Reset</button>
+    </div>
   </div>
 </div>
 

@@ -349,7 +349,17 @@ def test_render_lexicon_term_real_content_anchor_citation_is_a_real_link():
         assert f'<a href="{original_match.group(1)}">' in html
 
 
-def test_render_lexicon_term_with_synthetic_non_empty_seen_in_renders_links():
+def test_render_lexicon_term_with_synthetic_non_empty_seen_in_renders_plain_text():
+    # UPDATED post-Phase-9 (map-centric UI trim, "just maps and companies"):
+    # this used to assert a real `<a href="/wire/...">` link -- the Wire
+    # archive that href pointed into is no longer part of the live build
+    # (site/generate.py no longer calls wire.write_wire_pages()), so
+    # site/templates/lexicon_term.html was deliberately changed to render
+    # each `seen_in[]` reference as plain, unlinked text instead of a link
+    # into a page that would 404. `lexicon.py` itself (seen_in_href(),
+    # resolve_seen_in()) is completely unchanged -- it still computes an
+    # `href` field on each view -- the template simply no longer emits it
+    # as an `<a>`. This test now asserts that narrower, still-true claim.
     synthetic = [
         {
             "term": "widget",
@@ -360,13 +370,17 @@ def test_render_lexicon_term_with_synthetic_non_empty_seen_in_renders_links():
         }
     ]
     html = lexicon.render_lexicon_term(synthetic, "widget")
-    assert 'href="/wire/2026-07/#card-2026-07-09-widget-card-headline"' in html
-    # No `cards=` supplied -- link text falls back to the raw card id.
+    assert 'href="/wire/2026-07/#card-2026-07-09-widget-card-headline"' not in html
+    # No `cards=` supplied -- label text falls back to the raw card id,
+    # shown as plain text.
     assert "2026-07-09-widget-card" in html
     assert lexicon.EMPTY_SEEN_IN_MESSAGE not in html
 
 
-def test_render_lexicon_term_seen_in_resolves_the_cards_real_headline_as_link_text():
+def test_render_lexicon_term_seen_in_resolves_the_cards_real_headline_as_plain_text():
+    # UPDATED post-Phase-9 -- see the sibling test above for the full
+    # rationale: the seen_in reference is real, resolved-headline text, no
+    # longer wrapped in a link to the retired /wire/ archive.
     synthetic = [
         {
             "term": "widget",
@@ -378,16 +392,16 @@ def test_render_lexicon_term_seen_in_resolves_the_cards_real_headline_as_link_te
     ]
     cards = [{"id": "2026-07-09-widget-card", "headline": "Widget Labs ships Widget 2.0"}]
     html = lexicon.render_lexicon_term(synthetic, "widget", cards=cards)
-    assert (
-        '<a href="/wire/2026-07/#card-2026-07-09-widget-card-headline">'
-        "Widget Labs ships Widget 2.0</a>" in html
-    )
-    # The raw machine slug is never shown as the visible link text once a
+    assert "Widget Labs ships Widget 2.0" in html
+    assert '<a href="/wire/2026-07/#card-2026-07-09-widget-card-headline">' not in html
+    # The raw machine slug is never shown as the visible label once a
     # matching headline is available.
     assert ">2026-07-09-widget-card<" not in html
 
 
-def test_render_lexicon_term_seen_in_falls_back_to_the_card_id_when_unresolvable():
+def test_render_lexicon_term_seen_in_falls_back_to_the_card_id_as_plain_text_when_unresolvable():
+    # UPDATED post-Phase-9 -- see the two tests above for the full
+    # rationale.
     synthetic = [
         {
             "term": "widget",
@@ -398,13 +412,11 @@ def test_render_lexicon_term_seen_in_falls_back_to_the_card_id_when_unresolvable
         }
     ]
     # `cards=` supplied but with no matching id -- a stale seen_in[]
-    # reference -- still renders a usable link, labeled with the bare id.
+    # reference -- still renders the bare id, as plain text.
     cards = [{"id": "2026-07-09-some-other-card", "headline": "Unrelated headline"}]
     html = lexicon.render_lexicon_term(synthetic, "widget", cards=cards)
-    assert (
-        '<a href="/wire/2026-07/#card-2026-07-09-widget-card-headline">'
-        "2026-07-09-widget-card</a>" in html
-    )
+    assert "2026-07-09-widget-card" in html
+    assert '<a href="/wire/2026-07/#card-2026-07-09-widget-card-headline">' not in html
 
 
 # ---------------------------------------------------------------------------
@@ -449,5 +461,8 @@ def test_write_lexicon_pages_threads_cards_through_to_seen_in_headline_labels(tm
     lexicon.write_lexicon_pages(env, synthetic_entries, tmp_path, cards=cards)
     page = tmp_path / "lexicon" / "widget" / "index.html"
     html = page.read_text(encoding="utf-8")
-    assert "Widget Labs ships Widget 2.0</a>" in html
+    # UPDATED post-Phase-9 (map-centric UI trim): plain text, not a link
+    # into the retired /wire/ archive -- see the sibling render_lexicon_term
+    # tests above for the full rationale.
+    assert "Widget Labs ships Widget 2.0" in html
     assert ">2026-07-09-widget-card<" not in html

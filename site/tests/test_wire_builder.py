@@ -396,11 +396,25 @@ def test_render_wire_index_links_archive_months(env):
     assert '<a href="/wire/2026-05/">May 2026</a>' in html
 
 
-def test_render_wire_index_masthead_sparklines_present_when_passed(env):
-    # The masthead sparkline strip is scoped to the Wire home page only
-    # (nav-condense pass, see IMPROVEMENT_BACKLOG.md) -- render_wire_index
-    # includes it exactly when a caller (site/generate.py, in real use)
-    # passes a non-empty masthead_sparklines list.
+def test_render_wire_index_masthead_sparklines_context_var_still_set_when_passed(env):
+    # UPDATED post-Phase-9 (map-centric UI trim, "just maps and companies"):
+    # this test used to assert the masthead sparkline strip actually
+    # rendered ("masthead-strip" in html) when a caller passed a non-empty
+    # masthead_sparklines list. site/templates/base.html's own
+    # `{% include "_masthead_moving_strip.html" %}` block -- the ONLY place
+    # that ever rendered the strip's markup, shared by every page that
+    # extends base.html, including this one -- was removed outright as
+    # part of that trim (the owner wants the map to be the page's
+    # uncontested opening focus, with no competing widget above it,
+    # site-wide, not just on the Wire page). wire.py/wire_index.html
+    # themselves are completely unchanged: render_wire_index() still
+    # accepts and threads `masthead_sparklines` into the render context
+    # exactly as before (see the context-var assertion below) -- there is
+    # just no template left, anywhere, that turns that context var into
+    # visible "masthead-strip" markup. This test now asserts that
+    # narrower, still-true claim instead of the no-longer-true "the strip
+    # renders" claim; site/tests/test_build.py separately asserts the
+    # strip is gone from the real built output.
     from markupsafe import Markup
 
     fake_sparklines = [
@@ -409,7 +423,13 @@ def test_render_wire_index_masthead_sparklines_present_when_passed(env):
     html = wire.render_wire_index(
         env, ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY, masthead_sparklines=fake_sparklines
     )
-    assert "masthead-strip" in html
+    context = wire.build_wire_context(
+        ALL_CARDS, SYNTHETIC_LEXICON, today=TODAY, masthead_sparklines=fake_sparklines
+    )
+    assert context["masthead_sparklines"] == fake_sparklines
+    # And, now correctly: no template renders the strip's markup any more,
+    # not even here.
+    assert "masthead-strip" not in html
 
 
 def test_render_wire_index_masthead_sparklines_absent_when_not_passed(env):

@@ -1,13 +1,23 @@
-"""Build + accessibility tests for site/generate.py -- Phase 4 integration.
+"""Build + accessibility tests for site/generate.py -- Phase 4 integration,
+trimmed post-Phase-9 to the owner's "just maps and companies" two-page live
+site.
 
-This build stage wires every Phase 4 page builder
+This build stage originally wired every Phase 4 page builder
 (`site/builders/{wire,board,lexicon,primer,moving,method,corrections,
-about}.py`) together in `site/generate.py`'s own `render_pages()`. This
-file now covers, in addition to the original scaffold-stage smoke tests:
+about}.py`) together in `site/generate.py`'s own `render_pages()`. As of
+the post-Phase-9 map-centric-UI trim, `render_pages()` no longer calls
+`wire`, `board`, `primer_builder`, `moving`, or `about` at all -- see
+`site/generate.py`'s own module docstring for the full route table and
+rationale. Their own builder modules and templates are completely
+unedited and still independently covered by their own
+`site/tests/test_{wire,board,primer,moving,about}_builder.py` files (which
+this trim deliberately does not touch); this file's own assertions below
+were updated to match the new, smaller, real route set instead. This file
+now covers, in addition to the original scaffold-stage smoke tests:
 
-* every named route in the route table actually gets written under
-  `public/` (map homepage, Wire index, Board, Lexicon index + one page
-  per real term, Primer, What's Moving, Method, Corrections, About,
+* every named route in the (trimmed) route table actually gets written
+  under `public/` (map homepage, Companies index + one page per real
+  company, Lexicon index + one page per real term, Method, Corrections,
   404, sitemap.xml, robots.txt);
 * the accessibility pass this integration commit performs across the
   *whole* generated output: exactly one `<h1>` per HTML page, one `<main
@@ -16,20 +26,20 @@ file now covers, in addition to the original scaffold-stage smoke tests:
   scaffold-stage placeholder);
 * `public/404.html`, `public/sitemap.xml`, and `public/robots.txt` are
   real, well-formed files reachable the way GitHub Pages expects; and
-* the masthead sparkline strip is scoped to exactly one page (the
-  nav-condense pass narrowed this from an earlier "site-wide" design --
-  see `IMPROVEMENT_BACKLOG.md`): present on `public/index.html`, absent
-  from every other generated page. Phase 7 moved that page's own
-  *content* from the Wire index to the new world-map homepage (the Wire
-  index itself moved to `public/wire/index.html`) without changing
-  which physical file carries the strip -- see PROGRESS.md's Phase 7
-  entry.
+* the masthead sparkline strip (`_masthead_moving_strip.html`) is gone
+  from `templates/base.html` entirely -- absent from every generated page,
+  including `public/index.html` (the map homepage) -- per the owner's
+  explicit "the map should be the page's uncontested opening focus, with
+  no competing widget above it" instruction. This replaces the earlier
+  Phase-7-era "present on index.html only" assertion.
 
 All of this runs against this repo's *real* `content/*.json` and
 `data/*.json` (not fixtures), per this file's own established
 scaffold-stage precedent -- there is no analyst run yet, so `cards ==
 []` throughout, and every assertion below tolerates that (no `/wire/
-<YYYY-MM>/` page is asserted to exist, since none should).
+<YYYY-MM>/` page is asserted to exist, since none should -- nor is any
+`/wire/`, `/board/`, `/primer/`, `/moving/`, or `/about/` route at all,
+now, regardless of `cards`).
 """
 from __future__ import annotations
 
@@ -338,7 +348,12 @@ def test_base_path_is_derived_from_site_base_url(monkeypatch):
 def test_generate_applies_the_real_derived_base_path_to_actual_output(tmp_path):
     generate.generate(public_dir=tmp_path)
     html = (tmp_path / "index.html").read_text(encoding="utf-8")
-    assert f'href="{generate.BASE_PATH}/board/"' in html
+    # UPDATED post-Phase-9 (map-centric UI trim): /board/ is no longer
+    # part of the live route set (see site/generate.py's module
+    # docstring) -- /companies/ is the map homepage's own real nav link
+    # instead, present in both the trimmed masthead nav and the intro
+    # copy.
+    assert f'href="{generate.BASE_PATH}/companies/"' in html
     assert f'href="{generate.BASE_PATH}/static/css/tokens.css"' in html
     # The skip-link fragment and (if present) any external link must never
     # be prefixed.
@@ -351,7 +366,9 @@ def test_generate_rerun_does_not_double_prefix_base_path(tmp_path):
     generate.generate(public_dir=tmp_path)
     html = (tmp_path / "index.html").read_text(encoding="utf-8")
     assert generate.BASE_PATH + generate.BASE_PATH not in html
-    assert f'href="{generate.BASE_PATH}/board/"' in html
+    # See UPDATED comment above -- /board/ was retired from the live route
+    # set; /companies/ is a real link on the map homepage instead.
+    assert f'href="{generate.BASE_PATH}/companies/"' in html
 
 
 def test_sitemap_and_robots_are_not_touched_by_base_path_rewriting(tmp_path):
@@ -387,28 +404,37 @@ def _all_html_files(public_dir: Path) -> list[Path]:
 
 
 def test_every_named_route_in_the_build_plan_is_written(built_site):
-    # content/cards/ is empty in this environment (no analyst run has
-    # happened for real yet), so no /wire/<YYYY-MM>/ archive page is
-    # expected -- every other route in the build plan's table is,
-    # regardless. Phase 7: "index.html" is now the map homepage;
-    # "wire/index.html" is the Wire index that used to live at
-    # "index.html" before the homepage swap.
+    # UPDATED post-Phase-9 (map-centric UI trim, "just maps and
+    # companies"): site/generate.py's render_pages() no longer calls
+    # wire/board/primer/moving/about -- this is the new, real, smaller
+    # route set. "index.html" is the map homepage (Phase 7).
+    # "companies/index.html" is asserted here as a stand-in for "the
+    # Companies index route exists"; company.html is deliberately not
+    # re-verified per-slug here (site/tests/test_company_builder.py owns
+    # that).
     expected = [
         "index.html",
-        "wire/index.html",
-        "board/index.html",
+        "companies/index.html",
         "lexicon/index.html",
-        "primer/index.html",
-        "moving/index.html",
         "method/index.html",
         "corrections/index.html",
-        "about/index.html",
         "404.html",
         "sitemap.xml",
         "robots.txt",
     ]
     for rel in expected:
         assert (built_site / rel).is_file(), f"missing expected route: {rel}"
+    # And, now correctly: none of the five retired pages are written at
+    # all, regardless of content/cards/ being empty in this environment.
+    retired = [
+        "wire/index.html",
+        "board/index.html",
+        "primer/index.html",
+        "moving/index.html",
+        "about/index.html",
+    ]
+    for rel in retired:
+        assert not (built_site / rel).exists(), f"retired route was unexpectedly written: {rel}"
 
 
 def test_every_real_lexicon_term_gets_its_own_page(built_site):
@@ -456,12 +482,20 @@ def test_skip_link_is_first_focusable_element_on_every_page(built_site):
         )
 
 
-def test_masthead_sparkline_strip_renders_on_the_wire_home_page(built_site):
-    # Nav-condense pass (see IMPROVEMENT_BACKLOG.md): the masthead
-    # sparkline strip is scoped to the Wire home page -- the site's own
-    # front page -- only.
+def test_masthead_sparkline_strip_absent_from_the_map_home_page(built_site):
+    # UPDATED post-Phase-9 (map-centric UI trim, "just maps and
+    # companies"): this used to assert the strip rendered on the map
+    # homepage (it moved there from the Wire home page in Phase 7). The
+    # owner has since asked for the map to be the page's uncontested
+    # opening focus, with no competing widget above it -- so
+    # templates/base.html's own `{% include "_masthead_moving_strip.html"
+    # %}` block was removed outright (site/generate.py's module docstring
+    # has the full account). This asserts the new, opposite claim.
     html = (built_site / "index.html").read_text(encoding="utf-8")
-    assert "masthead-strip" in html, "public/index.html is missing the masthead sparkline strip"
+    assert "masthead-strip" not in html, (
+        "public/index.html unexpectedly has the masthead sparkline strip -- "
+        "it should be gone site-wide"
+    )
 
 
 def test_masthead_sparkline_strip_absent_from_every_other_page(built_site):
@@ -797,14 +831,23 @@ def test_404_page_uses_the_shared_shell_and_is_a_real_not_found_page(built_site)
 
 
 def test_sitemap_xml_is_well_formed_and_lists_expected_routes(built_site):
+    # UPDATED post-Phase-9 (map-centric UI trim): /board/ and /primer/ are
+    # no longer part of the live route set or this sitemap -- see
+    # site/generate.py's module docstring. /companies/ is asserted instead
+    # as the trimmed site's second real section; /lexicon/ is still
+    # listed (kept deliberately -- term pages link back to it).
     sitemap_path = built_site / "sitemap.xml"
     tree = ET.parse(sitemap_path)
     ns = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
     locs = [el.text for el in tree.getroot().findall("sm:url/sm:loc", ns)]
-    assert len(locs) > 30  # home + board + lexicon index + 30 term pages + ...
-    assert any(loc.endswith("/board/") for loc in locs)
+    assert len(locs) > 30  # home + companies index + lexicon index + 30 term pages + ...
+    assert any(loc.endswith("/companies/") for loc in locs)
     assert any(loc.endswith("/lexicon/") for loc in locs)
-    assert any(loc.endswith("/primer/") for loc in locs)
+    assert not any(loc.endswith("/board/") for loc in locs)
+    assert not any(loc.endswith("/primer/") for loc in locs)
+    assert not any(loc.endswith("/wire/") for loc in locs)
+    assert not any(loc.endswith("/moving/") for loc in locs)
+    assert not any(loc.endswith("/about/") for loc in locs)
     # every entry must be an absolute URL (a real <loc> requirement of the
     # sitemap protocol, not just "looks like a path")
     assert all(loc.startswith("https://") for loc in locs)

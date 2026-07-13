@@ -7,6 +7,172 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-13 -- Fix: dense HQ-cluster marker labels overlapping (owner follow-on)
+
+The map rebuild below shipped with a known, honestly-logged limitation:
+several hand-offset marker clusters (SF Bay Area, Beijing/Hangzhou)
+overlapped at real screen sizes, pre-dating that rebuild. This entry
+fixes it, plus a second, previously-unnoticed collision this fix's own
+verification pass turned up (Google DeepMind/London and Mistral
+AI/Paris, which `site/builders/map.py`'s own comment had called
+"genuinely isolated" -- wrong, verified colliding with a real
+headless-browser bounding-box check the same way the other two clusters
+were).
+
+**Root cause.** `MARKER_OFFSET_PX`'s hand-picked declutter offsets were
+folded directly into each marker's `pct_x`/`pct_y` -- a PERCENTAGE of the
+map's own rendered box. That makes the offset's real on-screen distance
+shrink proportionally on a narrower container, which is exactly
+backwards: the map box is smallest, and clustered markers hardest to
+tell apart, on a narrow mobile viewport. `ai2` (Seattle) was also
+excluded from the Bay Area table as "isolated" on pure geographic-
+distance grounds, without checking that at this map's whole-world
+projection scale (960x500 SVG units for the entire globe), ~1,300 real
+km is still only ~27 SVG units -- well inside the Bay Area cluster's own
+footprint.
+
+**Fix.** `MarkerView` gained `offset_dx`/`offset_dy` fields carrying the
+declutter offset in real CSS pixels, kept structurally separate from
+`pct_x`/`pct_y` (which now hold the marker's true, un-nudged projected
+position, unchanged in every other respect). `templates/map_index.html`
+writes `--dx`/`--dy` custom properties per marker and composes them into
+`.map-marker`'s existing `translate(-50%,-50%) scale(1/var(--map-scale))`
+rule as `translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
+scale(...)` -- placed BEFORE the counter-scale deliberately, so the
+declutter nudge shrinks proportionally as the user zooms in, converging
+toward the marker's true position at high zoom instead of staying a
+fixed, increasingly-wrong-looking offset forever.
+
+`MARKER_OFFSET_PX` itself was redesigned: the US cluster is now a
+6-member (adding `ai2`) 2-column x 3-row grid; the China cluster unifies
+Beijing's three companies and Hangzhou's two into one 5-member two-
+column layout (their true positions are only ~10x27 SVG units apart --
+too close to lay out as two independently-offset sub-clusters without
+them colliding with each other); a new 2-member Europe cluster
+(`google-deepmind`, `mistral`) replaces their old `(0, 0)` "isolated"
+entries.
+
+**Verification, run for real:** `python -m pytest` (repo root) -- 891
+passed, 2 deselected, 0 failures; `python -m pytest site/tests` -- 376
+passed (+2 net new: `test_marker_offset_china_cluster_members_are_all_
+distinct`, `test_marker_offset_europe_cluster_members_are_distinct_and_
+nonzero`; the existing Bay Area test was extended in place to cover
+`ai2`, not replaced). Built the site for real and ran a headless-browser
+bounding-box collision check (glyph+name combined box, every pair within
+each of the three clusters) at four real viewport widths -- 1440px
+desktop, 768px tablet, 390px mobile, and a 320px small-phone edge case
+-- zero collisions at every size, a strictly stronger guarantee than the
+prior fix's own single-desktop-plus-one-pair spot check. Confirmed
+visually with screenshots at desktop and mobile: every one of the 13
+real markers reads as a distinct, legible label.
+
+---
+
+## 2026-07-13 -- Map rebuild: full-bleed, pannable, zoomable canvas (owner follow-on)
+
+Owner instruction: "the map... I want it to be bigger, more interactive
+even on mobile and also has the ability to zoom in and out depending on
+the user's preference/action." Follows directly on the same day's "trim
+to Map + Companies" commit. Extends the Phase 7 map frontend
+(`site/builders/map.py`, `templates/map_index.html`,
+`static/js/map.js`) rather than replacing it -- the country/marker SVG
+geometry, the click-to-toggle popovers, "expand all", and the
+open-weights filter are all unchanged in *how* they work, just carried
+inside a bigger, transformable canvas.
+
+- **Full-bleed canvas** (`map_index.html`): `.map-section` breaks the
+  map out of the shared `.container` max-width reading column with the
+  standard `width:100vw; margin-inline:calc(50% - 50vw)` pattern;
+  `.map-viewport` gives it real vertical presence (`height:76vh`, clamped
+  `22rem`-`50rem`) on both desktop and mobile. `overflow-x:hidden` added
+  to `<html>` (`components.css`) as that trick's cross-browser safety
+  net. Everything else on the page (heading, controls, legend, footer)
+  keeps its normal reading-column width.
+- **Zoom + pan, vanilla JS, no new dependency** (`map.js`): a
+  `{scale, x, y}` state object drives a single `transform:
+  translate(...) scale(...)` on the existing `.map-wrap` element --
+  mouse-wheel zoom toward the cursor, two-pointer pinch-to-zoom toward
+  the live pinch midpoint, click-and-drag / single-finger-drag panning
+  (all through the unified Pointer Events API, one code path for mouse
+  and touch), and real `+`/`-`/`Reset` `<button>`s, each a 44x44px
+  target. Scale clamped 1x-6x; pan clamped so content can never be
+  dragged fully out of view (centers when smaller than the viewport,
+  pins to the edge when larger). The default/reset view zooms to
+  whichever is larger of "fits" or "fills the viewport's height",
+  clamped to the same 1x-6x range, rather than a separate unbounded
+  calculation -- this is what makes the map visually "bigger" by default
+  on first load, especially in mobile portrait. `touch-action: none` on
+  `.map-viewport` stops a pan gesture from also scrolling the page.
+- **Tap-vs-drag disambiguation**: a single shared one-shot
+  `suppressNextClick` flag, armed the instant a pointer's movement
+  crosses an 8px threshold and consumed by whichever `click` fires next,
+  reset the moment any new gesture starts -- so a drag that happens to
+  start on a marker glyph pans the map (matching ordinary map UX)
+  without also opening that marker's popover, while a genuine tap still
+  opens it and a keyboard-triggered click (Enter/Space) is never
+  affected. `setPointerCapture` is requested lazily, only once a gesture
+  is confirmed to be a real drag (crossing the threshold) rather than
+  eagerly on every pointerdown -- capturing eagerly was tried first and
+  found, via a real headless-browser check, to silently swallow the
+  browser's synthesized `click` on marker glyphs and zoom buttons.
+- **Marker/popover legibility at any zoom**: `.map-marker` counter-scales
+  by `calc(1 / var(--map-scale))` (a CSS custom property `map.js` writes
+  on every zoom change, defaulting to `1` -- a no-op -- when the script
+  never runs) so labels, dots, and popovers stay a constant, legible
+  on-screen size regardless of the underlying map's zoom level; only
+  each marker's *position* spreads apart when zoomed in, which is the
+  actually useful part of zooming a map with hand-offset marker
+  clusters.
+- **Mobile/edge popover-overflow fix** (requirement explicitly left as a
+  judgment call): a real headless-browser check at 375px confirmed the
+  pre-existing anchored-popover positioning could push a popover
+  partly off-screen near a map edge. Fixed with two layers rather than a
+  bottom-sheet reparent: (1) build-time, `site/builders/map.py`'s new
+  `MarkerView.anchor_right` (`pct_x > 50`) flips a popover to extend
+  leftward instead of rightward for any marker in the right half of the
+  map, as a deterministic default; (2) runtime, `map.js`'s
+  `clampPopoverOnScreen()` measures the just-opened popover's real
+  `getBoundingClientRect()` against the true window bounds and applies a
+  small corrective `translate()` if it still overflows on any side --
+  needed because (1) alone isn't sufficient at every viewport width (a
+  marker just past the 50% threshold can overflow the *opposite* edge
+  once the popover's real max-width is accounted for, confirmed via the
+  same browser check). `max-width: min(16rem, calc(100vw - 2rem))` and a
+  capped, internally-scrolling `max-height` are the general safety net
+  underneath both. Verified against all 13 real seeded markers at
+  375px with zero off-screen/overflowing popovers.
+- **No-JS fallback re-verified, not just assumed**: with JavaScript
+  disabled, `#map-wrap`'s computed `transform` is `none` (the plain CSS
+  default view, unchanged from before this rebuild), the zoom-control
+  buttons render but are inert (same `body.map-js-ready` gating pattern
+  the existing "expand all"/"open-weights" toggles already use), and
+  every marker's name is still a plain, real, working `<a href>` --
+  confirmed by loading the actual built page with JavaScript disabled.
+- **A pre-existing, unrelated bug found, not fixed (out of scope)**: the
+  same real-browser check found that several hand-offset marker
+  clusters (e.g. anthropic/openai in the Bay Area, the Beijing triangle)
+  already had *overlapping* glyph hit-targets at real screen sizes on
+  the **unmodified, pre-this-task** build -- confirmed by running the
+  identical check against a build of the prior commit. Not introduced by
+  this change (this task deliberately did NOT enlarge marker glyph touch
+  targets to 44px, precisely because doing so was tried and found to
+  make this pre-existing overlap worse); logged here rather than
+  silently fixed, since it's outside this task's brief.
+- **Tests**: `site/tests/test_map_builder.py` extended (+9: `anchor_right`
+  field derivation against synthetic and real seeded data, the
+  server-rendered full-bleed/zoom-control/anchor-class markup). The
+  interactive pan/zoom/touch/drag behavior itself is client-side JS this
+  Python suite structurally cannot exercise -- verified instead with a
+  real headless Chromium session (desktop 1400x900, mobile 375x812, and
+  a JS-disabled context): wheel zoom, button zoom, pinch zoom (via
+  synthetic two-pointer PointerEvents), drag-to-pan and single-finger
+  touch-drag-to-pan, drag-starting-on-a-marker not opening its popover,
+  a genuine tap opening it, all 13 real markers' popovers staying
+  on-screen at 375px, 44x44px zoom-control touch targets, and the no-JS
+  fallback. `python -m pytest` (891 passed, 2 deselected) and
+  `python -m pytest site/tests` (374 passed, up from 365) -- no
+  regression, both counts at or above their pre-change level.
+
 ## 2026-07-13 -- Phase 9: audit hardening + Method page (map-centric UI reshape complete, Phases 6-9)
 
 This is the final checkpoint for the four-phase (6-9) world-map-centric UI

@@ -36,17 +36,10 @@
       <nav class="masthead__nav" aria-label="Primary">
         <ul>
           <li><a href="/"{% if active_nav | default('') == 'map' %} aria-current="page"{% endif %}>Map</a></li>
-          <li><a href="/wire/"{% if active_nav | default('') == 'wire' %} aria-current="page"{% endif %}>Wire</a></li>
-          <li><a href="/board/"{% if active_nav | default('') == 'board' %} aria-current="page"{% endif %}>Board</a></li>
           <li><a href="/companies/"{% if active_nav | default('') == 'companies' %} aria-current="page"{% endif %}>Companies</a></li>
-          <li><a href="/lexicon/"{% if active_nav | default('') == 'lexicon' %} aria-current="page"{% endif %}>Lexicon</a></li>
-          <li><a href="/primer/"{% if active_nav | default('') == 'primer' %} aria-current="page"{% endif %}>Primer</a></li>
         </ul>
       </nav>
     </div>
-    {% if masthead_sparklines is defined and masthead_sparklines %}
-    {% include "_masthead_moving_strip.html" %}
-    {% endif %}
   </header>
 
   <main id="main-content" class="container">
@@ -67,9 +60,7 @@
         verification works.</p>
       <nav class="site-footer__nav" aria-label="More">
         <ul>
-          <li><a href="/moving/">What's Moving</a></li>
           <li><a href="/method/">Method</a></li>
-          <li><a href="/about/">About</a></li>
           <li><a href="/corrections/">Corrections</a></li>
         </ul>
       </nav>

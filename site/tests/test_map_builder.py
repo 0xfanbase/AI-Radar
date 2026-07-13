@@ -192,11 +192,44 @@ def test_marker_offset_table_covers_every_real_seeded_company():
 def test_marker_offset_bay_area_cluster_members_are_all_distinct():
     # anthropic and openai share the exact same hq_lat/hq_lng in the real
     # seeded data -- without a hand offset they'd render as one
-    # indistinguishable dot. Assert every Bay Area cluster member gets a
+    # indistinguishable dot. ai2/Seattle is included here too (UPDATED as
+    # part of the dense-cluster-overlap fix): it looked geographically
+    # "isolated" from the Bay Area cluster and was originally left at
+    # (0, 0), but at this map's whole-world projection scale it's only
+    # ~27 SVG units from the rest of the cluster -- well inside its
+    # footprint -- so it collided with it in practice and needs its own
+    # distinct offset too. Assert every US-cluster member gets a
     # different offset from every other member.
-    bay_area = ["anthropic", "openai", "meta-ai", "xai", "nvidia"]
-    offsets = [map_builder.marker_offset(cid) for cid in bay_area]
-    assert len(set(offsets)) == len(bay_area)
+    us_cluster = ["anthropic", "openai", "meta-ai", "xai", "nvidia", "ai2"]
+    offsets = [map_builder.marker_offset(cid) for cid in us_cluster]
+    assert len(set(offsets)) == len(us_cluster)
+
+
+def test_marker_offset_china_cluster_members_are_all_distinct():
+    # Beijing (moonshot-ai/zhipu-ai/bytedance-seed) and Hangzhou
+    # (deepseek/alibaba-qwen) share exact same-city coordinates within
+    # each city, and the two cities' own true positions are only ~10x27
+    # SVG units apart -- too close to lay out as two independently
+    # hand-offset sub-clusters without them colliding with each other,
+    # so all five are laid out together as one cluster (see
+    # MARKER_OFFSET_PX's own docstring). Assert every member gets a
+    # distinct offset.
+    china_cluster = ["moonshot-ai", "zhipu-ai", "bytedance-seed", "deepseek", "alibaba-qwen"]
+    offsets = [map_builder.marker_offset(cid) for cid in china_cluster]
+    assert len(set(offsets)) == len(china_cluster)
+
+
+def test_marker_offset_europe_cluster_members_are_distinct_and_nonzero():
+    # google-deepmind/London and mistral/Paris were originally called
+    # "genuinely isolated" and left at (0, 0) -- also wrong (UPDATED as
+    # part of the dense-cluster-overlap fix): they're only ~7x7 SVG
+    # units apart at this map's whole-world scale, close enough that a
+    # real headless-browser check found their labels overlapping. Assert
+    # both now have a real, distinct, nonzero offset.
+    europe_cluster = ["google-deepmind", "mistral"]
+    offsets = [map_builder.marker_offset(cid) for cid in europe_cluster]
+    assert len(set(offsets)) == len(europe_cluster)
+    assert all(offset != (0.0, 0.0) for offset in offsets)
 
 
 # ---------------------------------------------------------------------------
@@ -332,6 +365,46 @@ def test_build_markers_profile_href_points_at_the_companies_route():
     assert markers["anthropic"].profile_href == "/companies/anthropic/"
 
 
+# ---------------------------------------------------------------------------
+# MarkerView.anchor_right -- build-time left/right popover-anchor flip
+# (map rebuild: bigger/full-bleed/pannable/zoomable canvas, requirement 5's
+# build-time half of the mobile/edge popover-overflow fix)
+# ---------------------------------------------------------------------------
+
+
+def test_anchor_right_false_for_a_marker_left_of_center():
+    companies = [
+        {"id": "west", "name": "West Co", "hq_city": "X", "hq_country": "Y", "hq_lat": 0.0, "hq_lng": -170.0}
+    ]
+    markers = map_builder.build_markers(companies, [], [])
+    assert markers[0].pct_x < 50.0
+    assert markers[0].anchor_right is False
+
+
+def test_anchor_right_true_for_a_marker_right_of_center():
+    companies = [
+        {"id": "east", "name": "East Co", "hq_city": "X", "hq_country": "Y", "hq_lat": 0.0, "hq_lng": 170.0}
+    ]
+    markers = map_builder.build_markers(companies, [], [])
+    assert markers[0].pct_x > 50.0
+    assert markers[0].anchor_right is True
+
+
+def test_anchor_right_matches_pct_x_threshold_for_every_real_company():
+    markers = map_builder.build_markers(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    for marker in markers:
+        assert marker.anchor_right == (marker.pct_x > 50.0), marker.id
+
+
+def test_anchor_right_real_china_region_companies_anchor_right():
+    # Sanity check against real seeded data: every China-region company
+    # (near the map's right edge) should anchor its popover rightward
+    # (extending leftward, away from the page's own right edge).
+    markers = {m.id: m for m in map_builder.build_markers(REAL_COMPANIES, REAL_BOARD_ROWS, [])}
+    for company_id in ["deepseek", "alibaba-qwen", "moonshot-ai", "zhipu-ai", "bytedance-seed"]:
+        assert markers[company_id].anchor_right is True, company_id
+
+
 def test_build_context_shape():
     context = map_builder.build_context(REAL_COMPANIES, REAL_BOARD_ROWS, [])
     assert context["total_markers"] == 13
@@ -368,6 +441,65 @@ def test_render_map_page_popover_starts_hidden_without_js():
 def test_render_map_page_empty_cards_state_shown_when_no_cards_match():
     html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
     assert map_builder.EMPTY_CARDS_MESSAGE in html
+
+
+# ---------------------------------------------------------------------------
+# Map rebuild (bigger/full-bleed/pannable/zoomable canvas) -- server-
+# rendered/build-time markup this task actually changed. The interactive
+# pan/zoom/touch/drag behavior itself is client-side JS
+# (site/static/js/map.js) that this Python test suite has no way to
+# exercise -- see this task's own summary for the real-browser check that
+# covers it instead.
+# ---------------------------------------------------------------------------
+
+
+def test_render_map_page_has_the_full_bleed_section_wrapping_the_viewport():
+    html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    assert '<div class="map-section">' in html
+    assert '<div class="map-viewport" id="map-viewport">' in html
+    assert '<div class="map-wrap" id="map-wrap">' in html
+
+
+def test_render_map_page_has_real_keyboard_operable_zoom_controls():
+    html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    for button_id, label in [
+        ("map-zoom-in", "Zoom in"),
+        ("map-zoom-out", "Zoom out"),
+        ("map-zoom-reset", "Reset map view"),
+    ]:
+        assert f'id="{button_id}"' in html
+        assert f'aria-label="{label}"' in html
+    # Real <button> elements, not <a>/<div> click-handlers -- keyboard-
+    # operable (Enter/Space) with no script changes needed for that.
+    assert html.count('<button type="button" class="map-zoom-btn"') >= 2
+    assert '<button type="button" class="map-zoom-btn map-zoom-btn--reset"' in html
+
+
+def test_render_map_page_china_region_marker_popover_anchors_right():
+    html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    assert 'class="map-popover map-popover--anchor-right" id="map-popover-deepseek"' in html
+
+
+def test_render_map_page_west_coast_marker_popover_does_not_anchor_right():
+    html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    assert 'class="map-popover" id="map-popover-anthropic"' in html
+    assert 'map-popover--anchor-right" id="map-popover-anthropic"' not in html
+
+
+def test_write_map_page_zero_companies_still_omits_the_map_viewport_markup(tmp_path):
+    # No markers -> the `{% if markers %}` branch (which builds the whole
+    # .map-section/.map-viewport/.map-wrap/zoom-controls markup) doesn't
+    # render at all -- matches the pre-existing "No companies are tracked
+    # yet" empty-state branch, unchanged by this rebuild. The page's
+    # <style> block (shared, unconditional CSS) still mentions these
+    # class names either way, so this checks for the actual markup tags,
+    # not bare substring presence.
+    env = map_builder.build_jinja_env()
+    path = map_builder.write_map_page(env, [], [], [], tmp_path)
+    html = path.read_text(encoding="utf-8")
+    assert 'id="map-viewport"' not in html
+    assert 'class="map-zoom-controls"' not in html
+    assert "No companies are tracked yet" in html
 
 
 def test_write_map_page_writes_index_html(tmp_path):

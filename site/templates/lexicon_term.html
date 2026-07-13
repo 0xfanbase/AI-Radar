@@ -64,7 +64,11 @@
   {% if entry.seen_in %}
   <ul class="lexicon-term__seen-in">
     {% for ref in entry.seen_in %}
-    <li><a href="{{ ref.href }}">{{ ref.label }}</a></li>
+    {# Not a hyperlink: ref.href points into the retired /wire/ archive,
+       which this trimmed build no longer generates -- see
+       site/generate.py's module docstring. Shown as plain text rather
+       than a link to a page that doesn't exist in this output. #}
+    <li>{{ ref.label }}</li>
     {% endfor %}
   </ul>
   {% else %}

@@ -186,7 +186,17 @@ def test_build_correction_view_sets_card_href():
     assert view.card_href == "/wire/2026-07/#card-2026-07-09-example-story"
 
 
-def test_render_corrections_page_links_back_to_the_original_card():
+def test_render_corrections_page_names_the_original_card_as_plain_text():
+    # UPDATED post-Phase-9 (map-centric UI trim, "just maps and companies"):
+    # this used to assert a real `<a href="/wire/...">read the original
+    # story</a>` link -- the Wire archive that href pointed into is no
+    # longer part of the live build (site/generate.py no longer calls
+    # wire.write_wire_pages()), so site/templates/corrections.html was
+    # deliberately changed to name the corrected card's id as plain,
+    # unlinked text instead of linking into a page that would 404.
+    # `corrections.py` itself (card_href_for(), build_correction_view())
+    # is completely unchanged -- it still computes a `card_href` field on
+    # each view -- the template simply no longer emits it as an `<a>`.
     fixture = [
         {
             "id": "corr-2026-07-09-a",
@@ -199,6 +209,6 @@ def test_render_corrections_page_links_back_to_the_original_card():
         }
     ]
     html = corrections.render_corrections_page(fixture)
-    assert 'href="/wire/2026-07/#card-2026-07-09-example-story">read the original story</a>' in html
-    # The raw card_id slug is never surfaced to readers as visible text.
-    assert ">2026-07-09-example-story<" not in html
+    assert 'href="/wire/2026-07/#card-2026-07-09-example-story"' not in html
+    # The card_id is now shown, plainly, as the traceability text.
+    assert "2026-07-09-example-story" in html
