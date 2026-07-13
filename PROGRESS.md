@@ -7,6 +7,188 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-13 -- Phase 9: audit hardening + Method page (map-centric UI reshape complete, Phases 6-9)
+
+This is the final checkpoint for the four-phase (6-9) world-map-centric UI
+reshape described in the approved plan: company markers at real HQ
+locations, click-to-expand news, click-name for a wiki-like fact-checked
+profile page, plus the backend/schema/pipeline work underneath it. It
+does not merely close out Phase 9's own two tasks — it also wires in one
+piece Phase 8 explicitly built but left dangling (see below), following
+Phase 5's own precedent of ending a phase group with one consolidated
+entry naming what shipped across every phase and what still needs the
+owner.
+
+**What Phases 6-9 built, together, in full:**
+
+- **Phase 6 — entity foundation.** `schemas/company.schema.json` (id,
+  name, aliases[], HQ geocoding, official_domains[]/official_repos[] as
+  PRIMARY-classification inputs only, a per-claim-cited `profile` object
+  reusing `card.schema.json`'s own citation shape); `frontier_board
+  .schema.json` gained a required `company_id` FK; 13 real, fact-checked
+  `content/companies/<slug>.json` profiles (anthropic, openai,
+  google-deepmind, meta-ai, xai, mistral, deepseek, alibaba-qwen,
+  moonshot-ai, zhipu-ai, bytedance-seed, ai2, nvidia) plus a summary
+  `content/companies/index.json`; `scripts/migrate_frontier_board_company
+  _ids.py` reconciled every Board row's `company_id` against the new
+  registry; `data/trusted_domains.json`, a new, human-curated, **frozen**
+  outbound-link-safety allowlist, deliberately separate from
+  `official_domains[]`'s own PRIMARY-classification-only role.
+- **Phase 7 — the map frontend.** Vendored Natural Earth 110m admin-0
+  country geometry (`site/static/geo/`); `site/builders/map.py`, a pure-
+  Python equirectangular projection turning that geometry into inline SVG
+  country outlines plus one marker per tracked company, hand-offset for
+  the handful of real-world HQ clusters (SF Bay Area, Beijing, Hangzhou);
+  `site/static/js/map.js`, the site's **second** deliberate, narrow,
+  vanilla-JS-only exception to its zero-JS architecture (after
+  `matrix-rain.js`), attaching interaction only to each marker's own
+  glyph button, never the always-plain, always-real `<a href>` name link
+  underneath it; the homepage moved to the map (`map_index.html` now
+  builds `/`), the Wire's own index moved to `/wire/`.
+- **Phase 8 — profile pages + link defense.** `site/builders/company.py`
+  + `templates/{company,company_index}.html` — the `/companies/<slug>/`
+  pages every marker name and map popover already linked to; `scripts
+  /check_outbound_links.py`, a commit-time CI gate vetting every new
+  citation's host and its real, followed redirect chain against
+  `data/trusted_domains.json` (fails closed on an unresolvable redirect);
+  `auditor/linkrot.py::audit_hijacked_links`, the same redirect-vs-
+  allowlist re-check run weekly against already-published card citations
+  — **built and fully tested, but Phase 8's own entry explicitly logged
+  it as not yet wired into `data/audit/latest.json`'s report envelope**,
+  naming that wiring as the concrete next step; a new PROFILER role
+  (reference prompt text in `.github/workflows/analyze.yml`, alongside
+  the existing ANALYST/VERIFIER) and `scripts/plan_run.py::decide_profile
+  _target`, the deterministic pre-analyst pick of which single company's
+  profile a run should refresh.
+- **Phase 9 (this entry) — audit hardening + the Method page, and the
+  Phase 8 wiring gap above closed.** Three new checkers, all following
+  the established `{checked_at, ..., counts, results}` finding-emission
+  pattern: `auditor/profile_staleness.py` (any `content/companies/*.json`
+  profile whose `last_verified` is more than 45 days old — the exact same
+  `scripts.plan_run.PROFILE_STALE_THRESHOLD_DAYS` floor Phase 8's own
+  PROFILER-target selection already uses, reused rather than
+  re-tuned); `auditor/linkrot.py::audit_company_hijacked_links` (the same
+  hijack re-check as Phase 8's `audit_hijacked_links`, but over company-
+  profile citations, with each result attributable to a `company_id`).
+  All three — plus Phase 8's own previously-dangling `audit_hijacked_links`
+  — are now genuinely wired into `auditor/report.py::build_report`,
+  `schemas/audit.schema.json` (three new required top-level fields),
+  `auditor/cli.py::run_audit`, and `scripts/append_backlog_findings.py`'s
+  severity table (hijacked citation = high, stale profile = low).
+  `auditor/corrections_feed.py` turns a stale-profile or hijacked-company-
+  citation finding into a `target_type: "company"`
+  `data/pending_corrections.json` candidate — the first real *producer*
+  of that Phase-6-added, Phase-8-consumed field. Building one for real
+  immediately surfaced that `schemas/pending_corrections.schema.json`'s
+  own `card_id` was unconditionally required, which would have forced a
+  fabricated `card_id` on a company-only candidate; **fixed at the schema**
+  (`card_id` now required only when `target_type` is absent or `"card"`,
+  via an `if`/`then`/`else` conditional — every existing card-only entry
+  is completely unchanged) rather than worked around — this is exactly
+  the "confirm it's actually wired end to end, don't just assume" check
+  this phase's own brief asked for, and it found a real gap. The Method
+  page (`site/builders/method.py` + `templates/method.html`) now
+  documents, in the same own-words voice as its existing ANALYST/VERIFIER
+  section: how the map places markers (real, sourced HQ coordinates; a
+  small hand-picked pixel-offset table for real-world clusters, never an
+  estimate); how a company profile is drafted and refreshed (one company
+  per day, named by that day's own stories or by staleness, checked once
+  by the same role that drafts it — stated plainly as narrower than a
+  card's own fresh-context adversarial verifier pass, not glossed over);
+  and the link-vetting mechanism's honest coverage limits, stated
+  explicitly per this phase's own transparency instruction — it checks
+  where a link points (host + real redirect destination against a fixed
+  allowlist) and does **not** scan destination-page content for malware,
+  evaluate a trusted domain's specific page for safety, or protect
+  against a citation to a site compromised without changing domains.
+
+**Verification, run for real from `/home/user/AI-Radar`:**
+
+- `python -m pytest` → **891 passed, 2 deselected, 0 failures** (Phase 8's
+  own closing count was 845 passed/2 deselected; +46 net new tests this
+  phase: new files `tests/test_auditor_profile_staleness.py` (14),
+  `tests/test_corrections_feed.py` (15); extended
+  `tests/test_auditor_linkrot.py` (+8, the company-hijack functions),
+  `tests/test_pending_corrections.py` (+4, the schema conditional),
+  `tests/test_append_backlog_findings.py` (+9, the three new
+  finding-derivation categories plus the deterministic-order update),
+  `tests/test_auditor_report.py`/`tests/test_auditor_cli.py`/
+  `tests/test_audit_schema.py` updated in place for the report's three
+  new required fields, no test function count change there. No existing
+  test weakened, skipped, or deleted.
+- `python -m pytest site/tests` → **365 passed, 0 failures** (unchanged
+  from Phase 8's own count — this phase's Method-page edit changed
+  template prose only, and every existing `site/tests/test_method_builder
+  .py` assertion is substring/structure-based, not heading-number- or
+  exact-text-pinned, so it held without needing an update).
+- `python site/generate.py --out <tmp>` — builds cleanly end to end;
+  `<tmp>/method/index.html` renders all six numbered sections including
+  the two new ones (map placement, link vetting) plus the extended
+  company-profile paragraph inside the drafting/fact-checking section.
+- `python -m auditor.cli run` was run for real (unmocked, live network)
+  against a scratch `--out`/`--backlog-path`/`--pending-corrections-path`
+  (never the real committed files) as an end-to-end sanity check beyond
+  the test suite: it found `company_hijacked_links(hijacked=2)` — the two
+  `huggingface.co` citations (moonshot-ai, zhipu-ai) Phase 6's own
+  stage-3 entry already logged as "not yet covered by the allowlist," a
+  known pre-existing gap, not a new bug — and correctly fed two
+  `target_type: "company"` pending-correction candidates, each schema-
+  valid with no `card_id` field present at all, into the scratch
+  `pending_corrections.json`. `profile_staleness` reported 0 stale (all
+  13 real profiles carry `last_verified: "2026-07-13"`, today's date).
+
+**Judgment calls/limitations, logged in full in `IMPROVEMENT_BACKLOG.md`:**
+the `pending_corrections.schema.json` `card_id` conditional-requirement
+fix (the real gap this phase's "confirm it's wired end to end" check
+found); a "hijacked" finding can't itself distinguish a genuine
+post-publication redirect hijack from a citation that was simply never on
+the allowlist, so `auditor/corrections_feed.py`'s own generated
+`issue_description` text says so plainly rather than asserting a hijack
+narrative it can't prove; a still-true weekly finding gets a fresh,
+date-stamped pending-correction id every week it's unaddressed rather
+than being deduplicated across runs (consistent with
+`append_backlog_findings.py`'s own existing behavior, not a new problem);
+severity assignments for the three new checks (hijacked = high, stale =
+low) were spec-silent and are logged with their reasoning.
+
+### What still needs the owner — unchanged from before this phase, restated in full, not softened
+
+This phase did not close any of these; they are exactly as open as they
+were before Phase 6 started, restated here per this phase's own explicit
+instruction not to soften or omit any of them:
+
+(a) **Ratifying the full contents of `data/trusted_domains.json`.** It is
+    human-curated and frozen by its own `_meta.curation` field — no
+    automated pipeline step, including this build, may add to or edit it
+    — but "frozen against automated edits" is not the same thing as
+    "owner-reviewed and approved." Its current 44+ hostnames were
+    programmatically derived (CLAUDE.md's reputable-outlet table, every
+    registered `official_domains[]`, every citation host already in use)
+    and have never had an explicit human sign-off pass of their own.
+(b) **Approving `map.js` as a second JavaScript exception to the zero-JS
+    rule.** `matrix-rain.js` already went through this ritual once; this
+    build added a second, narrower exception (marker glyph interaction
+    only, with a structurally-enforced no-JS fallback) without an
+    equivalent owner sign-off step of its own.
+(c) **Deciding whether PROFILER generation runs inside the existing daily
+    Routine or a separate one — and, if so, actually updating that
+    Routine's own granted prompt/authority to include it.** This build
+    only added the reference PROFILER prompt text to `.github/workflows/
+    analyze.yml`, exactly as it did for ANALYST/VERIFIER; it did **not**
+    change any live Claude Code Remote Routine configuration. The real,
+    active daily Routine today runs only the ANALYST/VERIFIER prompt text
+    it was originally configured to read — it does not yet execute the
+    PROFILER step at all until the owner makes this decision and updates
+    the Routine (or creates a second one) accordingly.
+(d) **The still-outstanding 14-day hands-off observation window this
+    plan's own Phase 9 specifies.** This has **not** happened — it cannot
+    happen inside a single build session, only after this branch is
+    reviewed, merged, and the relevant Routine(s) have run unattended on
+    their real schedule for two real weeks. Nothing in this entry claims
+    otherwise.
+
+---
+
 ## 2026-07-13 -- Phase 8: profile pages + link defense
 
 Third of four phases (6-9) building the world-map-centric UI reshape.

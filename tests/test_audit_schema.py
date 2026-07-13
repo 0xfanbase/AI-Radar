@@ -4,14 +4,16 @@ this repo already uses (`tests/test_schemas.py`, `tests/test_p2_schemas.py`):
 schema self-validation, a valid fixture passes, an invalid fixture fails.
 
 `fixtures/schema_examples/valid/audit.json` is a full, hand-built
-`data/audit/latest.json`-shaped instance covering every one of the five
-checkers' own nested shapes at least once (including a `null` `http_status`/
-`matched_card_id`/etc. case and a non-trivial `dead`/`missed`/
-`duplicate_pairs` finding each), so this also doubles as a second,
-independent proof (beyond `tests/test_auditor_report.py`'s own
-`build_report`-produced instance) that the schema's nested `$defs` and
-`additionalProperties: false` constraints are actually satisfiable by real
-data, not just internally self-consistent.
+`data/audit/latest.json`-shaped instance covering every one of the eight
+checkers' own nested shapes at least once (the original five, plus
+Phase 9's `hijacked_links`/`company_hijacked_links`/`profile_staleness`;
+including a `null` `http_status`/`matched_card_id`/etc. case and a
+non-trivial `dead`/`missed`/`duplicate_pairs`/`hijacked`/`stale` finding
+each), so this also doubles as a second, independent proof (beyond
+`tests/test_auditor_report.py`'s own `build_report`-produced instance)
+that the schema's nested `$defs` and `additionalProperties: false`
+constraints are actually satisfiable by real data, not just internally
+self-consistent.
 """
 import json
 from pathlib import Path

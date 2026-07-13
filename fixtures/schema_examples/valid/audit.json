@@ -92,5 +92,48 @@
       }
     ]
   },
+  "hijacked_links": {
+    "checked_at": "2026-07-11T23:30:03Z",
+    "total_urls": 2,
+    "counts": { "trusted": 1, "hijacked": 1, "unreachable": 0 },
+    "results": [
+      {
+        "url": "https://anthropic.com/ok",
+        "status": "trusted",
+        "final_url": "https://anthropic.com/ok",
+        "detail": null
+      },
+      {
+        "url": "https://anthropic.com/hijacked",
+        "status": "hijacked",
+        "final_url": "https://squatted.example.com/x",
+        "detail": "host 'squatted.example.com' is not in data/trusted_domains.json"
+      }
+    ]
+  },
+  "company_hijacked_links": {
+    "checked_at": "2026-07-11T23:30:04Z",
+    "total_urls": 1,
+    "counts": { "trusted": 0, "hijacked": 1, "unreachable": 0 },
+    "results": [
+      {
+        "company_id": "anthropic",
+        "url": "https://anthropic.com/hijacked",
+        "status": "hijacked",
+        "final_url": "https://squatted.example.com/y",
+        "detail": "host 'squatted.example.com' is not in data/trusted_domains.json"
+      }
+    ]
+  },
+  "profile_staleness": {
+    "checked_at": "2026-07-11T23:30:05Z",
+    "stale_days_threshold": 45,
+    "total_companies": 2,
+    "counts": { "stale": 1, "fresh": 1 },
+    "results": [
+      { "company_id": "anthropic", "name": "Anthropic", "last_verified": "2026-07-10", "days_stale": 1, "stale": false },
+      { "company_id": "deepseek", "name": "DeepSeek", "last_verified": "2026-04-01", "days_stale": 101, "stale": true }
+    ]
+  },
   "findings_appended_to_backlog": 3
 }

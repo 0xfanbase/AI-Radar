@@ -19,6 +19,7 @@ call regardless.
 from __future__ import annotations
 
 import requests
+import requests_mock as requests_mock_lib
 
 from auditor import linkrot
 from watcher import http
@@ -555,3 +556,146 @@ def test_audit_hijacked_links_loads_trusted_domains_from_disk_when_none_passed(
     )
 
     assert report["counts"]["trusted"] == 1
+
+
+# --------------------------------------------------------------------------
+# Phase 9: collect_company_citation_urls / audit_company_hijacked_links --
+# the same hijack re-check as Phase 8's audit_hijacked_links, but over
+# content/companies/*.json profile citations instead of
+# content/cards/*.json's, with each result attributable to a company_id.
+# --------------------------------------------------------------------------
+
+
+def _company_with_citations(company_id: str, urls: list[str]) -> dict:
+    """Minimal `schemas/company.schema.json`-shaped dict carrying one
+    citedText citation per url in `urls`, all under `profile.overview`
+    plus one more under `profile.current_focus` (so a real call exercises
+    more than one `citedText` field, matching
+    `scripts.check_outbound_links.extract_citation_urls_from_company`'s
+    own multi-field flattening) -- only the fields that function and
+    `audit_company_hijacked_links` actually read."""
+    citations = [{"url": url, "outlet": "Test", "quote": "q"} for url in urls]
+    return {
+        "id": company_id,
+        "profile": {
+            "overview": {"text": "x", "citations": citations[:1] or citations},
+            "current_focus": {"text": "y", "citations": citations[1:] or citations[:0]},
+        },
+    }
+
+
+def test_collect_company_citation_urls_pairs_each_url_with_its_company_id():
+    companies = [
+        _company_with_citations("anthropic", ["https://anthropic.com/a"]),
+        _company_with_citations("openai", ["https://openai.com/b"]),
+    ]
+    pairs = linkrot.collect_company_citation_urls(companies)
+    assert pairs == [
+        ("anthropic", "https://anthropic.com/a"),
+        ("openai", "https://openai.com/b"),
+    ]
+
+
+def test_collect_company_citation_urls_dedupes_within_one_company_only():
+    same_url = "https://anthropic.com/a"
+    companies = [
+        {
+            "id": "anthropic",
+            "profile": {
+                "overview": {
+                    "text": "x",
+                    "citations": [
+                        {"url": same_url, "outlet": "Test", "quote": "q"}
+                    ],
+                },
+                "current_focus": {
+                    "text": "y",
+                    "citations": [
+                        {"url": same_url, "outlet": "Test", "quote": "q"}
+                    ],
+                },
+            },
+        },
+        _company_with_citations("openai", [same_url]),
+    ]
+    pairs = linkrot.collect_company_citation_urls(companies)
+    # Deduped within "anthropic" (same_url appears twice in its own
+    # profile) but "openai" citing the identical URL is a separate,
+    # independent pair -- see collect_company_citation_urls's own
+    # docstring for why.
+    assert pairs == [("anthropic", same_url), ("openai", same_url)]
+
+
+def test_collect_company_citation_urls_empty_companies():
+    assert linkrot.collect_company_citation_urls([]) == []
+
+
+def test_audit_company_hijacked_links_summary_shape(requests_mock):
+    requests_mock.head("https://anthropic.com/ok", status_code=200)
+    requests_mock.head(
+        "https://anthropic.com/hijacked",
+        status_code=301,
+        headers={"Location": "https://squatted.example.com/x"},
+    )
+    requests_mock.head("https://squatted.example.com/x", status_code=200)
+    requests_mock.head(
+        "https://openai.com/down", exc=requests.exceptions.ConnectionError
+    )
+
+    companies = [
+        _company_with_citations(
+            "anthropic", ["https://anthropic.com/ok", "https://anthropic.com/hijacked"]
+        ),
+        _company_with_citations("openai", ["https://openai.com/down"]),
+    ]
+
+    report = linkrot.audit_company_hijacked_links(companies, trusted=TRUSTED)
+
+    assert report["total_urls"] == 3
+    assert report["counts"] == {"trusted": 1, "hijacked": 1, "unreachable": 1}
+    assert set(report.keys()) == {"checked_at", "total_urls", "counts", "results"}
+    by_url = {r["url"]: r for r in report["results"]}
+    assert by_url["https://anthropic.com/hijacked"]["status"] == "hijacked"
+    assert by_url["https://anthropic.com/hijacked"]["company_id"] == "anthropic"
+    assert by_url["https://anthropic.com/hijacked"]["final_url"] == (
+        "https://squatted.example.com/x"
+    )
+    assert by_url["https://openai.com/down"]["company_id"] == "openai"
+    assert by_url["https://openai.com/down"]["status"] == "unreachable"
+
+
+def test_audit_company_hijacked_links_with_no_companies_is_a_clean_zero_report(
+    tmp_path,
+):
+    report = linkrot.audit_company_hijacked_links(
+        [], companies_dir=tmp_path / "nonexistent", trusted=TRUSTED
+    )
+
+    assert report["total_urls"] == 0
+    assert report["counts"] == {"trusted": 0, "hijacked": 0, "unreachable": 0}
+    assert report["results"] == []
+
+
+def test_audit_company_hijacked_links_loads_company_registry_from_disk_when_none_passed(
+    requests_mock,
+):
+    # No explicit companies= argument -- proves the default path really
+    # does load the real, committed content/companies/*.json registry
+    # (13 real profiles, each with real citation URLs across many
+    # different domains). A catch-all mock (every HEAD returns 200, no
+    # redirect) means every result resolves to its own original host --
+    # this test only needs to prove real profiles were actually loaded
+    # and checked (total_urls > 0, one result per real citation host),
+    # not to assert a specific trusted/hijacked split against the real,
+    # full registry (that would make this test brittle to future profile
+    # edits unrelated to this function).
+    requests_mock.head(requests_mock_lib.ANY, status_code=200)
+
+    real_companies = linkrot.load_company_registry()
+    expected_total = len(linkrot.collect_company_citation_urls(real_companies))
+
+    report = linkrot.audit_company_hijacked_links(trusted=TRUSTED)
+
+    assert expected_total > 0
+    assert report["total_urls"] == expected_total
+    assert sum(report["counts"].values()) == expected_total

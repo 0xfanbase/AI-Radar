@@ -4236,4 +4236,94 @@ for the full build description; this entry is the decision log.
   the simplest reasonable interim behavior. A future phase that wants
   company profiles to have their own public corrections history would
   need to extend `schemas/company.schema.json` first.
+- **2026-07-13 -- Phase 9 (`schemas/pending_corrections.schema.json`):
+  `card_id` was unconditionally required even for a `target_type:
+  "company"` entry that has no card to name -- discovered, not assumed,
+  by this phase's own "confirm it's actually wired end to end" check,
+  and fixed at the schema, not worked around in code.** Phase 6 added
+  `target_type`/`target_id` as a "forward-looking hook" and Phase 8's
+  PROFILER prompt is a real, documented *consumer* of a `target_type:
+  "company"` entry, but no real *producer* of one had ever run before
+  this phase's `auditor/profile_staleness.py` /
+  `auditor/linkrot.py::audit_company_hijacked_links` (via
+  `auditor/corrections_feed.py`) became the first. Building a real
+  candidate immediately surfaced that the schema's own `required: [...,
+  "card_id", ...]` made a genuine company-only candidate either fail
+  validation or force a fabricated `card_id` -- a direct violation of
+  this project's own no-fabrication rule (CLAUDE.md, and this build's own
+  brief, both state it explicitly). Fixed by making `card_id` required
+  only when `target_type` is absent or `"card"` (an `if`/`then`/`else`
+  conditional added to the schema) -- every existing card-only shape is
+  completely unchanged (still required, unchanged validation), and a
+  genuine company-targeted candidate can now omit it entirely, which
+  `auditor/corrections_feed.py` does. Proven end to end (not just
+  schema-valid in the abstract) by `tests/test_corrections_feed.py`'s own
+  round-trip tests and by a real, unmocked `python -m auditor.cli run`
+  invocation against this repo's actual `content/companies/*.json`
+  registry during this phase's own verification, which produced two real
+  `target_type: "company"` pending-correction candidates with no
+  `card_id` field at all (see the verification note below for what they
+  found).
+- **2026-07-13 -- Phase 9 (`auditor/linkrot.py::audit_company_hijacked_links`,
+  `auditor/corrections_feed.py::build_hijack_candidates`): a "hijacked"
+  finding cannot itself distinguish a genuine post-publication redirect
+  hijack from a citation whose destination was simply never added to
+  `data/trusted_domains.json` in the first place.** Both look identical
+  to this check -- "the current final URL fails the allowlist" -- since
+  neither this check nor `scripts/check_outbound_links.py`'s own
+  commit-time gate records *why* a URL passed or failed at write time,
+  only whether it does right now. Running this phase's new checks for
+  real against this repo's actual data surfaced exactly this case: two
+  `content/companies/*.json` citations (moonshot-ai, zhipu-ai) to
+  `huggingface.co` URLs that Phase 6's own stage-3 entry already logged
+  as "not yet covered by the allowlist" (a known, pre-existing gap, not a
+  new hijack) are correctly flagged `"hijacked"` by this check and fed
+  into `data/pending_corrections.json` as `target_type: "company"`
+  candidates -- which is the technically correct behavior (both cases are
+  equally "this citation's current target needs a human/analyst look"),
+  but the pending-correction's own `issue_description` text was written
+  to say so plainly rather than assert a hijack narrative it can't
+  actually prove; logged here rather than adding a "was this domain ever
+  trusted" history `data/trusted_domains.json` doesn't track today.
+- **2026-07-13 -- Phase 9 (`auditor/corrections_feed.py`): a still-true
+  weekly finding (a company still stale, or a citation still hijacked on
+  a later run) gets a fresh, date-stamped pending-correction id and
+  therefore a fresh `data/pending_corrections.json` entry every week it
+  remains unaddressed, rather than being deduplicated across runs.**
+  Deliberately consistent with `scripts/append_backlog_findings.py`'s own
+  existing behavior for e.g. a dead link or a falling verifier trend
+  (both re-appended to `IMPROVEMENT_BACKLOG.md` every week they're still
+  true) -- not a new problem this phase introduced, but worth stating
+  explicitly since an unaddressed stale-profile or hijacked-citation
+  finding will accumulate multiple pending entries over consecutive weeks
+  if the (not-yet-activated) PROFILER Routine never drains them. A future
+  pass could dedupe by `(target_type, target_id, category)` regardless of
+  date instead of by exact id; not done here since it would also change
+  `scripts.pending_corrections.append_pending_correction`'s own
+  "duplicate id raises" contract for an as-yet-unexercised code path.
+- **2026-07-13 -- Phase 9 severity assignments for the three new checks,
+  spec-silent (this phase's own brief named the checks, not their
+  backlog severity): hijacked citation (card or company) = high, stale
+  profile = low.** Reasoning logged in
+  `scripts/append_backlog_findings.py`'s own updated severity-mapping
+  table/docstring: a hijacked citation is a live security-relevant
+  finding (same class as a falling verifier-trend, CLAUDE.md's own
+  existing "high" precedent), while a stale profile is informational --
+  the audit report already surfaces it and this phase's own
+  `corrections_feed` separately queues it for the PROFILER, so it isn't
+  itself a content error the way a dead link or hijack is.
+- **2026-07-13 -- Phase 9 (Method page, `site/templates/method.html`):
+  the link-vetting section states its own coverage limits plainly, per
+  this phase's own build brief ("do not overstate what the mechanism
+  does") -- it checks where a link points (domain + real redirect
+  destination against a fixed allowlist), and explicitly does NOT scan
+  destination-page content for malware, does not evaluate a trusted
+  domain's specific page for safety/accuracy, and offers no protection
+  against a citation to a site compromised without changing domains.**
+  This is a factual description of `scripts/check_outbound_links.py` /
+  `auditor/linkrot.py`'s actual mechanism (host/redirect-chain
+  allowlisting only, no content inspection of any kind) written in
+  reader-facing prose for the first time -- no code changed to produce
+  this limitation, only made visible on the page that had previously
+  described the gate in a way that could be read as broader than it is.
 

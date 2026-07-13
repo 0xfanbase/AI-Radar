@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://frontier-wire.example/schemas/pending_corrections.schema.json",
   "title": "Pending Corrections",
-  "description": "Spec-silent shape (the approved build plan's Phase 2 section names 'data/pending_corrections.json' -- fed by audit.yml's findings or manual owner edits, drained first by the analyst each run -- without fixing fields; decision logged in IMPROVEMENT_BACKLOG.md). Top-level object: a version plus a queue of correction candidates awaiting the analyst's evidence check. A confirmed pending item becomes a content/corrections.json entry (schemas/corrections.schema.json) and its card's status is set to 'corrected'; an entry here is removed once actioned (not schema-tracked -- reconcile_run.py's own job). Phase 2 seeds data/pending_corrections.json = {\"version\": 1, \"pending\": []}. Phase 6 adds optional target_type/target_id, mirroring schemas/corrections.schema.json's own addition, so a pending candidate can eventually name a content/companies/<id>.json profile as well as a card -- card_id stays required for backward compatibility with today's card-only pipeline (data/pending_corrections.json's own pending[] is empty as of Phase 6, so this is a forward-looking addition, not a migration of real rows).",
+  "description": "Spec-silent shape (the approved build plan's Phase 2 section names 'data/pending_corrections.json' -- fed by audit.yml's findings or manual owner edits, drained first by the analyst each run -- without fixing fields; decision logged in IMPROVEMENT_BACKLOG.md). Top-level object: a version plus a queue of correction candidates awaiting the analyst's evidence check. A confirmed pending item becomes a content/corrections.json entry (schemas/corrections.schema.json) and its card's status is set to 'corrected'; an entry here is removed once actioned (not schema-tracked -- reconcile_run.py's own job). Phase 2 seeds data/pending_corrections.json = {\"version\": 1, \"pending\": []}. Phase 6 adds optional target_type/target_id, mirroring schemas/corrections.schema.json's own addition, so a pending candidate can eventually name a content/companies/<id>.json profile as well as a card. Phase 9 fixes a real end-to-end gap Phase 6 left open and Phase 9's own auditor checks were the first real writer to hit: card_id was unconditionally required even for a target_type:'company' entry, which has no card to name at all -- forcing a fabricated card_id (a violation of this project's own no-fabrication rule) just to pass schema validation. card_id is now required only when target_type is absent or 'card' (an 'if target_type==company then {} else {required:[card_id]}' conditional below), preserving every existing card-only entry's shape exactly (no target_type -> card_id still required, unchanged) while letting a genuine company-targeted candidate omit it. See IMPROVEMENT_BACKLOG.md for the discovery and fix, logged in full.",
   "type": "object",
   "required": ["version", "pending"],
   "properties": {
@@ -16,7 +16,6 @@
         "type": "object",
         "required": [
           "id",
-          "card_id",
           "issue_description",
           "evidence_url",
           "flagged_at",
@@ -26,6 +25,14 @@
           "target_type": ["target_id"],
           "target_id": ["target_type"]
         },
+        "if": {
+          "properties": { "target_type": { "const": "company" } },
+          "required": ["target_type"]
+        },
+        "then": {},
+        "else": {
+          "required": ["card_id"]
+        },
         "properties": {
           "id": {
             "type": "string",
@@ -34,12 +41,12 @@
           "card_id": {
             "type": "string",
             "minLength": 1,
-            "description": "content/cards/<id>.json this candidate correction targets. Remains required for backward compatibility with the pipeline in place today, which only ever targets cards -- see target_type/target_id below for the forward-looking company-targeting hook."
+            "description": "content/cards/<id>.json this candidate correction targets. Required whenever target_type is absent or 'card' (this schema's own if/target_type==company/then/else conditional, Phase 9) -- i.e. for every one of today's card-only entries, unchanged. Omitted (and must be omitted, never fabricated) for a target_type:'company' entry, which has no card to name -- see target_type/target_id below."
           },
           "target_type": {
             "type": "string",
             "enum": ["card", "company"],
-            "description": "Optional (Phase 6, forward-looking): what kind of record target_id names. Must be present together with target_id or not at all. Not yet populated by any current writer -- card_id above remains the field actually in use today."
+            "description": "Optional: what kind of record target_id names. Must be present together with target_id or not at all (dependentRequired below). Phase 9's auditor/profile_staleness.py and auditor/linkrot.py::audit_company_hijacked_links, wired through auditor/corrections_feed.py, are the first real writers of target_type:'company' entries; target_type:'card' (or omitted) remains the analyst's own card-only shape, unchanged."
           },
           "target_id": {
             "type": "string",

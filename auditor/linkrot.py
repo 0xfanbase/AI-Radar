@@ -60,6 +60,27 @@ weekly cadence, and emits one new finding type
 results}`` shape :func:`audit_link_rot` already established -- "consistent
 with this file's existing finding-emission pattern," per this turn's own
 instruction, not a new shape invented from scratch.
+
+**Phase 9 addition -- the same hijack re-check, over company-profile
+citations (:func:`audit_company_hijacked_links`).** Phase 8's
+:func:`audit_hijacked_links` only ever reads `content/cards/*.json`
+citations -- `schemas/company.schema.json`'s own nested `profile.*
+.citations[]` shape (the exact `citedText` shape
+`scripts.check_outbound_links.extract_citation_urls_from_company` already
+knows how to flatten, reused verbatim here) is a distinct universe of
+already-published citations this repo's commit-time gate
+(`scripts/check_outbound_links.py`) already vets but the weekly audit
+never re-checked. Rather than widening :func:`audit_hijacked_links`'s own
+committed `cards=` signature and `{checked_at, total_urls, counts,
+results}` shape (both already locked down by Phase 8's own tests, per
+this turn's own "never weaken an existing test" rule), this is a sibling
+function with its own per-company result shape (`company_id` attached to
+each result, since a citation's *owning company* -- not just its own
+URL/status -- is exactly what `auditor/corrections_feed.py` needs to turn
+a `"hijacked"` finding into a `target_type: "company"` pending-correction
+candidate). Reuses :func:`check_hijack` directly (the one real network-
+touching primitive both functions share), never a second implementation
+of the redirect-resolution/allowlist logic.
 """
 from __future__ import annotations
 
@@ -67,16 +88,18 @@ import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any, Iterable, Sequence
 
 import requests
 
 from scripts.check_outbound_links import (
     TRUSTED_DOMAINS_PATH,
     classify_url,
+    extract_citation_urls_from_company,
     load_trusted_domains,
     resolve_final_url,
 )
+from scripts.plan_run import COMPANIES_DIR, load_company_registry
 from watcher import http
 from watcher.config import REPO_ROOT, REQUEST_TIMEOUT_SECONDS
 
@@ -371,4 +394,89 @@ def audit_hijacked_links(
         "total_urls": len(urls),
         "counts": counts,
         "results": [asdict(r) for r in results],
+    }
+
+
+# --------------------------------------------------------------------------
+# Phase 9: post-publication hijack check over company-profile citations --
+# see module docstring's own "Phase 9 addition" section for the full
+# rationale (a sibling function, not a widened audit_hijacked_links, to
+# keep that function's own Phase 8-locked signature/shape untouched).
+# --------------------------------------------------------------------------
+
+
+def collect_company_citation_urls(
+    companies: Sequence[dict[str, Any]] = (),
+) -> list[tuple[str, str]]:
+    """Every `(company_id, url)` pair across `companies`' own
+    `profile.*.citations[].url` fields (`extract_citation_urls_from_company`,
+    reused verbatim from `scripts.check_outbound_links`), deduped
+    *per company* but not across companies -- two different companies
+    citing the identical URL are two separate, independent findings if
+    that URL turns out hijacked (each has its own profile page/reader to
+    correct), not one. Preserves first-seen order within each company.
+    """
+    pairs: list[tuple[str, str]] = []
+    for company in companies:
+        company_id = str(company.get("id") or "")
+        seen: set[str] = set()
+        for url in extract_citation_urls_from_company(company):
+            if url in seen:
+                continue
+            seen.add(url)
+            pairs.append((company_id, url))
+    return pairs
+
+
+def audit_company_hijacked_links(
+    companies: list[dict[str, Any]] | None = None,
+    *,
+    companies_dir: Path = COMPANIES_DIR,
+    trusted: dict[str, Any] | None = None,
+    trusted_domains_path: Path = TRUSTED_DOMAINS_PATH,
+    session: requests.Session | None = None,
+    timeout: float = REQUEST_TIMEOUT_SECONDS,
+) -> dict:
+    """Run :func:`audit_hijacked_links`'s exact same weekly re-check
+    (:func:`check_hijack`, reused directly), but over every
+    `content/companies/*.json` profile's own citations instead of
+    `content/cards/*.json`'s.
+
+    `companies`/`session` follow `audit_hijacked_links`'s own defaulting
+    convention exactly (an explicit list for testability, else loaded/
+    built fresh -- here via `scripts.plan_run.load_company_registry`,
+    reused, not reimplemented). `trusted` likewise.
+
+    Returns `{checked_at, total_urls, counts, results}` -- the same
+    top-level shape `audit_hijacked_links` and `audit_link_rot` both
+    already establish -- but each result additionally carries
+    `company_id` (which `content/companies/<id>.json` profile the citation
+    came from), which `audit_hijacked_links`'s own card-citation results
+    have no equivalent field for (a card's `citations[]` isn't itself
+    attributable to one single company the way a company profile's own
+    citations self-evidently are).
+    """
+    if companies is None:
+        companies = load_company_registry(companies_dir)
+    if trusted is None:
+        trusted = load_trusted_domains(trusted_domains_path)
+    if session is None:
+        session = http.build_session()
+
+    pairs = collect_company_citation_urls(companies)
+
+    counts = {"trusted": 0, "hijacked": 0, "unreachable": 0}
+    results: list[dict[str, Any]] = []
+    for company_id, url in pairs:
+        result = check_hijack(session, url, trusted, timeout=timeout)
+        counts[result.status] += 1
+        entry = asdict(result)
+        entry["company_id"] = company_id
+        results.append(entry)
+
+    return {
+        "checked_at": _utcnow_iso(),
+        "total_urls": len(pairs),
+        "counts": counts,
+        "results": results,
     }

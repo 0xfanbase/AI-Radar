@@ -23,11 +23,14 @@ instruction:**
 | Category                                                   | Severity |
 |-------------------------------------------------------------|----------|
 | Declining verifier pass-rate trend (`verifier_trend.trend == "falling"`) | **high** |
+| Hijacked card citation (`hijacked_links.results[].status == "hijacked"`) | **high** -- Phase 9 addition, not part of this turn's original given mapping; a citation that was trusted at publish time and now redirects off the allowlist is a live security-relevant finding, the same severity class as a falling verifier-trend, not a mere content-quality nit. |
+| Hijacked company-profile citation (`company_hijacked_links.results[].status == "hijacked"`) | **high** -- Phase 9 addition, same rationale as the card-citation case above. |
 | Missed story (`missed_stories.missed_stories[]`)             | **medium** |
 | Duplicate-topic pair (`duplicates.duplicate_pairs[]`)        | **medium** |
 | Dead citation link (`link_rot.results[].status == "dead"`)   | **low** |
 | Lexicon orphan (`lexicon.orphans[]`)                         | **low** |
 | Lexicon coverage gap (`lexicon.coverage_gaps[]`)             | **low** -- not explicitly named by this turn's own instruction (only "orphans" is); grouped under the same "lexicon" category/severity as the sibling check it lives alongside in `auditor.lexicon_audit`'s own combined `audit_lexicon()` return. Logged as this module's own extension of the given mapping, not a deviation from it. |
+| Stale company profile (`profile_staleness.results[].stale == true`) | **low** -- Phase 9 addition; informational (the audit report already surfaces it, and Phase 9's `auditor.corrections_feed` separately queues it for the PROFILER via `data/pending_corrections.json`), not itself a content error the way a dead link or hijack is. |
 
 This mapping is *this module's own default*, not the fortnightly
 `improve.yml`'s picker logic (`scripts/pick_backlog_item.py`, out of this
@@ -57,6 +60,13 @@ line) per category:**
   correctly-declined story is the corroboration rule working as intended,
   not a finding).
 - **duplicates** -- every entry in `duplicates.duplicate_pairs[]`.
+- **hijacked_links / company_hijacked_links** -- only `status ==
+  "hijacked"`, same "unreachable is retry-next-week, not confirmed" logic
+  as link rot above (`auditor.linkrot.check_hijack`'s own docstring makes
+  the identical distinction for its own `"unreachable"` bucket); `trusted`
+  needs no action.
+- **profile_staleness** -- every entry in `profile_staleness.results[]`
+  with `stale == true`.
 
 **Spec-silent guard: lexicon-orphan findings are suppressed (not merely
 demoted) whenever `has_cards` is `False` (zero published cards).** Logged
@@ -128,20 +138,31 @@ def derive_findings(
     verifier_trend: dict[str, Any],
     missed_stories: dict[str, Any],
     duplicates: dict[str, Any],
+    hijacked_links: dict[str, Any] | None = None,
+    company_hijacked_links: dict[str, Any] | None = None,
+    profile_staleness: dict[str, Any] | None = None,
     has_cards: bool,
 ) -> list[dict[str, str]]:
-    """Flatten the five checkers' own raw output dicts (exactly as
+    """Flatten the eight checkers' own raw output dicts (exactly as
     `auditor.report.build_report` also consumes them) into one ordered
     list of `{"severity", "category", "summary"}` finding dicts, per the
     severity mapping and "what's actionable" rules in the module
     docstring.
 
-    Order is deterministic: link rot, then lexicon coverage gaps, then
-    lexicon orphans, then verifier trend, then missed stories, then
-    duplicates -- the same field order `auditor.report.build_report`
-    itself assembles its own report in. An empty return means a
-    completely clean run (nothing actionable this week), not "nothing was
-    checked."
+    `hijacked_links`/`company_hijacked_links`/`profile_staleness` (Phase 9)
+    default to `None`, treated as `{}` (contributing no findings) -- unlike
+    the original five, which stay required kwargs, unchanged, so no
+    existing call site of this function needs updating just to keep
+    working. Every real caller (`auditor.cli.run_audit`) passes all eight
+    explicitly.
+
+    Order is deterministic: link rot, then hijacked links, then
+    company-hijacked links, then lexicon coverage gaps, then lexicon
+    orphans, then verifier trend, then missed stories, then duplicates,
+    then profile staleness -- the same field order
+    `auditor.report.build_report` itself assembles its own report in. An
+    empty return means a completely clean run (nothing actionable this
+    week), not "nothing was checked."
     """
     findings: list[dict[str, str]] = []
 
@@ -155,6 +176,37 @@ def derive_findings(
                 "summary": (
                     f"Dead citation link (HTTP {result.get('http_status')}): "
                     f"{result.get('url')}"
+                ),
+            }
+        )
+
+    for result in (hijacked_links or {}).get("results", []) or []:
+        if result.get("status") != "hijacked":
+            continue
+        findings.append(
+            {
+                "severity": "high",
+                "category": "hijacked_citation",
+                "summary": (
+                    f"Card citation {result.get('url')} now redirects to "
+                    f"{result.get('final_url')}, which fails the outbound-link "
+                    "allowlist (data/trusted_domains.json)."
+                ),
+            }
+        )
+
+    for result in (company_hijacked_links or {}).get("results", []) or []:
+        if result.get("status") != "hijacked":
+            continue
+        findings.append(
+            {
+                "severity": "high",
+                "category": "hijacked_company_citation",
+                "summary": (
+                    f"Company profile '{result.get('company_id')}' citation "
+                    f"{result.get('url')} now redirects to "
+                    f"{result.get('final_url')}, which fails the outbound-link "
+                    "allowlist (data/trusted_domains.json)."
                 ),
             }
         )
@@ -224,6 +276,22 @@ def derive_findings(
                     f"Possible duplicate: card {pair.get('card_a')} and "
                     f"{pair.get('card_b')} share headline similarity "
                     f"{similarity_note}{topics_note}."
+                ),
+            }
+        )
+
+    for result in (profile_staleness or {}).get("results", []) or []:
+        if not result.get("stale"):
+            continue
+        findings.append(
+            {
+                "severity": "low",
+                "category": "profile_staleness",
+                "summary": (
+                    f"Company profile '{result.get('company_id')}' last "
+                    f"verified {result.get('last_verified')} -- "
+                    f"{result.get('days_stale')} day(s) ago, past the freshness "
+                    "floor."
                 ),
             }
         )

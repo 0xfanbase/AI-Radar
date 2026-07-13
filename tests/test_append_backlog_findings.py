@@ -26,6 +26,9 @@ EMPTY_TREND = {
 }
 EMPTY_MISSED_STORIES = {"missed_stories": []}
 EMPTY_DUPLICATES = {"duplicate_pairs": []}
+EMPTY_HIJACKED_LINKS = {"results": []}
+EMPTY_COMPANY_HIJACKED_LINKS = {"results": []}
+EMPTY_PROFILE_STALENESS = {"results": []}
 
 
 def _derive(**overrides):
@@ -35,6 +38,9 @@ def _derive(**overrides):
         verifier_trend=EMPTY_TREND,
         missed_stories=EMPTY_MISSED_STORIES,
         duplicates=EMPTY_DUPLICATES,
+        hijacked_links=EMPTY_HIJACKED_LINKS,
+        company_hijacked_links=EMPTY_COMPANY_HIJACKED_LINKS,
+        profile_staleness=EMPTY_PROFILE_STALENESS,
         has_cards=True,
     )
     kwargs.update(overrides)
@@ -237,6 +243,126 @@ def test_derive_findings_duplicate_pair_without_shared_topics():
 
 
 # ---------------------------------------------------------------------------
+# derive_findings -- Phase 9: hijacked_links / company_hijacked_links /
+# profile_staleness
+# ---------------------------------------------------------------------------
+
+
+def test_derive_findings_hijacked_link_is_high_severity():
+    hijacked_links = {
+        "results": [
+            {
+                "url": "https://anthropic.com/hijacked",
+                "status": "hijacked",
+                "final_url": "https://squatted.example.com/x",
+                "detail": "not trusted",
+            }
+        ]
+    }
+    findings = _derive(hijacked_links=hijacked_links)
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "high"
+    assert findings[0]["category"] == "hijacked_citation"
+    assert "https://anthropic.com/hijacked" in findings[0]["summary"]
+    assert "https://squatted.example.com/x" in findings[0]["summary"]
+
+
+def test_derive_findings_hijacked_link_trusted_or_unreachable_is_not_a_finding():
+    hijacked_links = {
+        "results": [
+            {"url": "https://a.test/ok", "status": "trusted", "final_url": "https://a.test/ok", "detail": None},
+            {"url": "https://a.test/down", "status": "unreachable", "final_url": None, "detail": "timeout"},
+        ]
+    }
+    assert _derive(hijacked_links=hijacked_links) == []
+
+
+def test_derive_findings_company_hijacked_link_is_high_severity():
+    company_hijacked_links = {
+        "results": [
+            {
+                "company_id": "anthropic",
+                "url": "https://anthropic.com/hijacked",
+                "status": "hijacked",
+                "final_url": "https://squatted.example.com/x",
+                "detail": "not trusted",
+            }
+        ]
+    }
+    findings = _derive(company_hijacked_links=company_hijacked_links)
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "high"
+    assert findings[0]["category"] == "hijacked_company_citation"
+    assert "anthropic" in findings[0]["summary"]
+    assert "https://anthropic.com/hijacked" in findings[0]["summary"]
+
+
+def test_derive_findings_company_hijacked_link_trusted_is_not_a_finding():
+    company_hijacked_links = {
+        "results": [
+            {
+                "company_id": "anthropic",
+                "url": "https://anthropic.com/ok",
+                "status": "trusted",
+                "final_url": "https://anthropic.com/ok",
+                "detail": None,
+            }
+        ]
+    }
+    assert _derive(company_hijacked_links=company_hijacked_links) == []
+
+
+def test_derive_findings_stale_profile_is_low_severity():
+    profile_staleness = {
+        "results": [
+            {
+                "company_id": "anthropic",
+                "name": "Anthropic",
+                "last_verified": "2026-05-01",
+                "days_stale": 73,
+                "stale": True,
+            }
+        ]
+    }
+    findings = _derive(profile_staleness=profile_staleness)
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "low"
+    assert findings[0]["category"] == "profile_staleness"
+    assert "anthropic" in findings[0]["summary"]
+    assert "73" in findings[0]["summary"]
+
+
+def test_derive_findings_fresh_profile_is_not_a_finding():
+    profile_staleness = {
+        "results": [
+            {
+                "company_id": "anthropic",
+                "name": "Anthropic",
+                "last_verified": "2026-07-10",
+                "days_stale": 3,
+                "stale": False,
+            }
+        ]
+    }
+    assert _derive(profile_staleness=profile_staleness) == []
+
+
+def test_derive_findings_phase9_checkers_default_to_no_findings_when_omitted():
+    """An existing call site that predates Phase 9 -- omitting
+    hijacked_links/company_hijacked_links/profile_staleness entirely --
+    still works and simply contributes no Phase 9 findings, never raises."""
+    findings = backlog_mod.derive_findings(
+        link_rot=EMPTY_LINK_ROT,
+        lexicon=EMPTY_LEXICON,
+        verifier_trend=EMPTY_TREND,
+        missed_stories=EMPTY_MISSED_STORIES,
+        duplicates=EMPTY_DUPLICATES,
+        has_cards=True,
+    )
+    assert findings == []
+
+
+# ---------------------------------------------------------------------------
 # derive_findings -- deterministic ordering across categories
 # ---------------------------------------------------------------------------
 
@@ -244,6 +370,27 @@ def test_derive_findings_duplicate_pair_without_shared_topics():
 def test_derive_findings_deterministic_category_order():
     link_rot = {
         "results": [{"url": "https://example.com/gone", "status": "dead", "http_status": 404}]
+    }
+    hijacked_links = {
+        "results": [
+            {
+                "url": "https://a.test/hijacked",
+                "status": "hijacked",
+                "final_url": "https://squatted.example.com/x",
+                "detail": "not trusted",
+            }
+        ]
+    }
+    company_hijacked_links = {
+        "results": [
+            {
+                "company_id": "anthropic",
+                "url": "https://anthropic.com/hijacked",
+                "status": "hijacked",
+                "final_url": "https://squatted.example.com/y",
+                "detail": "not trusted",
+            }
+        ]
     }
     lexicon = {
         "coverage_gaps": [{"card_id": "card-1", "missing_terms": ["RAG"]}],
@@ -263,22 +410,39 @@ def test_derive_findings_deterministic_category_order():
             {"card_a": "card-1", "card_b": "card-2", "similarity": 0.5, "shared_topics": []}
         ]
     }
+    profile_staleness = {
+        "results": [
+            {
+                "company_id": "anthropic",
+                "name": "Anthropic",
+                "last_verified": "2026-05-01",
+                "days_stale": 73,
+                "stale": True,
+            }
+        ]
+    }
     findings = _derive(
         link_rot=link_rot,
+        hijacked_links=hijacked_links,
+        company_hijacked_links=company_hijacked_links,
         lexicon=lexicon,
         verifier_trend=trend,
         missed_stories=missed_stories,
         duplicates=duplicates,
+        profile_staleness=profile_staleness,
         has_cards=True,
     )
     categories = [f["category"] for f in findings]
     assert categories == [
         "link_rot",
+        "hijacked_citation",
+        "hijacked_company_citation",
         "lexicon_coverage_gap",
         "lexicon_orphan",
         "verifier_trend",
         "missed_story",
         "duplicate_topic",
+        "profile_staleness",
     ]
 
 

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://frontier-wire.example/schemas/audit.schema.json",
   "title": "Audit Report",
-  "description": "Spec-silent shape (CLAUDE.md's audit.yml 'weekly' bullet and the approved build plan's Phase 5 section both name 'data/audit/latest.json (schema in schemas/audit.schema.json)' without fixing fields; decision logged in IMPROVEMENT_BACKLOG.md). Written by auditor/report.py::save_report, which assembles the five Phase 5 checkers' own already-computed dicts verbatim under link_rot/lexicon/verifier_trend/missed_stories/duplicates -- this schema is a direct transcription of those five modules' real return shapes (auditor/linkrot.py::audit_link_rot, auditor/lexicon_audit.py::audit_lexicon, auditor/trend.py::audit_trend, auditor/missed_story.py::audit_missed_stories, auditor/duplicates.py::audit_duplicates), not an independently-designed shape. window is the report's own top-level 'what period does this audit cover' annotation (fixed at audit.yml's own weekly, 7-day cadence) -- it is never itself fed into any of the five checkers, each of which computes its own window (or has none) independently; see auditor/report.py's own module docstring. findings_appended_to_backlog is a plain count of how many checkbox findings scripts/append_backlog_findings.py actually wrote to IMPROVEMENT_BACKLOG.md this run, not a duplicated findings list -- every finding's own detail already lives in one of the five per-checker fields.",
+  "description": "Spec-silent shape (CLAUDE.md's audit.yml 'weekly' bullet and the approved build plan's Phase 5 section both name 'data/audit/latest.json (schema in schemas/audit.schema.json)' without fixing fields; decision logged in IMPROVEMENT_BACKLOG.md). Written by auditor/report.py::save_report, which assembles eight checkers' own already-computed dicts verbatim -- this schema is a direct transcription of those modules' real return shapes, not an independently-designed shape. The original five (Phase 5): link_rot (auditor/linkrot.py::audit_link_rot), lexicon (auditor/lexicon_audit.py::audit_lexicon), verifier_trend (auditor/trend.py::audit_trend), missed_stories (auditor/missed_story.py::audit_missed_stories), duplicates (auditor/duplicates.py::audit_duplicates). Phase 9 adds three more, wiring in a check Phase 8 had built but explicitly left unwired (auditor/linkrot.py::audit_hijacked_links's own docstring and IMPROVEMENT_BACKLOG.md's Phase 8 entry both name this exact wiring as the next step) plus two checks Phase 9 itself introduces: hijacked_links (auditor/linkrot.py::audit_hijacked_links, over content/cards/*.json citations), company_hijacked_links (auditor/linkrot.py::audit_company_hijacked_links, the same re-check over content/companies/*.json citations), profile_staleness (auditor/profile_staleness.py::audit_profile_staleness, which company profiles are past the 45-day freshness floor scripts/plan_run.py's own PROFILE_STALE_THRESHOLD_DAYS already defines). window is the report's own top-level 'what period does this audit cover' annotation (fixed at audit.yml's own weekly, 7-day cadence) -- it is never itself fed into any of the eight checkers, each of which computes its own window (or has none) independently; see auditor/report.py's own module docstring. findings_appended_to_backlog is a plain count of how many checkbox findings scripts/append_backlog_findings.py actually wrote to IMPROVEMENT_BACKLOG.md this run, not a duplicated findings list -- every finding's own detail already lives in one of the eight per-checker fields.",
   "$defs": {
     "story_classification": {
       "type": "object",
@@ -42,6 +42,9 @@
     "verifier_trend",
     "missed_stories",
     "duplicates",
+    "hijacked_links",
+    "company_hijacked_links",
+    "profile_staleness",
     "findings_appended_to_backlog"
   ],
   "properties": {
@@ -237,6 +240,122 @@
                 "type": "array",
                 "items": { "type": "string" }
               }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "hijacked_links": {
+      "type": "object",
+      "description": "Phase 9: auditor/linkrot.py::audit_hijacked_links's own return dict, verbatim -- the post-publication hijack re-check over content/cards/*.json citations (built in Phase 8, wired into this report in Phase 9).",
+      "required": ["checked_at", "total_urls", "counts", "results"],
+      "properties": {
+        "checked_at": { "type": "string", "format": "date-time" },
+        "total_urls": { "type": "integer", "minimum": 0 },
+        "counts": {
+          "type": "object",
+          "required": ["trusted", "hijacked", "unreachable"],
+          "properties": {
+            "trusted": { "type": "integer", "minimum": 0 },
+            "hijacked": { "type": "integer", "minimum": 0 },
+            "unreachable": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["url", "status", "final_url", "detail"],
+            "properties": {
+              "url": { "type": "string" },
+              "status": {
+                "type": "string",
+                "enum": ["trusted", "hijacked", "unreachable"]
+              },
+              "final_url": { "type": ["string", "null"] },
+              "detail": { "type": ["string", "null"] }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "company_hijacked_links": {
+      "type": "object",
+      "description": "Phase 9: auditor/linkrot.py::audit_company_hijacked_links's own return dict, verbatim -- the same hijack re-check as hijacked_links above, but over content/companies/*.json profile citations. Each result additionally carries company_id (which profile the citation came from), which hijacked_links's own card-citation results have no equivalent field for.",
+      "required": ["checked_at", "total_urls", "counts", "results"],
+      "properties": {
+        "checked_at": { "type": "string", "format": "date-time" },
+        "total_urls": { "type": "integer", "minimum": 0 },
+        "counts": {
+          "type": "object",
+          "required": ["trusted", "hijacked", "unreachable"],
+          "properties": {
+            "trusted": { "type": "integer", "minimum": 0 },
+            "hijacked": { "type": "integer", "minimum": 0 },
+            "unreachable": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["company_id", "url", "status", "final_url", "detail"],
+            "properties": {
+              "company_id": { "type": "string" },
+              "url": { "type": "string" },
+              "status": {
+                "type": "string",
+                "enum": ["trusted", "hijacked", "unreachable"]
+              },
+              "final_url": { "type": ["string", "null"] },
+              "detail": { "type": ["string", "null"] }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "profile_staleness": {
+      "type": "object",
+      "description": "Phase 9: auditor/profile_staleness.py::audit_profile_staleness's own return dict, verbatim -- which content/companies/*.json profiles have a last_verified older than the 45-day floor (scripts/plan_run.py::PROFILE_STALE_THRESHOLD_DAYS, reused, not a second independently-tuned number).",
+      "required": [
+        "checked_at",
+        "stale_days_threshold",
+        "total_companies",
+        "counts",
+        "results"
+      ],
+      "properties": {
+        "checked_at": { "type": "string", "format": "date-time" },
+        "stale_days_threshold": { "type": "integer", "minimum": 1 },
+        "total_companies": { "type": "integer", "minimum": 0 },
+        "counts": {
+          "type": "object",
+          "required": ["stale", "fresh"],
+          "properties": {
+            "stale": { "type": "integer", "minimum": 0 },
+            "fresh": { "type": "integer", "minimum": 0 }
+          },
+          "additionalProperties": false
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["company_id", "name", "last_verified", "days_stale", "stale"],
+            "properties": {
+              "company_id": { "type": "string" },
+              "name": { "type": "string" },
+              "last_verified": { "type": ["string", "null"] },
+              "days_stale": { "type": ["integer", "null"] },
+              "stale": { "type": "boolean" }
             },
             "additionalProperties": false
           }

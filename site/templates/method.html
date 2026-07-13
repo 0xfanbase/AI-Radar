@@ -93,10 +93,45 @@
     an unsupported sentence, drop a hollowed-out story entirely, or demote
     a story's status, but it can never upgrade one -- it's a one-way
     ratchet toward stricter, never looser.</p>
+  <p>Each tracked lab's profile page goes through a related but smaller
+    process. A plain-code step picks at most one company to touch each
+    day -- either a lab named in that day's own stories, or, if none is,
+    whichever tracked profile has gone longest without being re-verified,
+    once that exceeds a fixed 45-day floor -- so no profile sits unchecked
+    indefinitely even in a quiet news week. A separate AI role then
+    fetches that one company's own pages plus independent outlet coverage
+    and applies the exact same CONFIRMED/REPORTED sourcing bar as the
+    card pipeline above, updating only the fields new sourcing actually
+    supports. Unlike a story card, a profile page does not get a second,
+    fresh-context adversarial pass -- it is checked once, by the same
+    role that drafts it, not re-verified by an independent second reader.
+    That is a real, narrower guarantee than a card gets, stated plainly
+    rather than implied.</p>
+</section>
+
+<section class="method-section" aria-labelledby="method-map-heading">
+  <h2 id="method-map-heading">3. Placing companies on the map</h2>
+  <p>The homepage map plots one marker per tracked lab, positioned at the
+    headquarters coordinates recorded on that lab's own profile --
+    latitude and longitude sourced the same way any other fact on this
+    site is, not estimated or auto-geocoded from a company name. A
+    handful of real-world clusters (multiple labs headquartered within a
+    few kilometres of each other) are nudged apart by a small, fixed,
+    hand-picked pixel offset purely so their markers don't visually
+    overlap at world-map scale; the offset never changes what
+    coordinates are actually on record. Clicking a company's name always
+    goes straight to its profile page, with no script required. A
+    second, separate control on each marker -- a small glyph, not the
+    name itself -- expands a popover of that company's latest Frontier
+    Board entries and most recent wire stories; that popover interaction
+    is the site's only other JavaScript beyond the animated background,
+    and it only ever runs on this one page. If it fails to load for any
+    reason, every marker's name link and the plain company list still
+    work exactly as before.</p>
 </section>
 
 <section class="method-section" aria-labelledby="method-gate-heading">
-  <h2 id="method-gate-heading">3. A gate neither AI step can get past</h2>
+  <h2 id="method-gate-heading">4. A gate neither AI step can get past</h2>
   <p>Before anything is published, a plain-code check confirms every
     changed file is schema-valid and that the day's change only ever
     touched the site's editorial content and pipeline-state folders --
@@ -108,8 +143,36 @@
     never the system that produces it.</p>
 </section>
 
+<section class="method-section" aria-labelledby="method-links-heading">
+  <h2 id="method-links-heading">5. Keeping outbound links honest</h2>
+  <p>Every outbound link this site cites -- in a story or a company
+    profile -- is checked against a small, fixed, human-curated list of
+    trusted destinations before it can ever be published: the domain has
+    to match the list outright, plain <code>http://</code> links and bare
+    IP addresses are rejected, and the link's actual redirect chain is
+    followed and checked too, so a citation that looks trusted but quietly
+    forwards somewhere else can't slip through. That same allowlist file
+    is frozen -- the automated pipeline that writes stories and profiles
+    is never allowed to edit it, so it can never expand its own linking
+    budget on the same run it uses a new domain. A separate weekly pass
+    re-resolves every citation already published, catching the case where
+    a domain was trustworthy when first cited but has since been
+    abandoned, sold, or repointed elsewhere, and flags any company profile
+    that has gone more than 45 days without being re-checked against its
+    own sources for the daily process above to pick up.</p>
+  <p>Stated plainly, because it matters what this mechanism does and
+    doesn't do: it checks <em>where a link points</em> -- the domain and
+    the real destination of its redirect chain -- against a trusted list.
+    It does not scan the destination page's own content for malware, does
+    not evaluate whether a trusted domain's specific page is itself safe
+    or accurate, and offers no protection at all against a citation to a
+    site that was compromised without changing domains or redirecting
+    anywhere. It is a link-provenance check, not a content or malware
+    scanner, and this page will not describe it as more than that.</p>
+</section>
+
 <section class="method-section" aria-labelledby="method-audit-heading">
-  <h2 id="method-audit-heading">4. Auditing itself</h2>
+  <h2 id="method-audit-heading">6. Auditing itself</h2>
   {% if audit.available %}
   <p>The most recent self-audit ran {{ audit.generated_at }} and recorded
     {{ audit.findings_count }} finding(s).</p>
@@ -117,14 +180,19 @@
   <p class="method-audit-pending">{{ audit.message }}</p>
   {% endif %}
   <p>Once running, this weekly, entirely pure-code pass checks every
-    published citation for link rot, checks whether every AI/ML term
-    actually used in a story is defined in the Lexicon (and flags any
-    Lexicon term nothing has used in a while), tracks the verifier's own
-    pass rate over time, compares published stories against that week's
-    most-discussed Hacker News AI stories to catch genuine misses, and
-    looks for duplicate coverage of the same topic. Findings are logged as
-    findings, not failures -- a story correctly declined for weak sourcing
-    is not the same thing as a story the pipeline missed.</p>
+    published citation -- in both stories and company profiles -- for
+    link rot and for the redirect-hijack check described above, checks
+    whether every AI/ML term actually used in a story is defined in the
+    Lexicon (and flags any Lexicon term nothing has used in a while),
+    tracks the verifier's own pass rate over time, compares published
+    stories against that week's most-discussed Hacker News AI stories to
+    catch genuine misses, looks for duplicate coverage of the same topic,
+    and flags any company profile past the 45-day re-verification floor.
+    Findings are logged as findings, not failures -- a story correctly
+    declined for weak sourcing is not the same thing as a story the
+    pipeline missed. A stale-profile or hijacked-citation finding is also
+    queued for the next day's profile-refresh pass to act on, the same
+    way any other correction candidate is.</p>
 </section>
 
 <section class="method-section" aria-labelledby="method-stats-heading">

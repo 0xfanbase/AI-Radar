@@ -11,6 +11,21 @@ audit_duplicates`) verbatim -- this module never re-runs or re-derives any
 of their own logic, only assembles their already-produced dicts into one
 schema-valid envelope -- and returns/persists the combined report.
 
+**Phase 9 addition -- three more checkers, same "assemble verbatim, never
+recompute" contract.** `auditor.linkrot.audit_hijacked_links` (Phase 8's
+own post-publication hijack re-check over card citations) was built but
+explicitly left unwired into this module (see that function's own
+docstring and `IMPROVEMENT_BACKLOG.md`'s Phase 8 entry naming this exact
+wiring as "the concrete next step for whichever phase actually turns
+`audit.yml` live"). This phase is that step, and adds two siblings this
+phase itself introduces: `auditor.linkrot.audit_company_hijacked_links`
+(the same hijack re-check over company-profile citations) and
+`auditor.profile_staleness.audit_profile_staleness` (which
+`content/companies/*.json` profiles are past the 45-day freshness floor).
+All three are assembled verbatim, exactly like the original five, under
+new required top-level keys `hijacked_links`, `company_hijacked_links`,
+`profile_staleness`.
+
 Top-level shape (`schemas/audit.schema.json`, this module's own
 counterpart)::
 
@@ -24,6 +39,9 @@ counterpart)::
       "verifier_trend": <auditor.trend.audit_trend()'s own dict>,
       "missed_stories": <auditor.missed_story.audit_missed_stories()'s own dict>,
       "duplicates": <auditor.duplicates.audit_duplicates()'s own dict>,
+      "hijacked_links": <auditor.linkrot.audit_hijacked_links()'s own dict>,
+      "company_hijacked_links": <auditor.linkrot.audit_company_hijacked_links()'s own dict>,
+      "profile_staleness": <auditor.profile_staleness.audit_profile_staleness()'s own dict>,
       "findings_appended_to_backlog": <int>
     }
 
@@ -138,17 +156,23 @@ def build_report(
     verifier_trend: dict[str, Any],
     missed_stories: dict[str, Any],
     duplicates: dict[str, Any],
+    hijacked_links: dict[str, Any],
+    company_hijacked_links: dict[str, Any],
+    profile_staleness: dict[str, Any],
     now: datetime,
     findings_appended_to_backlog: int = 0,
     window_days: int = AUDIT_WINDOW_DAYS,
 ) -> dict[str, Any]:
-    """Assemble the five already-computed checker dicts into one
+    """Assemble the eight already-computed checker dicts into one
     `schemas/audit.schema.json`-shaped report -- pure, no filesystem I/O,
     no re-running of any checker (every one of `link_rot`/`lexicon`/
-    `verifier_trend`/`missed_stories`/`duplicates` is passed in exactly as
-    its own `audit_*` function returned it). `now` is always explicit,
-    never a live clock call -- matching every sibling `auditor.*` module's
-    own "no live clock inside pure-compute logic" convention.
+    `verifier_trend`/`missed_stories`/`duplicates`/`hijacked_links`/
+    `company_hijacked_links`/`profile_staleness` is passed in exactly as
+    its own `audit_*` function returned it -- see module docstring's
+    "Phase 9 addition" section for the three added in this phase). `now`
+    is always explicit, never a live clock call -- matching every sibling
+    `auditor.*` module's own "no live clock inside pure-compute logic"
+    convention.
     """
     return {
         "version": AUDIT_REPORT_VERSION,
@@ -160,6 +184,9 @@ def build_report(
         "verifier_trend": verifier_trend,
         "missed_stories": missed_stories,
         "duplicates": duplicates,
+        "hijacked_links": hijacked_links,
+        "company_hijacked_links": company_hijacked_links,
+        "profile_staleness": profile_staleness,
         "findings_appended_to_backlog": findings_appended_to_backlog,
     }
 
