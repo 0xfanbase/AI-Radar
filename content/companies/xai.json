@@ -1,0 +1,88 @@
+{
+  "id": "xai",
+  "name": "xAI",
+  "aliases": [
+    "xAI (SpaceXAI)",
+    "SpaceXAI"
+  ],
+  "hq_country": "US",
+  "hq_city": "Palo Alto",
+  "hq_lat": 37.4419,
+  "hq_lng": -122.143,
+  "official_domains": [
+    "x.ai",
+    "docs.x.ai"
+  ],
+  "founded": "2023",
+  "profile": {
+    "overview": {
+      "text": "xAI was founded by Elon Musk on March 9, 2023 and announced publicly that July, headquartered at Stanford Research Park in Palo Alto, California. It built the Grok model line, absorbed Musk's X (formerly Twitter) in March 2025, and was itself acquired by SpaceX in an all-stock deal that closed February 2, 2026, after which the combined AI operation rebranded as SpaceXAI in July 2026.",
+      "citations": [
+        {
+          "url": "https://en.wikipedia.org/wiki/SpaceXAI",
+          "outlet": "Wikipedia",
+          "quote": "Elon Musk founded xAI on March 9, 2023"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "xAI launched in 2023 with a founding team of AI researchers led by chief engineer Igor Babuschkin, and released its Grok model line beginning that year.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/SpaceXAI",
+            "outlet": "Wikipedia",
+            "quote": "led by chief engineer Igor Babuschkin"
+          }
+        ]
+      },
+      {
+        "text": "In March 2025 xAI acquired its sister company X Corp, and in February 2026 SpaceX acquired xAI outright in an all-stock transaction, before the combined entity was rebranded SpaceXAI in July 2026.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/SpaceXAI",
+            "outlet": "Wikipedia",
+            "quote": "xAI was rebranded as SpaceXAI"
+          }
+        ]
+      },
+      {
+        "text": "It released Grok 4.5 on July 8, 2026, the first model shipped under the SpaceXAI brand, trained in part on real-world coding and agent-interaction data from a partnership with Cursor, with a 500,000-token context window.",
+        "citations": [
+          {
+            "url": "https://docs.x.ai/developers/models",
+            "outlet": "xAI (official docs)",
+            "quote": "the most intelligent and fastest model we've built"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "xAI positions Grok 4.5 as its fastest and most capable model for coding, agentic tasks and knowledge work, recommended by its own documentation as the default choice for general use.",
+        "citations": [
+          {
+            "url": "https://docs.x.ai/developers/models",
+            "outlet": "xAI (official docs)",
+            "quote": "For everything else, including code, use Grok 4.5"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "xAI's current focus is Grok 4.5 under the new SpaceXAI brand, positioned by the company as a faster, cheaper rival to Anthropic's and OpenAI's flagship models following its formal absorption into SpaceX.",
+      "citations": [
+        {
+          "url": "https://en.wikipedia.org/wiki/SpaceXAI",
+          "outlet": "Wikipedia",
+          "quote": "a wholly owned subsidiary of SpaceX"
+        }
+      ]
+    },
+    "roadmap": []
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

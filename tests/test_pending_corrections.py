@@ -214,6 +214,61 @@ def test_drain_pending_correction_on_unknown_id_never_present_is_a_noop():
 # --------------------------------------------------------------------------
 
 
+# --------------------------------------------------------------------------
+# Phase 9: target_type: "company" entries -- card_id is required only when
+# target_type is absent or "card" (schemas/pending_corrections.schema.json's
+# own if/then/else conditional). See auditor/corrections_feed.py and its
+# own tests for the real producer this schema fix unblocked.
+# --------------------------------------------------------------------------
+
+
+def _company_entry(entry_id: str, target_id: str = "anthropic") -> dict:
+    return {
+        "id": entry_id,
+        "target_type": "company",
+        "target_id": target_id,
+        "issue_description": "Profile has not been re-verified recently.",
+        "evidence_url": "https://anthropic.com/news",
+        "flagged_at": "2026-07-13T00:00:00Z",
+        "source": "audit",
+    }
+
+
+def test_company_targeted_entry_validates_with_no_card_id():
+    data = append_pending_correction(empty_pending_corrections(), _company_entry("c-1"))
+    validate(data, "pending_corrections")  # must not raise
+    assert "card_id" not in data["pending"][0]
+
+
+def test_card_less_entry_with_no_target_type_still_requires_card_id():
+    entry = _company_entry("c-1")
+    del entry["target_type"]
+    del entry["target_id"]
+    data = {"version": 1, "pending": [entry]}
+    with pytest.raises(ValidationError):
+        validate(data, "pending_corrections")
+
+
+def test_card_less_entry_with_target_type_card_still_requires_card_id():
+    entry = _company_entry("c-1")
+    entry["target_type"] = "card"
+    entry["target_id"] = "2026-07-01-some-card"
+    data = {"version": 1, "pending": [entry]}
+    with pytest.raises(ValidationError):
+        validate(data, "pending_corrections")
+
+
+def test_company_targeted_entry_may_still_carry_a_card_id_if_ever_present():
+    """The schema fix only makes card_id conditionally NOT required for a
+    company target -- it never forbids it (additionalProperties already
+    allows the field; this just confirms the if/then/else doesn't
+    accidentally add a `not` constraint)."""
+    entry = _company_entry("c-1")
+    entry["card_id"] = "2026-07-01-some-card"
+    data = {"version": 1, "pending": [entry]}
+    validate(data, "pending_corrections")  # must not raise
+
+
 def test_append_then_drain_then_save_then_load_round_trip(tmp_path):
     path = tmp_path / "pending_corrections.json"
 

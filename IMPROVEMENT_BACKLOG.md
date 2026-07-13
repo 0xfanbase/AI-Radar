@@ -4027,6 +4027,21 @@ pattern -- and this entry is the correction of record.
   (`test_fetch_all_lab_items_skips_a_failing_lab_without_crashing`).
   `watcher.http.fetch`'s own retry/backoff logic is unchanged -- this fix
   is purely about what happens after retries are genuinely exhausted.
+- **2026-07-13 — `data/trusted_domains.json`'s `path_scoped[]` ships empty;
+  `huggingface.co` citations already in `content/frontier_board.json` are
+  not yet covered by the allowlist.** Two Board rows (Kimi K2.6, GLM-5.2)
+  already cite `huggingface.co` URLs, but the file's own rule -- never add
+  a bare `github.com`/`huggingface.co` to `hostnames[]`, since both are
+  multi-tenant hosts -- means only a `path_scoped` entry sourced from a
+  company's `official_repos[]` can cover them, and no
+  `content/companies/*.json` file has populated `official_repos[]` yet.
+  Rather than inventing a plausible-looking org path prefix not actually
+  drawn from a verified `official_repos[]` entry, left the gap open and
+  documented it in `trusted_domains.json`'s own `_meta.path_scoped_note`.
+  Next step: a future company-registry pass adds real `official_repos[]`
+  entries for Moonshot AI (`moonshotai` on Hugging Face) and Zhipu AI
+  (`zai-org` on Hugging Face), then a curation pass adds the matching
+  `path_scoped` rows.
 
 ## Audit findings -- audit-20260712T012433Z (2026-07-12T01:24:33Z)
 
@@ -4037,4 +4052,278 @@ pattern -- and this entry is the correction of record.
 - [ ] **[MEDIUM]** Missed story: "Small AI Models Gain Traction In places with unreliable networks" (https://spectrum.ieee.org/small-language-models-ai-pharmaceuticals) -- not covered by any published card or ledger entry.
 - [ ] **[MEDIUM]** Missed story: "Anthropic's Method to Losing Goodwill in a Few Easy Steps" (https://raheeljunaid.com/blog/anthropics-method-to-losing-goodwill-in-a-few-easy-steps/) -- not covered by any published card or ledger entry.
 - [ ] **[MEDIUM]** Missed story: "AI content is everywhere on social media, especially LinkedIn" (https://www.pangram.com/blog/ai-in-your-feed) -- not covered by any published card or ledger entry.
+
+## Phase 7: map frontend -- vendoring, projection, homepage swap (2026-07-13)
+
+Judgment calls and one logged gap from building the world-map homepage
+(`site/builders/map.py`, `site/static/geo/`, `site/static/js/map.js`,
+the `/` <-> `/wire/` homepage swap). See PROGRESS.md's own Phase 7 entry
+for the full build description; this entry is the decision log.
+
+- **GeoJSON, not TopoJSON, for the vendored world geometry.** The
+  approved plan named "the topojson/world-atlas project's
+  `countries-110m.json`" as one acceptable source but explicitly also
+  allowed "Natural Earth's own site" as an alternative. Chose GeoJSON
+  (fetched from `nvkelso/natural-earth-vector`, the standard long-lived
+  GitHub mirror of Natural Earth's vector layers) specifically because
+  it needs no arc-decoding step to become SVG paths -- TopoJSON's
+  quantized-arc format would require a hand-written decoder under this
+  build's own "no new pip dependency" constraint, which is strictly
+  more code for the same result at this map's scale (13 markers, no
+  interactive pan/zoom that would benefit from TopoJSON's smaller
+  transfer size). `site/static/geo/README.md` documents the exact
+  fetch, license, and a properties-only trim (60-ish Natural Earth
+  cartographic columns down to `name`/`iso_a2`/`continent`; geometry
+  itself untouched) that shrank the vendored file from 838,726 to
+  257,939 bytes.
+- **The masthead "What's Moving" sparkline strip moved with the
+  homepage content, not duplicated.** The approved plan's interaction
+  design says "the existing What's Moving strip stays above the map" --
+  read as the strip relocating to wherever `/` now renders (the map),
+  not staying pinned to the Wire index once the Wire moved to `/wire/`.
+  `site/generate.py` now threads `masthead_sparklines` into
+  `map_builder.write_map_page()` only; `wire.write_wire_pages()` is
+  called with `masthead_sparklines=None`. Structural enforcement, not
+  just a doc claim: `site/tests/test_build.py`'s existing "present on
+  exactly one generated page" test pair
+  (`test_masthead_sparkline_strip_renders_on_the_wire_home_page` /
+  `test_masthead_sparkline_strip_absent_from_every_other_page`) needed
+  no edits to keep passing under the new homepage -- they already assert
+  "present on `index.html`, absent everywhere else," which is exactly
+  as true of the map page as it was of the old Wire index.
+- **`content/companies/index.json` has no `schemas/company_index.schema.json`
+  counterpart.** Phase 6 built the full per-company profile schema
+  (`schemas/company.schema.json`) but this separate summary-index shape
+  (`{id, name, hq_country, hq_city, hq_lat, hq_lng, status}` per entry --
+  deliberately not the same shape as a full profile record) has no
+  schema of its own. `site/generate.py::load_companies_index()` loads it
+  unvalidated with a logged warning, the same tolerance already applied
+  to `content/primer.json`'s pre-existing gap. Not fixed in this phase
+  (schema authorship for a new content shape is arguably its own
+  decision, and this phase's job was the map frontend, not schema
+  backfill) -- flagged here as a real, open gap for a future pass
+  (either a dedicated `company_index.schema.json`, or -- possibly
+  cleaner -- deriving the map's marker list directly from
+  `content/companies/<id>.json`'s already-schema'd fields instead of
+  maintaining a second, unvalidated summary file at all).
+- **Card popover links use the existing `/wire/<YYYY-MM>/#card-<id>`
+  fragment-anchor convention, not a new permalink scheme.** Cards have
+  never had a standalone page route on this site --
+  `site/templates/card.html` renders inline inside the Wire index/month
+  archive with a stable `id="card-<id>"` anchor (`site/builders/
+  wire.py`'s own established pattern). `map.py::cards_for_company()`
+  reuses that exact anchor convention for its news-drill-down links
+  rather than inventing a second one Phase 8 (or a future card-permalink
+  project) would then have to reconcile.
+- **Marker offset table is hand-authored, not computed.** Per the
+  approved plan's own explicit instruction ("fixed, deterministic
+  per-marker offsets you compute by hand for the ~13 known markers --
+  do not pull in a runtime clustering library"),
+  `map.py::MARKER_OFFSET_PX` is a literal, checked-in pixel-offset
+  dict, verified (`site/tests/test_map_builder.py::
+  test_marker_offset_table_covers_every_real_seeded_company`) to cover
+  every one of the 13 real `content/companies/index.json` ids. If the
+  registry grows meaningfully, this table needs a human pass, the same
+  way the reputable-outlet table does -- not more code.
+- **2026-07-13 -- Phase 8 (`site/builders/company.py` +
+  `templates/company.html`/`company_index.html`): "Companies" added to
+  the masthead nav, not just reachable from the map/footer.** The
+  brief's own accessibility requirement was "every company page is
+  reachable with zero JS from somewhere other than the map"; a
+  `/companies/` index page alone would already satisfy that literally,
+  but leaving it reachable only via a direct URL or a footer link buried
+  among Moving/Method/About/Corrections would undersell it as a primary
+  site section on par with Board/Lexicon. Added as a sixth
+  `base.html` masthead nav item (`Map, Wire, Board, Companies, Lexicon,
+  Primer`); also fixed a stale doc-comment in `components.css` that
+  still said "the 4 masthead nav items" (already inaccurate before this
+  change -- Phase 7's own Map item made it 5).
+- **2026-07-13 -- Phase 8 (`schemas/company_index.schema.json` +
+  `scripts/update_company_index.py`): closed the schema gap Phase 7
+  itself logged ("content/companies/index.json has no
+  schemas/company_index.schema.json counterpart").** Rather than derive
+  the map's marker list directly from the fuller per-company profile
+  files (the alternative Phase 7's own entry floated), this phase keeps
+  the existing separate summary-index shape but gives it a real schema
+  and a dedicated pure-code regenerator
+  (`scripts/update_company_index.py`, mirroring
+  `scripts/update_card_index.py`'s architecture exactly), wired into
+  `scripts/reconcile_run.py` alongside the sibling card-index
+  regeneration. `reconcile_run()`'s return tuple grew a fourth element
+  (`company_index`) -- its one existing direct caller
+  (`tests/test_verifier_stats.py`) and `scripts/reconcile_run.py::main`
+  were both updated to unpack it. The regenerator sorts alphabetically
+  by `id` (a company registry has no natural recency axis the way cards
+  do) and writes with the pipeline's standard `indent=2, sort_keys=True`
+  formatting -- running it once against the real, already-committed
+  `content/companies/index.json` reordered every entry (values
+  unchanged, verified by an order-insensitive diff before committing the
+  reordered file) to match what the pipeline will now regenerate on
+  every future run, so the committed file and a fresh `reconcile_run.py`
+  pass never silently disagree.
+- **2026-07-13 -- Phase 8 (`scripts/plan_run.py::
+  find_board_upsert_candidate`): the "company whose frontier_board.json
+  row was upserted this run" profile-selection rule is implemented as a
+  deterministic *prediction*, not a confirmed post-hoc fact.**
+  `plan_run.py` runs strictly before the ANALYST/PROFILER step (it's
+  the pure-code planner that produces `data/run_plan.json`, which the
+  LLM steps then read), so it structurally cannot know which company's
+  Board row the analyst is actually about to upsert this run --  that
+  fact doesn't exist yet at plan time. The simplest reasonable
+  deterministic proxy available at plan time: check whether any of this
+  run's already-selected cluster's own `sources[].title` strings name a
+  tracked company by `name`/`aliases[]` (word-boundary, case-insensitive
+  match -- never a bare substring, so `"AI"` can't spuriously match
+  inside `"OpenAI2"` or similar), in cluster-rank order. A cluster
+  naming a lab is the closest a pure, pre-analyst signal can get to
+  "this run is likely to touch that company's Board row." This is
+  logged explicitly (in the function's own docstring, in
+  `scripts/plan_run.py`'s module docstring, and here) as a judgment
+  call given the phase's own ambiguous timing constraint, not an
+  attempt to read the analyst's mind exactly -- if this proves too
+  noisy in practice, the fallback rule (oldest `last_verified` past 45
+  days) still gives a reasonable target on a run where the prediction
+  finds nothing.
+- **2026-07-13 -- Phase 8 (`scripts/check_outbound_links.py`): an
+  unresolvable citation redirect chain fails closed (a hard CI
+  violation), not a warning.** The module docstring states the
+  rationale in full: this is a security-relevant CI gate blocking a new
+  citation from ever being published, and this project's own
+  established instinct for "can't confirm this is safe" is to treat it
+  as unsafe (`watcher/http.py::check_robots_allowed`'s "any other
+  failure -- skip this source" rule is the same posture applied to a
+  different check). Contrast `auditor/linkrot.py::check_hijack`'s own
+  weekly, *after-the-fact* re-check of already-published citations,
+  which deliberately buckets an unresolvable URL as its own
+  `"unreachable"` finding rather than conflating it with a confirmed
+  `"hijacked"` one -- a transient network hiccup on a previously-vetted
+  citation shouldn't itself read as hijack evidence, and there is no
+  publish decision left to block by that point anyway.
+- **2026-07-13 -- Phase 8 (`auditor/linkrot.py::audit_hijacked_links`):
+  the new post-publication hijack check is NOT yet wired into
+  `data/audit/latest.json`'s fixed report envelope
+  (`auditor/report.py::build_report`, `schemas/audit.schema.json`,
+  `auditor/cli.py::run_audit`) or into
+  `scripts/append_backlog_findings.py`'s finding-derivation table.**
+  This phase's own brief scoped the addition to "extend
+  auditor/linkrot.py ... as a new finding type consistent with this
+  file's existing finding-emission pattern" -- read literally and kept
+  to that scope: `check_hijack`/`check_hijacks`/`audit_hijacked_links`
+  are complete, real, and fully tested (mirroring
+  `check_url`/`check_links`/`audit_link_rot`'s own shape exactly), but
+  wiring a sixth checker into the audit report's `additionalProperties:
+  false` fixed shape is a materially larger, separate change (a new
+  required top-level field, a new `auditor.cli.run_audit` call, a new
+  backlog-finding-derivation rule, and updates to every existing test
+  that asserts the report's exact key set) that this phase did not
+  attempt. Flagged here as the concrete next step for whichever phase
+  actually turns `audit.yml` live.
+- **2026-07-13 -- Phase 8 (`schemas/pending_corrections.schema.json`'s
+  `target_type`/`target_id` fields, first added in Phase 6 as a
+  forward-looking hook): the PROFILER prompt text in `.github/workflows/
+  analyze.yml` is this phase's first real consumer of it, but a company
+  profile correction is still applied as a direct, cited edit to the
+  wrong field -- not a new `content/corrections.json` entry.**
+  `schemas/company.schema.json`'s own `status` enum has no `"corrected"`
+  value (only `confirmed`/`reported`) and the schema has no
+  `correction_note`-equivalent field either, so there is no schema-level
+  target for a company-profile correction to point at the way a card's
+  `correction_note` points at `content/corrections.json`. Building that
+  parallel corrections workflow for company profiles was out of this
+  phase's scope (the task named only "roadmap items attributed-only" and
+  the existing `target_type`/`target_id` drain, not a new corrections
+  schema); the PROFILER prompt text says so explicitly and logs this as
+  the simplest reasonable interim behavior. A future phase that wants
+  company profiles to have their own public corrections history would
+  need to extend `schemas/company.schema.json` first.
+- **2026-07-13 -- Phase 9 (`schemas/pending_corrections.schema.json`):
+  `card_id` was unconditionally required even for a `target_type:
+  "company"` entry that has no card to name -- discovered, not assumed,
+  by this phase's own "confirm it's actually wired end to end" check,
+  and fixed at the schema, not worked around in code.** Phase 6 added
+  `target_type`/`target_id` as a "forward-looking hook" and Phase 8's
+  PROFILER prompt is a real, documented *consumer* of a `target_type:
+  "company"` entry, but no real *producer* of one had ever run before
+  this phase's `auditor/profile_staleness.py` /
+  `auditor/linkrot.py::audit_company_hijacked_links` (via
+  `auditor/corrections_feed.py`) became the first. Building a real
+  candidate immediately surfaced that the schema's own `required: [...,
+  "card_id", ...]` made a genuine company-only candidate either fail
+  validation or force a fabricated `card_id` -- a direct violation of
+  this project's own no-fabrication rule (CLAUDE.md, and this build's own
+  brief, both state it explicitly). Fixed by making `card_id` required
+  only when `target_type` is absent or `"card"` (an `if`/`then`/`else`
+  conditional added to the schema) -- every existing card-only shape is
+  completely unchanged (still required, unchanged validation), and a
+  genuine company-targeted candidate can now omit it entirely, which
+  `auditor/corrections_feed.py` does. Proven end to end (not just
+  schema-valid in the abstract) by `tests/test_corrections_feed.py`'s own
+  round-trip tests and by a real, unmocked `python -m auditor.cli run`
+  invocation against this repo's actual `content/companies/*.json`
+  registry during this phase's own verification, which produced two real
+  `target_type: "company"` pending-correction candidates with no
+  `card_id` field at all (see the verification note below for what they
+  found).
+- **2026-07-13 -- Phase 9 (`auditor/linkrot.py::audit_company_hijacked_links`,
+  `auditor/corrections_feed.py::build_hijack_candidates`): a "hijacked"
+  finding cannot itself distinguish a genuine post-publication redirect
+  hijack from a citation whose destination was simply never added to
+  `data/trusted_domains.json` in the first place.** Both look identical
+  to this check -- "the current final URL fails the allowlist" -- since
+  neither this check nor `scripts/check_outbound_links.py`'s own
+  commit-time gate records *why* a URL passed or failed at write time,
+  only whether it does right now. Running this phase's new checks for
+  real against this repo's actual data surfaced exactly this case: two
+  `content/companies/*.json` citations (moonshot-ai, zhipu-ai) to
+  `huggingface.co` URLs that Phase 6's own stage-3 entry already logged
+  as "not yet covered by the allowlist" (a known, pre-existing gap, not a
+  new hijack) are correctly flagged `"hijacked"` by this check and fed
+  into `data/pending_corrections.json` as `target_type: "company"`
+  candidates -- which is the technically correct behavior (both cases are
+  equally "this citation's current target needs a human/analyst look"),
+  but the pending-correction's own `issue_description` text was written
+  to say so plainly rather than assert a hijack narrative it can't
+  actually prove; logged here rather than adding a "was this domain ever
+  trusted" history `data/trusted_domains.json` doesn't track today.
+- **2026-07-13 -- Phase 9 (`auditor/corrections_feed.py`): a still-true
+  weekly finding (a company still stale, or a citation still hijacked on
+  a later run) gets a fresh, date-stamped pending-correction id and
+  therefore a fresh `data/pending_corrections.json` entry every week it
+  remains unaddressed, rather than being deduplicated across runs.**
+  Deliberately consistent with `scripts/append_backlog_findings.py`'s own
+  existing behavior for e.g. a dead link or a falling verifier trend
+  (both re-appended to `IMPROVEMENT_BACKLOG.md` every week they're still
+  true) -- not a new problem this phase introduced, but worth stating
+  explicitly since an unaddressed stale-profile or hijacked-citation
+  finding will accumulate multiple pending entries over consecutive weeks
+  if the (not-yet-activated) PROFILER Routine never drains them. A future
+  pass could dedupe by `(target_type, target_id, category)` regardless of
+  date instead of by exact id; not done here since it would also change
+  `scripts.pending_corrections.append_pending_correction`'s own
+  "duplicate id raises" contract for an as-yet-unexercised code path.
+- **2026-07-13 -- Phase 9 severity assignments for the three new checks,
+  spec-silent (this phase's own brief named the checks, not their
+  backlog severity): hijacked citation (card or company) = high, stale
+  profile = low.** Reasoning logged in
+  `scripts/append_backlog_findings.py`'s own updated severity-mapping
+  table/docstring: a hijacked citation is a live security-relevant
+  finding (same class as a falling verifier-trend, CLAUDE.md's own
+  existing "high" precedent), while a stale profile is informational --
+  the audit report already surfaces it and this phase's own
+  `corrections_feed` separately queues it for the PROFILER, so it isn't
+  itself a content error the way a dead link or hijack is.
+- **2026-07-13 -- Phase 9 (Method page, `site/templates/method.html`):
+  the link-vetting section states its own coverage limits plainly, per
+  this phase's own build brief ("do not overstate what the mechanism
+  does") -- it checks where a link points (domain + real redirect
+  destination against a fixed allowlist), and explicitly does NOT scan
+  destination-page content for malware, does not evaluate a trusted
+  domain's specific page for safety/accuracy, and offers no protection
+  against a citation to a site compromised without changing domains.**
+  This is a factual description of `scripts/check_outbound_links.py` /
+  `auditor/linkrot.py`'s actual mechanism (host/redirect-chain
+  allowlisting only, no content inspection of any kind) written in
+  reader-facing prose for the first time -- no code changed to produce
+  this limitation, only made visible on the page that had previously
+  described the gate in a way that could be read as broader than it is.
 

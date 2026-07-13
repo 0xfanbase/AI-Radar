@@ -57,12 +57,24 @@ def test_load_lexicon_reads_a_small_fixture(tmp_path: Path):
 
 
 def test_run_audit_against_real_empty_repo_state_is_schema_valid():
-    report = cli_mod.run_audit(now=NOW, hn_items=[], append_to_backlog=False)
+    # companies=[] keeps this fully offline -- the real content/companies/
+    # registry carries real, live citation URLs that audit_company_
+    # hijacked_links would otherwise try to HEAD/GET for real (blocked by
+    # tests/conftest.py's autouse no-live-network fixture); feed_corrections
+    # is left at its real True default deliberately (see the dedicated
+    # feed_corrections tests below) but with companies=[] there is nothing
+    # for it to feed either way.
+    report = cli_mod.run_audit(
+        now=NOW, hn_items=[], companies=[], append_to_backlog=False
+    )
     validate(report, "audit")  # must not raise
     assert report["findings_appended_to_backlog"] == 0
     assert report["link_rot"]["total_urls"] == 0  # no cards -> no citations
     assert report["duplicates"]["duplicate_pairs"] == []
     assert report["missed_stories"]["total_checked"] == 0
+    assert report["hijacked_links"]["total_urls"] == 0
+    assert report["company_hijacked_links"]["total_urls"] == 0
+    assert report["profile_staleness"]["total_companies"] == 0
 
 
 def test_run_audit_dry_run_never_touches_backlog_file(tmp_path: Path):
@@ -72,6 +84,7 @@ def test_run_audit_dry_run_never_touches_backlog_file(tmp_path: Path):
     cli_mod.run_audit(
         now=NOW,
         hn_items=[],
+        companies=[],
         append_to_backlog=False,
         backlog_path=backlog_path,
     )
@@ -99,6 +112,7 @@ def test_run_audit_real_append_writes_to_the_given_backlog_path(tmp_path: Path):
     report = cli_mod.run_audit(
         now=NOW,
         hn_items=[],
+        companies=[],
         append_to_backlog=True,
         backlog_path=backlog_path,
         ledger_path=ledger_path,
@@ -146,6 +160,7 @@ def test_run_audit_appends_a_real_finding_when_one_exists(tmp_path: Path, monkey
     report = cli_mod.run_audit(
         now=NOW,
         hn_items=[],
+        companies=[],
         append_to_backlog=True,
         backlog_path=backlog_path,
         ledger_path=ledger_path,
@@ -208,6 +223,25 @@ def test_main_run_writes_report_and_returns_zero(tmp_path: Path, monkeypatch):
                 "results": [],
             },
             "duplicates": {"duplicate_pairs": []},
+            "hijacked_links": {
+                "checked_at": "2026-07-11T23:30:00Z",
+                "total_urls": 0,
+                "counts": {"trusted": 0, "hijacked": 0, "unreachable": 0},
+                "results": [],
+            },
+            "company_hijacked_links": {
+                "checked_at": "2026-07-11T23:30:00Z",
+                "total_urls": 0,
+                "counts": {"trusted": 0, "hijacked": 0, "unreachable": 0},
+                "results": [],
+            },
+            "profile_staleness": {
+                "checked_at": "2026-07-11T23:30:00Z",
+                "stale_days_threshold": 45,
+                "total_companies": 0,
+                "counts": {"stale": 0, "fresh": 0},
+                "results": [],
+            },
             "findings_appended_to_backlog": 0,
         }
 
@@ -268,6 +302,25 @@ def test_main_run_no_backlog_append_flag_disables_appending(tmp_path: Path, monk
                 "results": [],
             },
             "duplicates": {"duplicate_pairs": []},
+            "hijacked_links": {
+                "checked_at": "2026-07-11T23:30:00Z",
+                "total_urls": 0,
+                "counts": {"trusted": 0, "hijacked": 0, "unreachable": 0},
+                "results": [],
+            },
+            "company_hijacked_links": {
+                "checked_at": "2026-07-11T23:30:00Z",
+                "total_urls": 0,
+                "counts": {"trusted": 0, "hijacked": 0, "unreachable": 0},
+                "results": [],
+            },
+            "profile_staleness": {
+                "checked_at": "2026-07-11T23:30:00Z",
+                "stale_days_threshold": 45,
+                "total_companies": 0,
+                "counts": {"stale": 0, "fresh": 0},
+                "results": [],
+            },
             "findings_appended_to_backlog": 0,
         }
 

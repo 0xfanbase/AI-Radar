@@ -1,0 +1,108 @@
+{
+  "id": "deepseek",
+  "name": "DeepSeek",
+  "aliases": [
+    "DeepSeek"
+  ],
+  "hq_country": "CN",
+  "hq_city": "Hangzhou",
+  "hq_lat": 30.2741,
+  "hq_lng": 120.1551,
+  "official_domains": [
+    "deepseek.com",
+    "api-docs.deepseek.com"
+  ],
+  "founded": "2023-07-17",
+  "profile": {
+    "overview": {
+      "text": "DeepSeek is a Hangzhou-based AI lab founded on July 17, 2023 by Liang Wenfeng, who also co-founded the High-Flyer hedge fund that backs it, focused on research over near-term commercialization and on releasing many of its models' weights openly.",
+      "citations": [
+        {
+          "url": "https://en.wikipedia.org/wiki/DeepSeek",
+          "outlet": "Wikipedia",
+          "quote": "does not have immediate plans for commercialization"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "DeepSeek released its first model, DeepSeek Coder, in November 2023, then DeepSeek-V2 in May 2024 introducing its multi-head latent attention architecture, and DeepSeek-V3 -- 671 billion parameters -- in December 2024.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/DeepSeek",
+            "outlet": "Wikipedia",
+            "quote": "multi-head latent attention (MLA) architecture"
+          }
+        ]
+      },
+      {
+        "text": "Its DeepSeek-R1 reasoning model, released under the MIT license on January 20, 2025, surpassed ChatGPT as the most downloaded free app on the US iOS App Store within about a week.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/DeepSeek",
+            "outlet": "Wikipedia",
+            "quote": "the most downloaded freeware app on the iOS App Store"
+          }
+        ]
+      },
+      {
+        "text": "In April 2026 it released DeepSeek-V4, including the 1.6-trillion-parameter V4 Pro variant with a 1-million-token context window, which the company says leads open models on agentic coding benchmarks.",
+        "citations": [
+          {
+            "url": "https://api-docs.deepseek.com/news/news260424/",
+            "outlet": "DeepSeek (official docs)",
+            "quote": "Open-source SOTA in Agentic Coding benchmarks"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "DeepSeek's own release notes describe V4 Pro as leading all current open models in world knowledge, trailing only Gemini-3.1-Pro, and beating other open models on math, STEM and coding reasoning.",
+        "citations": [
+          {
+            "url": "https://api-docs.deepseek.com/news/news260424/",
+            "outlet": "DeepSeek (official docs)",
+            "quote": "rivaling top closed-source models"
+          }
+        ]
+      },
+      {
+        "text": "It has built a reputation for releasing frontier-class capability as open-weight models at a fraction of the training and serving cost typically reported by closed labs.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/DeepSeek",
+            "outlet": "Wikipedia",
+            "quote": "approximately $5.6 million"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "DeepSeek's current focus is its V4 model family, which it positions as cost-effective, million-token-context models integrated with leading third-party AI agents, while framing its work as a longer-term push toward general intelligence.",
+      "citations": [
+        {
+          "url": "https://api-docs.deepseek.com/news/news260424/",
+          "outlet": "DeepSeek (official docs)",
+          "quote": "seamlessly integrated with leading AI agents"
+        }
+      ]
+    },
+    "roadmap": [
+      {
+        "text": "DeepSeek says it remains committed to a long-term, steady path toward artificial general intelligence rather than chasing short-term benchmark wins.",
+        "citations": [
+          {
+            "url": "https://api-docs.deepseek.com/news/news260424/",
+            "outlet": "DeepSeek (official docs)",
+            "quote": "committed to longtermism, advancing steadily toward our ultimate goal of AGI"
+          }
+        ]
+      }
+    ]
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

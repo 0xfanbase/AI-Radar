@@ -35,10 +35,12 @@ sys.path.insert(0, str(REPO_ROOT))
 from watcher.schema_validate import validate  # noqa: E402
 
 # Exact repo-relative path -> schema name (schemas/<name>.schema.json).
-# Checked before the content/cards/ prefix rule below, since
-# content/cards/index.json would otherwise also match that prefix.
+# Checked before the content/cards/ and content/companies/ prefix rules
+# below, since content/cards/index.json / content/companies/index.json
+# would otherwise also match those prefixes.
 EXACT_PATH_SCHEMAS = {
     "content/cards/index.json": "card_index",
+    "content/companies/index.json": "company_index",
     "content/frontier_board.json": "frontier_board",
     "content/lexicon.json": "lexicon",
     "content/corrections.json": "corrections",
@@ -61,6 +63,10 @@ EXACT_PATH_SCHEMAS = {
 # handled above) is a single published card.
 CARDS_DIR_PREFIX = "content/cards/"
 
+# Any JSON file directly under content/companies/ (other than index.json,
+# handled above) is a single full company profile (Phase 8).
+COMPANIES_DIR_PREFIX = "content/companies/"
+
 
 def schema_name_for_path(path: str) -> str | None:
     """Return the schema name (matching schemas/<name>.schema.json) that
@@ -70,6 +76,8 @@ def schema_name_for_path(path: str) -> str | None:
         return EXACT_PATH_SCHEMAS[normalized]
     if normalized.startswith(CARDS_DIR_PREFIX) and normalized.endswith(".json"):
         return "card"
+    if normalized.startswith(COMPANIES_DIR_PREFIX) and normalized.endswith(".json"):
+        return "company"
     return None
 
 

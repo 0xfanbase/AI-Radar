@@ -182,7 +182,7 @@ a {
   text-decoration: underline;
 }
 
-/* Current-page indicator -- the 4 masthead nav items are the only ones
+/* Current-page indicator -- the masthead nav items are the only ones
  * ever marked `aria-current="page"` (set per-page via base.html's
  * `active_nav` context variable); this rule only adds a color/underline
  * accent on top of that real, screen-reader-visible attribute, never a

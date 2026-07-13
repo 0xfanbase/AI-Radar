@@ -1,0 +1,87 @@
+{
+  "id": "ai2",
+  "name": "Ai2",
+  "aliases": [
+    "Allen Institute for AI",
+    "Ai2"
+  ],
+  "hq_country": "US",
+  "hq_city": "Seattle",
+  "hq_lat": 47.6062,
+  "hq_lng": -122.3321,
+  "official_domains": [
+    "allenai.org"
+  ],
+  "founded": "2014",
+  "profile": {
+    "overview": {
+      "text": "Ai2 (the Allen Institute for AI) is a Seattle-based nonprofit AI research institute founded in 2014 by the late Microsoft co-founder Paul Allen, focused on open, fully inspectable AI research spanning language models, AI for science, conservation and robotics.",
+      "citations": [
+        {
+          "url": "https://allenai.org/about",
+          "outlet": "Ai2 (official)",
+          "quote": "Building breakthrough AI to solve the world's biggest problems"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "Ai2 built its Olmo line as fully open language models -- releasing model weights, training data, code and checkpoints together -- rather than the weights-only releases common among other open-weight labs.",
+        "citations": [
+          {
+            "url": "https://allenai.org/blog/olmo3",
+            "outlet": "Ai2 (official blog)",
+            "quote": "the entire model flow and full traceability back to training data"
+          }
+        ]
+      },
+      {
+        "text": "It released the Olmo 3 family on November 20, 2025, then followed with an extended reinforcement-learning update, Olmo 3.1, on December 12, 2025, at 32B parameter scale in both Think (reasoning) and Instruct variants.",
+        "citations": [
+          {
+            "url": "https://allenai.org/blog/olmo3",
+            "outlet": "Ai2 (official blog)",
+            "quote": "the strongest fully open base and thinking models we're aware of"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "Ai2 reports Olmo 3.1 32B Think improving over the original Olmo 3 32B by more than 5 points on the AIME math benchmark and more than 20 points on IFBench.",
+        "citations": [
+          {
+            "url": "https://allenai.org/blog/olmo3",
+            "outlet": "Ai2 (official blog)",
+            "quote": "improvements of 5+ points on AIME"
+          }
+        ]
+      },
+      {
+        "text": "Its models are compact enough to run on hardware ranging from laptops to research clusters, while still being, per Ai2's own comparison, its most capable fully open chat model to date at the Instruct tier.",
+        "citations": [
+          {
+            "url": "https://allenai.org/blog/olmo3",
+            "outlet": "Ai2 (official blog)",
+            "quote": "our most capable fully open chat model to date"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "Ai2's current focus is full-stack openness in frontier-adjacent AI research -- publishing data, code, model weights and checkpoints together rather than weights alone -- on the premise that true openness requires trust and accountability, not just access.",
+      "citations": [
+        {
+          "url": "https://allenai.org/blog/olmo3",
+          "outlet": "Ai2 (official blog)",
+          "quote": "trust, accountability, and shared progress"
+        }
+      ]
+    },
+    "roadmap": []
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

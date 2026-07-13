@@ -2,13 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://frontier-wire.example/schemas/frontier_board.schema.json",
   "title": "Frontier Board",
-  "description": "Top-level array of frontier-model rows (content/frontier_board.json), spec sec-5 verbatim: [{lab, region, model, release_date, modality[], context_window?, access, significance, source_url, last_verified}]. Phase 1 ships this schema only -- seeding >=12 rows across US/China/open-weights is Phase 3.",
+  "description": "Top-level array of frontier-model rows (content/frontier_board.json), spec sec-5 verbatim: [{lab, region, model, release_date, modality[], context_window?, access, significance, source_url, last_verified}]. Phase 1 ships this schema only -- seeding >=12 rows across US/China/open-weights is Phase 3. Phase 6 adds a required company_id FK into the new content/companies/<id>.json registry (schemas/company.schema.json) -- see that field's own description, and region's rewritten one, for the geography-authority split this introduces.",
   "type": "array",
   "items": {
     "type": "object",
     "required": [
       "lab",
       "region",
+      "company_id",
       "model",
       "release_date",
       "modality",
@@ -24,7 +25,14 @@
       },
       "region": {
         "type": "string",
-        "enum": ["US", "China", "open-weights"]
+        "enum": ["US", "China", "open-weights"],
+        "description": "An editorial lane for Board-page grouping ONLY (which section of the Board this row is displayed under) -- it is never a geography source. Actual HQ geography (country/city/lat/lng) lives on the company registry, resolved via company_id (schemas/company.schema.json). This distinction matters concretely for e.g. a US-HQ'd lab that primarily ships open-weights models: region here reflects the Board's editorial grouping choice for that row, while company_id's hq_country is the fact-checked geography."
+      },
+      "company_id": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$",
+        "minLength": 1,
+        "description": "Foreign key into content/companies/<id>.json (schemas/company.schema.json's id field) -- the lab this model row belongs to. This is the authoritative link to that company's HQ geography, official domains, and full profile; region above is a separate, editorial-only field and must not be read as a geography source."
       },
       "model": {
         "type": "string",

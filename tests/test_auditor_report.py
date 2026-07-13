@@ -31,8 +31,13 @@ from jsonschema import ValidationError
 import auditor.report as report_mod
 from auditor.duplicates import audit_duplicates
 from auditor.lexicon_audit import audit_lexicon
-from auditor.linkrot import audit_link_rot
+from auditor.linkrot import (
+    audit_company_hijacked_links,
+    audit_hijacked_links,
+    audit_link_rot,
+)
 from auditor.missed_story import audit_missed_stories
+from auditor.profile_staleness import audit_profile_staleness
 from auditor.trend import audit_trend
 from watcher.schema_validate import validate
 
@@ -63,6 +68,25 @@ EMPTY_MISSED_STORIES = {
     "results": [],
 }
 EMPTY_DUPLICATES = {"duplicate_pairs": []}
+EMPTY_HIJACKED_LINKS = {
+    "checked_at": "2026-07-11T23:30:03Z",
+    "total_urls": 0,
+    "counts": {"trusted": 0, "hijacked": 0, "unreachable": 0},
+    "results": [],
+}
+EMPTY_COMPANY_HIJACKED_LINKS = {
+    "checked_at": "2026-07-11T23:30:04Z",
+    "total_urls": 0,
+    "counts": {"trusted": 0, "hijacked": 0, "unreachable": 0},
+    "results": [],
+}
+EMPTY_PROFILE_STALENESS = {
+    "checked_at": "2026-07-11T23:30:05Z",
+    "stale_days_threshold": 45,
+    "total_companies": 0,
+    "counts": {"stale": 0, "fresh": 0},
+    "results": [],
+}
 
 
 # ---------------------------------------------------------------------------
@@ -107,6 +131,9 @@ def _build_empty_report(**overrides):
         verifier_trend=EMPTY_TREND,
         missed_stories=EMPTY_MISSED_STORIES,
         duplicates=EMPTY_DUPLICATES,
+        hijacked_links=EMPTY_HIJACKED_LINKS,
+        company_hijacked_links=EMPTY_COMPANY_HIJACKED_LINKS,
+        profile_staleness=EMPTY_PROFILE_STALENESS,
         now=NOW,
     )
     kwargs.update(overrides)
@@ -124,6 +151,9 @@ def test_build_report_assembles_every_field():
     assert rep["verifier_trend"] is EMPTY_TREND
     assert rep["missed_stories"] is EMPTY_MISSED_STORIES
     assert rep["duplicates"] is EMPTY_DUPLICATES
+    assert rep["hijacked_links"] is EMPTY_HIJACKED_LINKS
+    assert rep["company_hijacked_links"] is EMPTY_COMPANY_HIJACKED_LINKS
+    assert rep["profile_staleness"] is EMPTY_PROFILE_STALENESS
     assert rep["findings_appended_to_backlog"] == 0
 
 
@@ -224,6 +254,9 @@ def test_end_to_end_against_real_empty_repo_state_is_schema_valid():
         hn_items=[], cards=[], ledger={"version": 1, "entries": {}}
     )
     duplicates = audit_duplicates(cards=[])
+    hijacked_links = audit_hijacked_links(cards=[])
+    company_hijacked_links = audit_company_hijacked_links(companies=[])
+    profile_staleness = audit_profile_staleness(companies=[], today=date(2026, 7, 11))
 
     rep = report_mod.build_report(
         link_rot=link_rot,
@@ -231,6 +264,9 @@ def test_end_to_end_against_real_empty_repo_state_is_schema_valid():
         verifier_trend=verifier_trend,
         missed_stories=missed_stories,
         duplicates=duplicates,
+        hijacked_links=hijacked_links,
+        company_hijacked_links=company_hijacked_links,
+        profile_staleness=profile_staleness,
         now=NOW,
     )
 
@@ -240,3 +276,6 @@ def test_end_to_end_against_real_empty_repo_state_is_schema_valid():
     assert rep["verifier_trend"]["trend"] == "insufficient_data"
     assert rep["missed_stories"]["total_checked"] == 0
     assert rep["duplicates"]["duplicate_pairs"] == []
+    assert rep["hijacked_links"]["total_urls"] == 0
+    assert rep["company_hijacked_links"]["total_urls"] == 0
+    assert rep["profile_staleness"]["total_companies"] == 0

@@ -35,8 +35,10 @@
       <a class="masthead__brand" href="/">AI Frontier Wire</a>
       <nav class="masthead__nav" aria-label="Primary">
         <ul>
-          <li><a href="/"{% if active_nav | default('') == 'wire' %} aria-current="page"{% endif %}>Wire</a></li>
+          <li><a href="/"{% if active_nav | default('') == 'map' %} aria-current="page"{% endif %}>Map</a></li>
+          <li><a href="/wire/"{% if active_nav | default('') == 'wire' %} aria-current="page"{% endif %}>Wire</a></li>
           <li><a href="/board/"{% if active_nav | default('') == 'board' %} aria-current="page"{% endif %}>Board</a></li>
+          <li><a href="/companies/"{% if active_nav | default('') == 'companies' %} aria-current="page"{% endif %}>Companies</a></li>
           <li><a href="/lexicon/"{% if active_nav | default('') == 'lexicon' %} aria-current="page"{% endif %}>Lexicon</a></li>
           <li><a href="/primer/"{% if active_nav | default('') == 'primer' %} aria-current="page"{% endif %}>Primer</a></li>
         </ul>
@@ -75,5 +77,6 @@
   </footer>
 
   <script src="/static/js/matrix-rain.js" defer></script>
+  {% block extra_scripts %}{% endblock %}
 </body>
 </html>

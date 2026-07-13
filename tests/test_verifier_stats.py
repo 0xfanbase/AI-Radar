@@ -305,8 +305,12 @@ def test_reconcile_run_appends_one_row_onto_an_explicit_synthetic_history(tmp_pa
         encoding="utf-8",
     )
 
-    new_ledger, new_verifier_stats, card_index = reconcile_run(
-        run_plan, ledger, verifier_stats, cards_dir=cards_dir, now=NOW
+    companies_dir = tmp_path / "companies"
+    companies_dir.mkdir()
+
+    new_ledger, new_verifier_stats, card_index, company_index = reconcile_run(
+        run_plan, ledger, verifier_stats, cards_dir=cards_dir,
+        companies_dir=companies_dir, now=NOW,
     )
 
     assert len(new_verifier_stats["runs"]) == 2
@@ -320,4 +324,10 @@ def test_reconcile_run_appends_one_row_onto_an_explicit_synthetic_history(tmp_pa
 
     assert new_ledger["entries"][cluster_hash]["status"] == "published"
     assert new_ledger["entries"][cluster_hash]["card_id"] == "2026-07-09-example-card"
+
+    # Phase 8: company_index is regenerated unconditionally on every run,
+    # even one (like this one) that touched no company profile at all --
+    # an empty companies/ directory yields a valid, empty index.
+    assert company_index == {"version": 1, "companies": []}
+    assert (companies_dir / "index.json").is_file()
     assert len(card_index["cards"]) == 1

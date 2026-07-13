@@ -1,0 +1,111 @@
+{
+  "id": "meta-ai",
+  "name": "Meta AI",
+  "aliases": [
+    "Meta",
+    "Meta Superintelligence Labs",
+    "Meta Platforms"
+  ],
+  "hq_country": "US",
+  "hq_city": "Menlo Park",
+  "hq_lat": 37.4529,
+  "hq_lng": -122.1817,
+  "official_domains": [
+    "ai.meta.com",
+    "about.fb.com",
+    "meta.com"
+  ],
+  "founded": "2013",
+  "profile": {
+    "overview": {
+      "text": "Meta's AI research effort traces back to Facebook AI Research (FAIR), founded in December 2013 with Yann LeCun as its first director. In June 2025 Meta consolidated its AI work into a new unit, Meta Superintelligence Labs, headquartered in Menlo Park, California, under chief AI officer Alexandr Wang.",
+      "citations": [
+        {
+          "url": "https://en.wikipedia.org/wiki/Meta_Superintelligence_Labs",
+          "outlet": "Wikipedia",
+          "quote": "research and development in the field of artificial superintelligence"
+        }
+      ]
+    },
+    "what_theyve_done": [
+      {
+        "text": "Facebook founded FAIR in 2013 to build out an internal AI research division, directed by Yann LeCun until 2018.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Meta_AI",
+            "outlet": "Wikipedia",
+            "quote": "Meta AI was founded in 2013 as Facebook Artificial Intelligence Research (FAIR)"
+          }
+        ]
+      },
+      {
+        "text": "Meta formed Meta Superintelligence Labs in June 2025, consolidating FAIR and a new TBD Lab team under Alexandr Wang as chief AI officer, following reports that CEO Mark Zuckerberg was unhappy with the April 2025 Llama 4 release.",
+        "citations": [
+          {
+            "url": "https://en.wikipedia.org/wiki/Meta_Superintelligence_Labs",
+            "outlet": "Wikipedia",
+            "quote": "expressed displeasure at Llama 4, the company's large language model"
+          }
+        ]
+      },
+      {
+        "text": "In April 2026 the new lab shipped its first model, Muse Spark, built to reason over text, images and live camera or video input, rolling out mainly through Meta's own consumer apps rather than a broad developer API.",
+        "citations": [
+          {
+            "url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/",
+            "outlet": "Meta (official newsroom)",
+            "quote": "our most powerful model yet"
+          }
+        ]
+      }
+    ],
+    "strengths": [
+      {
+        "text": "Muse Spark is built to power Meta's own consumer AI products at scale -- the Meta AI app, WhatsApp, Instagram, Facebook, Messenger and Ray-Ban Meta glasses -- rather than as a general developer-facing API model.",
+        "citations": [
+          {
+            "url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/",
+            "outlet": "Meta (official newsroom)",
+            "quote": "purpose-built for Meta's products"
+          }
+        ]
+      }
+    ],
+    "current_focus": {
+      "text": "Meta Superintelligence Labs' current focus is Muse Spark, which Meta describes as a deliberate, scientific step in model scaling where each generation is validated before a bigger one is built, while it continues developing larger successor models in private.",
+      "citations": [
+        {
+          "url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/",
+          "outlet": "Meta (official newsroom)",
+          "quote": "a deliberate and scientific approach to model scaling"
+        }
+      ]
+    },
+    "roadmap": [
+      {
+        "text": "Meta says it has larger models already in development beyond Muse Spark and hopes to open-source future versions of the model line, even though Spark itself remains proprietary.",
+        "citations": [
+          {
+            "url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/",
+            "outlet": "Meta (official newsroom)",
+            "quote": "hope to open-source future versions of the model"
+          }
+        ]
+      },
+      {
+        "text": "Meta says its longer-term goal is what it calls personal superintelligence -- AI that understands a user's world, not just answers questions.",
+        "citations": [
+          {
+            "url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/",
+            "outlet": "Meta (official newsroom)",
+            "quote": "truly understands your world"
+          }
+        ]
+      }
+    ]
+  },
+  "status": "confirmed",
+  "generated_at": "2026-07-13T00:00:00Z",
+  "model": "claude-sonnet-5",
+  "last_verified": "2026-07-13"
+}

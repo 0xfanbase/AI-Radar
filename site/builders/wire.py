@@ -324,19 +324,33 @@ def write_wire_pages(
     window_days: int = DEFAULT_WINDOW_DAYS,
     today: date | None = None,
     masthead_sparklines: Any = None,
+    index_output_dir: Path | None = None,
 ) -> list[Path]:
-    """Render + write the Wire home page (`<public_dir>/index.html`) and
-    every month's archive page (`<public_dir>/wire/<YYYY-MM>/index.html`)
-    for every month any card exists in.
+    """Render + write the Wire index page and every month's archive page
+    (`<public_dir>/wire/<YYYY-MM>/index.html`) for every month any card
+    exists in.
 
-    `masthead_sparklines` is passed through to the home page only (see
+    `masthead_sparklines` is passed through to the index page only (see
     `build_wire_context`'s own docstring) -- month archive pages
     (`render_wire_month`/`build_month_context`) never take or render it,
-    so the masthead sparkline strip stays scoped to the Wire home page,
-    never any archive page."""
+    so the masthead sparkline strip stays scoped to wherever the caller
+    points the index page, never any archive page.
+
+    `index_output_dir` (defaulted to `None`, which preserves every
+    pre-Phase-7 caller's behavior of writing the Wire's own index page
+    at `<public_dir>/index.html`) lets a caller redirect just the index
+    page's own output location. `site/generate.py`'s Phase 7 map-frontend
+    integration passes `public_dir / "wire"` here, since the map homepage
+    (`site/builders/map.py`) now owns `<public_dir>/index.html` and the
+    Wire moved to `/wire/` (see PROGRESS.md's Phase 7 entry) -- month
+    archive pages are unaffected either way, they always render under
+    `<public_dir>/wire/<YYYY-MM>/`, which was already the right location
+    both before and after that move.
+    """
     cards = list(cards)
     lexicon_entries = list(lexicon_entries)
     public_dir = Path(public_dir)
+    index_dir = Path(index_output_dir) if index_output_dir is not None else public_dir
     written: list[Path] = []
 
     index_html = render_wire_index(
@@ -347,7 +361,7 @@ def write_wire_pages(
         today=today,
         masthead_sparklines=masthead_sparklines,
     )
-    index_path = public_dir / "index.html"
+    index_path = index_dir / "index.html"
     index_path.parent.mkdir(parents=True, exist_ok=True)
     index_path.write_text(index_html, encoding="utf-8")
     written.append(index_path)

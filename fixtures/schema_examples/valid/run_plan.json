@@ -11,5 +11,7 @@
       "rank": 1
     }
   ],
-  "reason": "normal run, 1 cluster available"
+  "reason": "normal run, 1 cluster available",
+  "profile_target": "anthropic",
+  "profile_reason": "company id 'anthropic' is named (by name/alias) in a source title of one of this run's selected clusters"
 }

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% set active_nav = "companies" %}
+
+{% block title %}Companies — AI Frontier Wire{% endblock %}
+
+{% block meta_description %}Every AI lab this site tracks -- {{ total_companies }} fact-checked company profiles, each with its own track record, strengths, current focus, and stated roadmap.{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for the companies index. Scoped to this page
+   * only, built entirely from site/static/css/tokens.css's custom
+   * properties -- matches the Lexicon/Board index pages' own established
+   * "inline <style>, no new site-wide rules" convention.
+   */
+  .companies-intro {
+    max-width: 38rem;
+  }
+
+  .companies-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .companies-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 0.85rem;
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--color-panel);
+  }
+
+  .companies-list__name {
+    font-family: var(--font-display);
+  }
+
+  .companies-list__hq {
+    opacity: 0.85;
+    font-size: 0.9rem;
+  }
+</style>
+
+<h1>Companies</h1>
+<p class="companies-intro">Every AI lab this site tracks, alphabetically.
+  Each name links to a fact-checked profile -- overview, track record,
+  strengths, current focus, and the company's own stated roadmap, each
+  claim independently cited. See the <a href="/">map</a> for the same
+  companies plotted by headquarters.</p>
+
+{% if companies %}
+<ul class="companies-list">
+  {% for company in companies %}
+  <li>
+    <a class="companies-list__name" href="{{ company.href }}">{{ company.name }}</a>
+    <span class="companies-list__hq">{{ company.hq_city }}, {{ company.hq_country }}</span>
+    <span class="{{ company.status_chip_class }}">{{ company.status_label }}</span>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>{{ empty_companies_message }}</p>
+{% endif %}
+
+{% endblock %}

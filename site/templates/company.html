@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+{% set active_nav = "companies" %}
+
+{% block title %}{{ company.name }} — AI Frontier Wire{% endblock %}
+
+{% block meta_description %}{{ company.overview.text }}{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for one company profile page. Scoped to this
+   * page only (this <style> block is only ever emitted inside the
+   * rendered company.html document, never shared across pages), built
+   * entirely from site/static/css/tokens.css's existing custom
+   * properties plus the already-established `.chip`/`.one-liner`
+   * utilities from components.css -- no new site-wide stylesheet rules
+   * are introduced here, matching every sibling page builder's own
+   * "inline <style>, no new site-wide rules" convention.
+   */
+  .company-profile__header {
+    margin-block-end: 1.5rem;
+  }
+
+  .company-profile__facts {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1rem;
+    margin: 0.5rem 0 0;
+    opacity: 0.9;
+  }
+
+  .company-profile__meta {
+    font-size: 0.8rem;
+    opacity: 0.75;
+    margin-top: 0.5rem;
+  }
+
+  .company-profile section {
+    margin-block-start: 2rem;
+  }
+
+  .company-profile section h2 {
+    margin-block-end: 0.5rem;
+  }
+
+  .company-profile__intro {
+    max-width: 42rem;
+  }
+
+  .company-profile__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 42rem;
+  }
+
+  .company-profile__list li p {
+    margin: 0 0 0.35rem;
+  }
+
+  .company-profile__sources {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.85rem;
+    opacity: 0.85;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .company-profile__roadmap-note {
+    max-width: 42rem;
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+
+  .board-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .board-row {
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.5rem;
+    background: var(--color-panel);
+    padding: 0.85rem 1.1rem;
+  }
+
+  .board-row__summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.4rem 1rem;
+  }
+
+  .board-row__model {
+    font-family: var(--font-display);
+    color: var(--color-star-white);
+  }
+
+  .board-row__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin: 0.5rem 0 0;
+  }
+
+  .board-row__facts dt {
+    font-size: 0.8rem;
+    opacity: 0.75;
+  }
+
+  .board-row__facts dd {
+    margin-inline-start: 0;
+  }
+
+  .board-row__significance {
+    max-width: 42rem;
+    margin: 0.5rem 0 0;
+  }
+
+  .wire-history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .wire-history-list li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .company-profile__back {
+    margin-block-start: 2rem;
+  }
+</style>
+
+<article class="company-profile">
+  <header class="company-profile__header">
+    <h1>{{ company.name }}</h1>
+    <p class="company-profile__facts">
+      <span>{{ company.hq_city }}, {{ company.hq_country }}</span>
+      <span>Founded {{ company.founded }}</span>
+      {% if company.official_site_url %}
+      <a href="{{ company.official_site_url }}">{{ company.official_site_label }}</a>
+      {% endif %}
+      <span class="{{ company.status_chip_class }}">{{ company.status_label }}</span>
+    </p>
+    <p class="company-profile__meta font-data">AI-generated <time datetime="{{ company.generated_at }}">{{ company.generated_at }}</time> · model: {{ company.model }} · last verified <time datetime="{{ company.last_verified }}">{{ company.last_verified }}</time> · <a href="/corrections/">Corrections</a></p>
+  </header>
+
+  <section aria-labelledby="company-overview-heading">
+    <h2 id="company-overview-heading">Overview</h2>
+    <p class="company-profile__intro">{{ company.overview.text }}</p>
+    {% if company.overview.citations %}
+    <ul class="company-profile__sources" aria-label="Sources">
+      {% for citation in company.overview.citations %}
+      <li><a href="{{ citation.url }}">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="company-history-heading">
+    <h2 id="company-history-heading">What they've done</h2>
+    {% if company.what_theyve_done %}
+    <ul class="company-profile__list">
+      {% for item in company.what_theyve_done %}
+      <li>
+        <p>{{ item.text }}</p>
+        {% if item.citations %}
+        <ul class="company-profile__sources" aria-label="Sources">
+          {% for citation in item.citations %}
+          <li><a href="{{ citation.url }}">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>Nothing recorded yet.</p>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="company-strengths-heading">
+    <h2 id="company-strengths-heading">Strengths</h2>
+    {% if company.strengths %}
+    <ul class="company-profile__list">
+      {% for item in company.strengths %}
+      <li>
+        <p>{{ item.text }}</p>
+        {% if item.citations %}
+        <ul class="company-profile__sources" aria-label="Sources">
+          {% for citation in item.citations %}
+          <li><a href="{{ citation.url }}">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>Nothing recorded yet.</p>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="company-focus-heading">
+    <h2 id="company-focus-heading">Current focus</h2>
+    <p class="company-profile__intro">{{ company.current_focus.text }}</p>
+    {% if company.current_focus.citations %}
+    <ul class="company-profile__sources" aria-label="Sources">
+      {% for citation in company.current_focus.citations %}
+      <li><a href="{{ citation.url }}">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="company-roadmap-heading">
+    <h2 id="company-roadmap-heading">{{ roadmap_heading }}</h2>
+    <p class="company-profile__roadmap-note">These are the company's own
+      stated plans, attributed and cited below -- not this site's
+      analysis or prediction of what comes next.</p>
+    {% if company.roadmap %}
+    <ul class="company-profile__list">
+      {% for item in company.roadmap %}
+      <li>
+        <p>{{ item.text }}</p>
+        {% if item.citations %}
+        <ul class="company-profile__sources" aria-label="Sources">
+          {% for citation in item.citations %}
+          <li><a href="{{ citation.url }}">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No publicly stated roadmap on record yet.</p>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="company-board-heading">
+    <h2 id="company-board-heading">Frontier Board rows</h2>
+    {% if company.board_rows %}
+    <ul class="board-list" aria-labelledby="company-board-heading">
+      {% for row in company.board_rows %}
+      <li class="board-row">
+        <div class="board-row__summary">
+          <span class="board-row__model">{{ row.model }}</span>
+          <span class="font-data"><time datetime="{{ row.release_date }}">{{ row.release_date }}</time></span>
+          <span>{{ row.access }}</span>
+        </div>
+        <dl class="board-row__facts">
+          <div><dt>Modality</dt><dd>{{ row.modality_display }}</dd></div>
+          <div><dt>Context window</dt><dd class="font-data">{{ row.context_window_display }}</dd></div>
+          <div><dt>Source</dt><dd><a href="{{ row.source_url }}">{{ row.source_host }}</a></dd></div>
+          <div><dt>Last verified</dt><dd class="font-data">{{ row.last_verified }}</dd></div>
+        </dl>
+        <p class="board-row__significance">{{ row.significance }}</p>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No Frontier Board rows for {{ company.name }} yet -- see the <a href="/board/">full Board</a>.</p>
+    {% endif %}
+  </section>
+
+  <section aria-labelledby="company-wire-heading">
+    <h2 id="company-wire-heading">Wire history</h2>
+    {% if company.cards %}
+    <ul class="wire-history-list" aria-labelledby="company-wire-heading">
+      {% for card in company.cards %}
+      <li>
+        <span class="{{ card.status_chip_class }}">{{ card.status_label }}</span>
+        <a href="{{ card.href }}">{{ card.headline }}</a>
+        <span class="font-data">{{ card.date }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>{{ empty_wire_history_message }}</p>
+    {% endif %}
+  </section>
+</article>
+
+<p class="company-profile__back"><a href="/companies/">&larr; Back to all companies</a></p>
+
+{% endblock %}

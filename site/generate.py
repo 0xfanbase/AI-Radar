@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""AI Frontier Wire -- static site generator entrypoint (Phase 4).
+"""AI Frontier Wire -- static site generator entrypoint (Phase 4; homepage
+route reassigned to the world map in Phase 7).
 
 This is the Phase-4 **integration** commit: every page builder written in
 this same working tree (`site/builders/{wire,board,lexicon,primer,moving,
@@ -7,12 +8,17 @@ method,corrections,about}.py`, each independently tested and each
 deliberately self-sufficient -- see every one of their own docstrings and
 `IMPROVEMENT_BACKLOG.md`'s per-builder entries -- for why none of them
 called back into this file until now) is wired together here, in one
-place, into the real `public/` output the approved build plan's route
-table names:
+place, into the real `public/` output. Phase 7 (`site/builders/map.py`)
+reassigns `/` from the Wire index to the new world-map homepage and moves
+the Wire index itself to `/wire/` -- see PROGRESS.md's Phase 7 entry for
+why. Current route table:
 
-    /                       Wire home page (last ~14 days)
+    /                       World map homepage (Phase 7)
+    /wire/                  Wire index (last ~14 days) -- moved here from `/`
     /wire/<YYYY-MM>/        Wire monthly archive
     /board/                 Frontier Board
+    /companies/             Companies index (Phase 8)
+    /companies/<slug>/      One fact-checked profile page per company (Phase 8)
     /lexicon/                Lexicon index
     /lexicon/<slug>/        one page per Lexicon term
     /primer/                Primer (10-step on-ramp)
@@ -120,6 +126,10 @@ def _load_module_by_path(name: str, path: Path):
 
 wire = _load_module_by_path("frontier_wire_site_builders_wire", BUILDERS_DIR / "wire.py")
 board = _load_module_by_path("frontier_wire_site_builders_board", BUILDERS_DIR / "board.py")
+map_builder = _load_module_by_path("frontier_wire_site_builders_map", BUILDERS_DIR / "map.py")
+company_builder = _load_module_by_path(
+    "frontier_wire_site_builders_company", BUILDERS_DIR / "company.py"
+)
 lexicon_builder = _load_module_by_path(
     "frontier_wire_site_builders_lexicon", BUILDERS_DIR / "lexicon.py"
 )
@@ -225,6 +235,67 @@ def load_cards() -> list[dict]:
     return cards
 
 
+def load_companies_index() -> list[dict]:
+    """Load `content/companies/index.json`'s `companies[]` array -- the
+    map homepage's marker list (id/name/hq_country/hq_city/hq_lat/
+    hq_lng/status only). Returns `[]` if the file doesn't exist yet.
+
+    No `schemas/company_index.schema.json` exists (this summary shape
+    is deliberately not the same as `schemas/company.schema.json`,
+    which describes the fuller per-company profile record at
+    `content/companies/<id>.json` -- a Phase 8 concern this loader
+    doesn't touch) -- logged in IMPROVEMENT_BACKLOG.md, same "loaded
+    unvalidated" tolerance this module's own docstring already applies
+    to `content/primer.json`. `content/companies/` is a subdirectory,
+    not a top-level `content/*.json` file, so `iter_top_level_json()`
+    never sees it -- this is a bespoke loader for the same reason
+    `load_cards()` is."""
+    path = CONTENT_DIR / "companies" / "index.json"
+    if not path.is_file():
+        log.warning(
+            "no content/companies/index.json found -- map homepage will render "
+            "zero markers"
+        )
+        return []
+    payload = load_json(path)
+    return list(payload.get("companies", []))
+
+
+def load_companies() -> list[dict]:
+    """Load every real `content/companies/<slug>.json` full profile
+    (excluding the generated `index.json` summary manifest this module's
+    own `load_companies_index()` reads instead) -- the Phase 8 company
+    profile pages' own input, distinct from the map homepage's marker
+    summary. Returns `[]` if `content/companies/` doesn't exist yet.
+
+    Each profile is jsonschema-validated against
+    `schemas/company.schema.json` (when present) before being returned --
+    same "a bad on-disk artifact is a real, loud bug" discipline this
+    module's own `load_cards()` already applies to `content/cards/`.
+    """
+    companies_dir = CONTENT_DIR / "companies"
+    if not companies_dir.is_dir():
+        return []
+    company_schema_path = SCHEMAS_DIR / "company.schema.json"
+    company_schema = load_json(company_schema_path) if company_schema_path.exists() else None
+    if company_schema is None:
+        log.warning(
+            "no schema found at schemas/company.schema.json -- company "
+            "profiles loaded unvalidated"
+        )
+    companies = []
+    for path in sorted(companies_dir.glob("*.json")):
+        if path.name == "index.json":
+            continue
+        company = load_json(path)
+        if company_schema is not None:
+            jsonschema.validate(
+                company, company_schema, format_checker=jsonschema.FormatChecker()
+            )
+        companies.append(company)
+    return companies
+
+
 def load_and_validate_content() -> dict[str, Any]:
     """Load every top-level content/*.json and data/*.json artifact plus
     content/cards/*.json, jsonschema-validating each against its
@@ -263,6 +334,8 @@ def load_and_validate_content() -> dict[str, Any]:
             jsonschema.validate(payload, schema, format_checker=jsonschema.FormatChecker())
         loaded[path.stem] = payload
     loaded["cards"] = load_cards()
+    loaded["companies_index"] = load_companies_index()
+    loaded["companies"] = load_companies()
     return loaded
 
 
@@ -357,15 +430,30 @@ def apply_base_path(public_dir: Path, base_path: str = BASE_PATH) -> int:
     return rewritten
 
 
-def collect_routes(cards: list[dict], lexicon_entries: list[dict]) -> list[str]:
+def collect_routes(
+    cards: list[dict], lexicon_entries: list[dict], companies: list[dict] | None = None
+) -> list[str]:
     """Every route this build produces, root-relative, for sitemap.xml.
-    Order roughly matches the masthead nav's own route order (build plan
-    section 5's page list), with the Wire's own newest-first archive
-    months and the Lexicon's own alphabetical term slugs interleaved in
-    their natural order."""
-    routes = ["/"]
+    Order roughly matches the masthead nav's own route order (Map, Wire,
+    Board, Companies, Lexicon, Primer, ...), with the Wire's own
+    newest-first archive months, the Companies index's own alphabetical
+    profile slugs, and the Lexicon's own alphabetical term slugs
+    interleaved in their natural order. `/` is the map homepage as of
+    Phase 7 (site/builders/map.py); the Wire index itself moved to
+    `/wire/` (see PROGRESS.md's Phase 7 entry) -- both are listed
+    explicitly since neither is derivable from the other. `companies`
+    (Phase 8, defaulted to `()` so an existing caller passing only two
+    positional args keeps working) is the full set of loaded
+    `content/companies/<slug>.json` profiles."""
+    companies = companies or []
+    routes = ["/", "/wire/"]
     routes += [f"/wire/{ym}/" for ym in wire.available_months(cards)]
     routes.append("/board/")
+    routes.append("/companies/")
+    routes += [
+        f"/companies/{slug}/"
+        for slug in [str(c["id"]) for c in company_builder.sorted_companies(companies)]
+    ]
     routes.append("/lexicon/")
     routes += [f"/lexicon/{slug}/" for slug in lexicon_builder.all_slugs(lexicon_entries)]
     routes.append("/primer/")
@@ -407,11 +495,13 @@ def render_pages(env: Environment, content: dict[str, Any], public_dir: Path) ->
     page-specific logic to each independently-tested builder module under
     `site/builders/` -- this function's only job is calling each one with
     the right slice of `content` and the shared `env`/`public_dir`, in a
-    sensible order (Wire first, since it's the home page; About/404 last,
-    since they carry no data dependency at all)."""
+    sensible order (the map homepage first, since it's `/` as of Phase
+    7; About/404 last, since they carry no data dependency at all)."""
     cards = content.get("cards", [])
     lexicon_entries = content.get("lexicon", [])
     frontier_board_rows = content.get("frontier_board", [])
+    companies_index = content.get("companies_index", [])
+    companies = content.get("companies", [])
     primer = content.get("primer", {})
     whats_moving = content.get("whats_moving", {})
     ledger = content.get("ledger", {})
@@ -428,23 +518,47 @@ def render_pages(env: Environment, content: dict[str, Any], public_dir: Path) ->
     today = datetime.now(timezone.utc).date()
 
     # Nav-condense pass (see IMPROVEMENT_BACKLOG.md): the masthead
-    # sparkline strip is now scoped to the Wire home page only, not
-    # site-wide -- so it's computed once here and passed explicitly to
-    # `wire.write_wire_pages()` below, rather than injected as a Jinja
-    # environment global every template picked up automatically. Capped
-    # to the top `moving.MASTHEAD_TOPIC_LIMIT` topics by 7-day mention
-    # total (`build_masthead_sparklines`'s own job) so the strip fits a
-    # narrow mobile viewport.
+    # sparkline strip is scoped to exactly one page, not site-wide -- so
+    # it's computed once here and passed explicitly to that page's
+    # writer below, rather than injected as a Jinja environment global
+    # every template picked up automatically. Capped to the top
+    # `moving.MASTHEAD_TOPIC_LIMIT` topics by 7-day mention total
+    # (`build_masthead_sparklines`'s own job) so the strip fits a narrow
+    # mobile viewport. Phase 7 moves the strip from the Wire home page
+    # to the new map homepage (see the approved plan's "the existing
+    # What's Moving strip stays above the map" interaction-design
+    # note) -- the Wire itself (now at `/wire/`) no longer receives it,
+    # so it's passed to `map_builder.write_map_page()` only, never to
+    # `wire.write_wire_pages()` below.
     strip_views = moving.build_masthead_sparklines(list(whats_moving.get("topics", [])))
 
     written: list[Path] = []
+    written.append(
+        map_builder.write_map_page(
+            env,
+            companies_index,
+            frontier_board_rows,
+            cards,
+            public_dir,
+            masthead_sparklines=strip_views,
+        )
+    )
     written += wire.write_wire_pages(
-        env, cards, lexicon_entries, public_dir, today=today, masthead_sparklines=strip_views
+        env,
+        cards,
+        lexicon_entries,
+        public_dir,
+        today=today,
+        masthead_sparklines=None,
+        index_output_dir=public_dir / "wire",
     )
     written.append(
         board.write_board_page(
             env, frontier_board_rows, today, public_dir, lexicon_entries=lexicon_entries
         )
+    )
+    written += company_builder.write_company_pages(
+        env, companies, frontier_board_rows, cards, public_dir
     )
     written += lexicon_builder.write_lexicon_pages(
         env, lexicon_entries, public_dir, cards=cards
@@ -462,7 +576,7 @@ def render_pages(env: Environment, content: dict[str, Any], public_dir: Path) ->
     written.append(about.write_about_page(env, public_dir))
     written.append(write_404_page(env, public_dir))
 
-    routes = collect_routes(cards, lexicon_entries)
+    routes = collect_routes(cards, lexicon_entries, companies)
     write_sitemap(routes, public_dir)
     write_robots(public_dir)
 
