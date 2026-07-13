@@ -197,7 +197,9 @@ def fetch_hn_items(
     fetch failure against a live window (e.g. retries exhausted in
     ``watcher.http.fetch``) propagates instead of being silently
     swallowed -- the caller decides whether to skip HN for the run, same
-    contract as ``watcher.http.fetch`` itself.
+    contract as ``watcher.http.fetch`` itself. ``watcher.cli.run`` is that
+    caller, and wraps this call in ``_fetch_source`` so the decision is
+    "skip HN for the run," never "crash the whole run."
     """
     if not check_robots_allowed(SEARCH_BY_DATE_URL):
         logger.warning(

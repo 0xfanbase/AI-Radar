@@ -4001,6 +4001,33 @@ pattern -- and this entry is the correction of record.
   on any other `<script>` tag appearing anywhere. Full account in
   `PROGRESS.md`'s "Architecture exception" entry.
 
+- **2026-07-13 — Bug fix: a single top-level source's exhausted-retry
+  failure was crashing the entire `watch` job, not just skipping that
+  source.** Surfaced by a real `watch.yml` cron failure: `export.arxiv.org`
+  returned a sustained `429`, `watcher.http.fetch` retried twice (per
+  `MAX_RETRIES`/`BACKOFF_BASE_SECONDS`) and then raised `HTTPError` per its
+  own documented contract ("callers decide whether to skip that source for
+  the run") -- but `watcher/cli.py`'s `run()` called `fetch_hn_items`/
+  `fetch_arxiv_items`/`fetch_all_lab_items` directly with no such decision
+  point, so the exception propagated straight out of `main()`, exit code 1,
+  zero cards for the day, even though HN and all four labs were fetchable.
+  This was inconsistent with the precedent `watcher/sources/labs/registry.py`
+  already established for isolating one *lab's* failure from the other
+  three (`fetch_all_lab_items`'s broad `except Exception`, logged
+  2026-07-09 above) -- that same "skip a source cleanly rather than crash
+  the whole run" rule had just never been extended one level up, across
+  HN/arXiv/labs themselves. Fixed by adding `watcher.cli._fetch_source`,
+  a thin wrapper applying the identical broad-except/log/degrade-to-`[]`
+  pattern around each of the three top-level fetch calls in `run()`. HN's
+  own docstring already described this as the intended contract ("the
+  caller decides whether to skip HN for the run") -- it just wasn't true
+  until now; updated to say so. Covered by
+  `test_run_skips_a_failing_source_without_crashing_the_whole_run` in
+  `tests/test_cli.py`, mirroring the existing per-lab isolation test
+  (`test_fetch_all_lab_items_skips_a_failing_lab_without_crashing`).
+  `watcher.http.fetch`'s own retry/backoff logic is unchanged -- this fix
+  is purely about what happens after retries are genuinely exhausted.
+
 ## Audit findings -- audit-20260712T012433Z (2026-07-12T01:24:33Z)
 
 - [ ] **[MEDIUM]** Missed story: "GLM 5.2 and the coming AI margin collapse" (https://martinalderson.com/posts/the-upcoming-ai-margin-collapse-part-1-glm-5-2/) -- not covered by any published card or ledger entry.

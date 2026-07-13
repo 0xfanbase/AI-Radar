@@ -14,6 +14,7 @@ import json
 from datetime import datetime, timezone
 
 import pytest
+import requests
 
 from watcher.cli import RunResult, main, run
 from watcher.ledger import empty_ledger
@@ -218,6 +219,36 @@ def test_run_handles_empty_fetch_pool_without_raising(tmp_path, monkeypatch):
     assert json.loads(queue_path.read_text(encoding="utf-8")) == []
     whats_moving = json.loads(whats_moving_path.read_text(encoding="utf-8"))
     assert all(t["daily_counts"] == [0] * 7 for t in whats_moving["topics"])
+
+
+def test_run_skips_a_failing_source_without_crashing_the_whole_run(tmp_path, monkeypatch):
+    """A single source's exhausted-retry failure (e.g. arXiv returning a
+    sustained 429, as seen in the 2026-07-13 ``watch`` job failure) must
+    degrade that source to zero items, not crash the whole ``run()`` --
+    same "skip a source cleanly" contract already covered for individual
+    labs by ``test_fetch_all_lab_items_skips_a_failing_lab_without_crashing``,
+    extended here to the top-level HN/arXiv/labs fetch calls themselves.
+    """
+    hn_items, _arxiv_items, lab_items = _fake_items()
+
+    def raising_arxiv_fetch(session, **kwargs):
+        raise requests.exceptions.HTTPError("429 Client Error")
+
+    monkeypatch.setattr("watcher.cli.fetch_hn_items", lambda session, **kwargs: hn_items)
+    monkeypatch.setattr("watcher.cli.fetch_arxiv_items", raising_arxiv_fetch)
+    monkeypatch.setattr("watcher.cli.fetch_all_lab_items", lambda session, **kwargs: lab_items)
+    monkeypatch.setattr("watcher.cli.build_session", lambda: object())
+
+    result = run(
+        now=FIXED_NOW,
+        ledger_path=tmp_path / "ledger.json",
+        queue_path=tmp_path / "queue.json",
+        whats_moving_path=tmp_path / "whats_moving.json",
+    )
+
+    assert result.arxiv_items == 0
+    assert result.hn_items == len(hn_items)
+    assert result.lab_items == len(lab_items)
 
 
 # --------------------------------------------------------------------------
