@@ -5,10 +5,10 @@ This build stage wires every Phase 4 page builder
 about}.py`) together in `site/generate.py`'s own `render_pages()`. This
 file now covers, in addition to the original scaffold-stage smoke tests:
 
-* every named route in the approved build plan's route table actually
-  gets written under `public/` (home, Board, Lexicon index + one page per
-  real term, Primer, What's Moving, Method, Corrections, About, 404,
-  sitemap.xml, robots.txt);
+* every named route in the route table actually gets written under
+  `public/` (map homepage, Wire index, Board, Lexicon index + one page
+  per real term, Primer, What's Moving, Method, Corrections, About,
+  404, sitemap.xml, robots.txt);
 * the accessibility pass this integration commit performs across the
   *whole* generated output: exactly one `<h1>` per HTML page, one `<main
   id="main-content">` landmark per page, and the skip-link as the first
@@ -16,10 +16,14 @@ file now covers, in addition to the original scaffold-stage smoke tests:
   scaffold-stage placeholder);
 * `public/404.html`, `public/sitemap.xml`, and `public/robots.txt` are
   real, well-formed files reachable the way GitHub Pages expects; and
-* the masthead sparkline strip is scoped to the Wire home page only (the
+* the masthead sparkline strip is scoped to exactly one page (the
   nav-condense pass narrowed this from an earlier "site-wide" design --
   see `IMPROVEMENT_BACKLOG.md`): present on `public/index.html`, absent
-  from every other generated page.
+  from every other generated page. Phase 7 moved that page's own
+  *content* from the Wire index to the new world-map homepage (the Wire
+  index itself moved to `public/wire/index.html`) without changing
+  which physical file carries the strip -- see PROGRESS.md's Phase 7
+  entry.
 
 All of this runs against this repo's *real* `content/*.json` and
 `data/*.json` (not fixtures), per this file's own established
@@ -386,9 +390,12 @@ def test_every_named_route_in_the_build_plan_is_written(built_site):
     # content/cards/ is empty in this environment (no analyst run has
     # happened for real yet), so no /wire/<YYYY-MM>/ archive page is
     # expected -- every other route in the build plan's table is,
-    # regardless.
+    # regardless. Phase 7: "index.html" is now the map homepage;
+    # "wire/index.html" is the Wire index that used to live at
+    # "index.html" before the homepage swap.
     expected = [
         "index.html",
+        "wire/index.html",
         "board/index.html",
         "lexicon/index.html",
         "primer/index.html",
@@ -543,33 +550,58 @@ def test_matrix_rain_wrapper_opening_tag_carries_class_and_aria_hidden_together(
 
 
 def test_exactly_one_script_tag_and_it_is_the_matrix_rain_canvas(built_site):
-    # AI Frontier Wire's zero-JavaScript architecture has exactly ONE
-    # deliberate, narrow exception (see IMPROVEMENT_BACKLOG.md): the
-    # canvas-based Matrix rain effect, a progressive enhancement over the
-    # always-present <noscript> CSS/SVG fallback (see the tests below).
-    # This is the test that keeps that exception singular and narrow --
-    # any OTHER <script> tag anywhere, on any page, is still a hard
-    # failure, exactly like the test this one replaces.
+    # AI Frontier Wire's zero-JavaScript architecture has exactly TWO
+    # deliberate, narrow exceptions (see IMPROVEMENT_BACKLOG.md): the
+    # canvas-based Matrix rain effect (site/static/js/matrix-rain.js), a
+    # progressive enhancement over the always-present <noscript> CSS/SVG
+    # fallback (see the tests below), present on EVERY page with no
+    # exception; and, as of Phase 7, the world-map marker-interaction
+    # script (site/static/js/map.js), allowed ONLY on the map homepage
+    # (public/index.html) -- see site/templates/map_index.html's own
+    # `extra_scripts` block. This is the test that keeps both exceptions
+    # singular and narrow -- any OTHER <script> tag anywhere, on any
+    # page, or map.js appearing on any page other than the map homepage,
+    # is still a hard failure, exactly like the test this one replaces.
     script_re = re.compile(r"<script\b[^>]*>", re.IGNORECASE)
+    map_home = built_site / "index.html"
     for page in _all_html_files(built_site):
         html = page.read_text(encoding="utf-8")
         matches = script_re.findall(html)
-        assert len(matches) == 1, (
+        allowed_srcs = ["static/js/matrix-rain.js"]
+        if page == map_home:
+            allowed_srcs.append("static/js/map.js")
+        assert len(matches) == len(allowed_srcs), (
             f"{page.relative_to(built_site)} contains {len(matches)} <script> "
-            f"tag(s) -- exactly one (the matrix-rain canvas script) is allowed"
+            f"tag(s) -- expected exactly {len(allowed_srcs)}: {allowed_srcs!r}"
         )
-        # "static/js/matrix-rain.js" rather than an anchored "/static/..."
-        # prefix: apply_base_path() legitimately rewrites every src="/...
-        # to include the site's base path (e.g. "/AI-Radar/static/...") --
-        # see site/generate.py -- so only the path's own tail is asserted.
-        assert 'src="' in matches[0] and "static/js/matrix-rain.js" in matches[0], (
-            f"{page.relative_to(built_site)}'s one <script> tag must be the "
-            f"matrix-rain canvas script, got: {matches[0]!r}"
-        )
-        assert "defer" in matches[0], (
-            f"{page.relative_to(built_site)}'s matrix-rain script tag must "
-            f"carry defer so it never blocks parsing/first paint"
-        )
+        for tag in matches:
+            assert 'src="' in tag, (
+                f"{page.relative_to(built_site)} has a <script> tag with no "
+                f"src attribute: {tag!r}"
+            )
+            # "static/js/..." rather than an anchored "/static/..." prefix:
+            # apply_base_path() legitimately rewrites every src="/... to
+            # include the site's base path (e.g. "/AI-Radar/static/...")
+            # -- see site/generate.py -- so only the path's own tail is
+            # matched.
+            assert any(src in tag for src in allowed_srcs), (
+                f"{page.relative_to(built_site)}'s <script> tag isn't one of "
+                f"the allowed {allowed_srcs!r}, got: {tag!r}"
+            )
+            assert "defer" in tag, (
+                f"{page.relative_to(built_site)}'s <script> tag must carry "
+                f"defer so it never blocks parsing/first paint: {tag!r}"
+            )
+        # Every allowed src for this page must actually be present exactly
+        # once -- not just that every present tag is *some* allowed src
+        # (which alone wouldn't catch e.g. matrix-rain.js appearing twice
+        # while map.js is silently missing from the map homepage).
+        for src in allowed_srcs:
+            count = sum(1 for tag in matches if src in tag)
+            assert count == 1, (
+                f"{page.relative_to(built_site)} expected exactly one "
+                f"<script src=\"...{src}\"> tag, found {count}"
+            )
 
 
 def test_matrix_rain_canvas_present_on_every_page_before_the_noscript_fallback(

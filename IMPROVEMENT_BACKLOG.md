@@ -4053,3 +4053,76 @@ pattern -- and this entry is the correction of record.
 - [ ] **[MEDIUM]** Missed story: "Anthropic's Method to Losing Goodwill in a Few Easy Steps" (https://raheeljunaid.com/blog/anthropics-method-to-losing-goodwill-in-a-few-easy-steps/) -- not covered by any published card or ledger entry.
 - [ ] **[MEDIUM]** Missed story: "AI content is everywhere on social media, especially LinkedIn" (https://www.pangram.com/blog/ai-in-your-feed) -- not covered by any published card or ledger entry.
 
+## Phase 7: map frontend -- vendoring, projection, homepage swap (2026-07-13)
+
+Judgment calls and one logged gap from building the world-map homepage
+(`site/builders/map.py`, `site/static/geo/`, `site/static/js/map.js`,
+the `/` <-> `/wire/` homepage swap). See PROGRESS.md's own Phase 7 entry
+for the full build description; this entry is the decision log.
+
+- **GeoJSON, not TopoJSON, for the vendored world geometry.** The
+  approved plan named "the topojson/world-atlas project's
+  `countries-110m.json`" as one acceptable source but explicitly also
+  allowed "Natural Earth's own site" as an alternative. Chose GeoJSON
+  (fetched from `nvkelso/natural-earth-vector`, the standard long-lived
+  GitHub mirror of Natural Earth's vector layers) specifically because
+  it needs no arc-decoding step to become SVG paths -- TopoJSON's
+  quantized-arc format would require a hand-written decoder under this
+  build's own "no new pip dependency" constraint, which is strictly
+  more code for the same result at this map's scale (13 markers, no
+  interactive pan/zoom that would benefit from TopoJSON's smaller
+  transfer size). `site/static/geo/README.md` documents the exact
+  fetch, license, and a properties-only trim (60-ish Natural Earth
+  cartographic columns down to `name`/`iso_a2`/`continent`; geometry
+  itself untouched) that shrank the vendored file from 838,726 to
+  257,939 bytes.
+- **The masthead "What's Moving" sparkline strip moved with the
+  homepage content, not duplicated.** The approved plan's interaction
+  design says "the existing What's Moving strip stays above the map" --
+  read as the strip relocating to wherever `/` now renders (the map),
+  not staying pinned to the Wire index once the Wire moved to `/wire/`.
+  `site/generate.py` now threads `masthead_sparklines` into
+  `map_builder.write_map_page()` only; `wire.write_wire_pages()` is
+  called with `masthead_sparklines=None`. Structural enforcement, not
+  just a doc claim: `site/tests/test_build.py`'s existing "present on
+  exactly one generated page" test pair
+  (`test_masthead_sparkline_strip_renders_on_the_wire_home_page` /
+  `test_masthead_sparkline_strip_absent_from_every_other_page`) needed
+  no edits to keep passing under the new homepage -- they already assert
+  "present on `index.html`, absent everywhere else," which is exactly
+  as true of the map page as it was of the old Wire index.
+- **`content/companies/index.json` has no `schemas/company_index.schema.json`
+  counterpart.** Phase 6 built the full per-company profile schema
+  (`schemas/company.schema.json`) but this separate summary-index shape
+  (`{id, name, hq_country, hq_city, hq_lat, hq_lng, status}` per entry --
+  deliberately not the same shape as a full profile record) has no
+  schema of its own. `site/generate.py::load_companies_index()` loads it
+  unvalidated with a logged warning, the same tolerance already applied
+  to `content/primer.json`'s pre-existing gap. Not fixed in this phase
+  (schema authorship for a new content shape is arguably its own
+  decision, and this phase's job was the map frontend, not schema
+  backfill) -- flagged here as a real, open gap for a future pass
+  (either a dedicated `company_index.schema.json`, or -- possibly
+  cleaner -- deriving the map's marker list directly from
+  `content/companies/<id>.json`'s already-schema'd fields instead of
+  maintaining a second, unvalidated summary file at all).
+- **Card popover links use the existing `/wire/<YYYY-MM>/#card-<id>`
+  fragment-anchor convention, not a new permalink scheme.** Cards have
+  never had a standalone page route on this site --
+  `site/templates/card.html` renders inline inside the Wire index/month
+  archive with a stable `id="card-<id>"` anchor (`site/builders/
+  wire.py`'s own established pattern). `map.py::cards_for_company()`
+  reuses that exact anchor convention for its news-drill-down links
+  rather than inventing a second one Phase 8 (or a future card-permalink
+  project) would then have to reconcile.
+- **Marker offset table is hand-authored, not computed.** Per the
+  approved plan's own explicit instruction ("fixed, deterministic
+  per-marker offsets you compute by hand for the ~13 known markers --
+  do not pull in a runtime clustering library"),
+  `map.py::MARKER_OFFSET_PX` is a literal, checked-in pixel-offset
+  dict, verified (`site/tests/test_map_builder.py::
+  test_marker_offset_table_covers_every_real_seeded_company`) to cover
+  every one of the 13 real `content/companies/index.json` ids. If the
+  registry grows meaningfully, this table needs a human pass, the same
+  way the reputable-outlet table does -- not more code.
+

@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+{% set active_nav = "map" %}
+
+{% block title %}AI Frontier Wire — Where AI Is Moving{% endblock %}
+
+{% block meta_description %}Frontier AI labs plotted at their real headquarters -- click a marker to see its latest models and news; use the open-weights filter to see who ships open weights, wherever they are.{% endblock %}
+
+{% block content %}
+
+<style>
+  /*
+   * Page-specific styling for the world-map homepage. Scoped to this
+   * page only (matches every sibling page's own inline-<style>
+   * convention -- see board.html/wire_index.html's own header
+   * comments), built entirely from tokens.css's custom properties.
+   * Progressive enhancement: every rule below must read correctly with
+   * site/static/js/map.js NOT running -- see map.js's own header
+   * comment and this file's <noscript>-equivalent guarantee (the name
+   * link stays a plain, unstyled-dependency <a> regardless of script
+   * state).
+   */
+  .map-intro {
+    max-width: 38rem;
+  }
+
+  .map-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    margin-block: 1rem;
+  }
+
+  .map-toggle {
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    color: var(--color-ink);
+    background: var(--color-panel);
+    border: 1px solid var(--color-hairline);
+    border-radius: 999px;
+    padding: 0.4em 0.9em;
+    cursor: pointer;
+  }
+
+  .map-toggle:hover,
+  .map-toggle:focus-visible {
+    color: var(--color-star-white);
+  }
+
+  .map-toggle[aria-pressed="true"] {
+    color: var(--color-signal-green);
+    border-color: var(--color-signal-green);
+  }
+
+  /* No-JS state: the two toggle buttons do nothing without map.js (no
+     click handler is ever attached), so they're visually de-emphasized
+     by default and only gain their normal "clearly interactive" look
+     once JS confirms it's actually running -- see map.js's own
+     `document.body.classList.add("map-js-ready")` call. */
+  .map-toggle {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+
+  body.map-js-ready .map-toggle {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .map-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: {{ map_width }} / {{ map_height }};
+    background: var(--color-panel);
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.5rem;
+    overflow: visible;
+    margin-block: 1rem 1.5rem;
+  }
+
+  .map-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .map-country {
+    fill: var(--color-bg);
+    fill-rule: evenodd;
+    stroke: var(--color-hairline);
+    stroke-width: 0.6;
+  }
+
+  .map-markers {
+    position: absolute;
+    inset: 0;
+  }
+
+  .map-marker {
+    position: absolute;
+    transform: translate(-50%, -50%);
+  }
+
+  .map-marker__glyph {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: none;
+    border: none;
+    padding: 0.15rem;
+    margin: 0;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .map-marker__dot {
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--color-signal-green);
+    box-shadow: 0 0 0 2px var(--color-bg);
+  }
+
+  .map-marker--open-weights .map-marker__dot {
+    background: var(--color-star-white);
+  }
+
+  .map-marker__badge {
+    font-family: var(--font-data);
+    font-size: 0.6rem;
+    letter-spacing: 0.03em;
+    color: var(--color-bg);
+    background: var(--color-star-white);
+    border-radius: 0.2rem;
+    padding: 0 0.25em;
+  }
+
+  .map-marker__name {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--color-ink);
+    margin-inline-start: 0.85rem;
+  }
+
+  .map-marker__name:hover,
+  .map-marker__name:focus-visible {
+    color: var(--color-star-white);
+    text-decoration: underline;
+  }
+
+  /* Open-weights filter: dims (never hides -- still fully navigable,
+     including by keyboard/screen reader) any marker map.js has flagged
+     as not currently open-weights. */
+  .map-marker--dimmed {
+    opacity: 0.3;
+  }
+
+  .map-popover {
+    position: absolute;
+    top: 1.1rem;
+    left: 0;
+    z-index: 5;
+    width: max-content;
+    max-width: 16rem;
+    background: var(--color-panel);
+    border: 1px solid var(--color-hairline);
+    border-radius: 0.4rem;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.85rem;
+  }
+
+  .map-popover[hidden] {
+    display: none;
+  }
+
+  .map-popover__hq {
+    margin: 0 0 0.4rem;
+    font-family: var(--font-display);
+    color: var(--color-star-white);
+  }
+
+  .map-popover__board {
+    margin: 0 0 0.4rem;
+  }
+
+  .map-popover__row {
+    margin: 0 0 0.3rem;
+  }
+
+  .map-popover__row dt {
+    font-size: 0.75rem;
+    opacity: 0.75;
+  }
+
+  .map-popover__row dd {
+    margin-inline-start: 0;
+  }
+
+  .map-popover__verified {
+    opacity: 0.7;
+    font-size: 0.75rem;
+  }
+
+  .map-popover__cards {
+    list-style: none;
+    margin: 0 0 0.4rem;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .map-popover__empty {
+    opacity: 0.75;
+    margin: 0 0 0.4rem;
+  }
+
+  .map-popover__footer {
+    margin: 0;
+  }
+
+  .map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-block-end: 1.5rem;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+
+<h1>Where AI Is Moving</h1>
+<p class="map-intro">Frontier AI labs, plotted at their real headquarters
+  -- {{ total_markers }} tracked, {{ open_weights_count }} shipping at
+  least one open-weights model. Click a marker's dot to see its latest
+  Frontier Board rows and wire stories, or click its name for a full
+  profile. See the <a href="/wire/">Wire</a> for the day-by-day story
+  feed, or the <a href="/board/">Frontier Board</a> for every tracked
+  model in one table.</p>
+
+<div class="map-controls">
+  <button type="button" id="map-expand-all" class="map-toggle" aria-pressed="false">Expand all</button>
+  <button type="button" id="map-filter-open-weights" class="map-toggle" aria-pressed="false">Open-weights only</button>
+</div>
+
+{% if markers %}
+<div class="map-wrap">
+  <svg class="map-svg" viewBox="0 0 {{ map_width }} {{ map_height }}" role="img" aria-label="World map with {{ total_markers }} markers for tracked AI labs at their headquarters" preserveAspectRatio="xMidYMid meet">
+    <g class="map-countries">
+      {% for country in country_paths %}
+      <path d="{{ country.d }}" class="map-country"{% if country.name %} data-name="{{ country.name }}"{% endif %}></path>
+      {% endfor %}
+    </g>
+  </svg>
+
+  <div class="map-markers">
+    {% for marker in markers %}
+    <div class="map-marker{% if marker.open_weights %} map-marker--open-weights{% endif %}" style="left: {{ marker.pct_x }}%; top: {{ marker.pct_y }}%;" data-company="{{ marker.id }}" data-open-weights="{{ 'true' if marker.open_weights else 'false' }}">
+      <button type="button" class="map-marker__glyph" aria-expanded="false" aria-controls="map-popover-{{ marker.id }}">
+        <span class="map-marker__dot" aria-hidden="true"></span>
+        {% if marker.open_weights %}<span class="map-marker__badge" aria-hidden="true" title="Ships at least one open-weights model">OW</span>{% endif %}
+        <span class="visually-hidden">{{ marker.name }} -- show details</span>
+      </button><a class="map-marker__name" href="{{ marker.profile_href }}">{{ marker.name }}</a>
+
+      <div class="map-popover" id="map-popover-{{ marker.id }}" hidden>
+        <p class="map-popover__hq">{{ marker.hq_city }}, {{ marker.hq_country }}{% if marker.open_weights %} <span class="chip chip--confirmed">Open-weights</span>{% endif %}</p>
+
+        {% if marker.board_rows %}
+        <dl class="map-popover__board">
+          {% for row in marker.board_rows %}
+          <div class="map-popover__row">
+            <dt class="font-data">{{ row.release_date }}</dt>
+            <dd>{{ row.model }} -- {{ row.access }}<br><span class="map-popover__verified">verified {{ row.last_verified }}</span></dd>
+          </div>
+          {% endfor %}
+        </dl>
+        {% endif %}
+
+        {% if marker.cards %}
+        <ul class="map-popover__cards">
+          {% for card in marker.cards %}
+          <li><a href="{{ card.href }}">{{ card.headline }}</a> <span class="font-data">{{ card.date }}</span> <span class="{{ card.status_chip_class }}">{{ card.status_label }}</span></li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="map-popover__empty">{{ marker.empty_cards_message }}</p>
+        {% endif %}
+
+        <p class="map-popover__footer"><a href="{{ marker.profile_href }}">Full profile &rarr;</a></p>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<p class="map-legend">
+  <span><span class="map-marker__dot" aria-hidden="true" style="display:inline-block;position:static;transform:none;vertical-align:middle;"></span> tracked lab</span>
+  <span><span class="map-marker__dot" aria-hidden="true" style="display:inline-block;position:static;transform:none;vertical-align:middle;background:var(--color-star-white);"></span> ships open-weights</span>
+</p>
+{% else %}
+<p>No companies are tracked yet -- check back once the registry is
+  seeded.</p>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="/static/js/map.js" defer></script>
+{% endblock %}

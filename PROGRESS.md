@@ -7,6 +7,170 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-13 -- Phase 7: map frontend
+
+Second of four phases (6-9) building the world-map-centric UI reshape.
+Phase 6 laid the entity foundation (company registry, `company_id` FKs,
+frozen link-trust allowlist). This phase builds the actual map: vendored
+geometry, a build-time SVG projection builder, a second narrow JS
+exception for marker interaction, and the homepage swap (map now owns
+`/`, the Wire index moves to `/wire/`).
+
+**1. Vendored geometry -- `site/static/geo/`.** Fetched, for real
+(`curl`, verified HTTP 200), Natural Earth's 1:110m Admin-0 Countries
+layer as GeoJSON from `nvkelso/natural-earth-vector`'s GitHub mirror
+(the standard long-lived public distribution point for Natural Earth's
+vector layers in ready-to-use GeoJSON -- Natural Earth's own site ships
+shapefiles, not GeoJSON). 177 country features confirmed. Before
+committing, trimmed each feature's ~60 Natural Earth cartographic
+columns down to the three this build actually reads (`name`, `iso_a2`,
+`continent`) -- geometry itself is untouched, byte-for-byte equivalent
+to upstream's coordinates; this shrank the vendored file from 838,726
+to 257,939 bytes. `site/static/geo/README.md` documents the exact
+source URL, the public-domain license (Natural Earth requires no
+attribution), the trimming step, and one checked-and-ruled-out
+limitation (the equirectangular projection's usual pole-distortion
+tradeoff; verified directly against this file that no ring crosses the
+antimeridian within itself -- Natural Earth's own upstream data already
+splits Russia/Fiji/etc. into separate east/west pieces, so no stray
+dateline artifact appears for any of the ~13 company markers or any
+other country this build renders).
+
+**2. `site/builders/map.py`.** Follows `site/builders/board.py`'s exact
+two-step pattern (`build_context()` then render/write). A pure-Python
+equirectangular projection (`project()` -- linear lon/lat -> x/y across
+a 960x500 viewBox, no trigonometry, no new pip dependency) turns every
+vendored country polygon/multipolygon into an inline SVG `<path>`
+(`fill-rule: evenodd` handles holes correctly regardless of source
+winding order) and projects every `content/companies/index.json`
+entry's `hq_lat`/`hq_lng` with the *same* function into a marker
+position. A marker's open-weights badge is derived, not stored --
+`has_open_weights()` checks whether the company has any current
+`content/frontier_board.json` row with `access: "open-weights"`, per
+the approved plan's "the Board is the source of truth, never a
+second copy on the company record" design. Dense real-world HQ
+clusters in the actual seeded data -- SF Bay Area (anthropic + openai
+share the exact same geocoded point; meta-ai/xai/nvidia sit within a
+few km, indistinguishable at world-map scale), Hangzhou (deepseek +
+alibaba-qwen, same point), Beijing (moonshot-ai + zhipu-ai +
+bytedance-seed, same point) -- get fixed, hand-picked per-marker pixel
+offsets (`MARKER_OFFSET_PX`, verified to cover every one of the 13 real
+company ids) rather than a runtime clustering library, exactly as
+scoped. Each marker's popover is fully pre-computed at build time (its
+latest Board rows, plus up to 3 matching wire cards via a new
+`companies[]` field lookup -- always `[]` today since `content/cards/`
+doesn't exist yet, rendering the honest `EMPTY_CARDS_MESSAGE` ==
+"No recent wire stories." placeholder; the lookup itself is real code,
+not a stub, so it activates the moment an analyst run produces cards
+naming a company). Card links use the existing `/wire/<YYYY-MM>/
+#card-<id>` fragment-anchor convention (`site/templates/card.html`'s own
+documented anchor id) rather than inventing a second permalink scheme,
+since cards have never had a standalone page route.
+
+**3. `site/static/js/map.js`.** A second narrow, self-contained,
+vanilla-JS IIFE -- zero dependencies, zero CDN, matching
+`matrix-rain.js`'s own precedent exactly (see that file's own header
+comment and the T-series IMPROVEMENT_BACKLOG.md entries for the sign-off
+ritual this repeats). Handles marker click/expand-collapse (toggles the
+popover's native `hidden` attribute + the glyph button's
+`aria-expanded`), an "expand all" toggle, and an open-weights filter
+toggle that dims (never hides) non-matching markers. Structural no-JS
+guarantee, verified by `site/tests/test_map_builder.py`: the marker
+GLYPH (`<button class="map-marker__glyph">`) is the only element this
+script attaches interaction to; the company NAME
+(`<a class="map-marker__name" href="/companies/<slug>/">`) is a
+separate, plain, always-rendered anchor -- reachable and readable
+without any JS or popover state. `/companies/<slug>/` does not resolve
+to a real page yet (Phase 8 builds that) -- linking to it now is this
+build's own explicit brief, not an oversight.
+
+**4. Homepage swap.** New `site/templates/map_index.html` (extends
+`base.html`, `active_nav = "map"`) is now written to
+`<public_dir>/index.html` by `map.write_map_page()`. The Wire's own
+index page moved to `<public_dir>/wire/index.html` -- `site/builders/
+wire.py::write_wire_pages()` gained one new, backward-compatible
+`index_output_dir` parameter (defaults to `None`, preserving every
+pre-existing caller/test's behavior of writing at `<public_dir>/
+index.html`) that `site/generate.py` now sets to `public_dir / "wire"`.
+Fixed every internal nav link that pointed at the old `/` (`base.html`'s
+masthead nav -- added a "Map" item at `/`, changed "Wire" to point at
+`/wire/`; `wire_month.html`'s "Back to the Wire"; `404.html`'s link
+list), and `site/generate.py`'s own route table / `collect_routes()` /
+module docstring. The masthead "What's Moving" sparkline strip moved
+with the homepage content, per the approved plan's own "the existing
+What's Moving strip stays above the map" interaction-design note -- it
+is now threaded into the map page's context instead of the Wire's;
+`content/companies/index.json` is loaded by a new, bespoke
+`load_companies_index()` in `site/generate.py` (mirroring
+`load_cards()`'s own precedent) since `content/companies/` is a
+subdirectory the existing top-level `content/*.json` loader never sees;
+logged in IMPROVEMENT_BACKLOG.md that no `schemas/company_index.schema.json`
+exists yet for this summary shape, so it loads unvalidated (same
+tolerance already applied to `content/primer.json`).
+
+**5. `site/tests/test_build.py`'s script-tag allowlist.**
+`test_exactly_one_script_tag_and_it_is_the_matrix_rain_canvas` is now a
+two-file allowlist: matrix-rain.js is still required, unconditionally,
+on every single page (unchanged from before); map.js is additionally
+allowed, and required, on the map homepage only -- checked by both
+"every script tag present is one of the two allowed srcs" and "every
+allowed src for this page appears exactly once," so the test would
+still fail if map.js leaked onto a second page or went missing from the
+homepage. `test_every_named_route_in_the_build_plan_is_written` gained
+`wire/index.html` to its expected-routes list. New
+`site/tests/test_map_builder.py` (35 tests) covers the projection math,
+polygon/hole path generation, the real vendored geometry, the marker
+offset table, Board-row/open-weights/card lookups against real
+`content/frontier_board.json` data, and full-template rendering
+including the structural no-JS name-link guarantee.
+
+**Verification, run for real from `/home/user/AI-Radar`:**
+- `python site/generate.py --out <tmp>` -- succeeds; `<tmp>/index.html`
+  is the map page (13 markers, one per real seeded company, all
+  `/companies/<slug>/` links present); `<tmp>/wire/index.html` exists
+  and carries the Wire's own content with no masthead strip;
+  `<tmp>/index.html` is the only generated page with a `map.js` script
+  tag; every other generated page has exactly one script tag
+  (matrix-rain.js).
+- `python -m pytest` (root `tests/`, this repo's own two-suite CI split
+  per `ci.yml`) -- **754 passed, 2 deselected**, 0 failures (unchanged
+  from Phase 6's own count; this phase touched no root-`tests/`-covered
+  code).
+- `python -m pytest site/tests` -- **330 passed**, 0 failures (up from
+  Phase 6's count; net +35 from the new `test_map_builder.py`, plus the
+  existing `test_build.py`/`test_reader_copy.py` test *functions*
+  unchanged in count -- only edited in place, none removed).
+
+**Judgment calls / limitations, logged:**
+- GeoJSON, not TopoJSON, for the vendored geometry -- the approved
+  plan named the topojson/world-atlas project's `countries-110m.json`
+  as one acceptable option but also explicitly allowed "Natural Earth's
+  own site" as the alternative; GeoJSON needs no arc-decoding step to
+  turn into SVG paths (topojson's quantized-arc format would need a
+  hand-written decoder for the same "no new pip dependency" reason this
+  build already accepts elsewhere), so it was chosen as the simpler
+  correct option under an equally-approved reading of the brief.
+- The masthead sparkline strip's move from the Wire index to the map
+  homepage is a judgment call reading "the existing What's Moving strip
+  stays above the map" as the strip physically relocating with the
+  homepage content, not a second copy appearing on both pages --
+  `site/tests/test_build.py`'s existing "present on exactly one page"
+  test enforces that reading structurally (it would fail if the strip
+  ever appeared on more than one generated file).
+- `content/companies/index.json` still has no
+  `schemas/company_index.schema.json` counterpart (Phase 6 built the
+  full per-company profile schema, `company.schema.json`, but not one
+  for this separate summary-index shape) -- loaded unvalidated with a
+  logged warning, same as `content/primer.json`'s existing gap. Not
+  fixed in this phase (out of this phase's assigned scope); flagged
+  here and in `IMPROVEMENT_BACKLOG.md` as a real gap for a future pass.
+- Company profile pages (`/companies/<slug>/`) do not exist yet --
+  every marker name link and "Full profile" footer link in this phase's
+  output is a real, correctly-formed `<a href>` to a route Phase 8
+  builds. This is this build's own explicit brief, not an oversight.
+
+---
+
 ## 2026-07-13 -- Phase 6: entity foundation for the map-centric UI reshape (company registry, geography, link-trust allowlist)
 
 First of four phases (6-9) building toward a world-map-centric UI reshape
