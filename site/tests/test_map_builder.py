@@ -192,11 +192,44 @@ def test_marker_offset_table_covers_every_real_seeded_company():
 def test_marker_offset_bay_area_cluster_members_are_all_distinct():
     # anthropic and openai share the exact same hq_lat/hq_lng in the real
     # seeded data -- without a hand offset they'd render as one
-    # indistinguishable dot. Assert every Bay Area cluster member gets a
+    # indistinguishable dot. ai2/Seattle is included here too (UPDATED as
+    # part of the dense-cluster-overlap fix): it looked geographically
+    # "isolated" from the Bay Area cluster and was originally left at
+    # (0, 0), but at this map's whole-world projection scale it's only
+    # ~27 SVG units from the rest of the cluster -- well inside its
+    # footprint -- so it collided with it in practice and needs its own
+    # distinct offset too. Assert every US-cluster member gets a
     # different offset from every other member.
-    bay_area = ["anthropic", "openai", "meta-ai", "xai", "nvidia"]
-    offsets = [map_builder.marker_offset(cid) for cid in bay_area]
-    assert len(set(offsets)) == len(bay_area)
+    us_cluster = ["anthropic", "openai", "meta-ai", "xai", "nvidia", "ai2"]
+    offsets = [map_builder.marker_offset(cid) for cid in us_cluster]
+    assert len(set(offsets)) == len(us_cluster)
+
+
+def test_marker_offset_china_cluster_members_are_all_distinct():
+    # Beijing (moonshot-ai/zhipu-ai/bytedance-seed) and Hangzhou
+    # (deepseek/alibaba-qwen) share exact same-city coordinates within
+    # each city, and the two cities' own true positions are only ~10x27
+    # SVG units apart -- too close to lay out as two independently
+    # hand-offset sub-clusters without them colliding with each other,
+    # so all five are laid out together as one cluster (see
+    # MARKER_OFFSET_PX's own docstring). Assert every member gets a
+    # distinct offset.
+    china_cluster = ["moonshot-ai", "zhipu-ai", "bytedance-seed", "deepseek", "alibaba-qwen"]
+    offsets = [map_builder.marker_offset(cid) for cid in china_cluster]
+    assert len(set(offsets)) == len(china_cluster)
+
+
+def test_marker_offset_europe_cluster_members_are_distinct_and_nonzero():
+    # google-deepmind/London and mistral/Paris were originally called
+    # "genuinely isolated" and left at (0, 0) -- also wrong (UPDATED as
+    # part of the dense-cluster-overlap fix): they're only ~7x7 SVG
+    # units apart at this map's whole-world scale, close enough that a
+    # real headless-browser check found their labels overlapping. Assert
+    # both now have a real, distinct, nonzero offset.
+    europe_cluster = ["google-deepmind", "mistral"]
+    offsets = [map_builder.marker_offset(cid) for cid in europe_cluster]
+    assert len(set(offsets)) == len(europe_cluster)
+    assert all(offset != (0.0, 0.0) for offset in offsets)
 
 
 # ---------------------------------------------------------------------------

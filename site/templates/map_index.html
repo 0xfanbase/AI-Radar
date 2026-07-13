@@ -169,26 +169,48 @@
    * inverse so labels/dots/popovers stay a constant, legible on-screen
    * size at any zoom level -- only each marker's POSITION spreads apart
    * as the underlying map zooms in, which is the actually useful part of
-   * zooming a map of hand-offset marker clusters. Composed with the
-   * existing translate(-50%,-50%) (which centers the marker box over its
-   * `left/top` anchor point) around the same default center
-   * transform-origin, so the anchor point itself never drifts.
+   * zooming a map of hand-offset marker clusters.
+   *
+   * `--dx`/`--dy` (set inline per marker by site/builders/map.py's
+   * MARKER_OFFSET_PX table, in real CSS pixels) are the fix for a dense
+   * HQ cluster (SF Bay Area, Beijing/Hangzhou) rendering as one
+   * unreadable jumble of overlapping labels: they nudge a clustered
+   * marker's whole box away from its true `left/top: N%` anchor point
+   * by a FIXED on-screen distance, composed into the same translate()
+   * as the existing -50%/-50% centering -- deliberately BEFORE the
+   * counter-scale, not after, so the nudge shrinks proportionally as
+   * the user zooms in (exactly like every other marker's own rendered
+   * size), converging back toward the marker's true position at high
+   * zoom rather than staying a fixed, increasingly-wrong-looking offset
+   * forever. This is a real fix for a bug in an earlier version of this
+   * rule, which folded the same declutter offset directly into
+   * `pct_x`/`pct_y` -- a PERCENTAGE of the map's own rendered box, which
+   * made the offset's real on-screen distance shrink on a narrower
+   * viewport instead of staying constant, so the exact same offset
+   * table that (mostly) worked on desktop rendered visibly tighter and
+   * more collision-prone on mobile, where the map box itself is
+   * smallest. A `var(--dx, 0px)` fixed-pixel transform has no such
+   * dependency on the map's own rendered size.
    */
   .map-marker {
     position: absolute;
-    transform: translate(-50%, -50%) scale(calc(1 / var(--map-scale, 1)));
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px)))
+      scale(calc(1 / var(--map-scale, 1)));
   }
 
   /* NOT bumped to a 44px min touch target like the zoom/pan controls
      below: this site's hand-picked marker-offset table
-     (site/builders/map.py's own MARKER_OFFSET_PX, e.g. the Bay Area
-     cluster's 16px vertical steps) was tuned against this glyph's small
+     (site/builders/map.py's own MARKER_OFFSET_PX, now a real fixed-CSS-
+     pixel grid -- e.g. the US cluster's 2-column x 3-row layout, ~64px
+     column gap / ~36px row gap) was tuned against this glyph's small
      footprint precisely so adjacent clustered markers stay individually
      tappable -- a 44px touch target here would make neighboring
      cluster members overlap and steal each other's taps (verified with
-     a real headless-browser check against the anthropic/openai pair,
-     16px apart -- see this task's own summary). Requirement 6's 44px
-     floor is scoped to the zoom/pan controls, not every marker glyph. */
+     a real headless-browser bounding-box check across every marker in
+     both real dense clusters, at a 1440px desktop and a 390px mobile
+     viewport -- see this fix's own PROGRESS.md entry). Requirement 6's
+     44px floor is scoped to the zoom/pan controls, not every marker
+     glyph. */
   .map-marker__glyph {
     display: flex;
     align-items: center;
@@ -455,7 +477,7 @@
 
       <div class="map-markers">
         {% for marker in markers %}
-        <div class="map-marker{% if marker.open_weights %} map-marker--open-weights{% endif %}" style="left: {{ marker.pct_x }}%; top: {{ marker.pct_y }}%;" data-company="{{ marker.id }}" data-open-weights="{{ 'true' if marker.open_weights else 'false' }}">
+        <div class="map-marker{% if marker.open_weights %} map-marker--open-weights{% endif %}" style="left: {{ marker.pct_x }}%; top: {{ marker.pct_y }}%; --dx: {{ marker.offset_dx }}px; --dy: {{ marker.offset_dy }}px;" data-company="{{ marker.id }}" data-open-weights="{{ 'true' if marker.open_weights else 'false' }}">
           <button type="button" class="map-marker__glyph" aria-expanded="false" aria-controls="map-popover-{{ marker.id }}">
             <span class="map-marker__dot" aria-hidden="true"></span>
             {% if marker.open_weights %}<span class="map-marker__badge" aria-hidden="true" title="Ships at least one open-weights model">OW</span>{% endif %}

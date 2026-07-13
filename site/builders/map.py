@@ -107,48 +107,88 @@ STATUS_CHIP_CLASS = {
     "corrected": "chip chip--corrected",
 }
 
-# Fixed, deterministic per-marker pixel offsets (dx, dy), applied AFTER
-# projection, hand-picked once against this build's real 13-row
-# `content/companies/index.json` (verified 2026-07-13). Three real HQ
-# clusters exist in the seeded data -- SF Bay Area (anthropic + openai
-# share the exact same geocoded point; meta-ai/xai/nvidia sit within a
-# few real-world kilometers, indistinguishable at this map's world
-# scale), Hangzhou (deepseek + alibaba-qwen share the exact same
-# point), and Beijing (moonshot-ai + zhipu-ai + bytedance-seed share the
-# exact same point) -- so every marker in those three clusters gets a
-# hand-picked offset; the remaining, genuinely isolated markers
-# (google-deepmind/London, mistral/Paris, ai2/Seattle) get (0, 0).
-# A company id absent from this table (e.g. the registry grows later)
-# also defaults to (0, 0) via :func:`marker_offset` -- never a crash.
+# Fixed, deterministic per-marker DECLUTTER offsets (dx, dy), in real
+# CSS pixels applied client-side via a `transform: translate(...)` (see
+# `MarkerView.offset_dx`/`offset_dy` and templates/map_index.html's
+# `.map-marker` rule) -- NOT folded into `pct_x`/`pct_y`, which stay the
+# marker's true, un-nudged projected position. This split matters: a
+# marker's `left/top: N%` position is relative to the SVG map's own
+# rendered box, so any decluttering nudge baked into that percentage
+# renders as a SMALLER absolute on-screen distance the narrower that box
+# is -- exactly backwards, since the map is smallest (and clustered
+# markers hardest to tell apart) on a narrow mobile viewport. A fixed-px
+# CSS transform offset renders as the same real distance on every
+# viewport, so this table is hand-tuned once against real screen pixels
+# (verified with a real headless-browser bounding-box check across a
+# 1440px desktop and a 390px mobile viewport -- see this fix's own
+# PROGRESS.md entry) rather than against this builder's 960x500 SVG
+# viewBox units.
+#
+# Three real-world clusters exist in the seeded data, hand-verified
+# 2026-07-13: a 6-member US cluster (anthropic + openai share the exact
+# same geocoded SF point; meta-ai/xai/nvidia sit a few real-world
+# kilometers apart in the South Bay; ai2/Seattle is genuinely ~1,300km
+# from the rest, but at this map's whole-world projection scale that's
+# still only ~27 SVG units of true separation -- well inside the
+# cluster's own footprint, so ai2 needs a hand offset too, not the (0,0)
+# "isolated" treatment an earlier version of this table gave it); a
+# 5-member China cluster (deepseek + alibaba-qwen share the exact same
+# Hangzhou point; moonshot-ai + zhipu-ai + bytedance-seed share the
+# exact same Beijing point; Beijing and Hangzhou's own true positions
+# are themselves only ~10x27 SVG units apart, too close to lay out as
+# two independently-offset sub-clusters without them colliding with each
+# other, so all five are laid out together as one cluster); and a
+# 2-member Europe cluster (google-deepmind/London and mistral/Paris are
+# only ~7x7 SVG units apart -- an earlier version of this table called
+# these two "genuinely isolated" and left them at (0, 0), which was
+# wrong: verified colliding with a real headless-browser bounding-box
+# check, same as the other two clusters). A company id absent from this
+# table (e.g. the registry grows later) defaults to (0, 0) via
+# :func:`marker_offset` -- never a crash, but also never checked for a
+# collision automatically; a newly-added company sharing an existing
+# company's approximate HQ needs the same by-hand verification pass this
+# table's own three clusters got.
 MARKER_OFFSET_PX: dict[str, tuple[float, float]] = {
-    # SF Bay Area cluster -- stacked in a vertical column, 16px apart
-    # (enough to clear one line of label text at this build's marker
-    # font size without needing to measure text width at build time).
-    "anthropic": (0.0, -32.0),
-    "openai": (0.0, -16.0),
-    "meta-ai": (0.0, 0.0),
-    "xai": (0.0, 16.0),
-    "nvidia": (0.0, 32.0),
-    # Hangzhou cluster -- side by side.
-    "deepseek": (-18.0, -8.0),
-    "alibaba-qwen": (18.0, 8.0),
-    # Beijing cluster -- a small triangle.
-    "moonshot-ai": (0.0, -22.0),
-    "zhipu-ai": (-20.0, 12.0),
-    "bytedance-seed": (20.0, 12.0),
-    # Isolated markers -- no real-world neighbor close enough at this
-    # map's scale to need an offset.
-    "google-deepmind": (0.0, 0.0),
-    "mistral": (0.0, 0.0),
-    "ai2": (0.0, 0.0),
+    # US cluster -- a 2-column x 3-row grid, wide enough apart
+    # horizontally to clear this build's longest label in this cluster
+    # ("Anthropic") and tall enough apart vertically to clear one line
+    # of label text, both with real margin (checked empirically, not
+    # just estimated from font metrics).
+    "anthropic": (-96.0, -44.0),
+    "openai": (-96.0, -8.0),
+    "meta-ai": (-96.0, 28.0),
+    "ai2": (64.0, -44.0),
+    "xai": (64.0, -8.0),
+    "nvidia": (64.0, 28.0),
+    # China cluster -- two columns, each stacked vertically. Every label
+    # in this cluster renders to the RIGHT of its own dot (never
+    # centered), so the two columns are separated by a much bigger gap
+    # than the US cluster's grid needs -- wide enough to clear this
+    # cluster's own longest label ("ByteDance Seed", with its
+    # open-weights badge) even measured from the LEFT column's anchor
+    # point, not just edge-to-edge.
+    "zhipu-ai": (-110.0, -60.0),
+    "moonshot-ai": (-110.0, -16.0),
+    "deepseek": (-110.0, 28.0),
+    "bytedance-seed": (90.0, -38.0),
+    "alibaba-qwen": (90.0, 6.0),
+    # Europe cluster -- side by side, split both horizontally and
+    # vertically so their two-line-tall labels (name plus nothing below
+    # it today, but matching the same generous margin every other pair
+    # in this table uses) can't touch either.
+    "google-deepmind": (-64.0, -16.0),
+    "mistral": (40.0, 16.0),
 }
 
 
 def marker_offset(company_id: str) -> tuple[float, float]:
-    """The hand-picked (dx, dy) pixel offset for `company_id`, or
-    `(0.0, 0.0)` for any id not in :data:`MARKER_OFFSET_PX` (a company
-    added to the registry without a corresponding offset entry renders
-    at its true projected point rather than crashing the build)."""
+    """The hand-picked (dx, dy) CSS-pixel declutter offset for
+    `company_id`, or `(0.0, 0.0)` for any id not in
+    :data:`MARKER_OFFSET_PX` (a company added to the registry without a
+    corresponding offset entry renders at its true projected point
+    rather than crashing the build). Applied client-side via CSS
+    transform, never folded into `pct_x`/`pct_y` -- see the table's own
+    docstring above for why."""
     return MARKER_OFFSET_PX.get(company_id, (0.0, 0.0))
 
 
@@ -361,6 +401,8 @@ class MarkerView:
     cards: tuple[dict[str, Any], ...] = field(default_factory=tuple)
     empty_cards_message: str = EMPTY_CARDS_MESSAGE
     anchor_right: bool = False
+    offset_dx: float = 0.0
+    offset_dy: float = 0.0
 
 
 def build_markers(
@@ -387,7 +429,6 @@ def build_markers(
             continue
         x, y = project(float(lng), float(lat), width, height)
         dx, dy = marker_offset(company_id)
-        px, py = x + dx, y + dy
         rows = board_rows_for_company(company_id, board_rows)[:MAX_BOARD_ROWS_PER_MARKER]
         board_views = tuple(
             BoardRowView(
@@ -398,7 +439,11 @@ def build_markers(
             )
             for r in rows
         )
-        pct_x = round(px / width * 100, 3)
+        # pct_x/pct_y are the marker's TRUE projected position -- the
+        # declutter offset (dx, dy) is applied separately, client-side,
+        # in fixed CSS pixels (see MARKER_OFFSET_PX's own docstring for
+        # why it must not be folded in here).
+        pct_x = round(x / width * 100, 3)
         markers.append(
             MarkerView(
                 id=company_id,
@@ -407,7 +452,7 @@ def build_markers(
                 hq_city=str(company.get("hq_city", "")),
                 hq_country=str(company.get("hq_country", "")),
                 pct_x=pct_x,
-                pct_y=round(py / height * 100, 3),
+                pct_y=round(y / height * 100, 3),
                 open_weights=has_open_weights(company_id, board_rows),
                 board_rows=board_views,
                 cards=tuple(cards_for_company(company_id, cards)),
@@ -421,6 +466,8 @@ def build_markers(
                 # templates/map_index.html's own CSS comment (PROGRESS.md
                 # entry for the map rebuild has the full rationale).
                 anchor_right=pct_x > 50.0,
+                offset_dx=dx,
+                offset_dy=dy,
             )
         )
     return markers

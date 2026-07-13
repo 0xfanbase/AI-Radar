@@ -7,6 +7,67 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-13 -- Fix: dense HQ-cluster marker labels overlapping (owner follow-on)
+
+The map rebuild below shipped with a known, honestly-logged limitation:
+several hand-offset marker clusters (SF Bay Area, Beijing/Hangzhou)
+overlapped at real screen sizes, pre-dating that rebuild. This entry
+fixes it, plus a second, previously-unnoticed collision this fix's own
+verification pass turned up (Google DeepMind/London and Mistral
+AI/Paris, which `site/builders/map.py`'s own comment had called
+"genuinely isolated" -- wrong, verified colliding with a real
+headless-browser bounding-box check the same way the other two clusters
+were).
+
+**Root cause.** `MARKER_OFFSET_PX`'s hand-picked declutter offsets were
+folded directly into each marker's `pct_x`/`pct_y` -- a PERCENTAGE of the
+map's own rendered box. That makes the offset's real on-screen distance
+shrink proportionally on a narrower container, which is exactly
+backwards: the map box is smallest, and clustered markers hardest to
+tell apart, on a narrow mobile viewport. `ai2` (Seattle) was also
+excluded from the Bay Area table as "isolated" on pure geographic-
+distance grounds, without checking that at this map's whole-world
+projection scale (960x500 SVG units for the entire globe), ~1,300 real
+km is still only ~27 SVG units -- well inside the Bay Area cluster's own
+footprint.
+
+**Fix.** `MarkerView` gained `offset_dx`/`offset_dy` fields carrying the
+declutter offset in real CSS pixels, kept structurally separate from
+`pct_x`/`pct_y` (which now hold the marker's true, un-nudged projected
+position, unchanged in every other respect). `templates/map_index.html`
+writes `--dx`/`--dy` custom properties per marker and composes them into
+`.map-marker`'s existing `translate(-50%,-50%) scale(1/var(--map-scale))`
+rule as `translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
+scale(...)` -- placed BEFORE the counter-scale deliberately, so the
+declutter nudge shrinks proportionally as the user zooms in, converging
+toward the marker's true position at high zoom instead of staying a
+fixed, increasingly-wrong-looking offset forever.
+
+`MARKER_OFFSET_PX` itself was redesigned: the US cluster is now a
+6-member (adding `ai2`) 2-column x 3-row grid; the China cluster unifies
+Beijing's three companies and Hangzhou's two into one 5-member two-
+column layout (their true positions are only ~10x27 SVG units apart --
+too close to lay out as two independently-offset sub-clusters without
+them colliding with each other); a new 2-member Europe cluster
+(`google-deepmind`, `mistral`) replaces their old `(0, 0)` "isolated"
+entries.
+
+**Verification, run for real:** `python -m pytest` (repo root) -- 891
+passed, 2 deselected, 0 failures; `python -m pytest site/tests` -- 376
+passed (+2 net new: `test_marker_offset_china_cluster_members_are_all_
+distinct`, `test_marker_offset_europe_cluster_members_are_distinct_and_
+nonzero`; the existing Bay Area test was extended in place to cover
+`ai2`, not replaced). Built the site for real and ran a headless-browser
+bounding-box collision check (glyph+name combined box, every pair within
+each of the three clusters) at four real viewport widths -- 1440px
+desktop, 768px tablet, 390px mobile, and a 320px small-phone edge case
+-- zero collisions at every size, a strictly stronger guarantee than the
+prior fix's own single-desktop-plus-one-pair spot check. Confirmed
+visually with screenshots at desktop and mobile: every one of the 13
+real markers reads as a distinct, legible label.
+
+---
+
 ## 2026-07-13 -- Map rebuild: full-bleed, pannable, zoomable canvas (owner follow-on)
 
 Owner instruction: "the map... I want it to be bigger, more interactive
