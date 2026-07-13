@@ -1,11 +1,15 @@
 /*
- * World-map marker interaction -- click/expand popovers, "expand all",
- * the open-weights filter toggle, and (owner follow-on to the Phases
- * 6-9 map-centric UI reshape) pan + zoom on the map canvas itself:
- * mouse-wheel zoom toward the cursor, pinch-to-zoom toward the pinch
- * midpoint, click-and-drag / single-finger-drag panning, and explicit
- * +/-/reset <button> controls, with tap-vs-drag disambiguation so a
- * drag gesture that starts on a marker never also opens its popover.
+ * World-map marker interaction -- click/expand a single marker's own
+ * popover, the "Scan all labs" overview panel (owner follow-on: this
+ * replaced an earlier "expand every marker's popover at once" behavior
+ * that broke down in any real HQ cluster -- see closeScanPanel()'s own
+ * comment below for the full story), the open-weights filter toggle,
+ * and (owner follow-on to the Phases 6-9 map-centric UI reshape) pan +
+ * zoom on the map canvas itself: mouse-wheel zoom toward the cursor,
+ * pinch-to-zoom toward the pinch midpoint, click-and-drag / single-
+ * finger-drag panning, and explicit +/-/reset <button> controls, with
+ * tap-vs-drag disambiguation so a drag gesture that starts on a marker
+ * never also opens its popover.
  *
  * This is the site's SECOND deliberate, narrow exception to an
  * otherwise zero-JavaScript architecture (the first is
@@ -179,22 +183,67 @@
             event.preventDefault();
             return;
           }
+          // The scan panel and a single marker's own popover are
+          // mutually exclusive views of the same underlying data -- see
+          // closeScanPanel()'s own comment below for why "show
+          // everything at once" moved off the map entirely.
+          closeScanPanel();
           setExpanded(marker, !isExpanded(marker));
         });
       })(markers[i]);
     }
 
+    // -----------------------------------------------------------------
+    // "Scan all labs" overview panel -- replaces the old "Expand all"
+    // behavior of opening every marker's own floating popover at once.
+    // That pattern could never work once markers are close enough
+    // together to need a hand-picked declutter offset in the first
+    // place (site/builders/map.py's MARKER_OFFSET_PX table exists for
+    // exactly the three real HQ clusters where this broke down: popover
+    // cards ~220px wide, markers as little as 60-160px apart) -- no
+    // amount of z-index or anchor-side tweaking fixes a floating card
+    // pattern that structurally cannot fit N of itself into that little
+    // space. The panel sidesteps the whole problem: one native-
+    // scrolling list, reusing the exact same marker_details() macro
+    // output the single-marker popover renders (site/templates/
+    // map_index.html), so the two can never drift apart content-wise.
+    // -----------------------------------------------------------------
+    var scanPanel = document.getElementById("map-scan-panel");
     var expandAllBtn = document.getElementById("map-expand-all");
-    if (expandAllBtn) {
-      var allExpanded = false;
-      expandAllBtn.setAttribute("aria-pressed", "false");
-      expandAllBtn.addEventListener("click", function () {
-        allExpanded = !allExpanded;
+    var scanOpen = false;
+
+    function setScanOpen(open) {
+      if (!scanPanel || !expandAllBtn) {
+        return;
+      }
+      scanOpen = open;
+      if (open) {
+        // A single scan panel replaces every individual popover, not
+        // just visually -- close them for real so a later "Scan all
+        // labs" -> close -> tap-a-marker sequence doesn't resurrect a
+        // stale expanded state underneath the panel.
         for (var j = 0; j < markers.length; j++) {
-          setExpanded(markers[j], allExpanded);
+          setExpanded(markers[j], false);
         }
-        expandAllBtn.setAttribute("aria-pressed", allExpanded ? "true" : "false");
-        expandAllBtn.textContent = allExpanded ? "Collapse all" : "Expand all";
+        scanPanel.removeAttribute("hidden");
+      } else {
+        scanPanel.setAttribute("hidden", "");
+      }
+      viewport.classList.toggle("has-scan-open", open);
+      expandAllBtn.setAttribute("aria-pressed", open ? "true" : "false");
+      expandAllBtn.setAttribute("aria-expanded", open ? "true" : "false");
+      expandAllBtn.textContent = open ? "Close list" : "Scan all labs";
+    }
+
+    function closeScanPanel() {
+      if (scanOpen) {
+        setScanOpen(false);
+      }
+    }
+
+    if (expandAllBtn) {
+      expandAllBtn.addEventListener("click", function () {
+        setScanOpen(!scanOpen);
       });
     }
 
@@ -211,6 +260,22 @@
             marker.classList.add("map-marker--dimmed");
           } else {
             marker.classList.remove("map-marker--dimmed");
+          }
+        }
+        // Mirror the same dim-never-hide filtering onto the scan
+        // panel's own list items, keyed off the same data-open-weights
+        // attribute site/templates/map_index.html renders identically
+        // on both a .map-marker and its .map-scan__item counterpart.
+        if (scanPanel) {
+          var items = scanPanel.querySelectorAll(".map-scan__item");
+          for (var m = 0; m < items.length; m++) {
+            var item = items[m];
+            var itemIsOpenWeights = item.getAttribute("data-open-weights") === "true";
+            if (filterActive && !itemIsOpenWeights) {
+              item.classList.add("map-scan__item--dimmed");
+            } else {
+              item.classList.remove("map-scan__item--dimmed");
+            }
           }
         }
         filterBtn.setAttribute("aria-pressed", filterActive ? "true" : "false");
@@ -407,6 +472,30 @@
       { passive: false }
     );
 
+    // Defensive hardening for Safari/WebKit (iOS Chrome is WebKit under
+    // the hood too -- Apple requires it): `touch-action: none` on
+    // .map-viewport is the correct, load-bearing mechanism that hands
+    // pinch/pan gestures to this file's own Pointer Event handlers
+    // instead of the browser's native page zoom, but WebKit ALSO fires
+    // its own proprietary, non-standard gesture* events for a
+    // multi-touch gesture, via a separate native gesture recognizer
+    // that has -- in some WebKit versions -- won a race against
+    // touch-action and zoomed the whole page instead of respecting it.
+    // These three listeners exist purely as a second, redundant line of
+    // defense against that specific failure mode; every other browser
+    // simply never fires gesture* events, so this is a no-op everywhere
+    // else. See PROGRESS.md's entry for this fix for the full report
+    // this was written in response to.
+    ["gesturestart", "gesturechange", "gestureend"].forEach(function (type) {
+      viewport.addEventListener(
+        type,
+        function (event) {
+          event.preventDefault();
+        },
+        { passive: false }
+      );
+    });
+
     // --- Drag-to-pan (mouse) + single-finger drag-to-pan (touch) +
     // two-pointer pinch-to-zoom, all via the unified Pointer Events API
     // so the same code path handles mouse, touch, and pen. `touch-action:
@@ -440,17 +529,17 @@
       // pinch is the one exception: once a second pointer lands, treat
       // it as a pinch regardless of what the first pointer started on,
       // since a real two-finger pinch gesture is unambiguous.
-      // .map-popover (its content can scroll -- see the CSS `touch-action:
-      // pan-y` override) and the small tap-only .map-zoom-btn/.map-toggle
-      // buttons are excluded from pan tracking entirely. The marker
-      // glyph and name link are deliberately NOT excluded: a drag
-      // gesture is allowed to start on top of a marker (it should still
-      // pan the map, matching ordinary map UX), it just must not ALSO
-      // open/navigate that marker -- see wasProbablyADrag() above, which
-      // is exactly what makes that safe to allow here.
+      // .map-popover and .map-scan (both have their own internal
+      // `touch-action: pan-y` scroll override) and the small tap-only
+      // .map-zoom-btn/.map-toggle buttons are excluded from pan tracking
+      // entirely. The marker glyph and name link are deliberately NOT
+      // excluded: a drag gesture is allowed to start on top of a marker
+      // (it should still pan the map, matching ordinary map UX), it just
+      // must not ALSO open/navigate that marker -- see wasProbablyADrag()
+      // above, which is exactly what makes that safe to allow here.
       var startedOnExcluded =
         event.target.closest &&
-        event.target.closest(".map-zoom-btn, .map-toggle, .map-popover");
+        event.target.closest(".map-zoom-btn, .map-toggle, .map-popover, .map-scan");
       if (startedOnExcluded && activeCount === 0) {
         return;
       }
@@ -536,6 +625,7 @@
     }
 
     function endPointer(event) {
+      var wasPinching = pinchState !== null;
       delete activePointers[event.pointerId];
       activeCount = Object.keys(activePointers).length;
 
@@ -547,6 +637,13 @@
         }
         dragState = null;
         viewport.classList.remove("is-panning");
+      }
+      if (wasPinching) {
+        // A two-finger pinch ending can lift either finger off directly
+        // on top of a marker glyph, which would otherwise fire that
+        // glyph's own synthetic "click" right after -- suppress it the
+        // same way a real drag's trailing click is suppressed above.
+        suppressNextClick = true;
       }
       if (activeCount < 2) {
         pinchState = null;

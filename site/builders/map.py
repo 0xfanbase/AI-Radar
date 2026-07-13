@@ -473,6 +473,25 @@ def build_markers(
     return markers
 
 
+def scan_order(markers: Iterable[MarkerView]) -> list[MarkerView]:
+    """Every marker, ordered for the "scan all labs" overview panel
+    (see templates/map_index.html's `.map-scan` -- the fix for the
+    "Expand all" floating-popover-per-marker pattern being unreadable in
+    a dense real-world cluster, since a scrollable list has no
+    positioning geometry to break). Newest Board release first (each
+    `MarkerView.board_rows` is already sorted newest-first by
+    :func:`board_rows_for_company`, so this only needs each marker's own
+    first row), name as a stable tiebreak, and any marker with no Board
+    rows at all sorts last -- matches the page's own "Where AI Is
+    Moving" premise: read like a wire, not an alphabetical directory."""
+    by_name = sorted(markers, key=lambda m: m.name.lower())
+    return sorted(
+        by_name,
+        key=lambda m: m.board_rows[0].release_date if m.board_rows else "",
+        reverse=True,
+    )
+
+
 def build_context(
     companies: Iterable[Mapping[str, Any]],
     board_rows: Iterable[Mapping[str, Any]],
@@ -491,6 +510,7 @@ def build_context(
     return {
         "country_paths": country_paths,
         "markers": markers,
+        "scan_markers": scan_order(markers),
         "map_width": MAP_WIDTH,
         "map_height": MAP_HEIGHT,
         "open_weights_count": sum(1 for m in markers if m.open_weights),

@@ -7,6 +7,74 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-13 -- Fix: "Expand all" replaced with a scan panel; iOS pinch-zoom hardening (owner follow-on)
+
+The owner reported the live site as broken on an iPhone (old nav tabs,
+no zoom) with a screenshot; comparing it against `curl` headers for the
+real deploy proved the screenshot was a stale cached page, not the live
+build -- but while investigating, "Expand all" turned out to be a real,
+reproducible bug independent of that caching issue: it opened every
+marker's own floating popover at once, and in every real HQ cluster
+those popovers rendered stacked directly on top of each other,
+unreadable (screenshotted and confirmed on both desktop and a 390px
+mobile viewport against the actual live build). The owner asked for a
+fundamental rethink, with fable as project director.
+
+**Root cause, architecturally:** a floating popover anchored to its own
+marker's position can only ever work for ONE popover at a time. The
+three real HQ clusters (`site/builders/map.py`'s `MARKER_OFFSET_PX`)
+exist specifically because those markers' true positions are only
+60-160 CSS px apart -- nowhere near enough room for even one ~220px
+popover card next to its neighbor, let alone several at once. No
+positioning fix solves this; the pattern itself doesn't scale.
+
+**Fix -- fable's recommendation, implemented as designed:** "Expand all"
+(now labeled "Scan all labs") no longer opens N floating popovers. It
+opens a single scrollable overview panel instead -- a sidebar overlaying
+the map on wide viewports, a bottom sheet on narrow ones -- listing
+every marker's popover content in one native-scrolling list, newest
+Board release first. The panel and a single marker's own popover are
+mutually exclusive (opening one closes the other) and share their inner
+markup via a new Jinja macro, `marker_details()`, extracted from the
+existing popover body so the two surfaces can never drift apart
+content-wise. `site/builders/map.py` gained `scan_order()` (newest-
+release-first sort, name tiebreak, no-board-rows-yet sorts last) and a
+`scan_markers` context key; nothing about individual markers, the
+declutter-offset table, or pan/zoom mechanics changed.
+
+**iOS "cannot zoom" report:** reviewed the actual pinch/zoom
+implementation (Pointer Events API, `touch-action: none`, explicit
+`preventDefault()` on multi-pointer moves) against known WebKit
+gotchas -- it's the textbook-correct modern approach and no bug was
+found. The most likely explanation remains the same stale-cache issue
+that explained the rest of the report (pinch-zoom didn't exist at all
+in the build the owner's screenshot shows). Added one defensive
+hardening regardless, since this project has no way to test real WebKit
+directly (only Chromium is available in this environment): explicit
+`preventDefault()` on WebKit's proprietary `gesturestart`/`gesturechange`/
+`gestureend` events on the map viewport, guarding against Safari's
+native pinch-to-zoom-the-page gesture recognizer winning a race against
+`touch-action: none` in some WebKit versions. A no-op everywhere else.
+Also closed a small related gap: a two-finger pinch ending with a
+finger lifting off a marker glyph could previously leak a synthetic
+click that toggled that marker's popover -- now suppressed the same way
+a real drag's trailing click already was.
+
+**Verification, run for real:** `python -m pytest` -- 891 passed, 2
+deselected, 0 failures. `python -m pytest site/tests` -- 386 passed (+10
+net new: `scan_order` ordering/tiebreak/empty-rows tests, scan-panel
+markup/content-parity/open-weights-class tests; every pre-existing
+popover markup assertion passes unchanged, proving the single-marker
+popover truly wasn't touched). Built the site for real and drove it in
+a headless browser: "Scan all labs" opens a clean 13-item list with zero
+overlapping content at both a 1440px desktop (sidebar) and a 390px
+mobile viewport (bottom sheet); clicking a marker while the panel is
+open correctly closes the panel and opens just that marker's popover;
+the open-weights filter dims the same 7 non-open-weights items in the
+panel as it dims on the map itself.
+
+---
+
 ## 2026-07-13 -- Fix: dense HQ-cluster marker labels overlapping (owner follow-on)
 
 The map rebuild below shipped with a known, honestly-logged limitation:

@@ -414,6 +414,59 @@ def test_build_context_shape():
 
 
 # ---------------------------------------------------------------------------
+# scan_order -- "Scan all labs" overview panel ordering (the "Expand all"
+# floating-popover-per-marker replacement: a dense HQ cluster (see
+# MARKER_OFFSET_PX) can't fit N popover cards, so this feeds a single
+# scrollable list instead -- see templates/map_index.html's .map-scan)
+# ---------------------------------------------------------------------------
+
+
+def test_scan_order_newest_release_first():
+    markers = map_builder.build_markers(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    ordered = map_builder.scan_order(markers)
+    dated = [m for m in ordered if m.board_rows]
+    release_dates = [m.board_rows[0].release_date for m in dated]
+    assert release_dates == sorted(release_dates, reverse=True)
+
+
+def test_scan_order_is_a_permutation_of_the_input_markers():
+    markers = map_builder.build_markers(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    ordered = map_builder.scan_order(markers)
+    assert len(ordered) == len(markers)
+    assert {m.id for m in ordered} == {m.id for m in markers}
+
+
+def test_scan_order_empty_board_rows_sort_last():
+    companies = [
+        {"id": "no-rows", "name": "No Rows Co", "hq_city": "X", "hq_country": "Y", "hq_lat": 0.0, "hq_lng": 0.0},
+        {"id": "has-rows", "name": "Has Rows Co", "hq_city": "X", "hq_country": "Y", "hq_lat": 0.0, "hq_lng": 0.0},
+    ]
+    board_rows = [{"company_id": "has-rows", "release_date": "2026-01-01", "model": "M", "access": "api"}]
+    markers = map_builder.build_markers(companies, board_rows, [])
+    ordered = map_builder.scan_order(markers)
+    assert [m.id for m in ordered] == ["has-rows", "no-rows"]
+
+
+def test_scan_order_ties_break_by_name():
+    companies = [
+        {"id": "z-co", "name": "Z Co", "hq_city": "X", "hq_country": "Y", "hq_lat": 0.0, "hq_lng": 0.0},
+        {"id": "a-co", "name": "A Co", "hq_city": "X", "hq_country": "Y", "hq_lat": 0.0, "hq_lng": 0.0},
+    ]
+    board_rows = [
+        {"company_id": "z-co", "release_date": "2026-01-01", "model": "M1", "access": "api"},
+        {"company_id": "a-co", "release_date": "2026-01-01", "model": "M2", "access": "api"},
+    ]
+    markers = map_builder.build_markers(companies, board_rows, [])
+    ordered = map_builder.scan_order(markers)
+    assert [m.id for m in ordered] == ["a-co", "z-co"]
+
+
+def test_build_context_includes_scan_markers_matching_markers():
+    context = map_builder.build_context(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    assert {m.id for m in context["scan_markers"]} == {m.id for m in context["markers"]}
+
+
+# ---------------------------------------------------------------------------
 # render_map_page / write_map_page -- real template, end to end
 # ---------------------------------------------------------------------------
 
@@ -473,6 +526,51 @@ def test_render_map_page_has_real_keyboard_operable_zoom_controls():
     # operable (Enter/Space) with no script changes needed for that.
     assert html.count('<button type="button" class="map-zoom-btn"') >= 2
     assert '<button type="button" class="map-zoom-btn map-zoom-btn--reset"' in html
+
+
+def test_render_map_page_has_the_scan_panel_button_and_container():
+    html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    assert (
+        'id="map-expand-all" class="map-toggle" aria-pressed="false" '
+        'aria-expanded="false" aria-controls="map-scan-panel">Scan all labs</button>'
+    ) in html
+    assert '<aside class="map-scan" id="map-scan-panel" hidden' in html
+
+
+def test_render_map_page_scan_panel_has_one_item_per_marker():
+    html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    assert html.count('<section class="map-scan__item') == 13
+
+
+def test_render_map_page_scan_panel_item_has_the_company_name_as_a_real_link():
+    # Unlike the map-anchored popover (whose marker already carries the
+    # name as a separate sibling element), a scan-panel item is not next
+    # to any marker, so it needs the name inside itself.
+    html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    assert (
+        '<h2 class="map-scan__name"><a href="/companies/anthropic/">Anthropic</a></h2>'
+        in html
+    )
+
+
+def test_render_map_page_scan_panel_and_popover_render_identical_board_row_content():
+    # Both surfaces call the same marker_details() macro -- this is the
+    # content-parity guarantee that macro extraction is meant to give:
+    # a board row's exact text appears verbatim in both places, never
+    # hand-duplicated and liable to drift.
+    html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    anthropic_row_text = "Claude Fable 5"
+    assert html.count(anthropic_row_text) >= 2
+
+
+def test_render_map_page_scan_panel_open_weights_class_matches_marker():
+    html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    assert 'class="map-marker map-marker--open-weights"' in html
+    assert (
+        '<section class="map-scan__item map-scan__item--open-weights" '
+        'data-company="deepseek" data-open-weights="true">'
+        in html
+    )
 
 
 def test_render_map_page_china_region_marker_popover_anchors_right():
