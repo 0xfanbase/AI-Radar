@@ -26,7 +26,7 @@
     },
     "what_theyve_done": [
       {
-        "text": "ByteDance formed its Seed team in early 2023 to build large language, speech, vision and world models, and in 2025 fully merged its separate AI Lab into Seed to unify the company's AI research under one organization.",
+        "text": "ByteDance formed its Seed team in early 2023 to build large language, speech, vision and world models.",
         "citations": [
           {
             "url": "https://en.wikipedia.org/wiki/ByteDance",
@@ -58,7 +58,7 @@
         ]
       },
       {
-        "text": "It is served at scale through ByteDance's own Doubao consumer assistant and Volcano Engine cloud platform, giving Seed direct distribution to a very large consumer user base rather than relying on third-party API resellers.",
+        "text": "It is served through ByteDance's own Doubao consumer assistant and Volcano Engine cloud platform rather than a broad third-party API.",
         "citations": [
           {
             "url": "https://seed.bytedance.com/en/blog/seed2-1-officially-released-advancing-ai-productivity",

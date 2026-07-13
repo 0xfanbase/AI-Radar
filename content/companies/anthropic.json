@@ -36,7 +36,7 @@
           {
             "url": "https://en.wikipedia.org/wiki/Anthropic",
             "outlet": "Wikipedia",
-            "quote": "a focus on AI safety"
+            "quote": "founded in January 2021 by seven former employees of OpenAI"
           }
         ]
       },
@@ -46,12 +46,12 @@
           {
             "url": "https://en.wikipedia.org/wiki/Anthropic",
             "outlet": "Wikipedia",
-            "quote": "to research AI systems' safety and reliability"
+            "quote": "In May 2025, Anthropic released Claude 4 Opus and Sonnet"
           }
         ]
       },
       {
-        "text": "In June 2026 it released Claude Sonnet 5, its most agentic mid-tier model yet, alongside the restricted Claude Fable 5 and Claude Mythos 5 as its current top-tier flagship pair, with Fable 5 becoming generally available on June 9, 2026 with a 1-million-token context window on by default.",
+        "text": "In June 2026 it released Claude Sonnet 5, its most agentic mid-tier model yet, alongside Claude Fable 5 and the restricted Claude Mythos 5 as its current top-tier flagship pair, with Fable 5 becoming generally available on June 9, 2026 with a 1-million-token context window on by default.",
         "citations": [
           {
             "url": "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5",
@@ -89,7 +89,7 @@
       }
     ],
     "current_focus": {
-      "text": "Anthropic's current lineup is led by the restricted Claude Fable 5 and Claude Mythos 5 as its top-tier models, with Claude Sonnet 5 positioned as a cheaper, still highly agentic mid-tier model that narrows the performance gap to the Opus-class flagship at a lower price, and the company's own developer guidance now points users who need maximum capability at Fable 5 rather than Opus 4.8.",
+      "text": "Anthropic's current lineup is led by Claude Fable 5 and the restricted Claude Mythos 5 as its top-tier models, with Claude Sonnet 5 positioned as a cheaper, still highly agentic mid-tier model that narrows the performance gap to the Opus-class flagship at a lower price, and the company's own developer guidance now points users who need maximum capability at Fable 5 rather than Opus 4.8.",
       "citations": [
         {
           "url": "https://www.anthropic.com/news/claude-sonnet-5",
@@ -97,9 +97,9 @@
           "quote": "its performance is close to that of Opus 4.8"
         },
         {
-          "url": "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5",
+          "url": "https://platform.claude.com/docs/en/about-claude/models/overview",
           "outlet": "Anthropic (official docs)",
-          "quote": "become available on June 9, 2026"
+          "quote": "the highest available capability, use Claude Fable 5"
         }
       ]
     },

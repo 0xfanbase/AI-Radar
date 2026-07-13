@@ -4326,4 +4326,36 @@ for the full build description; this entry is the decision log.
   reader-facing prose for the first time -- no code changed to produce
   this limitation, only made visible on the page that had previously
   described the gate in a way that could be read as broader than it is.
+- **2026-07-13 -- Owner-requested adversarial fact-check pass (13 parallel
+  agents, one per `content/companies/*.json`, each re-fetching every
+  citation live) found and fixed a real factual error (Anthropic's
+  profile mislabeled Claude Fable 5 as "restricted" -- only Claude
+  Mythos 5 is; Fable 5 is generally available), several fabricated or
+  mismatched citation quotes (Mistral, DeepSeek, Moonshot AI, Google
+  DeepMind, xAI, ByteDance Seed), two `context_window: null` Board rows
+  with a real documented figure that should have been filled in
+  (Mistral, OpenAI), one HQ-coordinate correction (NVIDIA, ~2km off its
+  real campus), one untraceable comparative claim (NVIDIA's Board row
+  calling three differently-sized models "comparably-sized"), and three
+  stale entries describing an already-superseded product state as
+  current (Meta AI's Muse Spark 1.1 API preview, OpenAI's GPT-5.6
+  general-availability rollout, both dated the same day as their own
+  `last_verified` -- upserted with new Board rows/milestones and real
+  citations; Moonshot AI's Kimi K2.7-Code, released June 12 2026, before
+  its Board row's own `last_verified` of July 9 -- logged here rather
+  than fabricated, since the fact-check pass flagged the gap without
+  gathering full specs/citations for a new row; a future PROFILER run or
+  manual pass should add it).**
+- **2026-07-13 -- Alibaba Qwen's `founded: "2023-04"` is Qwen's public
+  beta-launch date, not the founding of the team behind it (Tongyi Lab,
+  reportedly ~2022) -- flagged by the same fact-check pass as
+  inconsistent with this dataset's own convention elsewhere (e.g.
+  Google DeepMind's `founded` field uses the 2010 lab founding, not the
+  2023 "Google DeepMind" merger/rebrand date). Deliberately NOT changed:
+  the only sourcing found for the ~2022 date is secondary Chinese-language
+  tech press (36kr.com, thepaper.cn), not a primary source or a
+  reputable-outlet-table source, so per this project's own "omit rather
+  than guess" discipline the field is left as-is pending a properly
+  primary-sourced correction rather than swapped for a lower-confidence
+  value.
 
