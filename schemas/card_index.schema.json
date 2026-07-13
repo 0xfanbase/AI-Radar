@@ -59,6 +59,16 @@
           "status": {
             "type": "string",
             "enum": ["confirmed", "reported", "corrected"]
+          },
+          "companies": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]+$",
+              "minLength": 1
+            },
+            "description": "Optional (Phase 6): mirrors the source card's own companies[] (schemas/card.schema.json), carried into the index so map-centric UI listing/filtering by company doesn't require opening every per-card file."
           }
         },
         "additionalProperties": false

@@ -2,6 +2,7 @@
   {
     "lab": "Example Lab",
     "region": "US",
+    "company_id": "example-lab",
     "model": "Example Model 5",
     "release_date": "2026-07-09",
     "modality": ["text", "code"],
@@ -14,6 +15,7 @@
   {
     "lab": "Example Open Lab",
     "region": "open-weights",
+    "company_id": "example-open-lab",
     "model": "Example Weights 3",
     "release_date": "2026-06-01",
     "modality": ["text"],

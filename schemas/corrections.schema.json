@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://frontier-wire.example/schemas/corrections.schema.json",
   "title": "Corrections",
-  "description": "Spec-silent shape (spec sec-5 names 'corrections.json' without fields; the plan's Phase 2 section fixes the minimal shape used here, logged in IMPROVEMENT_BACKLOG.md). Top-level array published at content/corrections.json, the public corrections log linked from every card footer. Phase 1 ships this schema only -- entries are appended by the Phase 2 analyst when a pending correction (data/pending_corrections.json) is confirmed against fresh evidence.",
+  "description": "Spec-silent shape (spec sec-5 names 'corrections.json' without fields; the plan's Phase 2 section fixes the minimal shape used here, logged in IMPROVEMENT_BACKLOG.md). Top-level array published at content/corrections.json, the public corrections log linked from every card footer. Phase 1 ships this schema only -- entries are appended by the Phase 2 analyst when a pending correction (data/pending_corrections.json) is confirmed against fresh evidence. Phase 6 adds optional target_type/target_id so a correction can name a content/companies/<id>.json profile as well as a card, without breaking any existing consumer: card_id stays required and is exactly what today's pipeline (the analyst prompt, scripts/pending_corrections.py, site/builders/corrections.py) reads and writes for a card-targeted correction; target_type/target_id are an additive, currently-optional pair (present together or not at all, enforced via dependentRequired) that a future stage can wire up for company-targeted corrections. No live data exists in content/corrections.json as of Phase 6 (empty array), so this is a forward-looking schema addition, not a migration of real rows.",
   "type": "array",
   "items": {
     "type": "object",
@@ -15,6 +15,10 @@
       "source_url",
       "corrected_at"
     ],
+    "dependentRequired": {
+      "target_type": ["target_id"],
+      "target_id": ["target_type"]
+    },
     "properties": {
       "id": {
         "type": "string",
@@ -23,7 +27,17 @@
       "card_id": {
         "type": "string",
         "minLength": 1,
-        "description": "content/cards/<id>.json this correction applies to."
+        "description": "content/cards/<id>.json this correction applies to. Remains required for backward compatibility with the pipeline in place today, which only ever targets cards -- see target_type/target_id below for the forward-looking company-targeting hook."
+      },
+      "target_type": {
+        "type": "string",
+        "enum": ["card", "company"],
+        "description": "Optional (Phase 6, forward-looking): what kind of record target_id names. Must be present together with target_id or not at all. Not yet populated by any current writer -- card_id above remains the field actually in use for today's card-only corrections workflow."
+      },
+      "target_id": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Optional (Phase 6, forward-looking): the id of the record this correction targets -- a content/cards/<id>.json id when target_type is 'card', or a content/companies/<id>.json id when target_type is 'company'. Must be present together with target_type or not at all."
       },
       "original_claim": {
         "type": "string",

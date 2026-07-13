@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/company.schema.json",
+  "title": "Company",
+  "description": "Phase 6 entity-foundation addition: one per-company registry/profile record, published to content/companies/<id>.json. This is a wiki-like fact-checked profile (overview, track record, strengths, current focus, roadmap -- each claim carrying its own citations[], reusing card.schema.json's exact {url, outlet, quote} shape) plus the HQ geocoding (hq_country/hq_city/hq_lat/hq_lng) the map-centric UI plots a marker from. official_domains[] and official_repos[] are informational metadata and a PRIMARY-source-classification input for the analyst's corroboration procedure ONLY -- they are NOT the link-vetting/outbound-link allowlist (that is a separate, code-owned artifact, data/trusted_domains.json, not defined by this schema). Company id is the FK target frontier_board.schema.json's company_id field points at.",
+  "type": "object",
+  "required": [
+    "id",
+    "name",
+    "aliases",
+    "hq_country",
+    "hq_city",
+    "hq_lat",
+    "hq_lng",
+    "official_domains",
+    "founded",
+    "profile",
+    "status",
+    "generated_at",
+    "model",
+    "last_verified"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "minLength": 1,
+      "description": "Stable slug, e.g. 'anthropic', 'deepseek'. FK target for frontier_board.schema.json's company_id and for card.schema.json/card_index.schema.json's optional companies[]."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Canonical display name, e.g. 'Anthropic'."
+    },
+    "aliases": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "Other names/spellings this company is known by (e.g. former names, common abbreviations, non-English renderings). May be empty."
+    },
+    "hq_country": {
+      "type": "string",
+      "pattern": "^[A-Z]{2}$",
+      "description": "ISO 3166-1 alpha-2 country code of the company's headquarters, e.g. 'US', 'CN'."
+    },
+    "hq_city": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Headquarters city, as sourced."
+    },
+    "hq_lat": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90,
+      "description": "Headquarters latitude, decimal degrees -- the map-centric UI plots this company's marker here."
+    },
+    "hq_lng": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180,
+      "description": "Headquarters longitude, decimal degrees -- the map-centric UI plots this company's marker here."
+    },
+    "official_domains": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "This company's own domain(s) (e.g. 'anthropic.com'), used purely as informational metadata and as one input to the analyst's corroboration procedure for classifying a fetched source as PRIMARY (schemas/card.schema.json-adjacent CLAUDE.md step 2). This is NOT the site's outbound-link-vetting allowlist and must never be read as one -- that is a separate, code-owned artifact (data/trusted_domains.json), out of this schema's scope entirely."
+    },
+    "official_repos": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "Optional: this company's official GitHub org/repo URLs (e.g. 'https://github.com/anthropics'), same PRIMARY-classification-input-only caveat as official_domains -- not a link allowlist."
+    },
+    "founded": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Founding year or date, free-form as sourced (e.g. '2021' or '2021-01-01') -- not schema-constrained to a single format since the precision available in primary sourcing varies by company."
+    },
+    "profile": {
+      "type": "object",
+      "required": [
+        "overview",
+        "what_theyve_done",
+        "strengths",
+        "current_focus",
+        "roadmap"
+      ],
+      "properties": {
+        "overview": { "$ref": "#/$defs/citedText" },
+        "what_theyve_done": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/citedText" },
+          "description": "Track-record bullets: notable releases, milestones, and events, each independently cited."
+        },
+        "strengths": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/citedText" },
+          "description": "What this company is particularly known for / good at, each independently cited."
+        },
+        "current_focus": { "$ref": "#/$defs/citedText" },
+        "roadmap": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/citedText" },
+          "description": "Publicly stated future plans/direction, each independently cited. Only the company's own stated roadmap, per Hard Rule 3 (claims hygiene) -- never speculation framed as roadmap."
+        }
+      },
+      "additionalProperties": false
+    },
+    "status": {
+      "type": "string",
+      "enum": ["confirmed", "reported"],
+      "description": "The corroboration-rule outcome for this profile as a whole, same two working statuses as card.schema.json (no 'corrected' here yet -- company profiles don't yet have their own corrections-workflow wiring; see schemas/pending_corrections.schema.json's target_type/target_id fields for the forward-looking hook)."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Model identifier that generated/last updated this profile, e.g. 'claude-sonnet-4-5'."
+    },
+    "last_verified": {
+      "type": "string",
+      "format": "date",
+      "description": "Date this profile was last fact-checked against its citations. Mirrors frontier_board.schema.json's own last_verified convention."
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "citedText": {
+      "type": "object",
+      "required": ["text", "citations"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Own-words prose -- never a lightly reworded source sentence, per Hard Rule 2/CLAUDE.md's own-words body requirement."
+        },
+        "citations": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Exact citations[] shape reused verbatim from schemas/card.schema.json: {url, outlet, quote}, quote <=15 words, max one per source.",
+          "items": {
+            "type": "object",
+            "required": ["url", "outlet", "quote"],
+            "properties": {
+              "url": {
+                "type": "string",
+                "format": "uri"
+              },
+              "outlet": {
+                "type": "string",
+                "minLength": 1
+              },
+              "quote": {
+                "type": "string",
+                "description": "Supporting quote, spec cap: <=15 words, max one per source."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

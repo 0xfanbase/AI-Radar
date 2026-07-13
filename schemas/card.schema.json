@@ -115,6 +115,16 @@
     "correction_note": {
       "type": ["string", "null"],
       "description": "Optional short pointer to the content/corrections.json entry that corrected this card. Present only when status is 'corrected'."
+    },
+    "companies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$",
+        "minLength": 1
+      },
+      "description": "Optional (Phase 6): company slugs (schemas/company.schema.json's id field) this card is about/mentions, for map-centric UI cross-linking from a card to its company profile page(s). Omitted or empty is valid -- not every card names a specific company."
     }
   },
   "additionalProperties": false
