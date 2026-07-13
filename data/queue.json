@@ -1,127 +1,113 @@
 [
   {
-    "cluster_hash": "c4b71c69d76591ffa08be0400db8df158ce9cde4a1ff573131309cab4d84bac1",
+    "cluster_hash": "5bc0a40c52496856615251916750bda53e287d5d3d56d5c120c9bae9866463a9",
     "rank": 1,
-    "score": 69.8701317237876,
+    "score": 90.92481190776994,
     "sources": [
       {
-        "outlet": "blog.yaelwrites.com",
-        "points": 109,
+        "outlet": "raymyers.org",
+        "points": 1393,
         "source_type": "hn",
-        "title": "Stop Telling Me to Ask an LLM",
-        "url": "https://blog.yaelwrites.com/stop-telling-me-to-ask-an-llm/"
+        "title": "Zig Creator Calls Spade a Spade, Anthropic Blows Smoke",
+        "url": "https://raymyers.org/post/zed-creator-calls-spade-a-spade/"
       }
     ]
   },
   {
-    "cluster_hash": "47241c700e22d76b233188c99f1d303d8a606395e6568416c1fabb9b85a4d5a8",
+    "cluster_hash": "c328c8ca299f5a2b38c3e8976204fa960f187d201712a208a9576b0618d89ba3",
     "rank": 2,
-    "score": 57.42233423821393,
+    "score": 56.67194710813473,
     "sources": [
       {
-        "outlet": "wsj.com",
-        "points": 77,
+        "outlet": "neow.in",
+        "points": 224,
         "source_type": "hn",
-        "title": "Apple Sues OpenAI, Alleging It Stole Trade Secrets",
-        "url": "https://www.wsj.com/tech/apple-openai-lawsuit-f86bd58c"
-      },
-      {
-        "outlet": "9to5mac.com",
-        "points": 1565,
-        "source_type": "hn",
-        "title": "Apple sues OpenAI, accuses ex-employees of stealing trade secrets",
-        "url": "https://9to5mac.com/2026/07/10/apple-sues-openai-trade-secret-theft/"
-      },
-      {
-        "outlet": "nytimes.com",
-        "points": 113,
-        "source_type": "hn",
-        "title": "Apple sues OpenAI, accusing it of stealing company secrets",
-        "url": "https://www.nytimes.com/2026/07/10/technology/apple-openai-lawsuit.html"
+        "title": "Samsung Health app threatens data deletion if users opt out AI training",
+        "url": "https://neow.in/cWsyMTV3"
       }
     ]
   },
   {
-    "cluster_hash": "c3547331e720b325bbbbcd16f830f6666298d52ae495717850f07332f0ac95a2",
+    "cluster_hash": "935a3aca4bd073e47d0ce10d377cf2b3538d6220dab4c071d2b3dedfbdea03f4",
     "rank": 3,
-    "score": 28.6283854791159,
+    "score": 44.35899753404158,
     "sources": [
       {
-        "outlet": "geohot.github.io",
-        "points": 171,
+        "outlet": "github.com",
+        "points": 85,
         "source_type": "hn",
-        "title": "AI 2040 and the cult of intelligence",
-        "url": "https://geohot.github.io//blog/jekyll/update/2026/07/11/ai-2040.html"
+        "title": "Claude is just Mr. Meeseeks",
+        "url": "https://github.com/thephw/claude-meseeks"
       }
     ]
   },
   {
-    "cluster_hash": "3bb35e61c94ed0fe9f6733684932b2e668f5d6e9dad56674e4a1e6548d7e33af",
+    "cluster_hash": "6e8afa87e2257b6affdb234b5ccb121db0ef181e5f8973a4ccc8bcb2049f2d66",
     "rank": 4,
-    "score": 19.47149561266763,
+    "score": 44.29555543889867,
     "sources": [
       {
-        "outlet": "io-fund.com",
-        "points": 130,
+        "outlet": "news.ycombinator.com",
+        "points": 1000,
         "source_type": "hn",
-        "title": "Nvidia, CoreWeave, and Nebius: Inside the Circular Financing of the GPU Boom",
-        "url": "https://io-fund.com/ai-stocks/nvidia-coreweave-nebius-circular-financing-gpu-boom"
+        "title": "Ask HN: Add flag for AI-generated articles",
+        "url": "https://news.ycombinator.com/item?id=48886741"
       }
     ]
   },
   {
-    "cluster_hash": "8e64f4513c18cd9d79d30d588339ebd8023d3f63d66f8429ab9d798af2865bf6",
+    "cluster_hash": "398431a5f118d841d6a8dd041caabbd674f935908d0bf2ed36b173c37cd5c111",
     "rank": 5,
-    "score": 18.69332955376578,
+    "score": 23.146933463160977,
     "sources": [
       {
-        "outlet": "iroh.computer",
-        "points": 26,
+        "outlet": "systima.ai",
+        "points": 684,
         "source_type": "hn",
-        "title": "Mesh LLM: distributed AI computing on iroh",
-        "url": "https://www.iroh.computer/blog/mesh-llm"
+        "title": "Claude Code sends 33k tokens before reading the prompt; OpenCode sends 7k",
+        "url": "https://systima.ai/blog/claude-code-vs-opencode-token-overhead"
       }
     ]
   },
   {
-    "cluster_hash": "66bbdd7828c6eff6e3728e9a33d659e0fc469cfe32fb093a332ac57b1e4f4405",
+    "cluster_hash": "46d7fc932bd3074a7bb94bc47dbdb97f47163901a217ca161c6e6b5f9eb57513",
     "rank": 6,
-    "score": 17.258050410714112,
+    "score": 17.930625088543064,
     "sources": [
       {
-        "outlet": "cdn.openai.com",
-        "points": 510,
+        "outlet": "bytecode.news",
+        "points": 74,
         "source_type": "hn",
-        "title": "GPT-5.6 Sol Ultra produces proof of the Cycle Double Cover Conjecture [pdf]",
-        "url": "https://cdn.openai.com/pdf/04d1d1e4-bc75-476a-97cf-49055cd98d31/cdc_proof.pdf"
+        "title": "AI Is a Bad Tool",
+        "url": "https://bytecode.news/posts/2026/07/user-submission-ai-is-a-bad-tool"
       }
     ]
   },
   {
-    "cluster_hash": "4ba2a217667184c34b32dae2a84672b12a356b214cdd73d1c869e79bdbcfa432",
+    "cluster_hash": "66ae81ac75abdcb2c2b5bd9ea090379cd737d9d5ddbe071d4224422b3e695746",
     "rank": 7,
-    "score": 13.17128958159883,
+    "score": 11.562419164219563,
     "sources": [
       {
-        "outlet": "mixfont.com",
-        "points": 190,
+        "outlet": "github.com",
+        "points": 46,
         "source_type": "hn",
-        "title": "Ghost Font: A font that humans can read but AI cannot",
-        "url": "https://www.mixfont.com/ghost-font"
+        "title": "Show HN: I implemented a neural network in SQL",
+        "url": "https://github.com/xqlsystems/xarray-sql/blob/claude/xarray-sql-mnist-demo/benchmarks/nn.py"
       }
     ]
   },
   {
-    "cluster_hash": "a3dfb41b3e0da104ce94fac70dbe6ed1a5cd2cbe677473fb6e2034f72df0c613",
+    "cluster_hash": "b4e194bf0de5ff7d836642b3f57a9481390c730c18b44b922df05d6a9ed14be7",
     "rank": 8,
-    "score": 12.947401689166202,
+    "score": 9.163326473776129,
     "sources": [
       {
-        "outlet": "pluralistic.net",
-        "points": 86,
+        "outlet": "github.com",
+        "points": 52,
         "source_type": "hn",
-        "title": "Reverse centaurs are the answer to the AI paradox (2025)",
-        "url": "https://pluralistic.net/2025/09/11/vulgar-thatcherism/#there-is-an-alternative"
+        "title": "Show HN: BillAI Bass, an AI-Powered Big Mouth Billy Bass Using Strands Agents",
+        "url": "https://github.com/morganwilliscloud/billai-bass"
       }
     ]
   }
