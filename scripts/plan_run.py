@@ -44,6 +44,31 @@ three-layer shape already established by ``watcher/queue_writer.py`` and
 :func:`save_run_plan` schema-validates then writes it; :func:`write_run_plan`
 composes the two. :func:`main` is the only piece that reads the real clock
 and the real ``QUOTA_DEGRADATION_LEVEL`` environment variable.
+
+**Phase 8 addition -- deterministic PROFILER-target selection
+(:func:`decide_profile_target`).** Per this phase's own build brief: "pick
+at most one profile per run -- any company whose frontier_board.json row
+was upserted this run, else the company with the oldest last_verified if
+older than 45 days, else none." This module runs strictly *before* the
+ANALYST/PROFILER step, so it cannot know for a fact which company's Board
+row the analyst is about to upsert this run -- rule (1) is therefore
+implemented as a deterministic *prediction*, not a confirmed post-hoc
+fact: :func:`find_board_upsert_candidate` checks whether any of this
+run's already-selected cluster's own source titles name a tracked
+company (by ``name``/``aliases[]``, same case-insensitive matching
+discipline ``scripts/migrate_frontier_board_company_ids.py`` already uses
+for ``frontier_board.json`` rows, applied here as a substring/word-
+boundary search over free-text titles instead of an exact whole-string
+match, since a headline is prose, not a bare lab name) -- a cluster
+naming a lab is the closest a pure, pre-analyst signal can get to "this
+run is likely to touch that company's Board row." This is a deliberate,
+logged judgment call (see ``IMPROVEMENT_BACKLOG.md``), not an attempt to
+read the analyst's mind exactly. Rule (2), :func:`find_stale_profile_candidate`,
+has no such ambiguity -- it's a plain oldest-``last_verified`` scan over
+the already-on-disk company registry. Both together are
+:func:`decide_profile_target`, threaded into :func:`compute_run_plan` as
+the new ``profile_target``/``profile_reason`` fields
+(``schemas/run_plan.schema.json``).
 """
 from __future__ import annotations
 
@@ -54,7 +79,7 @@ import re
 import sys
 from datetime import date, datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping, Sequence
 
 # Allow running as `python scripts/plan_run.py` (no package install / no -m
 # needed), same trick scripts/run_watcher_live.py already uses -- put the
@@ -75,9 +100,15 @@ __all__ = [
     "DIGEST_CARDS_CAP",
     "DIGEST_WEEKDAY",
     "DEFAULT_DEGRADATION_LEVEL",
+    "COMPANIES_DIR",
+    "PROFILE_STALE_THRESHOLD_DAYS",
     "kebab_slug",
     "compute_proposed_card_id",
     "decide_run_mode",
+    "load_company_registry",
+    "find_board_upsert_candidate",
+    "find_stale_profile_candidate",
+    "decide_profile_target",
     "compute_run_plan",
     "load_run_plan",
     "save_run_plan",
@@ -88,6 +119,15 @@ __all__ = [
 
 RUN_PLAN_PATH = REPO_ROOT / "data" / "run_plan.json"
 RUN_PLAN_VERSION = 1
+
+# Phase 8: the company profile registry this run's PROFILER-target
+# selection reads from -- full per-company profiles (name/aliases[]/
+# last_verified), not the map homepage's summary content/companies/
+# index.json (which carries neither).
+COMPANIES_DIR = REPO_ROOT / "content" / "companies"
+
+# "older than 45 days" per this phase's own build brief, verbatim.
+PROFILE_STALE_THRESHOLD_DAYS = 45
 
 # --------------------------------------------------------------------------
 # Ladder constants (CLAUDE.md's "Quota degradation ladder" section, spec-
@@ -268,6 +308,168 @@ def decide_run_mode(
 
 
 # --------------------------------------------------------------------------
+# Phase 8: deterministic PROFILER-target selection -- see module docstring's
+# own "Phase 8 addition" section for the full rationale.
+# --------------------------------------------------------------------------
+
+_NAME_PATTERN_CACHE: dict[str, "re.Pattern[str]"] = {}
+
+
+def _name_mentioned(title: str, name: str) -> bool:
+    """True if `name` (a company's `name` or one of its `aliases[]`)
+    appears in `title` as a whole word/phrase, case-insensitive -- a
+    word-boundary regex search, not a bare substring check, so e.g.
+    `"AI"` never spuriously matches inside `"OpenAI"`. Compiled patterns
+    are cached (module-level, keyed by the exact name string) since the
+    same small set of company names/aliases gets checked against every
+    source title in a run."""
+    name = name.strip()
+    if not name:
+        return False
+    pattern = _NAME_PATTERN_CACHE.get(name)
+    if pattern is None:
+        pattern = re.compile(r"\b" + re.escape(name) + r"\b", re.IGNORECASE)
+        _NAME_PATTERN_CACHE[name] = pattern
+    return bool(pattern.search(title))
+
+
+def load_company_registry(companies_dir: Path = COMPANIES_DIR) -> list[dict[str, Any]]:
+    """Load every full `content/companies/<id>.json` profile (excluding
+    the generated `index.json` summary manifest, which carries neither
+    `aliases[]` nor `last_verified` -- both of which
+    :func:`decide_profile_target` needs). Returns `[]` if the directory
+    doesn't exist yet, matching every sibling "load every X" loader in
+    this pipeline's own graceful-missing-directory convention."""
+    if not companies_dir.is_dir():
+        return []
+    companies: list[dict[str, Any]] = []
+    for path in sorted(companies_dir.glob("*.json")):
+        if path.name == "index.json":
+            continue
+        with path.open("r", encoding="utf-8") as f:
+            companies.append(json.load(f))
+    return companies
+
+
+def find_board_upsert_candidate(
+    selected: Sequence[Mapping[str, Any]], companies: Sequence[Mapping[str, Any]]
+) -> str | None:
+    """The first company (in `selected` cluster order, then in each
+    cluster's own `sources[]` order, then in `companies` order) whose
+    `name` or any `aliases[]` entry is mentioned in a source's `title` --
+    a deterministic *prediction* of which company this run's ANALYST is
+    likely to touch (see module docstring), not a confirmed fact.
+    `selected` is `decide_run_mode`'s own already-filtered subset of
+    `queue` (full `queue.schema.json`-shaped entries, each with its own
+    `sources[]`) -- never re-derived from a raw `cluster_hash` join here,
+    since `decide_run_mode` already produced exactly that subset.
+    Returns `None` if no source title in `selected` mentions any
+    registered company."""
+    for entry in selected:
+        for source in entry.get("sources", None) or []:
+            title = str(source.get("title", "") or "")
+            if not title:
+                continue
+            for company in companies:
+                names = [str(company.get("name", ""))] + [
+                    str(a) for a in (company.get("aliases", None) or [])
+                ]
+                if any(_name_mentioned(title, name) for name in names if name):
+                    return str(company.get("id", "")) or None
+    return None
+
+
+def find_stale_profile_candidate(
+    companies: Sequence[Mapping[str, Any]],
+    today: date,
+    *,
+    stale_days: int = PROFILE_STALE_THRESHOLD_DAYS,
+) -> str | None:
+    """The company with the single oldest `last_verified` date across
+    `companies`, but only if that date is more than `stale_days` days
+    before `today` -- otherwise `None` (every profile is fresh enough,
+    nothing to refresh this run). Ties (two companies sharing the exact
+    same oldest `last_verified`) break on company `id`, ascending, for a
+    deterministic result regardless of `companies`' own iteration order.
+    A company with a missing or unparseable `last_verified` is skipped
+    (defensive -- every real seeded profile has one, per
+    `schemas/company.schema.json`'s required fields, but this stays
+    tolerant of malformed input the same way every sibling pure-compute
+    function in this pipeline does)."""
+    dated: list[tuple[date, str]] = []
+    for company in companies:
+        raw = company.get("last_verified")
+        if not raw:
+            continue
+        try:
+            last_verified = date.fromisoformat(str(raw))
+        except ValueError:
+            continue
+        dated.append((last_verified, str(company.get("id", ""))))
+
+    if not dated:
+        return None
+
+    dated.sort(key=lambda pair: (pair[0], pair[1]))
+    oldest_date, oldest_id = dated[0]
+    if (today - oldest_date).days > stale_days:
+        return oldest_id
+    return None
+
+
+def decide_profile_target(
+    run_mode: str,
+    selected: Sequence[Mapping[str, Any]],
+    companies: Sequence[Mapping[str, Any]],
+    today: date,
+) -> tuple[str | None, str]:
+    """Return `(company_id_or_None, reason)` for this run's PROFILER
+    target, per the three-rule priority order in the module docstring's
+    "Phase 8 addition" section.
+
+    **Unconditional rule, checked first:** whenever `run_mode` is
+    `"skip"`, the profile target is always `None` too -- CLAUDE.md's
+    "empty queue / nothing to do this run" rule applies to the profile
+    target exactly as it does to `clusters`, so a skip run never
+    recommends touching a company profile either.
+    """
+    if run_mode == "skip":
+        return (
+            None,
+            "run_mode is skip -- nothing to do this run, so no profile is "
+            "targeted either",
+        )
+
+    candidate = find_board_upsert_candidate(selected, companies)
+    if candidate is not None:
+        return (
+            candidate,
+            f"company id {candidate!r} is named (by name/alias) in a source "
+            "title of one of this run's selected clusters -- predicting a "
+            "Frontier Board upsert for that company is likely this run "
+            "(a deterministic prediction from cluster content, not a "
+            "confirmed post-hoc fact, since this plan is written before "
+            "the analyst runs)",
+        )
+
+    stale = find_stale_profile_candidate(companies, today)
+    if stale is not None:
+        return (
+            stale,
+            "no selected cluster names a tracked company by title; company "
+            f"id {stale!r} has the oldest last_verified in the registry and "
+            f"is more than {PROFILE_STALE_THRESHOLD_DAYS} days stale",
+        )
+
+    return (
+        None,
+        "no selected cluster names a tracked company by title, and no "
+        f"company profile is more than {PROFILE_STALE_THRESHOLD_DAYS} days "
+        "stale -- no profile is targeted this run",
+    )
+
+
+# --------------------------------------------------------------------------
 # compute_run_plan -- pure computation, no disk I/O (mirrors
 # watcher/velocity.py's compute_whats_moving: takes an explicit `now`,
 # never calls datetime.now() itself).
@@ -275,7 +477,11 @@ def decide_run_mode(
 
 
 def compute_run_plan(
-    queue: list[dict[str, Any]], degradation_level: int, *, now: datetime
+    queue: list[dict[str, Any]],
+    degradation_level: int,
+    *,
+    now: datetime,
+    companies: Sequence[Mapping[str, Any]] = (),
 ) -> dict[str, Any]:
     """Build the ``run_plan.schema.json``-shaped payload for one run.
 
@@ -287,6 +493,16 @@ def compute_run_plan(
     degradation-ladder decision unit-testable without freezing the real
     clock: every test in ``tests/test_degradation_ladder.py`` passes its
     own fixed ``now``.
+
+    ``companies`` (Phase 8, defaulted to ``()`` so every pre-existing
+    call site -- including every test in ``tests/test_degradation_ladder
+    .py`` -- keeps working unchanged) is the already-loaded
+    ``content/companies/<id>.json`` registry (see
+    :func:`load_company_registry`), threaded into
+    :func:`decide_profile_target` to compute this run's
+    ``profile_target``/``profile_reason``. Omitting it simply means no
+    board-upsert/staleness signal is available, so the result is always
+    ``profile_target: null`` with an honest reason -- never a crash.
     """
     today = now.date()
     run_mode, cards_cap, selected, reason = decide_run_mode(
@@ -304,6 +520,10 @@ def compute_run_plan(
         for entry in selected
     ]
 
+    profile_target, profile_reason = decide_profile_target(
+        run_mode, selected, companies, today
+    )
+
     return {
         "version": RUN_PLAN_VERSION,
         "generated_at": now.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -312,6 +532,8 @@ def compute_run_plan(
         "cards_cap": cards_cap,
         "clusters": clusters,
         "reason": reason,
+        "profile_target": profile_target,
+        "profile_reason": profile_reason,
     }
 
 
@@ -357,14 +579,19 @@ def write_run_plan(
     degradation_level: int,
     *,
     now: datetime,
+    companies: Sequence[Mapping[str, Any]] = (),
     path: Path | str = RUN_PLAN_PATH,
 ) -> dict[str, Any]:
     """Compose :func:`compute_run_plan` + :func:`save_run_plan`: the
     single call ``main`` (and any future ``analyze.yml`` step) makes to
     compute, validate, and persist ``data/run_plan.json`` for one run.
     Returns the written payload.
+
+    ``companies`` (Phase 8, defaulted to ``()`` so every pre-existing
+    call site keeps working unchanged) is passed straight through to
+    :func:`compute_run_plan`.
     """
-    plan = compute_run_plan(queue, degradation_level, now=now)
+    plan = compute_run_plan(queue, degradation_level, now=now, companies=companies)
     save_run_plan(plan, path)
     return plan
 
@@ -428,9 +655,10 @@ def main() -> int:
     logging.basicConfig(level=logging.INFO)
     degradation_level = read_degradation_level()
     queue = load_queue(QUEUE_PATH)
+    companies = load_company_registry()
     now = datetime.now(timezone.utc)
 
-    plan = write_run_plan(queue, degradation_level, now=now)
+    plan = write_run_plan(queue, degradation_level, now=now, companies=companies)
 
     print(
         f"data/run_plan.json written: run_mode={plan['run_mode']} "
@@ -438,6 +666,9 @@ def main() -> int:
         f"clusters={len(plan['clusters'])} cards_cap={plan['cards_cap']}"
     )
     print(f"reason: {plan['reason']}")
+    print(
+        f"profile_target: {plan['profile_target']!r} -- {plan['profile_reason']}"
+    )
     return 0
 
 

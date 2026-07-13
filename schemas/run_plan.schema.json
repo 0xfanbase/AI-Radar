@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://frontier-wire.example/schemas/run_plan.schema.json",
   "title": "Run Plan",
-  "description": "Spec-silent shape (the approved build plan's Phase 2 section names 'scripts/plan_run.py ... writes data/run_plan.json (today's cluster subset, pre-computed card IDs ..., degradation-ladder decision)' without fixing fields; decision logged in IMPROVEMENT_BACKLOG.md). Written by the pure-code plan_run.py step before the analyst runs, so the LLM never invents or collides card IDs and the degradation ladder (CLAUDE.md's quota-degradation section) is decided deterministically, not by the analyst's own discretion. run_mode 'skip' is the unconditional empty-queue case (cards_cap/clusters/reason should reflect nothing-to-publish); 'normal'/'capped'/'digest' correspond to degradation_level 0, 1-2, and 3 respectively per CLAUDE.md's ladder. No seed data/run_plan.json is shipped yet -- the script that produces real ones is a later Phase 2 commit.",
+  "description": "Spec-silent shape (the approved build plan's Phase 2 section names 'scripts/plan_run.py ... writes data/run_plan.json (today's cluster subset, pre-computed card IDs ..., degradation-ladder decision)' without fixing fields; decision logged in IMPROVEMENT_BACKLOG.md). Written by the pure-code plan_run.py step before the analyst runs, so the LLM never invents or collides card IDs and the degradation ladder (CLAUDE.md's quota-degradation section) is decided deterministically, not by the analyst's own discretion. run_mode 'skip' is the unconditional empty-queue case (cards_cap/clusters/reason should reflect nothing-to-publish); 'normal'/'capped'/'digest' correspond to degradation_level 0, 1-2, and 3 respectively per CLAUDE.md's ladder. Phase 8 adds profile_target/profile_reason: the deterministic, pure-code PROFILER-target selection (scripts/plan_run.py::decide_profile_target) -- at most one company per run, picked before the PROFILER (or ANALYST, if the two roles are ever merged) ever runs, same 'the LLM never invents its own target' rationale as proposed_card_id.",
   "type": "object",
   "required": [
     "version",
@@ -11,7 +11,9 @@
     "run_mode",
     "cards_cap",
     "clusters",
-    "reason"
+    "reason",
+    "profile_target",
+    "profile_reason"
   ],
   "properties": {
     "version": {
@@ -66,6 +68,15 @@
     "reason": {
       "type": "string",
       "description": "Short human-readable explanation of the run_mode/degradation_level decision (e.g. 'queue empty', 'degradation_level=1: capped to top 5', 'normal run, 8 clusters available')."
+    },
+    "profile_target": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Phase 8: at most one content/companies/<id>.json company id the PROFILER should refresh this run, or null if no candidate was found (or run_mode is 'skip'). Picked deterministically by scripts/plan_run.py::decide_profile_target, in priority order: (1) a company named by name/alias in one of this run's selected cluster's own source titles -- a deterministic *prediction* that this run's ANALYST is likely to upsert that company's frontier_board.json row, since plan_run.py itself runs before the analyst and has no visibility into what the analyst will actually write; (2) absent that, the company with the oldest last_verified across content/companies/*.json, only if that date is more than 45 days before this run's date; (3) otherwise null. Always null when run_mode is 'skip' -- CLAUDE.md's 'nothing to do this run' rule applies to the profile target exactly as it does to clusters."
+    },
+    "profile_reason": {
+      "type": "string",
+      "description": "Short human-readable explanation of the profile_target decision (always present, even when profile_target is null) -- e.g. 'company id anthropic is named ... in one of this run's selected clusters', 'no selected cluster names a tracked company ... company id mistral has the oldest last_verified and is more than 45 days stale', 'run_mode is skip -- nothing to do this run'."
     }
   },
   "additionalProperties": false

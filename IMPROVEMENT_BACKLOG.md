@@ -4125,4 +4125,115 @@ for the full build description; this entry is the decision log.
   every one of the 13 real `content/companies/index.json` ids. If the
   registry grows meaningfully, this table needs a human pass, the same
   way the reputable-outlet table does -- not more code.
+- **2026-07-13 -- Phase 8 (`site/builders/company.py` +
+  `templates/company.html`/`company_index.html`): "Companies" added to
+  the masthead nav, not just reachable from the map/footer.** The
+  brief's own accessibility requirement was "every company page is
+  reachable with zero JS from somewhere other than the map"; a
+  `/companies/` index page alone would already satisfy that literally,
+  but leaving it reachable only via a direct URL or a footer link buried
+  among Moving/Method/About/Corrections would undersell it as a primary
+  site section on par with Board/Lexicon. Added as a sixth
+  `base.html` masthead nav item (`Map, Wire, Board, Companies, Lexicon,
+  Primer`); also fixed a stale doc-comment in `components.css` that
+  still said "the 4 masthead nav items" (already inaccurate before this
+  change -- Phase 7's own Map item made it 5).
+- **2026-07-13 -- Phase 8 (`schemas/company_index.schema.json` +
+  `scripts/update_company_index.py`): closed the schema gap Phase 7
+  itself logged ("content/companies/index.json has no
+  schemas/company_index.schema.json counterpart").** Rather than derive
+  the map's marker list directly from the fuller per-company profile
+  files (the alternative Phase 7's own entry floated), this phase keeps
+  the existing separate summary-index shape but gives it a real schema
+  and a dedicated pure-code regenerator
+  (`scripts/update_company_index.py`, mirroring
+  `scripts/update_card_index.py`'s architecture exactly), wired into
+  `scripts/reconcile_run.py` alongside the sibling card-index
+  regeneration. `reconcile_run()`'s return tuple grew a fourth element
+  (`company_index`) -- its one existing direct caller
+  (`tests/test_verifier_stats.py`) and `scripts/reconcile_run.py::main`
+  were both updated to unpack it. The regenerator sorts alphabetically
+  by `id` (a company registry has no natural recency axis the way cards
+  do) and writes with the pipeline's standard `indent=2, sort_keys=True`
+  formatting -- running it once against the real, already-committed
+  `content/companies/index.json` reordered every entry (values
+  unchanged, verified by an order-insensitive diff before committing the
+  reordered file) to match what the pipeline will now regenerate on
+  every future run, so the committed file and a fresh `reconcile_run.py`
+  pass never silently disagree.
+- **2026-07-13 -- Phase 8 (`scripts/plan_run.py::
+  find_board_upsert_candidate`): the "company whose frontier_board.json
+  row was upserted this run" profile-selection rule is implemented as a
+  deterministic *prediction*, not a confirmed post-hoc fact.**
+  `plan_run.py` runs strictly before the ANALYST/PROFILER step (it's
+  the pure-code planner that produces `data/run_plan.json`, which the
+  LLM steps then read), so it structurally cannot know which company's
+  Board row the analyst is actually about to upsert this run --  that
+  fact doesn't exist yet at plan time. The simplest reasonable
+  deterministic proxy available at plan time: check whether any of this
+  run's already-selected cluster's own `sources[].title` strings name a
+  tracked company by `name`/`aliases[]` (word-boundary, case-insensitive
+  match -- never a bare substring, so `"AI"` can't spuriously match
+  inside `"OpenAI2"` or similar), in cluster-rank order. A cluster
+  naming a lab is the closest a pure, pre-analyst signal can get to
+  "this run is likely to touch that company's Board row." This is
+  logged explicitly (in the function's own docstring, in
+  `scripts/plan_run.py`'s module docstring, and here) as a judgment
+  call given the phase's own ambiguous timing constraint, not an
+  attempt to read the analyst's mind exactly -- if this proves too
+  noisy in practice, the fallback rule (oldest `last_verified` past 45
+  days) still gives a reasonable target on a run where the prediction
+  finds nothing.
+- **2026-07-13 -- Phase 8 (`scripts/check_outbound_links.py`): an
+  unresolvable citation redirect chain fails closed (a hard CI
+  violation), not a warning.** The module docstring states the
+  rationale in full: this is a security-relevant CI gate blocking a new
+  citation from ever being published, and this project's own
+  established instinct for "can't confirm this is safe" is to treat it
+  as unsafe (`watcher/http.py::check_robots_allowed`'s "any other
+  failure -- skip this source" rule is the same posture applied to a
+  different check). Contrast `auditor/linkrot.py::check_hijack`'s own
+  weekly, *after-the-fact* re-check of already-published citations,
+  which deliberately buckets an unresolvable URL as its own
+  `"unreachable"` finding rather than conflating it with a confirmed
+  `"hijacked"` one -- a transient network hiccup on a previously-vetted
+  citation shouldn't itself read as hijack evidence, and there is no
+  publish decision left to block by that point anyway.
+- **2026-07-13 -- Phase 8 (`auditor/linkrot.py::audit_hijacked_links`):
+  the new post-publication hijack check is NOT yet wired into
+  `data/audit/latest.json`'s fixed report envelope
+  (`auditor/report.py::build_report`, `schemas/audit.schema.json`,
+  `auditor/cli.py::run_audit`) or into
+  `scripts/append_backlog_findings.py`'s finding-derivation table.**
+  This phase's own brief scoped the addition to "extend
+  auditor/linkrot.py ... as a new finding type consistent with this
+  file's existing finding-emission pattern" -- read literally and kept
+  to that scope: `check_hijack`/`check_hijacks`/`audit_hijacked_links`
+  are complete, real, and fully tested (mirroring
+  `check_url`/`check_links`/`audit_link_rot`'s own shape exactly), but
+  wiring a sixth checker into the audit report's `additionalProperties:
+  false` fixed shape is a materially larger, separate change (a new
+  required top-level field, a new `auditor.cli.run_audit` call, a new
+  backlog-finding-derivation rule, and updates to every existing test
+  that asserts the report's exact key set) that this phase did not
+  attempt. Flagged here as the concrete next step for whichever phase
+  actually turns `audit.yml` live.
+- **2026-07-13 -- Phase 8 (`schemas/pending_corrections.schema.json`'s
+  `target_type`/`target_id` fields, first added in Phase 6 as a
+  forward-looking hook): the PROFILER prompt text in `.github/workflows/
+  analyze.yml` is this phase's first real consumer of it, but a company
+  profile correction is still applied as a direct, cited edit to the
+  wrong field -- not a new `content/corrections.json` entry.**
+  `schemas/company.schema.json`'s own `status` enum has no `"corrected"`
+  value (only `confirmed`/`reported`) and the schema has no
+  `correction_note`-equivalent field either, so there is no schema-level
+  target for a company-profile correction to point at the way a card's
+  `correction_note` points at `content/corrections.json`. Building that
+  parallel corrections workflow for company profiles was out of this
+  phase's scope (the task named only "roadmap items attributed-only" and
+  the existing `target_type`/`target_id` drain, not a new corrections
+  schema); the PROFILER prompt text says so explicitly and logs this as
+  the simplest reasonable interim behavior. A future phase that wants
+  company profiles to have their own public corrections history would
+  need to extend `schemas/company.schema.json` first.
 

@@ -17,6 +17,8 @@ why. Current route table:
     /wire/                  Wire index (last ~14 days) -- moved here from `/`
     /wire/<YYYY-MM>/        Wire monthly archive
     /board/                 Frontier Board
+    /companies/             Companies index (Phase 8)
+    /companies/<slug>/      One fact-checked profile page per company (Phase 8)
     /lexicon/                Lexicon index
     /lexicon/<slug>/        one page per Lexicon term
     /primer/                Primer (10-step on-ramp)
@@ -125,6 +127,9 @@ def _load_module_by_path(name: str, path: Path):
 wire = _load_module_by_path("frontier_wire_site_builders_wire", BUILDERS_DIR / "wire.py")
 board = _load_module_by_path("frontier_wire_site_builders_board", BUILDERS_DIR / "board.py")
 map_builder = _load_module_by_path("frontier_wire_site_builders_map", BUILDERS_DIR / "map.py")
+company_builder = _load_module_by_path(
+    "frontier_wire_site_builders_company", BUILDERS_DIR / "company.py"
+)
 lexicon_builder = _load_module_by_path(
     "frontier_wire_site_builders_lexicon", BUILDERS_DIR / "lexicon.py"
 )
@@ -256,6 +261,41 @@ def load_companies_index() -> list[dict]:
     return list(payload.get("companies", []))
 
 
+def load_companies() -> list[dict]:
+    """Load every real `content/companies/<slug>.json` full profile
+    (excluding the generated `index.json` summary manifest this module's
+    own `load_companies_index()` reads instead) -- the Phase 8 company
+    profile pages' own input, distinct from the map homepage's marker
+    summary. Returns `[]` if `content/companies/` doesn't exist yet.
+
+    Each profile is jsonschema-validated against
+    `schemas/company.schema.json` (when present) before being returned --
+    same "a bad on-disk artifact is a real, loud bug" discipline this
+    module's own `load_cards()` already applies to `content/cards/`.
+    """
+    companies_dir = CONTENT_DIR / "companies"
+    if not companies_dir.is_dir():
+        return []
+    company_schema_path = SCHEMAS_DIR / "company.schema.json"
+    company_schema = load_json(company_schema_path) if company_schema_path.exists() else None
+    if company_schema is None:
+        log.warning(
+            "no schema found at schemas/company.schema.json -- company "
+            "profiles loaded unvalidated"
+        )
+    companies = []
+    for path in sorted(companies_dir.glob("*.json")):
+        if path.name == "index.json":
+            continue
+        company = load_json(path)
+        if company_schema is not None:
+            jsonschema.validate(
+                company, company_schema, format_checker=jsonschema.FormatChecker()
+            )
+        companies.append(company)
+    return companies
+
+
 def load_and_validate_content() -> dict[str, Any]:
     """Load every top-level content/*.json and data/*.json artifact plus
     content/cards/*.json, jsonschema-validating each against its
@@ -295,6 +335,7 @@ def load_and_validate_content() -> dict[str, Any]:
         loaded[path.stem] = payload
     loaded["cards"] = load_cards()
     loaded["companies_index"] = load_companies_index()
+    loaded["companies"] = load_companies()
     return loaded
 
 
@@ -389,18 +430,30 @@ def apply_base_path(public_dir: Path, base_path: str = BASE_PATH) -> int:
     return rewritten
 
 
-def collect_routes(cards: list[dict], lexicon_entries: list[dict]) -> list[str]:
+def collect_routes(
+    cards: list[dict], lexicon_entries: list[dict], companies: list[dict] | None = None
+) -> list[str]:
     """Every route this build produces, root-relative, for sitemap.xml.
     Order roughly matches the masthead nav's own route order (Map, Wire,
-    Board, Lexicon, Primer, ...), with the Wire's own newest-first
-    archive months and the Lexicon's own alphabetical term slugs
+    Board, Companies, Lexicon, Primer, ...), with the Wire's own
+    newest-first archive months, the Companies index's own alphabetical
+    profile slugs, and the Lexicon's own alphabetical term slugs
     interleaved in their natural order. `/` is the map homepage as of
     Phase 7 (site/builders/map.py); the Wire index itself moved to
     `/wire/` (see PROGRESS.md's Phase 7 entry) -- both are listed
-    explicitly since neither is derivable from the other."""
+    explicitly since neither is derivable from the other. `companies`
+    (Phase 8, defaulted to `()` so an existing caller passing only two
+    positional args keeps working) is the full set of loaded
+    `content/companies/<slug>.json` profiles."""
+    companies = companies or []
     routes = ["/", "/wire/"]
     routes += [f"/wire/{ym}/" for ym in wire.available_months(cards)]
     routes.append("/board/")
+    routes.append("/companies/")
+    routes += [
+        f"/companies/{slug}/"
+        for slug in [str(c["id"]) for c in company_builder.sorted_companies(companies)]
+    ]
     routes.append("/lexicon/")
     routes += [f"/lexicon/{slug}/" for slug in lexicon_builder.all_slugs(lexicon_entries)]
     routes.append("/primer/")
@@ -448,6 +501,7 @@ def render_pages(env: Environment, content: dict[str, Any], public_dir: Path) ->
     lexicon_entries = content.get("lexicon", [])
     frontier_board_rows = content.get("frontier_board", [])
     companies_index = content.get("companies_index", [])
+    companies = content.get("companies", [])
     primer = content.get("primer", {})
     whats_moving = content.get("whats_moving", {})
     ledger = content.get("ledger", {})
@@ -503,6 +557,9 @@ def render_pages(env: Environment, content: dict[str, Any], public_dir: Path) ->
             env, frontier_board_rows, today, public_dir, lexicon_entries=lexicon_entries
         )
     )
+    written += company_builder.write_company_pages(
+        env, companies, frontier_board_rows, cards, public_dir
+    )
     written += lexicon_builder.write_lexicon_pages(
         env, lexicon_entries, public_dir, cards=cards
     )
@@ -519,7 +576,7 @@ def render_pages(env: Environment, content: dict[str, Any], public_dir: Path) ->
     written.append(about.write_about_page(env, public_dir))
     written.append(write_404_page(env, public_dir))
 
-    routes = collect_routes(cards, lexicon_entries)
+    routes = collect_routes(cards, lexicon_entries, companies)
     write_sitemap(routes, public_dir)
     write_robots(public_dir)
 

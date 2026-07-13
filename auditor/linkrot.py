@@ -40,6 +40,26 @@ the "record unreachable now, retry next week" behavior this check wants,
 with no separate retry loop needed here). Nothing about ``fetch()``'s
 GET-only ETag-cache behavior is reused or reimplemented, since a link-rot
 check has no use for cached response bodies and needs a real HEAD verb.
+
+**Phase 8 addition -- the post-publication hijack check
+(:func:`audit_hijacked_links`).** ``scripts/check_outbound_links.py`` (the
+commit-time CI gate) vets a citation's redirect target against
+``data/trusted_domains.json`` the moment a card/company profile is
+written, but a citation that was trusted at commit time can still be
+hijacked *after* the fact -- a domain lapses and gets squatted, a lab page
+starts redirecting somewhere new, etc. This function re-runs that exact
+same redirect-resolution + allowlist check (:func:`scripts.
+check_outbound_links.resolve_final_url` / ``classify_url``, imported and
+reused verbatim rather than re-implemented a second time -- matching
+``auditor.trend``'s own precedent of importing ``scripts.reconcile_run
+.rolling_pass_rate`` rather than duplicating it) against every citation
+URL already published in ``content/cards/*.json``, on `audit.yml`'s
+weekly cadence, and emits one new finding type
+(:class:`HijackCheckResult`, ``status`` one of ``trusted``/``hijacked``/
+``unreachable``) via the exact same ``{checked_at, total_urls, counts,
+results}`` shape :func:`audit_link_rot` already established -- "consistent
+with this file's existing finding-emission pattern," per this turn's own
+instruction, not a new shape invented from scratch.
 """
 from __future__ import annotations
 
@@ -47,10 +67,16 @@ import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
+from typing import Any, Iterable
 
 import requests
 
+from scripts.check_outbound_links import (
+    TRUSTED_DOMAINS_PATH,
+    classify_url,
+    load_trusted_domains,
+    resolve_final_url,
+)
 from watcher import http
 from watcher.config import REPO_ROOT, REQUEST_TIMEOUT_SECONDS
 
@@ -219,6 +245,124 @@ def audit_link_rot(
     results = check_links(session, urls, timeout=timeout)
 
     counts = {"ok": 0, "dead": 0, "unreachable": 0}
+    for result in results:
+        counts[result.status] += 1
+
+    return {
+        "checked_at": _utcnow_iso(),
+        "total_urls": len(urls),
+        "counts": counts,
+        "results": [asdict(r) for r in results],
+    }
+
+
+# --------------------------------------------------------------------------
+# Phase 8: post-publication hijack check -- see module docstring's own
+# "Phase 8 addition" section for the full rationale.
+# --------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class HijackCheckResult:
+    """The outcome of re-resolving one already-published citation URL's
+    redirect chain and re-checking the final URL against
+    ``data/trusted_domains.json``."""
+
+    url: str
+    status: str  # "trusted" | "hijacked" | "unreachable"
+    final_url: str | None
+    detail: str | None = None
+
+
+def check_hijack(
+    session: requests.Session,
+    url: str,
+    trusted: dict[str, Any],
+    *,
+    timeout: float = REQUEST_TIMEOUT_SECONDS,
+) -> HijackCheckResult:
+    """Re-resolve ``url``'s current redirect chain
+    (:func:`scripts.check_outbound_links.resolve_final_url`) and classify
+    the final URL against ``trusted``
+    (:func:`scripts.check_outbound_links.classify_url`) -- the exact same
+    two functions the commit-time CI gate runs, reused verbatim here for
+    the weekly, after-the-fact re-check.
+
+    - ``"trusted"`` -- the redirect chain resolved and the final URL still
+      clears the allowlist. The common case; no finding.
+    - ``"hijacked"`` -- the redirect chain resolved, but the final URL now
+      fails the allowlist check (a domain that was trusted at commit time
+      now redirects somewhere it shouldn't -- a post-commit hijack).
+    - ``"unreachable"`` -- the redirect chain itself couldn't be resolved
+      (timeout, connection error, any other network failure). Unlike
+      ``scripts/check_outbound_links.py``'s own commit-time gate (which
+      fails closed -- treats an unresolvable URL as a hard violation,
+      since it's blocking a brand-new citation from ever being published),
+      this weekly, after-the-fact check downgrades an unresolvable URL to
+      its own distinct bucket rather than conflating it with a confirmed
+      ``"hijacked"`` finding: a transient network hiccup on an
+      already-published, previously-vetted citation shouldn't itself read
+      as evidence of a hijack. It's simply checked again next week, same
+      spirit as :func:`classify_status_code`'s own "record unreachable
+      now, don't retry within this run" rule.
+    """
+    final_url, error = resolve_final_url(session, url, timeout=timeout)
+    if error is not None:
+        return HijackCheckResult(url=url, status="unreachable", final_url=None, detail=error)
+
+    result = classify_url(final_url, trusted)
+    if result.ok:
+        return HijackCheckResult(url=url, status="trusted", final_url=final_url)
+    return HijackCheckResult(
+        url=url, status="hijacked", final_url=final_url, detail=result.reason
+    )
+
+
+def check_hijacks(
+    session: requests.Session,
+    urls: Iterable[str],
+    trusted: dict[str, Any],
+    *,
+    timeout: float = REQUEST_TIMEOUT_SECONDS,
+) -> list[HijackCheckResult]:
+    """Check every URL in ``urls``, in order, returning one
+    :class:`HijackCheckResult` each -- mirrors :func:`check_links`'s own
+    shape for the ok/dead/unreachable check."""
+    return [check_hijack(session, url, trusted, timeout=timeout) for url in urls]
+
+
+def audit_hijacked_links(
+    cards: list[dict] | None = None,
+    *,
+    cards_dir: Path = CARDS_DIR,
+    trusted: dict[str, Any] | None = None,
+    trusted_domains_path: Path = TRUSTED_DOMAINS_PATH,
+    session: requests.Session | None = None,
+    timeout: float = REQUEST_TIMEOUT_SECONDS,
+) -> dict:
+    """Run the full post-publication hijack check and return a summary
+    dict, same ``{checked_at, total_urls, counts, results}`` shape
+    :func:`audit_link_rot` already established (see module docstring).
+
+    ``cards``/``session`` follow :func:`audit_link_rot`'s own defaulting
+    convention exactly (an explicit list for testability, else loaded/built
+    fresh). ``trusted`` likewise lets a caller (or a test) pass an explicit
+    allowlist dict directly; when omitted, it's loaded fresh from
+    ``trusted_domains_path`` (default: the real, committed
+    ``data/trusted_domains.json``) via :func:`scripts.check_outbound_links
+    .load_trusted_domains`.
+    """
+    if cards is None:
+        cards = load_cards(cards_dir)
+    if trusted is None:
+        trusted = load_trusted_domains(trusted_domains_path)
+    if session is None:
+        session = http.build_session()
+
+    urls = collect_citation_urls(cards)
+    results = check_hijacks(session, urls, trusted, timeout=timeout)
+
+    counts = {"trusted": 0, "hijacked": 0, "unreachable": 0}
     for result in results:
         counts[result.status] += 1
 

@@ -7,6 +7,206 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-13 -- Phase 8: profile pages + link defense
+
+Third of four phases (6-9) building the world-map-centric UI reshape.
+Phase 6 laid the entity foundation, Phase 7 built the map homepage whose
+markers link to `/companies/<slug>/` (which didn't resolve yet) and whose
+news-drilldown slot renders cards once they exist. This phase builds the
+company profile pages those links point at, a commit-time outbound-link
+CI gate, a weekly post-publication hijack re-check, and the reference
+PROFILER prompt text + deterministic profile-selection plumbing that will
+drive that page's content once the daily Routine actually runs it.
+
+**1. `site/builders/company.py` + `site/templates/{company,
+company_index}.html`.** Follows `site/builders/{board,lexicon,map}.py`'s
+exact two-step build pattern (`build_context()`/`build_index_context()`
+then render/write). One `/companies/<slug>/` page per
+`content/companies/<slug>.json` full profile: header (name, HQ city/
+country, founded, official-site link from `official_domains[0]`, status
+chip), the exact per-card disclaimer convention `card.html` already
+established (`AI-generated <time>...</time> · model: ... · <a
+href="/corrections/">Corrections</a>`) extended with `last_verified`,
+then Overview / What they've done / Strengths / Current focus / Roadmap
+(headed literally `"Roadmap — what the company says"`, plus an explicit
+one-sentence note that these are the company's own stated plans, not this
+site's analysis -- Hard Rule 3's claims-hygiene requirement made visible
+to the reader, not just enforced in the prompt), that company's
+`content/frontier_board.json` rows, and a "Wire history" section (real
+cards whose `companies[]` names this slug, newest first, no cap unlike
+the map popover's 3-card limit; the honest `EMPTY_WIRE_HISTORY_MESSAGE`
+placeholder today, since `content/cards/` still doesn't exist -- same
+"real code, not a stub" precedent `map.py`'s own `cards_for_company` set
+in Phase 7). Footer links to Corrections/Method come from `base.html`'s
+already-global site footer, unchanged. A plain `/companies/` index page
+(`company_index.html`) lists every company alphabetically by name with a
+link -- the accessibility/graceful-degradation fallback the Phase 7/8
+brief required ("every company page is reachable with zero JS from
+somewhere other than the map"); also added as a sixth masthead nav item
+(`Map, Wire, Board, Companies, Lexicon, Primer`) rather than left as a
+footer-only or map-only path, logged in `IMPROVEMENT_BACKLOG.md`. Wired
+into `site/generate.py`: a new `load_companies()` loader (full profiles,
+schema-validated, distinct from the pre-existing `load_companies_index()`
+summary loader Phase 7 added), `company_builder.write_company_pages()`
+called from `render_pages()`, and `collect_routes()` extended for
+`sitemap.xml`. 35 new tests in `site/tests/test_company_builder.py`
+(pure helpers, real-content view-model assertions, real-template
+render/write checks) plus `company` added to
+`site/tests/test_reader_copy.py`'s copy-lint scan.
+
+**2. `scripts/check_outbound_links.py` -- commit-time outbound-link CI
+gate.** Modeled on `scripts/check_path_allowlist.py`'s own diff-reading
+conventions (`git diff --name-only --no-renames HEAD`). For every changed
+`content/companies/*.json` / `content/cards/*.json` file (never either
+directory's own generated `index.json`): collects every citation URL
+(card `citations[]` and every nested `profile.*.citations[]` a company
+record carries); statically rejects `http://`, IP-literal hosts, userinfo
+in the URL, punycode (`xn--`) hostname labels, and a small named
+URL-shortener denylist (bit.ly/t.co/tinyurl.com/goo.gl); requires the
+(www-insensitive) hostname to exact-match `data/trusted_domains.json`'s
+`hostnames[]` or a `path_scoped[]` entry; then follows the real redirect
+chain (via `watcher.http.build_session()`, reused, HEAD-first with a
+GET fallback on 405/501 -- same rule `auditor/linkrot.py::check_url`
+already established) and re-applies the exact same checks to the FINAL
+resolved URL, catching a citation that was trusted at write time but now
+redirects somewhere it shouldn't. An unresolvable redirect chain fails
+closed (a hard violation, not a skip) -- logged in
+`IMPROVEMENT_BACKLOG.md`, since this is a publish-blocking security gate,
+not an audit. Separately and unconditionally: any diff touching
+`data/trusted_domains.json` at all hard-fails the whole check regardless
+of content -- that file is frozen and human-only per its own `_meta`
+field. Wired into `.github/workflows/analyze.yml`'s reference gate
+sequence, alongside the path-allowlist/schema gates. 44 new tests in
+`tests/test_check_outbound_links.py`, all against fixtures/`requests_mock`
+-- no live network call, per this repo's structurally-enforced default.
+
+**3. `auditor/linkrot.py::audit_hijacked_links`** -- the weekly,
+post-publication counterpart to #2's commit-time gate. Re-resolves every
+already-published citation's current redirect chain and re-checks the
+final URL against the allowlist, reusing `scripts.check_outbound_links
+.resolve_final_url`/`classify_url` directly (never a second
+implementation of either), emitting one new finding type
+(`trusted`/`hijacked`/`unreachable`) via the exact same `{checked_at,
+total_urls, counts, results}` shape `audit_link_rot` already established
+-- "consistent with this file's existing finding-emission pattern," per
+this phase's own brief. Deliberately kept to that literal scope: it is
+**not** yet wired into `data/audit/latest.json`'s fixed report envelope
+(`auditor/report.py`/`schemas/audit.schema.json`/`auditor/cli.py`) or
+`scripts/append_backlog_findings.py` -- that's a materially larger,
+separate change (a new required top-level field plus updates to every
+test asserting the report's exact key set), flagged in
+`IMPROVEMENT_BACKLOG.md` as the concrete next step for whichever phase
+turns `audit.yml` live. 8 new tests appended to
+`tests/test_auditor_linkrot.py`.
+
+**4. PROFILER role + deterministic profile-selection.** Added a new,
+fully-documented PROFILER `prompt:` section to `.github/workflows/
+analyze.yml`, in the exact structure/voice of the existing ANALYST/
+VERIFIER sections (own smaller 20-turn budget; drains
+`data/pending_corrections.json` entries with `target_type: "company"`
+first -- the Phase 6 forward-looking schema hook this phase is the first
+real consumer of; then, if `data/run_plan.json` names a `profile_target`,
+fetches only that company's `official_domains[]` pages plus the
+reputable-outlet table, applies the same PRIMARY/OUTLET corroboration
+discipline as the ANALYST, updates whichever profile fields new sourcing
+supports, roadmap items attributed-only). Also added a new outbound-link
+gate step (#2 above) to the same workflow's reference gate sequence, and
+renumbered the lettered step comments accordingly. `scripts/plan_run.py`
+gained the deterministic pre-analyst selection step
+(`decide_profile_target`, threaded into `compute_run_plan` as new
+`profile_target`/`profile_reason` fields on `data/run_plan.json`,
+`schemas/run_plan.schema.json` extended to match): priority 1 is a
+company named by name/alias in one of this run's selected clusters' own
+source titles (`find_board_upsert_candidate` -- a deterministic
+*prediction*, not a confirmed fact, since `plan_run.py` runs before the
+analyst and can't know what it will actually upsert; logged at length in
+both that function's own docstring and `IMPROVEMENT_BACKLOG.md`);
+priority 2 is the company with the oldest `last_verified` if more than 45
+days stale (`find_stale_profile_candidate`); priority 3 is `None`.
+Unconditionally `None` whenever `run_mode` is `"skip"`. 25 new tests
+appended to `tests/test_degradation_ladder.py`.
+
+**5. `scripts/reconcile_run.py` now also regenerates
+`content/companies/index.json`**, via a new sibling module,
+`scripts/update_company_index.py` (mirrors `scripts/update_card_index
+.py`'s architecture exactly: glob-then-rebuild-from-scratch, load/save/
+write three-layer shape), unconditionally on every run -- not gated on a
+profile actually having been refreshed, so the index never drifts out of
+sync with whatever profiles exist on disk. This also closed a schema gap
+Phase 7 itself had logged ("`content/companies/index.json` has no
+`schemas/company_index.schema.json` counterpart"): added that schema,
+registered `content/companies/index.json`/`content/companies/*.json` in
+`scripts/validate_changed_schemas.py`'s path-to-schema table.
+`reconcile_run()`'s return tuple grew a fourth element (`company_index`);
+its one existing direct caller (`tests/test_verifier_stats.py`) and
+`scripts/reconcile_run.py::main` were both updated to unpack it. Running
+the new regenerator once against the real, already-committed
+`content/companies/index.json` reordered every entry alphabetically by
+`id` with the pipeline's standard `sort_keys=True` formatting (values
+verified unchanged via an order-insensitive diff before committing) --
+otherwise the very first real reconcile run would have produced a diff
+against a file this phase itself claims to keep "consistent." 14 new
+tests in `tests/test_company_index.py`.
+
+**No automated PROFILER run has actually executed in production.** Same
+status as the existing ANALYST/VERIFIER prompt text this phase's PROFILER
+section was modeled on: `.github/workflows/analyze.yml` is reference
+documentation only (see that file's own header comment and CLAUDE.md's
+"Daily self-learning loop" section) -- the real daily analyst+verifier
+Routine reads that prompt text and executes it as a fresh subagent
+outside this session, and this build stage cannot itself trigger that
+Routine or fabricate a real PROFILER output. The 13 seeded Phase-6
+profiles (`content/companies/*.json`) remain the only real, live-cited
+profile content that exists right now -- analogous to Phase 3's seed
+content backfill for cards/lexicon, not a claim that a PROFILER run has
+happened.
+
+**Verification:** `python -m pytest` from `/home/user/AI-Radar` ->
+**845 passed, 2 deselected, 0 failures** (baseline before this phase was
+754 passed/2 deselected; +91 new tests in the root suite -- new files
+`tests/test_check_outbound_links.py` (44), `tests/test_company_index.py`
+(14); +25 new tests appended to `tests/test_degradation_ladder.py`
+(profile-selection); +8 new tests appended to
+`tests/test_auditor_linkrot.py` (hijack check); `tests/test_verifier_stats
+.py` had its one `reconcile_run()` call site updated for the new 4-tuple
+return and one new assertion added, no new test function. No existing
+test weakened, skipped, or deleted -- every count independently confirmed
+via `pytest --collect-only` against both the new/changed files and their
+pre-Phase-8 (`git show HEAD:...`) versions). `python -m pytest site/tests`
+-> **365 passed, 0 failures** (up from 330 after Phase 7; +35 new tests,
+all in the new `site/tests/test_company_builder.py`; `test_reader_copy
+.py`'s `BUILDER_MODULE_NAMES` list gained one entry, `"company"`, with no
+new test function of its own).
+`python site/generate.py` builds cleanly end to end, producing all 13
+`/companies/<slug>/index.html` pages plus `/companies/index.html`, and
+`sitemap.xml` lists every one of them. `.github/workflows/analyze.yml`
+parses as valid YAML (`yaml.safe_load`) with all 12 steps in the expected
+order, including the new PROFILER and outbound-link-gate steps --
+syntactic validity only, not live-run-verified, matching that whole
+file's own already-documented "reference, not the active mechanism"
+status. `scripts/check_outbound_links.py` and
+`scripts/update_company_index.py` were also each run directly against
+this repo's real, current working tree (not just their own test suites)
+as an extra sanity check: the outbound-link checker exits 0 against an
+empty diff, and the company-index regenerator's real-registry output
+matched the already-committed file content exactly (order aside, fixed
+as described in #5 above).
+
+**Judgment calls/limitations, logged in full in `IMPROVEMENT_BACKLOG.md`:**
+the board-upsert profile-selection rule is a deterministic prediction
+from cluster source titles, not a confirmed fact (timing constraint --
+`plan_run.py` runs before the analyst); the outbound-link gate fails
+closed on an unresolvable redirect (publish-blocking security gate);
+`audit_hijacked_links` is not yet wired into `data/audit/latest.json`'s
+fixed report envelope (kept to this phase's literal
+`auditor/linkrot.py` scope); company-profile corrections apply as a
+direct cited edit rather than a new `content/corrections.json` entry
+(`schemas/company.schema.json` has no `"corrected"` status or
+correction-note field yet); "Companies" was added to the masthead nav
+beyond the letter of the accessibility requirement.
+
+---
+
 ## 2026-07-13 -- Phase 7: map frontend
 
 Second of four phases (6-9) building the world-map-centric UI reshape.

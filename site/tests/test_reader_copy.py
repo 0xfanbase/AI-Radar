@@ -37,6 +37,7 @@ BUILDER_MODULE_NAMES = [
     "primer",
     "about",
     "map",
+    "company",
 ]
 
 # Internal dev/ops vocabulary that must never reach a real reader: workflow

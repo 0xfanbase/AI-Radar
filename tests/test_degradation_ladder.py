@@ -14,7 +14,7 @@ this module's own duck-typed reads.
 from __future__ import annotations
 
 import json
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
 from jsonschema import ValidationError
@@ -24,10 +24,15 @@ from scripts.plan_run import (
     DEFAULT_DEGRADATION_LEVEL,
     DIGEST_CARDS_CAP,
     NORMAL_CARDS_CAP,
+    PROFILE_STALE_THRESHOLD_DAYS,
     compute_proposed_card_id,
     compute_run_plan,
+    decide_profile_target,
     decide_run_mode,
+    find_board_upsert_candidate,
+    find_stale_profile_candidate,
     kebab_slug,
+    load_company_registry,
     load_run_plan,
     read_degradation_level,
     save_run_plan,
@@ -401,3 +406,227 @@ def test_write_run_plan_builds_saves_and_returns_payload(tmp_path):
     assert on_disk == result
     assert result["run_mode"] == "capped"
     assert len(result["clusters"]) == 3
+
+
+# --------------------------------------------------------------------------
+# Phase 8: deterministic PROFILER-target selection
+# --------------------------------------------------------------------------
+
+ANTHROPIC = {
+    "id": "anthropic",
+    "name": "Anthropic",
+    "aliases": ["Anthropic PBC"],
+    "last_verified": "2026-07-01",
+}
+MISTRAL = {
+    "id": "mistral",
+    "name": "Mistral AI",
+    "aliases": ["Mistral"],
+    "last_verified": "2026-05-01",
+}
+OPENAI = {
+    "id": "openai",
+    "name": "OpenAI",
+    "aliases": [],
+    "last_verified": "2026-06-15",
+}
+
+COMPANIES = [ANTHROPIC, MISTRAL, OPENAI]
+
+
+# --- find_board_upsert_candidate ---
+
+
+def test_find_board_upsert_candidate_matches_company_name_in_title():
+    selected = [_entry("h1", 1, title="Anthropic ships a new agentic model")]
+    assert find_board_upsert_candidate(selected, COMPANIES) == "anthropic"
+
+
+def test_find_board_upsert_candidate_matches_alias():
+    selected = [_entry("h1", 1, title="Mistral AI announces open weights release")]
+    assert find_board_upsert_candidate(selected, COMPANIES) == "mistral"
+
+
+def test_find_board_upsert_candidate_word_boundary_avoids_false_positive():
+    # "AI" must never spuriously match inside "OpenAI2" or similar -- only
+    # a real word-boundary mention of a registered name/alias counts. Here
+    # no registered company name/alias appears as a whole word/phrase.
+    selected = [_entry("h1", 1, title="SuperAI2 unveils a new benchmark result")]
+    assert find_board_upsert_candidate(selected, COMPANIES) is None
+
+
+def test_find_board_upsert_candidate_case_insensitive():
+    selected = [_entry("h1", 1, title="ANTHROPIC releases something big today")]
+    assert find_board_upsert_candidate(selected, COMPANIES) == "anthropic"
+
+
+def test_find_board_upsert_candidate_checks_clusters_in_order():
+    selected = [
+        _entry("h1", 1, title="Nothing relevant here at all"),
+        _entry("h2", 2, title="OpenAI updates its flagship model"),
+    ]
+    assert find_board_upsert_candidate(selected, COMPANIES) == "openai"
+
+
+def test_find_board_upsert_candidate_no_match_returns_none():
+    selected = [_entry("h1", 1, title="A generic AI story about nothing specific")]
+    assert find_board_upsert_candidate(selected, COMPANIES) is None
+
+
+def test_find_board_upsert_candidate_empty_selected_returns_none():
+    assert find_board_upsert_candidate([], COMPANIES) is None
+
+
+def test_find_board_upsert_candidate_empty_companies_returns_none():
+    selected = [_entry("h1", 1, title="Anthropic ships something")]
+    assert find_board_upsert_candidate(selected, []) is None
+
+
+# --- find_stale_profile_candidate ---
+
+
+def test_find_stale_profile_candidate_returns_oldest_when_stale_enough():
+    today = date(2026, 7, 13)
+    # mistral's last_verified (2026-05-01) is well over 45 days before
+    # today; it's the oldest of the three.
+    assert find_stale_profile_candidate(COMPANIES, today) == "mistral"
+
+
+def test_find_stale_profile_candidate_returns_none_when_oldest_is_fresh():
+    today = date(2026, 5, 5)  # mistral's 2026-05-01 is only 4 days old here
+    assert find_stale_profile_candidate(COMPANIES, today) is None
+
+
+def test_find_stale_profile_candidate_exact_threshold_boundary_is_not_stale():
+    # Exactly PROFILE_STALE_THRESHOLD_DAYS days old is NOT "older than" the
+    # threshold -- the rule is a strict ">", matching board.py's own
+    # is_pulse_eligible boundary-inclusive-the-other-way convention stated
+    # explicitly (">45 days" means 46+ days triggers it, not 45 exactly).
+    companies = [{"id": "solo", "name": "Solo Labs", "aliases": [], "last_verified": "2026-01-01"}]
+    today = date(2026, 1, 1) + timedelta(days=PROFILE_STALE_THRESHOLD_DAYS)
+    assert find_stale_profile_candidate(companies, today) is None
+    today_plus_one = today + timedelta(days=1)
+    assert find_stale_profile_candidate(companies, today_plus_one) == "solo"
+
+
+def test_find_stale_profile_candidate_ties_break_on_id_ascending():
+    companies = [
+        {"id": "zeta", "name": "Zeta", "aliases": [], "last_verified": "2026-01-01"},
+        {"id": "alpha", "name": "Alpha", "aliases": [], "last_verified": "2026-01-01"},
+    ]
+    today = date(2026, 1, 1) + timedelta(days=PROFILE_STALE_THRESHOLD_DAYS + 1)
+    assert find_stale_profile_candidate(companies, today) == "alpha"
+
+
+def test_find_stale_profile_candidate_empty_companies_returns_none():
+    assert find_stale_profile_candidate([], date(2026, 7, 13)) is None
+
+
+def test_find_stale_profile_candidate_skips_missing_or_bad_last_verified():
+    companies = [
+        {"id": "no-date", "name": "No Date", "aliases": []},
+        {"id": "bad-date", "name": "Bad Date", "aliases": [], "last_verified": "not-a-date"},
+    ]
+    assert find_stale_profile_candidate(companies, date(2026, 7, 13)) is None
+
+
+# --- decide_profile_target ---
+
+
+def test_decide_profile_target_skip_run_mode_always_none():
+    result, reason = decide_profile_target(
+        "skip", [], COMPANIES, date(2026, 7, 13)
+    )
+    assert result is None
+    assert "skip" in reason.lower()
+
+
+def test_decide_profile_target_prefers_board_upsert_candidate_over_stale():
+    selected = [_entry("h1", 1, title="OpenAI announces a big update")]
+    result, reason = decide_profile_target(
+        "normal", selected, COMPANIES, date(2026, 7, 13)
+    )
+    assert result == "openai"
+    assert "openai" in reason.lower()
+
+
+def test_decide_profile_target_falls_back_to_stale_when_no_cluster_match():
+    selected = [_entry("h1", 1, title="A story mentioning nobody tracked")]
+    result, reason = decide_profile_target(
+        "normal", selected, COMPANIES, date(2026, 7, 13)
+    )
+    assert result == "mistral"
+    assert "stale" in reason.lower()
+
+
+def test_decide_profile_target_none_when_no_candidate_and_nothing_stale():
+    selected = [_entry("h1", 1, title="A story mentioning nobody tracked")]
+    result, reason = decide_profile_target(
+        "normal", selected, COMPANIES, date(2026, 5, 5)
+    )
+    assert result is None
+    assert "no profile is targeted" in reason.lower()
+
+
+# --- compute_run_plan wiring ---
+
+
+def test_compute_run_plan_defaults_to_no_profile_target_without_companies():
+    queue = _queue(3)
+    plan = compute_run_plan(queue, 0, now=THURSDAY_EVEN_DOY)
+    assert plan["profile_target"] is None
+    assert isinstance(plan["profile_reason"], str) and plan["profile_reason"]
+
+
+def test_compute_run_plan_threads_companies_into_profile_target():
+    queue = [_entry("h1", 1, title="Anthropic launches a new flagship model")]
+    plan = compute_run_plan(
+        queue, 0, now=datetime(2026, 7, 13, 8, 0, 0, tzinfo=timezone.utc), companies=COMPANIES
+    )
+    assert plan["profile_target"] == "anthropic"
+
+
+def test_compute_run_plan_skip_run_forces_profile_target_none_even_with_stale_company():
+    # Empty queue -> run_mode "skip" -- profile_target must be None
+    # regardless of how stale the registry's companies are.
+    plan = compute_run_plan(
+        [], 0, now=datetime(2026, 7, 13, 8, 0, 0, tzinfo=timezone.utc), companies=COMPANIES
+    )
+    assert plan["run_mode"] == "skip"
+    assert plan["profile_target"] is None
+
+
+def test_compute_run_plan_output_with_profile_target_validates_against_schema():
+    queue = [_entry("h1", 1, title="Anthropic launches a new flagship model")]
+    plan = compute_run_plan(
+        queue, 0, now=datetime(2026, 7, 13, 8, 0, 0, tzinfo=timezone.utc), companies=COMPANIES
+    )
+    validate(plan, "run_plan")
+
+
+# --- load_company_registry ---
+
+
+def test_load_company_registry_missing_dir_returns_empty_list(tmp_path):
+    assert load_company_registry(tmp_path / "does-not-exist") == []
+
+
+def test_load_company_registry_skips_index_json(tmp_path):
+    companies_dir = tmp_path / "companies"
+    companies_dir.mkdir()
+    (companies_dir / "index.json").write_text('{"version": 1, "companies": []}')
+    (companies_dir / "anthropic.json").write_text(json.dumps(ANTHROPIC))
+
+    companies = load_company_registry(companies_dir)
+
+    assert len(companies) == 1
+    assert companies[0]["id"] == "anthropic"
+
+
+def test_load_company_registry_against_the_real_seeded_registry():
+    # Real content/companies/*.json -- 13 seeded profiles per Phase 6.
+    companies = load_company_registry()
+    assert len(companies) == 13
+    ids = {c["id"] for c in companies}
+    assert "anthropic" in ids
+    assert "deepseek" in ids

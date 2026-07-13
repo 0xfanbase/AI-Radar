@@ -19,7 +19,16 @@ verifier dropped), this module:
    schema.json``'s own ``if``/``then``), and a ``verifier_outcome`` record.
 2. **Regenerates the card index** by calling ``scripts/update_card_index.
    write_card_index`` -- never a second, parallel index-builder here.
-3. **Appends one row to ``data/verifier_stats.json``**
+3. **Regenerates the company index** (Phase 8) by calling
+   ``scripts/update_company_index.write_company_index`` -- same
+   "delegate to the one module that owns this artifact" discipline as
+   step 2, unconditionally on every run (not gated on ``profile_target``
+   being non-null): a run with no profile refresh at all still keeps
+   ``content/companies/index.json`` byte-for-byte consistent with
+   whatever full profiles exist on disk, exactly the way step 2 already
+   keeps ``content/cards/index.json`` consistent regardless of whether
+   any card was actually drafted this run.
+4. **Appends one row to ``data/verifier_stats.json``**
    (:func:`compute_verifier_stats_row`): ``{date, cards_drafted, confirmed,
    reported, dropped, pass_rate}`` for this run.
 
@@ -55,6 +64,10 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from scripts.update_card_index import CARDS_DIR, write_card_index  # noqa: E402
+from scripts.update_company_index import (  # noqa: E402
+    COMPANIES_DIR,
+    write_company_index,
+)
 from watcher.config import REPO_ROOT  # noqa: E402
 from watcher.ledger import LEDGER_PATH, load_ledger, save_ledger  # noqa: E402
 from watcher.schema_validate import validate  # noqa: E402
@@ -375,39 +388,50 @@ def reconcile_run(
     verifier_stats: dict[str, Any],
     *,
     cards_dir: Path | str = CARDS_DIR,
+    companies_dir: Path | str = COMPANIES_DIR,
     now: datetime,
-) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any], dict[str, Any]]:
     """The full post-LLM-steps reconciliation for one ``analyze.yml`` run.
 
-    Returns ``(new_ledger, new_verifier_stats, card_index)``. Neither
-    ``ledger`` nor ``verifier_stats`` is mutated in place (this function's
-    own return values are what a caller persists via
+    Returns ``(new_ledger, new_verifier_stats, card_index, company_index)``.
+    Neither ``ledger`` nor ``verifier_stats`` is mutated in place (this
+    function's own return values are what a caller persists via
     :func:`watcher.ledger.save_ledger`/:func:`save_verifier_stats`).
 
-    Regenerating ``content/cards/index.json`` is the one disk write this
-    function *does* perform as a side effect (via ``scripts.
-    update_card_index.write_card_index``, which already owns
-    validate-then-write for that artifact -- there is no benefit to a
-    second, parallel in-memory-only card-index builder here). The index is
-    always written to ``<cards_dir>/index.json`` -- deliberately derived
-    from the caller's own ``cards_dir`` rather than defaulting to the
-    module-level ``CARD_INDEX_PATH`` constant, so that passing a
-    non-default ``cards_dir`` (every test in this repo's suite does,
-    against a ``tmp_path``) can never fall through to writing the real
-    ``content/cards/index.json`` by accident. A caller that wants a
-    side-effect-free preview of the index can call ``scripts.
-    update_card_index.build_card_index`` directly instead.
+    Regenerating ``content/cards/index.json`` and (Phase 8)
+    ``content/companies/index.json`` are the two disk writes this function
+    *does* perform as a side effect (via ``scripts.update_card_index
+    .write_card_index`` / ``scripts.update_company_index
+    .write_company_index``, each of which already owns validate-then-write
+    for its own artifact -- there is no benefit to a second, parallel
+    in-memory-only index builder for either here). Each index is written
+    to ``<cards_dir>/index.json`` / ``<companies_dir>/index.json``
+    respectively -- deliberately derived from the caller's own
+    ``cards_dir``/``companies_dir`` rather than defaulting to either
+    module's own path constant, so that passing non-default directories
+    (every test in this repo's suite does, against a ``tmp_path``) can
+    never fall through to writing the real, committed files by accident.
+    The company index is regenerated unconditionally on every call, not
+    gated on this run's ``run_plan.get("profile_target")`` being non-null
+    -- see this module's own docstring for why (keeping it consistent
+    with whatever profiles exist on disk matters even on a run that
+    touched none). A caller that wants a side-effect-free preview of
+    either index can call ``scripts.update_card_index.build_card_index``
+    / ``scripts.update_company_index.build_company_index`` directly
+    instead.
     """
     cards_dir = Path(cards_dir)
+    companies_dir = Path(companies_dir)
     clusters = run_plan.get("clusters", [])
     cards_by_cluster = load_cards_by_cluster(clusters, cards_dir)
 
     new_ledger = reconcile_ledger(clusters, ledger, cards_by_cluster, now=now)
     card_index = write_card_index(cards_dir, cards_dir / "index.json")
+    company_index = write_company_index(companies_dir, companies_dir / "index.json")
     stats_row = compute_verifier_stats_row(clusters, cards_by_cluster, now=now)
     new_verifier_stats = append_verifier_stats_row(verifier_stats, stats_row)
 
-    return new_ledger, new_verifier_stats, card_index
+    return new_ledger, new_verifier_stats, card_index, company_index
 
 
 # --------------------------------------------------------------------------
@@ -435,7 +459,7 @@ def main() -> int:
     verifier_stats = load_verifier_stats(VERIFIER_STATS_PATH)
     now = datetime.now(timezone.utc)
 
-    new_ledger, new_verifier_stats, card_index = reconcile_run(
+    new_ledger, new_verifier_stats, card_index, company_index = reconcile_run(
         run_plan, ledger, verifier_stats, now=now
     )
 
@@ -444,7 +468,8 @@ def main() -> int:
 
     latest_row = new_verifier_stats["runs"][-1]
     print(
-        f"reconcile_run: {len(card_index['cards'])} cards indexed; "
+        f"reconcile_run: {len(card_index['cards'])} cards indexed, "
+        f"{len(company_index['companies'])} companies indexed; "
         f"verifier_stats row appended for {latest_row['date']} "
         f"(cards_drafted={latest_row['cards_drafted']} "
         f"pass_rate={latest_row['pass_rate']:.3f})"
