@@ -70,10 +70,15 @@
     <p><strong>Was:</strong> {{ correction.original_claim }}</p>
     <p><strong>Now:</strong> {{ correction.corrected_claim }}</p>
     <p><strong>Why:</strong> {{ correction.reason }}</p>
+    {# correction.card_href is not linked here: it points into the retired
+       /wire/ archive, which this trimmed build no longer generates -- see
+       site/generate.py's module docstring. The card id is still shown, as
+       plain text, so the correction stays traceable to its original
+       story. #}
     <p class="correction-card__meta">
       Corrected {{ correction.corrected_at }} --
       <a href="{{ correction.source_url }}">source</a> --
-      <a href="{{ correction.card_href }}">read the original story</a>
+      original story: {{ correction.card_id }}
     </p>
   </li>
   {% endfor %}

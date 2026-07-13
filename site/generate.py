@@ -1,33 +1,54 @@
 #!/usr/bin/env python3
 """AI Frontier Wire -- static site generator entrypoint (Phase 4; homepage
-route reassigned to the world map in Phase 7).
+route reassigned to the world map in Phase 7; trimmed to a two-page live
+site -- Map + Companies -- per the owner's post-Phase-9 "just do maps and
+companies" instruction).
 
-This is the Phase-4 **integration** commit: every page builder written in
-this same working tree (`site/builders/{wire,board,lexicon,primer,moving,
-method,corrections,about}.py`, each independently tested and each
-deliberately self-sufficient -- see every one of their own docstrings and
-`IMPROVEMENT_BACKLOG.md`'s per-builder entries -- for why none of them
-called back into this file until now) is wired together here, in one
-place, into the real `public/` output. Phase 7 (`site/builders/map.py`)
-reassigns `/` from the Wire index to the new world-map homepage and moves
-the Wire index itself to `/wire/` -- see PROGRESS.md's Phase 7 entry for
-why. Current route table:
+This is the Phase-4 **integration** commit, since narrowed: every page
+builder written in this same working tree (`site/builders/{wire,board,
+lexicon,primer,moving,method,corrections,about}.py`, each independently
+tested and each deliberately self-sufficient -- see every one of their own
+docstrings and `IMPROVEMENT_BACKLOG.md`'s per-builder entries -- for why
+none of them called back into this file until now) was originally wired
+together here, in one place, into the real `public/` output. Phase 7
+(`site/builders/map.py`) reassigned `/` from the Wire index to the new
+world-map homepage and moved the Wire index itself to `/wire/`.
 
-    /                       World map homepage (Phase 7)
-    /wire/                  Wire index (last ~14 days) -- moved here from `/`
-    /wire/<YYYY-MM>/        Wire monthly archive
-    /board/                 Frontier Board
+**Post-Phase-9 trim (owner-directed, "keep it much simpler: just maps and
+companies; the other tabs can be hidden; the code can be hidden too and
+just left in GitHub"):** `render_pages()` below no longer calls
+`wire.write_wire_pages`, `board.write_board_page`, `primer_builder
+.write_primer_page`, `moving.write_moving_page`, or `about.write_about_page`,
+and `collect_routes()` no longer lists any of those five pages' routes in
+`sitemap.xml`. None of those five builder modules or their templates were
+edited or deleted -- they still exist, still independently tested, sitting
+unused in the repository, ready to be re-wired here if the owner ever
+wants them back. The Lexicon *index* (`/lexicon/`) is a deliberate
+exception among the "hidden" pages: it is still built, because every
+Lexicon *term* page (kept -- see below) links back to it, and every
+per-term "Related terms" chip links to a sibling term page reachable only
+by slug already known at render time, so dropping the index would create
+a real dead end, not just an unlinked-from-nav page. Current route table:
+
+    /                       World map homepage (Phase 7) -- the live site's
+                            one entry point
     /companies/             Companies index (Phase 8)
     /companies/<slug>/      One fact-checked profile page per company (Phase 8)
-    /lexicon/                Lexicon index
-    /lexicon/<slug>/        one page per Lexicon term
-    /primer/                Primer (10-step on-ramp)
-    /moving/                What's Moving
-    /method/                Method & Audit
-    /corrections/           Corrections
-    /about/                 About
+    /lexicon/               Lexicon index -- kept: term pages link back to it
+    /lexicon/<slug>/        one page per Lexicon term -- kept: company-profile
+                            prose auto-links into these via site/lib/linkify.py
+    /method/                Method & Audit -- compliance page, footer-linked
+    /corrections/           Corrections -- compliance page, footer-linked
     /404.html               GitHub Pages' own not-found page
     /sitemap.xml /robots.txt
+
+Retired from the live build (code untouched, just not called from here):
+
+    /wire/, /wire/<YYYY-MM>/   site/builders/wire.py + wire_index.html/wire_month.html
+    /board/                    site/builders/board.py + board.html
+    /primer/                   site/builders/primer.py + primer.html
+    /moving/                   site/builders/moving.py + moving.html
+    /about/                    site/builders/about.py + about.html
 
 `content/cards/` is empty as of this build stage (no analyst run has
 happened for real yet) -- every builder above is already written to
@@ -47,7 +68,6 @@ import logging
 import re
 import shutil
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -124,8 +144,11 @@ def _load_module_by_path(name: str, path: Path):
     return module
 
 
-wire = _load_module_by_path("frontier_wire_site_builders_wire", BUILDERS_DIR / "wire.py")
-board = _load_module_by_path("frontier_wire_site_builders_board", BUILDERS_DIR / "board.py")
+# Only the modules the live, trimmed build actually calls are loaded here.
+# site/builders/{wire,board,primer,moving,about}.py are deliberately NOT
+# loaded by this file any more (see module docstring above) -- they are
+# untouched on disk, independently tested by their own site/tests/test_
+# *_builder.py files, and simply not wired into this entrypoint.
 map_builder = _load_module_by_path("frontier_wire_site_builders_map", BUILDERS_DIR / "map.py")
 company_builder = _load_module_by_path(
     "frontier_wire_site_builders_company", BUILDERS_DIR / "company.py"
@@ -133,15 +156,10 @@ company_builder = _load_module_by_path(
 lexicon_builder = _load_module_by_path(
     "frontier_wire_site_builders_lexicon", BUILDERS_DIR / "lexicon.py"
 )
-primer_builder = _load_module_by_path(
-    "frontier_wire_site_builders_primer", BUILDERS_DIR / "primer.py"
-)
-moving = _load_module_by_path("frontier_wire_site_builders_moving", BUILDERS_DIR / "moving.py")
 method = _load_module_by_path("frontier_wire_site_builders_method", BUILDERS_DIR / "method.py")
 corrections_builder = _load_module_by_path(
     "frontier_wire_site_builders_corrections", BUILDERS_DIR / "corrections.py"
 )
-about = _load_module_by_path("frontier_wire_site_builders_about", BUILDERS_DIR / "about.py")
 matrix_rain = _load_module_by_path(
     "frontier_wire_site_lib_matrix_rain", SITE_DIR / "lib" / "matrix_rain.py"
 )
@@ -433,34 +451,36 @@ def apply_base_path(public_dir: Path, base_path: str = BASE_PATH) -> int:
 def collect_routes(
     cards: list[dict], lexicon_entries: list[dict], companies: list[dict] | None = None
 ) -> list[str]:
-    """Every route this build produces, root-relative, for sitemap.xml.
-    Order roughly matches the masthead nav's own route order (Map, Wire,
-    Board, Companies, Lexicon, Primer, ...), with the Wire's own
-    newest-first archive months, the Companies index's own alphabetical
-    profile slugs, and the Lexicon's own alphabetical term slugs
-    interleaved in their natural order. `/` is the map homepage as of
-    Phase 7 (site/builders/map.py); the Wire index itself moved to
-    `/wire/` (see PROGRESS.md's Phase 7 entry) -- both are listed
-    explicitly since neither is derivable from the other. `companies`
-    (Phase 8, defaulted to `()` so an existing caller passing only two
-    positional args keeps working) is the full set of loaded
-    `content/companies/<slug>.json` profiles."""
+    """Every route this (trimmed) build produces, root-relative, for
+    sitemap.xml. Order matches the masthead nav's own route order (Map,
+    Companies), with the Companies index's own alphabetical profile slugs
+    and the Lexicon's own alphabetical term slugs interleaved in their
+    natural order. `/` is the map homepage (Phase 7, site/builders/map.py).
+    `companies` (Phase 8, defaulted to `()` so an existing caller passing
+    only two positional args keeps working) is the full set of loaded
+    `content/companies/<slug>.json` profiles.
+
+    Post-Phase-9 trim (see module docstring): `/wire/` and its monthly
+    archives, `/board/`, `/primer/`, `/moving/`, and `/about/` are no
+    longer part of the live route set or this sitemap -- those builders
+    are simply not called from `render_pages()` any more. `cards` is kept
+    as a parameter purely for call-site/signature stability (it drove the
+    now-removed `/wire/<YYYY-MM>/` archive-month routes); it is unused
+    here today.
+    """
     companies = companies or []
-    routes = ["/", "/wire/"]
-    routes += [f"/wire/{ym}/" for ym in wire.available_months(cards)]
-    routes.append("/board/")
+    routes = ["/"]
     routes.append("/companies/")
     routes += [
         f"/companies/{slug}/"
         for slug in [str(c["id"]) for c in company_builder.sorted_companies(companies)]
     ]
+    # Lexicon index kept: every term page links back to it (see module
+    # docstring for why the index survives the nav trim).
     routes.append("/lexicon/")
     routes += [f"/lexicon/{slug}/" for slug in lexicon_builder.all_slugs(lexicon_entries)]
-    routes.append("/primer/")
-    routes.append("/moving/")
     routes.append("/method/")
     routes.append("/corrections/")
-    routes.append("/about/")
     return routes
 
 
@@ -490,47 +510,34 @@ def write_robots(public_dir: Path, base_url: str = SITE_BASE_URL) -> Path:
 
 
 def render_pages(env: Environment, content: dict[str, Any], public_dir: Path) -> list[Path]:
-    """Render + write every real page this site has, per the approved
-    build plan's route table (module docstring above). Delegates all
-    page-specific logic to each independently-tested builder module under
+    """Render + write every real page this (trimmed) site has, per the
+    route table in the module docstring above. Delegates all page-specific
+    logic to each independently-tested builder module under
     `site/builders/` -- this function's only job is calling each one with
     the right slice of `content` and the shared `env`/`public_dir`, in a
-    sensible order (the map homepage first, since it's `/` as of Phase
-    7; About/404 last, since they carry no data dependency at all)."""
+    sensible order (the map homepage first, since it's `/`; 404 last,
+    since it carries no data dependency at all).
+
+    Post-Phase-9 trim (see module docstring): this no longer calls
+    `wire.write_wire_pages`, `board.write_board_page`, `primer_builder
+    .write_primer_page`, `moving.write_moving_page`, or
+    `about.write_about_page` -- those five builder modules are untouched
+    on disk but simply not invoked from here any more. The masthead
+    sparkline strip (`_masthead_moving_strip.html`, formerly passed into
+    `map_builder.write_map_page()` as `masthead_sparklines`) is dropped
+    for the same reason the owner asked for: the map should be the page's
+    uncontested opening focus, with nothing competing above it -- so
+    `write_map_page()` is now called with no `masthead_sparklines`
+    argument at all (it defaults to `None` and renders no strip)."""
     cards = content.get("cards", [])
     lexicon_entries = content.get("lexicon", [])
     frontier_board_rows = content.get("frontier_board", [])
     companies_index = content.get("companies_index", [])
     companies = content.get("companies", [])
-    primer = content.get("primer", {})
-    whats_moving = content.get("whats_moving", {})
     ledger = content.get("ledger", {})
     verifier_stats = content.get("verifier_stats", {})
     corrections_entries = content.get("corrections", [])
     audit_latest = method.load_audit_latest()
-
-    # A single "today" for the whole build (the Wire's 14-day window and
-    # the Board's 7-day pulse-eligibility window both anchor on it) --
-    # computed once here, at the top-level entrypoint, rather than by any
-    # individual builder (each of which stays a pure function of an
-    # explicitly-passed date; see board.py's own `is_pulse_eligible`
-    # docstring for why that matters for testability).
-    today = datetime.now(timezone.utc).date()
-
-    # Nav-condense pass (see IMPROVEMENT_BACKLOG.md): the masthead
-    # sparkline strip is scoped to exactly one page, not site-wide -- so
-    # it's computed once here and passed explicitly to that page's
-    # writer below, rather than injected as a Jinja environment global
-    # every template picked up automatically. Capped to the top
-    # `moving.MASTHEAD_TOPIC_LIMIT` topics by 7-day mention total
-    # (`build_masthead_sparklines`'s own job) so the strip fits a narrow
-    # mobile viewport. Phase 7 moves the strip from the Wire home page
-    # to the new map homepage (see the approved plan's "the existing
-    # What's Moving strip stays above the map" interaction-design
-    # note) -- the Wire itself (now at `/wire/`) no longer receives it,
-    # so it's passed to `map_builder.write_map_page()` only, never to
-    # `wire.write_wire_pages()` below.
-    strip_views = moving.build_masthead_sparklines(list(whats_moving.get("topics", [])))
 
     written: list[Path] = []
     written.append(
@@ -540,21 +547,6 @@ def render_pages(env: Environment, content: dict[str, Any], public_dir: Path) ->
             frontier_board_rows,
             cards,
             public_dir,
-            masthead_sparklines=strip_views,
-        )
-    )
-    written += wire.write_wire_pages(
-        env,
-        cards,
-        lexicon_entries,
-        public_dir,
-        today=today,
-        masthead_sparklines=None,
-        index_output_dir=public_dir / "wire",
-    )
-    written.append(
-        board.write_board_page(
-            env, frontier_board_rows, today, public_dir, lexicon_entries=lexicon_entries
         )
     )
     written += company_builder.write_company_pages(
@@ -564,16 +556,11 @@ def render_pages(env: Environment, content: dict[str, Any], public_dir: Path) ->
         env, lexicon_entries, public_dir, cards=cards
     )
     written.append(
-        primer_builder.write_primer_page(env, primer, lexicon_entries, public_dir)
-    )
-    written.append(moving.write_moving_page(env, whats_moving, public_dir))
-    written.append(
         method.write_method_page(env, ledger, verifier_stats, audit_latest, public_dir)
     )
     written.append(
         corrections_builder.write_corrections_page(env, corrections_entries, public_dir)
     )
-    written.append(about.write_about_page(env, public_dir))
     written.append(write_404_page(env, public_dir))
 
     routes = collect_routes(cards, lexicon_entries, companies)
