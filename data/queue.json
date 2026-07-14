@@ -1,12 +1,26 @@
 [
   {
-    "cluster_hash": "5bc0a40c52496856615251916750bda53e287d5d3d56d5c120c9bae9866463a9",
+    "cluster_hash": "dcf364f8d3ab164c7cd3aa4a78f78a8abb60e6e942c3feacb3afc7c93e2a687d",
     "rank": 1,
-    "score": 90.92481190776994,
+    "score": 41.020373317170694,
+    "sources": [
+      {
+        "outlet": "artfish.ai",
+        "points": 356,
+        "source_type": "hn",
+        "title": "Are we offloading too much of our thinking to AI?",
+        "url": "https://www.artfish.ai/p/offloading-thinking-to-ai"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "5bc0a40c52496856615251916750bda53e287d5d3d56d5c120c9bae9866463a9",
+    "rank": 2,
+    "score": 38.45235172669621,
     "sources": [
       {
         "outlet": "raymyers.org",
-        "points": 1393,
+        "points": 1512,
         "source_type": "hn",
         "title": "Zig Creator Calls Spade a Spade, Anthropic Blows Smoke",
         "url": "https://raymyers.org/post/zed-creator-calls-spade-a-spade/"
@@ -14,41 +28,41 @@
     ]
   },
   {
-    "cluster_hash": "c328c8ca299f5a2b38c3e8976204fa960f187d201712a208a9576b0618d89ba3",
-    "rank": 2,
-    "score": 56.67194710813473,
+    "cluster_hash": "7f97d56bb8a605fc8a9373269c5db0a6dc85ea7f27e2a51982e73138cc44ef98",
+    "rank": 3,
+    "score": 33.31968010624268,
     "sources": [
       {
-        "outlet": "neow.in",
-        "points": 224,
+        "outlet": "jola.dev",
+        "points": 407,
         "source_type": "hn",
-        "title": "Samsung Health app threatens data deletion if users opt out AI training",
-        "url": "https://neow.in/cWsyMTV3"
+        "title": "How to stop Claude from saying load-bearing",
+        "url": "https://jola.dev/posts/how-to-stop-claude-from-saying-load-bearing"
       }
     ]
   },
   {
-    "cluster_hash": "935a3aca4bd073e47d0ce10d377cf2b3538d6220dab4c071d2b3dedfbdea03f4",
-    "rank": 3,
-    "score": 44.35899753404158,
+    "cluster_hash": "3b3647cb2f0c20cba570b5e3a6779a448be6f1f01ad718b300d74346100c38be",
+    "rank": 4,
+    "score": 25.92793612839638,
     "sources": [
       {
-        "outlet": "github.com",
-        "points": 85,
+        "outlet": "bis.org",
+        "points": 52,
         "source_type": "hn",
-        "title": "Claude is just Mr. Meeseeks",
-        "url": "https://github.com/thephw/claude-meseeks"
+        "title": "Financing the AI boom: from cash flows to debt [pdf]",
+        "url": "https://www.bis.org/publ/bisbull120.pdf"
       }
     ]
   },
   {
     "cluster_hash": "6e8afa87e2257b6affdb234b5ccb121db0ef181e5f8973a4ccc8bcb2049f2d66",
-    "rank": 4,
-    "score": 44.29555543889867,
+    "rank": 5,
+    "score": 22.90846474103737,
     "sources": [
       {
         "outlet": "news.ycombinator.com",
-        "points": 1000,
+        "points": 1067,
         "source_type": "hn",
         "title": "Ask HN: Add flag for AI-generated articles",
         "url": "https://news.ycombinator.com/item?id=48886741"
@@ -56,58 +70,44 @@
     ]
   },
   {
-    "cluster_hash": "398431a5f118d841d6a8dd041caabbd674f935908d0bf2ed36b173c37cd5c111",
-    "rank": 5,
-    "score": 23.146933463160977,
-    "sources": [
-      {
-        "outlet": "systima.ai",
-        "points": 684,
-        "source_type": "hn",
-        "title": "Claude Code sends 33k tokens before reading the prompt; OpenCode sends 7k",
-        "url": "https://systima.ai/blog/claude-code-vs-opencode-token-overhead"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "46d7fc932bd3074a7bb94bc47dbdb97f47163901a217ca161c6e6b5f9eb57513",
+    "cluster_hash": "027f1f912e53cae8eb1e3750571824a47dd6e45adcf6071566c67b975a616cd8",
     "rank": 6,
-    "score": 17.930625088543064,
+    "score": 15.124143400998072,
     "sources": [
       {
-        "outlet": "bytecode.news",
-        "points": 74,
+        "outlet": "jacobfilipp.com",
+        "points": 167,
         "source_type": "hn",
-        "title": "AI Is a Bad Tool",
-        "url": "https://bytecode.news/posts/2026/07/user-submission-ai-is-a-bad-tool"
+        "title": "Proof of care in the age of AI",
+        "url": "https://jacobfilipp.com/care/"
       }
     ]
   },
   {
-    "cluster_hash": "66ae81ac75abdcb2c2b5bd9ea090379cd737d9d5ddbe071d4224422b3e695746",
+    "cluster_hash": "c328c8ca299f5a2b38c3e8976204fa960f187d201712a208a9576b0618d89ba3",
     "rank": 7,
-    "score": 11.562419164219563,
+    "score": 12.306100951622604,
     "sources": [
       {
-        "outlet": "github.com",
-        "points": 46,
+        "outlet": "neow.in",
+        "points": 344,
         "source_type": "hn",
-        "title": "Show HN: I implemented a neural network in SQL",
-        "url": "https://github.com/xqlsystems/xarray-sql/blob/claude/xarray-sql-mnist-demo/benchmarks/nn.py"
+        "title": "Samsung Health app threatens data deletion if users opt out AI training",
+        "url": "https://neow.in/cWsyMTV3"
       }
     ]
   },
   {
-    "cluster_hash": "b4e194bf0de5ff7d836642b3f57a9481390c730c18b44b922df05d6a9ed14be7",
+    "cluster_hash": "7bbc748c3c636e1d0d7b7e01581f55c44208e96567d03a2006e376fd12d78127",
     "rank": 8,
-    "score": 9.163326473776129,
+    "score": 9.148663804325322,
     "sources": [
       {
-        "outlet": "github.com",
-        "points": 52,
+        "outlet": "twitter.com",
+        "points": 134,
         "source_type": "hn",
-        "title": "Show HN: BillAI Bass, an AI-Powered Big Mouth Billy Bass Using Strands Agents",
-        "url": "https://github.com/morganwilliscloud/billai-bass"
+        "title": "Demis Hassabis has a plan to harness AI safely",
+        "url": "https://twitter.com/demishassabis/status/2076957440109625718"
       }
     ]
   }
