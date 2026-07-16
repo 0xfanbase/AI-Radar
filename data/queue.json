@@ -1,113 +1,113 @@
 [
   {
-    "cluster_hash": "dcf364f8d3ab164c7cd3aa4a78f78a8abb60e6e942c3feacb3afc7c93e2a687d",
+    "cluster_hash": "19c1c047398399212724447f67982dbaee3f59b608c31a73eea8ea2ee1272002",
     "rank": 1,
-    "score": 41.020373317170694,
+    "score": 52.94054534078071,
     "sources": [
       {
-        "outlet": "artfish.ai",
-        "points": 356,
+        "outlet": "turntrout.com",
+        "points": 286,
         "source_type": "hn",
-        "title": "Are we offloading too much of our thinking to AI?",
-        "url": "https://www.artfish.ai/p/offloading-thinking-to-ai"
+        "title": "Why I Left Google DeepMind",
+        "url": "https://turntrout.com/why-i-left-google-deepmind"
       }
     ]
   },
   {
-    "cluster_hash": "5bc0a40c52496856615251916750bda53e287d5d3d56d5c120c9bae9866463a9",
+    "cluster_hash": "e0f3590a3c246cffeebd8f1c8be5cda7f194f8d5fb3c89c1a4620c7dec7b3d48",
     "rank": 2,
-    "score": 38.45235172669621,
+    "score": 34.08002914226569,
     "sources": [
       {
-        "outlet": "raymyers.org",
-        "points": 1512,
+        "outlet": "mass-driver.com",
+        "points": 84,
         "source_type": "hn",
-        "title": "Zig Creator Calls Spade a Spade, Anthropic Blows Smoke",
-        "url": "https://raymyers.org/post/zed-creator-calls-spade-a-spade/"
+        "title": "We don't use AI in any of our design or production processes",
+        "url": "https://mass-driver.com/article/from-human-hands"
       }
     ]
   },
   {
-    "cluster_hash": "7f97d56bb8a605fc8a9373269c5db0a6dc85ea7f27e2a51982e73138cc44ef98",
+    "cluster_hash": "8c8bc684726af989367429a5ef62a42b85e37f4c345bc64d9d6cac3af4228ad8",
     "rank": 3,
-    "score": 33.31968010624268,
+    "score": 34.01142100384928,
     "sources": [
       {
-        "outlet": "jola.dev",
-        "points": 407,
+        "outlet": "ayush.digital",
+        "points": 599,
         "source_type": "hn",
-        "title": "How to stop Claude from saying load-bearing",
-        "url": "https://jola.dev/posts/how-to-stop-claude-from-saying-load-bearing"
+        "title": "I tricked Claude into leaking your deepest, darkest secrets",
+        "url": "https://www.ayush.digital/blog/the-memory-heist"
       }
     ]
   },
   {
-    "cluster_hash": "3b3647cb2f0c20cba570b5e3a6779a448be6f1f01ad718b300d74346100c38be",
+    "cluster_hash": "e1da17862e83328862f1ad18756abba482a6fc44a35046ffe40235e41907e82b",
     "rank": 4,
-    "score": 25.92793612839638,
+    "score": 22.233725022813235,
     "sources": [
       {
-        "outlet": "bis.org",
-        "points": 52,
+        "outlet": "dpa-international.com",
+        "points": 212,
         "source_type": "hn",
-        "title": "Financing the AI boom: from cash flows to debt [pdf]",
-        "url": "https://www.bis.org/publ/bisbull120.pdf"
+        "title": "OpenAI loses trademark dispute at EU court",
+        "url": "https://dpa-international.com/economics/urn:newsml:dpa.com:20090101:260715-930-389143/"
       }
     ]
   },
   {
-    "cluster_hash": "6e8afa87e2257b6affdb234b5ccb121db0ef181e5f8973a4ccc8bcb2049f2d66",
+    "cluster_hash": "6f7ccffe3c567f4598fbe9de13cf753b26dc3b08033ca1544b5f9599a59abcd2",
     "rank": 5,
-    "score": 22.90846474103737,
+    "score": 20.552606446488795,
     "sources": [
       {
-        "outlet": "news.ycombinator.com",
-        "points": 1067,
+        "outlet": "thinkingmachines.ai",
+        "points": 120,
         "source_type": "hn",
-        "title": "Ask HN: Add flag for AI-generated articles",
-        "url": "https://news.ycombinator.com/item?id=48886741"
+        "title": "Inkling \u2013 Open-Weights 975B Parameter LLM",
+        "url": "https://thinkingmachines.ai/inkling/"
       }
     ]
   },
   {
-    "cluster_hash": "027f1f912e53cae8eb1e3750571824a47dd6e45adcf6071566c67b975a616cd8",
+    "cluster_hash": "b069180b6e4e0251c494af82f00b045f4cd27e931e298fdb20e86ff6450da996",
     "rank": 6,
-    "score": 15.124143400998072,
+    "score": 19.400929012040994,
     "sources": [
       {
-        "outlet": "jacobfilipp.com",
-        "points": 167,
+        "outlet": "economics.mit.edu",
+        "points": 47,
         "source_type": "hn",
-        "title": "Proof of care in the age of AI",
-        "url": "https://jacobfilipp.com/care/"
+        "title": "Speculative Growth and the AI \"Bubble\" [pdf]",
+        "url": "https://economics.mit.edu/sites/default/files/2026-07/speculative_growth_AI_public.pdf"
       }
     ]
   },
   {
-    "cluster_hash": "c328c8ca299f5a2b38c3e8976204fa960f187d201712a208a9576b0618d89ba3",
+    "cluster_hash": "58eeae17ff823541fe39b847d237cce8fa1b39baa9325f4f146b642f345b3598",
     "rank": 7,
-    "score": 12.306100951622604,
+    "score": 18.91687627812332,
     "sources": [
       {
-        "outlet": "neow.in",
-        "points": 344,
+        "outlet": "siegelendowment.org",
+        "points": 53,
         "source_type": "hn",
-        "title": "Samsung Health app threatens data deletion if users opt out AI training",
-        "url": "https://neow.in/cWsyMTV3"
+        "title": "Governments, companies, nonprofits should invest in free, open source AI [pdf]",
+        "url": "https://www.siegelendowment.org/wp-content/uploads/2026/07/fortune-david-siegel-open-source-ai.pdf"
       }
     ]
   },
   {
-    "cluster_hash": "7bbc748c3c636e1d0d7b7e01581f55c44208e96567d03a2006e376fd12d78127",
+    "cluster_hash": "9a3240227fa76435375e35b06ccba5c05c8d6fa13448b5ef432711a399fc9cf1",
     "rank": 8,
-    "score": 9.148663804325322,
+    "score": 17.645675018644894,
     "sources": [
       {
-        "outlet": "twitter.com",
-        "points": 134,
+        "outlet": "brainless.swerdlow.dev",
+        "points": 77,
         "source_type": "hn",
-        "title": "Demis Hassabis has a plan to harness AI safely",
-        "url": "https://twitter.com/demishassabis/status/2076957440109625718"
+        "title": "Brainless: Shadcn components that look like Claude Code, Codex and Grok",
+        "url": "https://brainless.swerdlow.dev"
       }
     ]
   }
