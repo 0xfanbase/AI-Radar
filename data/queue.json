@@ -1,40 +1,96 @@
 [
   {
-    "cluster_hash": "19c1c047398399212724447f67982dbaee3f59b608c31a73eea8ea2ee1272002",
+    "cluster_hash": "e92da1656dac27d854f28180d0f8116ac5313df1bec49206e5fb03e8075351a7",
     "rank": 1,
-    "score": 52.94054534078071,
+    "score": 33.13322697367693,
     "sources": [
       {
-        "outlet": "turntrout.com",
-        "points": 286,
+        "outlet": "lmstudio.ai",
+        "points": 125,
         "source_type": "hn",
-        "title": "Why I Left Google DeepMind",
-        "url": "https://turntrout.com/why-i-left-google-deepmind"
+        "title": "LM Studio Bionic: the AI agent for open models",
+        "url": "https://lmstudio.ai/blog/introducing-lm-studio-bionic"
       }
     ]
   },
   {
-    "cluster_hash": "e0f3590a3c246cffeebd8f1c8be5cda7f194f8d5fb3c89c1a4620c7dec7b3d48",
+    "cluster_hash": "7a40a45d7b6d5907da2ae7e1376258e933c0fe0c0421e480ef2915fa9f7ecd66",
     "rank": 2,
-    "score": 34.08002914226569,
+    "score": 27.45636842293207,
     "sources": [
       {
-        "outlet": "mass-driver.com",
-        "points": 84,
+        "outlet": "blog.google",
+        "points": 218,
         "source_type": "hn",
-        "title": "We don't use AI in any of our design or production processes",
-        "url": "https://mass-driver.com/article/from-human-hands"
+        "title": "NotebookLM is now Gemini Notebook",
+        "url": "https://blog.google/innovation-and-ai/products/gemini-notebook/notebooklm-gemini-notebook/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "9f75baac4fcc1991231bd2b83503d3e6ee0b5ac039fa070e28a037245aaba335",
+    "rank": 3,
+    "score": 22.883148898903734,
+    "sources": [
+      {
+        "outlet": "tryai.dev",
+        "points": 92,
+        "source_type": "hn",
+        "title": "$100 AI Music Video: Claude Fable 5 vs. GPT-5.6 Sol",
+        "url": "https://www.tryai.dev/blog/ai-music-video-arena-claude-vs-gpt-5.6"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "30068d7445a6d923138f19e9264cf944e49e477eaf384b809aad389d55f4687c",
+    "rank": 4,
+    "score": 19.09740133345011,
+    "sources": [
+      {
+        "outlet": "blog.lyc8503.net",
+        "points": 141,
+        "source_type": "hn",
+        "title": "Detecting LLM-Generated Texts with \u201cClassical\u201d Machine Learning",
+        "url": "https://blog.lyc8503.net/en/post/llm-classifier/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "df7265f1cfb8ac3e9661707cb0f6bb901c39355953fd4d35c6a71c7cc9712fa7",
+    "rank": 5,
+    "score": 18.323398079091596,
+    "sources": [
+      {
+        "outlet": "the-decoder.com",
+        "points": 116,
+        "source_type": "hn",
+        "title": "German AI consortium releases Soofi S, an open 30B model that tops benchmarks",
+        "url": "https://the-decoder.com/german-ai-consortium-releases-soofi-s-an-open-30b-model-that-tops-benchmarks-in-both-english-and-german/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "d48a5a70d710937c0c035f6ff5ec69f08745fadc32431b40ed22708895d0d2b4",
+    "rank": 6,
+    "score": 18.29295812477614,
+    "sources": [
+      {
+        "outlet": "joinedanthropic.com",
+        "points": 293,
+        "source_type": "hn",
+        "title": "At least 105 past YC founders have worked at OpenAI and Anthropic",
+        "url": "https://joinedanthropic.com"
       }
     ]
   },
   {
     "cluster_hash": "8c8bc684726af989367429a5ef62a42b85e37f4c345bc64d9d6cac3af4228ad8",
-    "rank": 3,
-    "score": 34.01142100384928,
+    "rank": 7,
+    "score": 15.837482750203433,
     "sources": [
       {
         "outlet": "ayush.digital",
-        "points": 599,
+        "points": 659,
         "source_type": "hn",
         "title": "I tricked Claude into leaking your deepest, darkest secrets",
         "url": "https://www.ayush.digital/blog/the-memory-heist"
@@ -42,72 +98,16 @@
     ]
   },
   {
-    "cluster_hash": "e1da17862e83328862f1ad18756abba482a6fc44a35046ffe40235e41907e82b",
-    "rank": 4,
-    "score": 22.233725022813235,
-    "sources": [
-      {
-        "outlet": "dpa-international.com",
-        "points": 212,
-        "source_type": "hn",
-        "title": "OpenAI loses trademark dispute at EU court",
-        "url": "https://dpa-international.com/economics/urn:newsml:dpa.com:20090101:260715-930-389143/"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "6f7ccffe3c567f4598fbe9de13cf753b26dc3b08033ca1544b5f9599a59abcd2",
-    "rank": 5,
-    "score": 20.552606446488795,
-    "sources": [
-      {
-        "outlet": "thinkingmachines.ai",
-        "points": 120,
-        "source_type": "hn",
-        "title": "Inkling \u2013 Open-Weights 975B Parameter LLM",
-        "url": "https://thinkingmachines.ai/inkling/"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "b069180b6e4e0251c494af82f00b045f4cd27e931e298fdb20e86ff6450da996",
-    "rank": 6,
-    "score": 19.400929012040994,
-    "sources": [
-      {
-        "outlet": "economics.mit.edu",
-        "points": 47,
-        "source_type": "hn",
-        "title": "Speculative Growth and the AI \"Bubble\" [pdf]",
-        "url": "https://economics.mit.edu/sites/default/files/2026-07/speculative_growth_AI_public.pdf"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "58eeae17ff823541fe39b847d237cce8fa1b39baa9325f4f146b642f345b3598",
-    "rank": 7,
-    "score": 18.91687627812332,
-    "sources": [
-      {
-        "outlet": "siegelendowment.org",
-        "points": 53,
-        "source_type": "hn",
-        "title": "Governments, companies, nonprofits should invest in free, open source AI [pdf]",
-        "url": "https://www.siegelendowment.org/wp-content/uploads/2026/07/fortune-david-siegel-open-source-ai.pdf"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "9a3240227fa76435375e35b06ccba5c05c8d6fa13448b5ef432711a399fc9cf1",
+    "cluster_hash": "f44ae901a4bbd7db6617f3928a2bcfb4a8531a9d9b82440eb6c510ad830c31bc",
     "rank": 8,
-    "score": 17.645675018644894,
+    "score": 14.884393559182579,
     "sources": [
       {
-        "outlet": "brainless.swerdlow.dev",
-        "points": 77,
+        "outlet": "theocharis.dev",
+        "points": 180,
         "source_type": "hn",
-        "title": "Brainless: Shadcn components that look like Claude Code, Codex and Grok",
-        "url": "https://brainless.swerdlow.dev"
+        "title": "The LLM Critics Are Right. I Use LLMs Anyway",
+        "url": "https://www.theocharis.dev/blog/llm-critics-are-right-i-use-llms-anyway/"
       }
     ]
   }
