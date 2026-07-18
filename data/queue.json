@@ -1,113 +1,120 @@
 [
   {
-    "cluster_hash": "bf92b9a03ae8f701b88cb8a4758aa7a47d0ae78b5b633cfbbb487fe6166e2030",
+    "cluster_hash": "250938f11e581e76ad9dfb562bf12822d41e8e50071a2b914efba8a55cacec14",
     "rank": 1,
-    "score": 94.46772188255196,
+    "score": 49.16181992273652,
+    "sources": [
+      {
+        "outlet": "petapixel.com",
+        "points": 87,
+        "source_type": "hn",
+        "title": "Mayor Mamdani Says Landlords Can't Use AI Images to Advertise",
+        "url": "https://petapixel.com/2026/07/16/mayor-mamdani-says-landlords-cant-secretly-use-ai-images-to-advertise-properties/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "16e13c52f7cd02d4ace3d47abac95ccf3b9e630262bd24e605b9bb93a859298e",
+    "rank": 2,
+    "score": 45.275429441971426,
+    "sources": [
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Our approach to bioresilience",
+        "url": "https://deepmind.google/blog/our-approach-to-bioresilience/"
+      },
+      {
+        "outlet": "deepmind.google",
+        "points": 60,
+        "source_type": "hn",
+        "title": "Our Approach to Bioresilience: Isomorphic Labs and Google DeepMind",
+        "url": "https://deepmind.google/blog/our-approach-to-bioresilience/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "271cd1b24d5ceb6706b5a79c375780f3c38b55b34731387957457a3adb704d9e",
+    "rank": 3,
+    "score": 43.7960662709713,
+    "sources": [
+      {
+        "outlet": "old.reddit.com",
+        "points": 481,
+        "source_type": "hn",
+        "title": "GPT-5.6 used a prompt to close a 30-year gap in convex optimization",
+        "url": "https://old.reddit.com/r/math/comments/1uxj3cy/after_openais_cdc_proof_announcement_gpt56_used_a/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "ce44e1889cb1ed747d766884afca29e1047472f7498eeca4376ecf53c57b1d5f",
+    "rank": 4,
+    "score": 31.901821038547656,
+    "sources": [
+      {
+        "outlet": "velvetshark.com",
+        "points": 411,
+        "source_type": "hn",
+        "title": "Why do AI company logos look like buttholes? (2025)",
+        "url": "https://velvetshark.com/ai-company-logos-that-look-like-buttholes"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "f87cf5105615bedd7816b80d5f30bccfa3b8b9f7d95877336db00effbe96cbef",
+    "rank": 5,
+    "score": 27.455361537647804,
+    "sources": [
+      {
+        "outlet": "data.stackexchange.com",
+        "points": 351,
+        "source_type": "hn",
+        "title": "What AI did to stackoverflow in a graph",
+        "url": "https://data.stackexchange.com/stackoverflow/query/1953768#graph"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "daf0528a98732d150947fbce6748ec4add5154d2430eae873643c7294289bdb0",
+    "rank": 6,
+    "score": 21.295856039362608,
+    "sources": [
+      {
+        "outlet": "ykdojo.github.io",
+        "points": 166,
+        "source_type": "hn",
+        "title": "Setting up your spare Mac for Claude Code to control, a step-by-step guide",
+        "url": "https://ykdojo.github.io/claude-controls-mac/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "bf92b9a03ae8f701b88cb8a4758aa7a47d0ae78b5b633cfbbb487fe6166e2030",
+    "rank": 7,
+    "score": 21.208742331924196,
     "sources": [
       {
         "outlet": "localnewsmatters.org",
-        "points": 144,
+        "points": 542,
         "source_type": "hn",
-        "title": "Kaiser nurses say AI, workplace surveillance are making their jobs, care worse",
+        "title": "Kaiser nurses say AI, surveillance are making their jobs and patient care worse",
         "url": "https://localnewsmatters.org/2026/07/15/kaiser-nurses-say-ai-workplace-surveillance-are-making-their-jobs-and-patient-care-worse/"
       }
     ]
   },
   {
-    "cluster_hash": "14270184fe75ec594fc7aeaf3ee9c38ce1cf1cd321a1d977136f25b67da21670",
-    "rank": 2,
-    "score": 37.36813016775718,
-    "sources": [
-      {
-        "outlet": "stateofopensource.ai",
-        "points": 353,
-        "source_type": "hn",
-        "title": "The state of open source AI",
-        "url": "https://stateofopensource.ai/"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "517e8476ff553e9bd4d2492eafc276898afa4611f120d831ec5789013213e709",
-    "rank": 3,
-    "score": 31.03550329519972,
-    "sources": [
-      {
-        "outlet": "ft.com",
-        "points": 370,
-        "source_type": "hn",
-        "title": "Apple targets dozens of OpenAI employees with legal letters",
-        "url": "https://www.ft.com/content/1b8c9d52-88a9-426b-ba47-f1811f859166"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "dde91137aca66368e7b1f286817885c0c4bfcad8292c31c2c8c9ec2b589f378e",
-    "rank": 4,
-    "score": 22.620442480171885,
-    "sources": [
-      {
-        "outlet": "newrepublic.com",
-        "points": 58,
-        "source_type": "hn",
-        "title": "Everybody's Weirded Out by AI\u2013Except the People Who Foist It on Us",
-        "url": "https://newrepublic.com/article/213004/everybody-weirded-ai-except-people-foist-us"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "10b8ae2e6c81e52815956eacbc84133e548992dc258ba19a8a6117489a47d071",
-    "rank": 5,
-    "score": 14.488636056644667,
-    "sources": [
-      {
-        "outlet": "news.ycombinator.com",
-        "points": 82,
-        "source_type": "hn",
-        "title": "Ask HN: Did Fable disappear from your Claude usage and requires credits now?",
-        "url": "https://news.ycombinator.com/item?id=48950477"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "bdf2300c4ca03c949453609970e1621baa8ff34b48f388e6520726cd832320c4",
-    "rank": 6,
-    "score": 14.080729476611143,
-    "sources": [
-      {
-        "outlet": "olafalders.com",
-        "points": 134,
-        "source_type": "hn",
-        "title": "Claude Code: Anatomy of a Misfeature",
-        "url": "https://www.olafalders.com/2026/07/17/claude-code-anatomy-of-a-misfeature/"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "9f75baac4fcc1991231bd2b83503d3e6ee0b5ac039fa070e28a037245aaba335",
-    "rank": 7,
-    "score": 13.687042845806369,
-    "sources": [
-      {
-        "outlet": "tryai.dev",
-        "points": 382,
-        "source_type": "hn",
-        "title": "$100 AI Music Video: Claude Fable 5 vs. GPT-5.6 Sol",
-        "url": "https://www.tryai.dev/blog/ai-music-video-arena-claude-vs-gpt-5.6"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "e92da1656dac27d854f28180d0f8116ac5313df1bec49206e5fb03e8075351a7",
+    "cluster_hash": "e60638403f058be26cf720ebd1ebd192d892850b9e38a115e50372c33cb43bdd",
     "rank": 8,
-    "score": 11.532136444456183,
+    "score": 15.782451097554379,
     "sources": [
       {
-        "outlet": "lmstudio.ai",
-        "points": 319,
+        "outlet": "charlesazam.com",
+        "points": 205,
         "source_type": "hn",
-        "title": "LM Studio Bionic: the AI agent for open models",
-        "url": "https://lmstudio.ai/blog/introducing-lm-studio-bionic"
+        "title": "Fable 5 vs. GPT-5.6 Sol on an NP-Hard Problem: Does /goal help?",
+        "url": "https://charlesazam.com/blog/fable-5-gpt-5-6-sol-goal/"
       }
     ]
   }

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-17T23:57:57Z",
+  "generated_at": "2026-07-18T23:59:49Z",
   "topics": [
     {
       "daily_counts": [
@@ -8,8 +8,8 @@
         0,
         0,
         0,
-        8,
-        2
+        2,
+        3
       ],
       "topic": "models",
       "trend": "accelerating"
@@ -86,8 +86,8 @@
         0,
         0,
         0,
-        0,
-        1
+        1,
+        0
       ],
       "topic": "open-source",
       "trend": "accelerating"
