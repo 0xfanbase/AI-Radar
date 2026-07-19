@@ -1,9 +1,289 @@
 {
+  "company_hijacked_links": {
+    "checked_at": "2026-07-19T01:22:55.157733+00:00",
+    "counts": {
+      "hijacked": 3,
+      "trusted": 34,
+      "unreachable": 0
+    },
+    "results": [
+      {
+        "company_id": "ai2",
+        "detail": null,
+        "final_url": "https://allenai.org/about",
+        "status": "trusted",
+        "url": "https://allenai.org/about"
+      },
+      {
+        "company_id": "ai2",
+        "detail": null,
+        "final_url": "https://allenai.org/blog/olmo3",
+        "status": "trusted",
+        "url": "https://allenai.org/blog/olmo3"
+      },
+      {
+        "company_id": "alibaba-qwen",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/Qwen",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/Qwen"
+      },
+      {
+        "company_id": "alibaba-qwen",
+        "detail": null,
+        "final_url": "https://www.alibabacloud.com/notfound",
+        "status": "trusted",
+        "url": "https://www.alibabacloud.com/blog/qwen3-7-the-agent-frontier_603154"
+      },
+      {
+        "company_id": "anthropic",
+        "detail": null,
+        "final_url": "https://www.anthropic.com/company",
+        "status": "trusted",
+        "url": "https://www.anthropic.com/company"
+      },
+      {
+        "company_id": "anthropic",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/Anthropic",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/Anthropic"
+      },
+      {
+        "company_id": "anthropic",
+        "detail": null,
+        "final_url": "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5",
+        "status": "trusted",
+        "url": "https://platform.claude.com/docs/en/about-claude/models/introducing-claude-fable-5-and-claude-mythos-5"
+      },
+      {
+        "company_id": "anthropic",
+        "detail": null,
+        "final_url": "https://www.anthropic.com/news/claude-sonnet-5",
+        "status": "trusted",
+        "url": "https://www.anthropic.com/news/claude-sonnet-5"
+      },
+      {
+        "company_id": "anthropic",
+        "detail": null,
+        "final_url": "https://platform.claude.com/docs/en/about-claude/models/overview",
+        "status": "trusted",
+        "url": "https://platform.claude.com/docs/en/about-claude/models/overview"
+      },
+      {
+        "company_id": "bytedance-seed",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/ByteDance",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/ByteDance"
+      },
+      {
+        "company_id": "bytedance-seed",
+        "detail": null,
+        "final_url": "https://seed.bytedance.com/en/blog/seed2-1-officially-released-advancing-ai-productivity",
+        "status": "trusted",
+        "url": "https://seed.bytedance.com/en/blog/seed2-1-officially-released-advancing-ai-productivity"
+      },
+      {
+        "company_id": "deepseek",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/DeepSeek",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/DeepSeek"
+      },
+      {
+        "company_id": "deepseek",
+        "detail": null,
+        "final_url": "https://arxiv.org/abs/2412.19437",
+        "status": "trusted",
+        "url": "https://arxiv.org/abs/2412.19437"
+      },
+      {
+        "company_id": "deepseek",
+        "detail": null,
+        "final_url": "https://api-docs.deepseek.com/news/news260424/",
+        "status": "trusted",
+        "url": "https://api-docs.deepseek.com/news/news260424/"
+      },
+      {
+        "company_id": "google-deepmind",
+        "detail": null,
+        "final_url": "https://deepmind.google/about/",
+        "status": "trusted",
+        "url": "https://deepmind.google/about/"
+      },
+      {
+        "company_id": "google-deepmind",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/Google_DeepMind",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/Google_DeepMind"
+      },
+      {
+        "company_id": "google-deepmind",
+        "detail": null,
+        "final_url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/",
+        "status": "trusted",
+        "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/"
+      },
+      {
+        "company_id": "meta-ai",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/Meta_Superintelligence_Labs",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/Meta_Superintelligence_Labs"
+      },
+      {
+        "company_id": "meta-ai",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/Meta_AI",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/Meta_AI"
+      },
+      {
+        "company_id": "meta-ai",
+        "detail": null,
+        "final_url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/",
+        "status": "trusted",
+        "url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/"
+      },
+      {
+        "company_id": "meta-ai",
+        "detail": null,
+        "final_url": "https://ai.meta.com/blog/introducing-muse-spark-meta-model-api/",
+        "status": "trusted",
+        "url": "https://ai.meta.com/blog/introducing-muse-spark-meta-model-api/"
+      },
+      {
+        "company_id": "mistral",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/Mistral_AI",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/Mistral_AI"
+      },
+      {
+        "company_id": "mistral",
+        "detail": null,
+        "final_url": "https://mistral.ai/news/mistral-3/",
+        "status": "trusted",
+        "url": "https://mistral.ai/news/mistral-3/"
+      },
+      {
+        "company_id": "moonshot-ai",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/Moonshot_AI",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/Moonshot_AI"
+      },
+      {
+        "company_id": "moonshot-ai",
+        "detail": "host 'huggingface.co' is not in data/trusted_domains.json",
+        "final_url": "https://huggingface.co/moonshotai/Kimi-K2.6",
+        "status": "hijacked",
+        "url": "https://huggingface.co/moonshotai/Kimi-K2.6"
+      },
+      {
+        "company_id": "nvidia",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/Nvidia",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/Nvidia"
+      },
+      {
+        "company_id": "nvidia",
+        "detail": null,
+        "final_url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
+        "status": "trusted",
+        "url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/"
+      },
+      {
+        "company_id": "openai",
+        "detail": null,
+        "final_url": "https://techcrunch.com/2015/12/11/non-profit-openai-launches-with-backing-from-elon-musk-and-sam-altman/",
+        "status": "trusted",
+        "url": "https://techcrunch.com/2015/12/11/non-profit-openai-launches-with-backing-from-elon-musk-and-sam-altman/"
+      },
+      {
+        "company_id": "openai",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/OpenAI",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/OpenAI"
+      },
+      {
+        "company_id": "openai",
+        "detail": null,
+        "final_url": "https://deploymentsafety.openai.com/gpt-5-6-preview",
+        "status": "trusted",
+        "url": "https://deploymentsafety.openai.com/gpt-5-6-preview"
+      },
+      {
+        "company_id": "openai",
+        "detail": null,
+        "final_url": "https://techcrunch.com/2026/07/09/openai-launches-its-new-family-of-models-with-gpt-5-6/",
+        "status": "trusted",
+        "url": "https://techcrunch.com/2026/07/09/openai-launches-its-new-family-of-models-with-gpt-5-6/"
+      },
+      {
+        "company_id": "xai",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/SpaceXAI",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/SpaceXAI"
+      },
+      {
+        "company_id": "xai",
+        "detail": null,
+        "final_url": "https://docs.x.ai/developers/models",
+        "status": "trusted",
+        "url": "https://docs.x.ai/developers/models"
+      },
+      {
+        "company_id": "xai",
+        "detail": "host 'cursor.com' is not in data/trusted_domains.json",
+        "final_url": "https://cursor.com/blog/grok-4-5",
+        "status": "hijacked",
+        "url": "https://cursor.com/blog/grok-4-5"
+      },
+      {
+        "company_id": "xai",
+        "detail": null,
+        "final_url": "https://techcrunch.com/2026/07/08/spacexai-releases-grok-4-5-which-elon-describes-as-an-opus-class-model/",
+        "status": "trusted",
+        "url": "https://techcrunch.com/2026/07/08/spacexai-releases-grok-4-5-which-elon-describes-as-an-opus-class-model/"
+      },
+      {
+        "company_id": "zhipu-ai",
+        "detail": null,
+        "final_url": "https://en.wikipedia.org/wiki/Zhipu_AI",
+        "status": "trusted",
+        "url": "https://en.wikipedia.org/wiki/Zhipu_AI"
+      },
+      {
+        "company_id": "zhipu-ai",
+        "detail": "host 'huggingface.co' is not in data/trusted_domains.json",
+        "final_url": "https://huggingface.co/blog/zai-org/glm-52-blog",
+        "status": "hijacked",
+        "url": "https://huggingface.co/blog/zai-org/glm-52-blog"
+      }
+    ],
+    "total_urls": 37
+  },
   "duplicates": {
     "duplicate_pairs": []
   },
-  "findings_appended_to_backlog": 7,
-  "generated_at": "2026-07-12T01:24:33Z",
+  "findings_appended_to_backlog": 3,
+  "generated_at": "2026-07-19T01:22:37Z",
+  "hijacked_links": {
+    "checked_at": "2026-07-19T01:22:42.793787+00:00",
+    "counts": {
+      "hijacked": 0,
+      "trusted": 0,
+      "unreachable": 0
+    },
+    "results": [],
+    "total_urls": 0
+  },
   "lexicon": {
     "coverage_gaps": [],
     "orphans": [
@@ -40,7 +320,7 @@
     ]
   },
   "link_rot": {
-    "checked_at": "2026-07-12T01:24:33.405329+00:00",
+    "checked_at": "2026-07-19T01:22:37.171181+00:00",
     "counts": {
       "dead": 0,
       "ok": 0,
@@ -50,257 +330,193 @@
     "total_urls": 0
   },
   "missed_stories": {
-    "checked_at": "2026-07-12T01:24:39.366703+00:00",
+    "checked_at": "2026-07-19T01:22:42.793637+00:00",
     "counts": {
-      "covered": 13,
-      "missed": 7,
+      "covered": 20,
+      "missed": 0,
       "seen_but_dropped": 0
     },
-    "missed_stories": [
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 690,
-        "title": "GLM 5.2 and the coming AI margin collapse",
-        "url": "https://martinalderson.com/posts/the-upcoming-ai-margin-collapse-part-1-glm-5-2/"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 415,
-        "title": "GPT-5.6 Sol Ultra will be in Codex",
-        "url": "https://twitter.com/thsottiaux/status/2073933490513752151"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 379,
-        "title": "AI 2040: Plan A",
-        "url": "https://ai-2040.com/"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 373,
-        "title": "AMD Ryzen AI Halo \u2013 $4k AI Dev Kit",
-        "url": "https://www.lttlabs.com/articles/2026/07/06/amd-ryzen-ai-halo"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 275,
-        "title": "Small AI Models Gain Traction In places with unreliable networks",
-        "url": "https://spectrum.ieee.org/small-language-models-ai-pharmaceuticals"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 246,
-        "title": "Anthropic's Method to Losing Goodwill in a Few Easy Steps",
-        "url": "https://raheeljunaid.com/blog/anthropics-method-to-losing-goodwill-in-a-few-easy-steps/"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 244,
-        "title": "AI content is everywhere on social media, especially LinkedIn",
-        "url": "https://www.pangram.com/blog/ai-in-your-feed"
-      }
-    ],
+    "missed_stories": [],
     "results": [
       {
         "classification": "covered",
         "dropped_reason": null,
         "matched_card_id": null,
-        "matched_cluster_hash": "47241c700e22d76b233188c99f1d303d8a606395e6568416c1fabb9b85a4d5a8",
-        "points": 1572,
-        "title": "Apple sues OpenAI, accuses ex-employees of stealing trade secrets",
-        "url": "https://9to5mac.com/2026/07/10/apple-sues-openai-trade-secret-theft/"
+        "matched_cluster_hash": "5bc0a40c52496856615251916750bda53e287d5d3d56d5c120c9bae9866463a9",
+        "points": 1541,
+        "title": "Zig Creator Calls Spade a Spade, Anthropic Blows Smoke",
+        "url": "https://raymyers.org/post/zed-creator-calls-spade-a-spade/"
       },
       {
         "classification": "covered",
         "dropped_reason": null,
         "matched_card_id": null,
-        "matched_cluster_hash": "e19fbb75eb44457e4dbe61ac0c57dd698fc70ccefdd1c171e2f4db8584de6c3d",
-        "points": 1542,
-        "title": "GPT-5.6",
-        "url": "https://openai.com/index/gpt-5-6/"
+        "matched_cluster_hash": "6e8afa87e2257b6affdb234b5ccb121db0ef181e5f8973a4ccc8bcb2049f2d66",
+        "points": 1091,
+        "title": "Ask HN: Add flag for AI-generated articles",
+        "url": "https://news.ycombinator.com/item?id=48886741"
       },
       {
         "classification": "covered",
         "dropped_reason": null,
         "matched_card_id": null,
-        "matched_cluster_hash": "3fb14968493dc68260e4892ed338c85e26c34d1f5bd0189f7fdc8ddef48ad531",
-        "points": 747,
-        "title": "GPT\u2011Live",
-        "url": "https://openai.com/index/introducing-gpt-live/"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 690,
-        "title": "GLM 5.2 and the coming AI margin collapse",
-        "url": "https://martinalderson.com/posts/the-upcoming-ai-margin-collapse-part-1-glm-5-2/"
+        "matched_cluster_hash": "398431a5f118d841d6a8dd041caabbd674f935908d0bf2ed36b173c37cd5c111",
+        "points": 704,
+        "title": "Claude Code sends 33k tokens before reading the prompt; OpenCode sends 7k",
+        "url": "https://systima.ai/blog/claude-code-vs-opencode-token-overhead"
       },
       {
         "classification": "covered",
         "dropped_reason": null,
         "matched_card_id": null,
-        "matched_cluster_hash": "dcb832a0eb498c456b97b2dc3de310ff50242df86db5fb0b4b92e5fd4d7136bd",
-        "points": 538,
-        "title": "GitLost: We Tricked GitHub's AI Agent into Leaking Private Repos",
-        "url": "https://noma.security/blog/gitlost-how-we-tricked-githubs-ai-agent-into-leaking-private-repos/"
+        "matched_cluster_hash": "8c8bc684726af989367429a5ef62a42b85e37f4c345bc64d9d6cac3af4228ad8",
+        "points": 667,
+        "title": "I tricked Claude into leaking your deepest, darkest secrets",
+        "url": "https://www.ayush.digital/blog/the-memory-heist"
       },
       {
         "classification": "covered",
         "dropped_reason": null,
         "matched_card_id": null,
-        "matched_cluster_hash": "66bbdd7828c6eff6e3728e9a33d659e0fc469cfe32fb093a332ac57b1e4f4405",
-        "points": 511,
-        "title": "GPT-5.6 Sol Ultra produces proof of the Cycle Double Cover Conjecture [pdf]",
-        "url": "https://cdn.openai.com/pdf/04d1d1e4-bc75-476a-97cf-49055cd98d31/cdc_proof.pdf"
+        "matched_cluster_hash": "7f97d56bb8a605fc8a9373269c5db0a6dc85ea7f27e2a51982e73138cc44ef98",
+        "points": 605,
+        "title": "How to stop Claude from saying load-bearing",
+        "url": "https://jola.dev/posts/how-to-stop-claude-from-saying-load-bearing"
       },
       {
         "classification": "covered",
         "dropped_reason": null,
         "matched_card_id": null,
-        "matched_cluster_hash": "cafc9d3c3da053e9739d61b137ae7a0eb001544e8ca90e0502d85a30c62c131e",
-        "points": 487,
-        "title": "Mistral's Robostral Navigate: a state of the art robotics navigation model",
-        "url": "https://mistral.ai/news/robostral-navigate/"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 415,
-        "title": "GPT-5.6 Sol Ultra will be in Codex",
-        "url": "https://twitter.com/thsottiaux/status/2073933490513752151"
+        "matched_cluster_hash": "bf92b9a03ae8f701b88cb8a4758aa7a47d0ae78b5b633cfbbb487fe6166e2030",
+        "points": 542,
+        "title": "Kaiser nurses say AI, surveillance are making their jobs and patient care worse",
+        "url": "https://localnewsmatters.org/2026/07/15/kaiser-nurses-say-ai-workplace-surveillance-are-making-their-jobs-and-patient-care-worse/"
       },
       {
         "classification": "covered",
         "dropped_reason": null,
         "matched_card_id": null,
-        "matched_cluster_hash": "fca8a3981e7fce1f0d5153a691e2ef8e2675c1d36e5af760675c54e39ea70a00",
-        "points": 407,
-        "title": "I think I have LLM burnout",
-        "url": "https://www.alecscollon.com/blog/llm-burnout/"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 379,
-        "title": "AI 2040: Plan A",
-        "url": "https://ai-2040.com/"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 373,
-        "title": "AMD Ryzen AI Halo \u2013 $4k AI Dev Kit",
-        "url": "https://www.lttlabs.com/articles/2026/07/06/amd-ryzen-ai-halo"
+        "matched_cluster_hash": "dcf364f8d3ab164c7cd3aa4a78f78a8abb60e6e942c3feacb3afc7c93e2a687d",
+        "points": 523,
+        "title": "Are we offloading too much of our thinking to AI?",
+        "url": "https://www.artfish.ai/p/offloading-thinking-to-ai"
       },
       {
         "classification": "covered",
         "dropped_reason": null,
         "matched_card_id": null,
-        "matched_cluster_hash": "2015b07b78a1afecfd58b7e1d65d0291ceaa973b0db5939711b8104e58957b13",
-        "points": 348,
-        "title": "ChatGPT Work",
-        "url": "https://openai.com/index/chatgpt-for-your-most-ambitious-work/"
+        "matched_cluster_hash": "271cd1b24d5ceb6706b5a79c375780f3c38b55b34731387957457a3adb704d9e",
+        "points": 492,
+        "title": "GPT-5.6 used a prompt to close a 30-year gap in convex optimization",
+        "url": "https://old.reddit.com/r/math/comments/1uxj3cy/after_openais_cdc_proof_announcement_gpt56_used_a/"
       },
       {
         "classification": "covered",
         "dropped_reason": null,
         "matched_card_id": null,
-        "matched_cluster_hash": "b7534fef03b25a7f4c5d8924f988d1dd26d99733161f9edf042c2a9f9ce1dcd7",
-        "points": 345,
-        "title": "Show HN: Microsoft releases Flint, a visualization language for AI agents",
-        "url": "https://microsoft.github.io/flint-chart/#/"
+        "matched_cluster_hash": "14270184fe75ec594fc7aeaf3ee9c38ce1cf1cd321a1d977136f25b67da21670",
+        "points": 475,
+        "title": "The state of open source AI",
+        "url": "https://stateofopensource.ai/"
       },
       {
         "classification": "covered",
         "dropped_reason": null,
         "matched_card_id": null,
-        "matched_cluster_hash": "5f6174abae08b75020f15414034a6343afc152e986789c48d072ef6c8be58b08",
+        "matched_cluster_hash": "ce44e1889cb1ed747d766884afca29e1047472f7498eeca4376ecf53c57b1d5f",
+        "points": 414,
+        "title": "Why do AI company logos look like buttholes? (2025)",
+        "url": "https://velvetshark.com/ai-company-logos-that-look-like-buttholes"
+      },
+      {
+        "classification": "covered",
+        "dropped_reason": null,
+        "matched_card_id": null,
+        "matched_cluster_hash": "517e8476ff553e9bd4d2492eafc276898afa4611f120d831ec5789013213e709",
+        "points": 403,
+        "title": "Apple targets dozens of OpenAI employees with legal letters",
+        "url": "https://www.ft.com/content/1b8c9d52-88a9-426b-ba47-f1811f859166"
+      },
+      {
+        "classification": "covered",
+        "dropped_reason": null,
+        "matched_card_id": null,
+        "matched_cluster_hash": "9f75baac4fcc1991231bd2b83503d3e6ee0b5ac039fa070e28a037245aaba335",
+        "points": 395,
+        "title": "$100 AI Music Video: Claude Fable 5 vs. GPT-5.6 Sol",
+        "url": "https://www.tryai.dev/blog/ai-music-video-arena-claude-vs-gpt-5.6"
+      },
+      {
+        "classification": "covered",
+        "dropped_reason": null,
+        "matched_card_id": null,
+        "matched_cluster_hash": "7a40a45d7b6d5907da2ae7e1376258e933c0fe0c0421e480ef2915fa9f7ecd66",
+        "points": 367,
+        "title": "NotebookLM is now Gemini Notebook",
+        "url": "https://blog.google/innovation-and-ai/products/gemini-notebook/notebooklm-gemini-notebook/"
+      },
+      {
+        "classification": "covered",
+        "dropped_reason": null,
+        "matched_card_id": null,
+        "matched_cluster_hash": "19c1c047398399212724447f67982dbaee3f59b608c31a73eea8ea2ee1272002",
+        "points": 363,
+        "title": "Why I Left Google DeepMind",
+        "url": "https://turntrout.com/why-i-left-google-deepmind"
+      },
+      {
+        "classification": "covered",
+        "dropped_reason": null,
+        "matched_card_id": null,
+        "matched_cluster_hash": "f87cf5105615bedd7816b80d5f30bccfa3b8b9f7d95877336db00effbe96cbef",
+        "points": 358,
+        "title": "What AI did to stackoverflow in a graph",
+        "url": "https://data.stackexchange.com/stackoverflow/query/1953768#graph"
+      },
+      {
+        "classification": "covered",
+        "dropped_reason": null,
+        "matched_card_id": null,
+        "matched_cluster_hash": "c328c8ca299f5a2b38c3e8976204fa960f187d201712a208a9576b0618d89ba3",
+        "points": 350,
+        "title": "Samsung Health app threatens data deletion if users opt out AI training",
+        "url": "https://neow.in/cWsyMTV3"
+      },
+      {
+        "classification": "covered",
+        "dropped_reason": null,
+        "matched_card_id": null,
+        "matched_cluster_hash": "e92da1656dac27d854f28180d0f8116ac5313df1bec49206e5fb03e8075351a7",
+        "points": 326,
+        "title": "LM Studio Bionic: the AI agent for open models",
+        "url": "https://lmstudio.ai/blog/introducing-lm-studio-bionic"
+      },
+      {
+        "classification": "covered",
+        "dropped_reason": null,
+        "matched_card_id": null,
+        "matched_cluster_hash": "f44ae901a4bbd7db6617f3928a2bcfb4a8531a9d9b82440eb6c510ad830c31bc",
+        "points": 305,
+        "title": "The LLM Critics Are Right. I Use LLMs Anyway",
+        "url": "https://www.theocharis.dev/blog/llm-critics-are-right-i-use-llms-anyway/"
+      },
+      {
+        "classification": "covered",
+        "dropped_reason": null,
+        "matched_card_id": null,
+        "matched_cluster_hash": "d48a5a70d710937c0c035f6ff5ec69f08745fadc32431b40ed22708895d0d2b4",
         "points": 302,
-        "title": "We charge $10k a week to delete AI-generated code",
-        "url": "https://odra.dev/slopfix/"
+        "title": "At least 105 past YC founders have worked at OpenAI and Anthropic",
+        "url": "https://joinedanthropic.com"
       },
       {
         "classification": "covered",
         "dropped_reason": null,
         "matched_card_id": null,
-        "matched_cluster_hash": "df1fe051b58f9e418259659d41ad1e4f8b8c255a03309e3cba891b42a1e5ad42",
-        "points": 287,
-        "title": "AI-generated videos to maximally drive a target brain region",
-        "url": "https://nevo-project.epfl.ch/"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 275,
-        "title": "Small AI Models Gain Traction In places with unreliable networks",
-        "url": "https://spectrum.ieee.org/small-language-models-ai-pharmaceuticals"
-      },
-      {
-        "classification": "covered",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": "0d1dcf4ab4f0ca6008c7d60b149a762f3a2370c0c0dd234b073abaa04f6ae9db",
-        "points": 271,
-        "title": "SWE-1.7 Reach Near GPT 5.5 and Opus Intelligence",
-        "url": "https://cognition.com/blog/swe-1-7"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 246,
-        "title": "Anthropic's Method to Losing Goodwill in a Few Easy Steps",
-        "url": "https://raheeljunaid.com/blog/anthropics-method-to-losing-goodwill-in-a-few-easy-steps/"
-      },
-      {
-        "classification": "missed",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": null,
-        "points": 244,
-        "title": "AI content is everywhere on social media, especially LinkedIn",
-        "url": "https://www.pangram.com/blog/ai-in-your-feed"
-      },
-      {
-        "classification": "covered",
-        "dropped_reason": null,
-        "matched_card_id": null,
-        "matched_cluster_hash": "1bd6a547e4df1a4a036d7116095b1bfc23d0edc2a0d8d0d585209ed83f431dda",
-        "points": 235,
-        "title": "GPT-5.6 Sol, along with Terra and Luna, will launch publicly this Thursday",
-        "url": "https://twitter.com/OpenAI/status/2074704958419792299"
+        "matched_cluster_hash": "58eeae17ff823541fe39b847d237cce8fa1b39baa9325f4f146b642f345b3598",
+        "points": 293,
+        "title": "Governments, companies, nonprofits should invest in free, open source AI [pdf]",
+        "url": "https://www.siegelendowment.org/wp-content/uploads/2026/07/fortune-david-siegel-open-source-ai.pdf"
       }
     ],
     "seen_but_dropped_stories": [],
@@ -308,9 +524,111 @@
     "total_checked": 20,
     "window_hours": 168
   },
-  "run_id": "audit-20260712T012433Z",
+  "profile_staleness": {
+    "checked_at": "2026-07-19T01:22:55.157812+00:00",
+    "counts": {
+      "fresh": 13,
+      "stale": 0
+    },
+    "results": [
+      {
+        "company_id": "ai2",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "Ai2",
+        "stale": false
+      },
+      {
+        "company_id": "alibaba-qwen",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "Alibaba Qwen",
+        "stale": false
+      },
+      {
+        "company_id": "anthropic",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "Anthropic",
+        "stale": false
+      },
+      {
+        "company_id": "bytedance-seed",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "ByteDance Seed",
+        "stale": false
+      },
+      {
+        "company_id": "deepseek",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "DeepSeek",
+        "stale": false
+      },
+      {
+        "company_id": "google-deepmind",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "Google DeepMind",
+        "stale": false
+      },
+      {
+        "company_id": "meta-ai",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "Meta AI",
+        "stale": false
+      },
+      {
+        "company_id": "mistral",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "Mistral AI",
+        "stale": false
+      },
+      {
+        "company_id": "moonshot-ai",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "Moonshot AI",
+        "stale": false
+      },
+      {
+        "company_id": "nvidia",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "NVIDIA",
+        "stale": false
+      },
+      {
+        "company_id": "openai",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "OpenAI",
+        "stale": false
+      },
+      {
+        "company_id": "xai",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "xAI",
+        "stale": false
+      },
+      {
+        "company_id": "zhipu-ai",
+        "days_stale": 6,
+        "last_verified": "2026-07-13",
+        "name": "Zhipu AI",
+        "stale": false
+      }
+    ],
+    "stale_days_threshold": 45,
+    "total_companies": 13
+  },
+  "run_id": "audit-20260719T012237Z",
   "verifier_trend": {
-    "as_of": "2026-07-12",
+    "as_of": "2026-07-19",
     "prior_week_pass_rate": null,
     "rolling_30d_pass_rate": null,
     "rolling_7d_pass_rate": null,
@@ -319,7 +637,7 @@
   "version": 1,
   "window": {
     "days": 7,
-    "end": "2026-07-12",
-    "start": "2026-07-06"
+    "end": "2026-07-19",
+    "start": "2026-07-13"
   }
 }

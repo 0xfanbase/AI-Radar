@@ -4359,3 +4359,10 @@ for the full build description; this entry is the decision log.
   primary-sourced correction rather than swapped for a lower-confidence
   value.
 
+
+## Audit findings -- audit-20260719T012237Z (2026-07-19T01:22:37Z)
+
+- [ ] **[HIGH]** Company profile 'moonshot-ai' citation https://huggingface.co/moonshotai/Kimi-K2.6 now redirects to https://huggingface.co/moonshotai/Kimi-K2.6, which fails the outbound-link allowlist (data/trusted_domains.json).
+- [ ] **[HIGH]** Company profile 'xai' citation https://cursor.com/blog/grok-4-5 now redirects to https://cursor.com/blog/grok-4-5, which fails the outbound-link allowlist (data/trusted_domains.json).
+- [ ] **[HIGH]** Company profile 'zhipu-ai' citation https://huggingface.co/blog/zai-org/glm-52-blog now redirects to https://huggingface.co/blog/zai-org/glm-52-blog, which fails the outbound-link allowlist (data/trusted_domains.json).
+
