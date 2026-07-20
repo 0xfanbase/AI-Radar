@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-18T23:59:49Z",
+  "generated_at": "2026-07-20T00:03:39Z",
   "topics": [
     {
       "daily_counts": [
@@ -7,9 +7,9 @@
         0,
         0,
         0,
-        0,
+        3,
         2,
-        3
+        0
       ],
       "topic": "models",
       "trend": "accelerating"
@@ -21,11 +21,11 @@
         0,
         0,
         0,
-        0,
+        1,
         0
       ],
       "topic": "research",
-      "trend": "flat"
+      "trend": "accelerating"
     },
     {
       "daily_counts": [
@@ -86,11 +86,11 @@
         0,
         0,
         0,
-        1,
+        0,
         0
       ],
       "topic": "open-source",
-      "trend": "accelerating"
+      "trend": "flat"
     },
     {
       "daily_counts": [
@@ -99,11 +99,11 @@
         0,
         0,
         0,
-        0,
+        3,
         0
       ],
       "topic": "China",
-      "trend": "flat"
+      "trend": "accelerating"
     },
     {
       "daily_counts": [

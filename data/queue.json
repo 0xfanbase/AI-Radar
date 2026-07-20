@@ -1,120 +1,127 @@
 [
   {
-    "cluster_hash": "250938f11e581e76ad9dfb562bf12822d41e8e50071a2b914efba8a55cacec14",
+    "cluster_hash": "8c341ca217c5b9c5ca66a2c270eeadb0c7715a019ce457b2e94ede3ed2a26564",
     "rank": 1,
-    "score": 49.16181992273652,
+    "score": 77.58670597185021,
+    "sources": [
+      {
+        "outlet": "thenextweb.com",
+        "points": 214,
+        "source_type": "hn",
+        "title": "AI advice made people 3x less accurate but 2x confident, researchers found",
+        "url": "https://thenextweb.com/news/ai-advice-suppresses-critical-thinking-wrong-answers-study"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "cb17425c4feefd90fe7ccbb230fad2fe0053d1624b6b3e12e7cbb2509f7bf7ee",
+    "rank": 2,
+    "score": 48.98178113086691,
+    "sources": [
+      {
+        "outlet": "twitter.com",
+        "points": 750,
+        "source_type": "hn",
+        "title": "Qwen 3.8",
+        "url": "https://twitter.com/Alibaba_Qwen/status/2078759124914098291"
+      },
+      {
+        "outlet": "qwencloud.com",
+        "points": 215,
+        "source_type": "hn",
+        "title": "Qwen 3.8 Max Preview",
+        "url": "https://www.qwencloud.com/pricing/token-plan"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "4f0e18b4fccc7d26864438c42e1da103e5bafc84f11ab4dc662784c8b99bf9ca",
+    "rank": 3,
+    "score": 26.419903117069612,
+    "sources": [
+      {
+        "outlet": "simonwillison.net",
+        "points": 370,
+        "source_type": "hn",
+        "title": "Claude Code uses Bun written in Rust now",
+        "url": "https://simonwillison.net/2026/Jul/19/claude-code-in-bun-in-rust/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "88d1139971f75245af7dd7ff4daa859b3a35f99266a50dd5ab43b49c3e7014ce",
+    "rank": 4,
+    "score": 24.56143353632199,
+    "sources": [
+      {
+        "outlet": "twitter.com",
+        "points": 197,
+        "source_type": "hn",
+        "title": "Moonshot AI suspends new subscriptions due to Kimi K3 demand",
+        "url": "https://twitter.com/kimi_moonshot/status/2078855608565207130"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "250938f11e581e76ad9dfb562bf12822d41e8e50071a2b914efba8a55cacec14",
+    "rank": 5,
+    "score": 21.67729438919907,
     "sources": [
       {
         "outlet": "petapixel.com",
-        "points": 87,
+        "points": 560,
         "source_type": "hn",
-        "title": "Mayor Mamdani Says Landlords Can't Use AI Images to Advertise",
+        "title": "NYC may require landlords and realtors to disclose the use of AI in listings",
         "url": "https://petapixel.com/2026/07/16/mayor-mamdani-says-landlords-cant-secretly-use-ai-images-to-advertise-properties/"
       }
     ]
   },
   {
-    "cluster_hash": "16e13c52f7cd02d4ace3d47abac95ccf3b9e630262bd24e605b9bb93a859298e",
-    "rank": 2,
-    "score": 45.275429441971426,
+    "cluster_hash": "d1255b05e88d2dc5b9a817e143bb932f3620fa11eac128c62563ea89be0ea609",
+    "rank": 6,
+    "score": 18.080328631399578,
     "sources": [
       {
-        "outlet": null,
-        "points": null,
-        "source_type": "lab",
-        "title": "Our approach to bioresilience",
-        "url": "https://deepmind.google/blog/our-approach-to-bioresilience/"
+        "outlet": "github.com",
+        "points": 292,
+        "source_type": "hn",
+        "title": "OpenAI reduces Codex Model Context Size from 372k to 272k",
+        "url": "https://github.com/openai/codex/pull/33972/files"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "b412d327294ee8fd7121d0a55a514f493c4b41fb1600d31b1d6abb55d0abbaea",
+    "rank": 7,
+    "score": 16.79043807747987,
+    "sources": [
+      {
+        "outlet": "ludic.mataroa.blog",
+        "points": 69,
+        "source_type": "hn",
+        "title": "AI Mania Is Eviscerating Global Decision-Making",
+        "url": "https://ludic.mataroa.blog/blog/ai-mania-is-eviscerating-global-decision-making/"
       },
       {
-        "outlet": "deepmind.google",
-        "points": 60,
+        "outlet": "ludic.mataroa.blog",
+        "points": 379,
         "source_type": "hn",
-        "title": "Our Approach to Bioresilience: Isomorphic Labs and Google DeepMind",
-        "url": "https://deepmind.google/blog/our-approach-to-bioresilience/"
+        "title": "AI Mania Is Eviscerating Global Decision-Making",
+        "url": "https://ludic.mataroa.blog/blog/ai-mania-is-eviscerating-global-decision-making/#fnref:3"
       }
     ]
   },
   {
     "cluster_hash": "271cd1b24d5ceb6706b5a79c375780f3c38b55b34731387957457a3adb704d9e",
-    "rank": 3,
-    "score": 43.7960662709713,
+    "rank": 8,
+    "score": 16.63502406729031,
     "sources": [
       {
         "outlet": "old.reddit.com",
-        "points": 481,
+        "points": 583,
         "source_type": "hn",
         "title": "GPT-5.6 used a prompt to close a 30-year gap in convex optimization",
         "url": "https://old.reddit.com/r/math/comments/1uxj3cy/after_openais_cdc_proof_announcement_gpt56_used_a/"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "ce44e1889cb1ed747d766884afca29e1047472f7498eeca4376ecf53c57b1d5f",
-    "rank": 4,
-    "score": 31.901821038547656,
-    "sources": [
-      {
-        "outlet": "velvetshark.com",
-        "points": 411,
-        "source_type": "hn",
-        "title": "Why do AI company logos look like buttholes? (2025)",
-        "url": "https://velvetshark.com/ai-company-logos-that-look-like-buttholes"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "f87cf5105615bedd7816b80d5f30bccfa3b8b9f7d95877336db00effbe96cbef",
-    "rank": 5,
-    "score": 27.455361537647804,
-    "sources": [
-      {
-        "outlet": "data.stackexchange.com",
-        "points": 351,
-        "source_type": "hn",
-        "title": "What AI did to stackoverflow in a graph",
-        "url": "https://data.stackexchange.com/stackoverflow/query/1953768#graph"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "daf0528a98732d150947fbce6748ec4add5154d2430eae873643c7294289bdb0",
-    "rank": 6,
-    "score": 21.295856039362608,
-    "sources": [
-      {
-        "outlet": "ykdojo.github.io",
-        "points": 166,
-        "source_type": "hn",
-        "title": "Setting up your spare Mac for Claude Code to control, a step-by-step guide",
-        "url": "https://ykdojo.github.io/claude-controls-mac/"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "bf92b9a03ae8f701b88cb8a4758aa7a47d0ae78b5b633cfbbb487fe6166e2030",
-    "rank": 7,
-    "score": 21.208742331924196,
-    "sources": [
-      {
-        "outlet": "localnewsmatters.org",
-        "points": 542,
-        "source_type": "hn",
-        "title": "Kaiser nurses say AI, surveillance are making their jobs and patient care worse",
-        "url": "https://localnewsmatters.org/2026/07/15/kaiser-nurses-say-ai-workplace-surveillance-are-making-their-jobs-and-patient-care-worse/"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "e60638403f058be26cf720ebd1ebd192d892850b9e38a115e50372c33cb43bdd",
-    "rank": 8,
-    "score": 15.782451097554379,
-    "sources": [
-      {
-        "outlet": "charlesazam.com",
-        "points": 205,
-        "source_type": "hn",
-        "title": "Fable 5 vs. GPT-5.6 Sol on an NP-Hard Problem: Does /goal help?",
-        "url": "https://charlesazam.com/blog/fable-5-gpt-5-6-sol-goal/"
       }
     ]
   }
