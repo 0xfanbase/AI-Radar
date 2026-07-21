@@ -7,6 +7,80 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-21 -- Correction: the [skip ci] removal didn't fix the deploy gap it targeted; workflow_run added instead
+
+The previous entry below (same day, PR #15, already merged to `main`)
+shipped a real diagnosis (the live site frozen 8 days on 2026-07-13's
+content) but the wrong fix, and shipped it with more confidence than it
+had earned: it removed `[skip ci]` from `watch.yml`/`audit.yml`'s commit
+messages and asserted this would let their automated commits redeploy
+the site. **That claim was wrong**, caught by this same pass's own
+independent Fable verification agent -- which, in an honest process gap
+also worth recording, reported *after* PR #15 had already been committed,
+pushed, opened, and merged (the commit → push → PR → merge sequence
+happened faster than the verification pass finished; see that agent's
+own "Finding 2" for the timeline). Its finding: GitHub documents that a
+push authored by the default `GITHUB_TOKEN` (which is what
+`actions/checkout@v4` uses here, no PAT/deploy-key configured) never
+fires an `on: push`-triggered workflow in the same repo -- a recursion
+guard, unrelated to `[skip ci]` and not overridden by removing it.
+Verified independently before acting on the report (not taken on faith
+any more than the original claim should have been): confirmed neither
+`watch.yml` nor `audit.yml` configures a custom checkout token; confirmed
+GitHub's documented behavior via a live source check; and confirmed
+empirically against this repo's own history
+(`mcp__github__actions_list` filtered to `deploy.yml` runs with actor
+`frontier-wire-bot`: zero, ever, across all 15 real deploy runs). All
+three lines of evidence agree -- the `[skip ci]` removal was inert for
+its stated purpose (though harmless; it wasn't making anything worse).
+
+**Actual fix:** `deploy.yml` gains a third trigger,
+`workflow_run: {workflows: ["watch", "audit"], types: [completed]}` --
+GitHub's own documented exception to the `GITHUB_TOKEN` recursion guard
+(`workflow_dispatch`/`repository_dispatch`-adjacent triggers, of which
+`workflow_run` is one, are exempt). No new PAT or secret needed. The
+`build` job gains an `if:` gate skipping a `workflow_run` event whose
+triggering run didn't succeed, and the checkout step now pins
+`ref: ${{ github.event.workflow_run.head_sha || github.sha }}` so a
+`workflow_run`-triggered deploy checks out exactly the commit that
+triggered it rather than implicitly relying on `main`'s tip not having
+moved in the interim. `workflow_run` has no path-filter equivalent (that
+GitHub Actions feature is `push`/`pull_request`-only), so this will also
+fire on a watch/audit run that made no changes -- accepted as a small,
+free (public-repo Actions minutes) cost rather than added complexity to
+detect "did it actually push."
+
+**Deliberately stated with appropriate hedging, not re-asserted as
+already-proven:** `workflow_run` trigger configuration is read from the
+workflow file **as committed on the default branch**, not the branch
+that dispatches it -- meaning this fix cannot be empirically observed to
+work until *after* it merges to `main`, the same structural reason the
+previous attempt's claim went unverified before shipping. This entry
+does not claim success; the plan is to merge, then manually
+`workflow_dispatch` `watch.yml` (or wait for a real cron firing) and
+directly check whether `deploy.yml` actually fires via `workflow_run` and
+succeeds -- and report that result honestly, whichever way it goes,
+rather than assume.
+
+Also corrected: `deploy.yml`'s own header comment (the source of the
+`[skip ci]`-causes-redeploy claim) rewritten to describe the actual
+three-trigger mechanism and why. `IMPROVEMENT_BACKLOG.md`'s "Fixed, not
+deferred" entry from PR #15 is *not* edited in place -- the merged record
+stays as shipped, with a new correction-of-record entry added instead
+(same convention `content/corrections.json` uses for published editorial
+claims, applied here to this project's own build log). `CLAUDE.md`
+needed no change: it never asserted the `[skip ci]` claim itself, only
+described the target architecture ("auto-commit -> GitHub Pages
+redeploys") that this fix now actually implements correctly.
+
+Verification: `python -m pytest` and `python -m pytest site/tests` both
+re-run clean (no test covers workflow YAML). All three edited/read
+workflow files re-parsed with `pyyaml` to confirm no syntax breakage;
+`deploy.yml`'s new `on.workflow_run` block and `jobs.build.if` condition
+specifically checked for correct structure post-edit.
+
+---
+
 ## 2026-07-21 -- General maintenance pass: four-audit Fable-directed check, real bugs fixed, daily loop's silent failure diagnosed
 
 Owner's instruction was open-ended: "check and make updates as needed to

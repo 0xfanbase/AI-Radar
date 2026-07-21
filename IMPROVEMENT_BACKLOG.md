@@ -4494,3 +4494,37 @@ then sequential implementation. Full narrative in `PROGRESS.md`'s
   before trusting it, especially one with no date on it) is worth keeping
   visible.
 
+## 2026-07-21, follow-up -- Correction of record: the `[skip ci]` fix above was wrong
+
+This entry corrects, without editing, the "Fixed, not deferred" bullet
+immediately above and its accompanying commit (`a0a415d`), PR #15's
+body, and `PROGRESS.md`'s item 8 in that same day's first entry -- all of
+which claimed that dropping `[skip ci]` from `watch.yml`/`audit.yml`
+would let their automated commits redeploy the live site. **That causal
+claim is false.** GitHub documents that a push authored by the default
+`GITHUB_TOKEN` (what `actions/checkout@v4` uses in both workflows, no PAT
+configured) never fires an `on: push`-triggered workflow in the same
+repo -- unrelated to `[skip ci]`, and not fixed by removing it. Caught by
+this same maintenance pass's own independent Fable verification agent,
+reporting after PR #15 had already merged (a real process gap: the
+commit/push/PR/merge sequence outran the verification pass -- see
+`PROGRESS.md`'s new correction entry for the honest timeline). Verified
+independently before acting: no custom checkout token in either
+workflow; GitHub's documented `GITHUB_TOKEN` recursion-guard behavior
+confirmed from a live source; and, empirically, zero of `deploy.yml`'s
+15 real historical runs have actor `frontier-wire-bot`.
+
+**Real fix:** `deploy.yml` gains a `workflow_run` trigger on
+`watch`/`audit` completing -- GitHub's own documented exception to the
+`GITHUB_TOKEN` guard, no new secret needed. Full detail in
+`PROGRESS.md`'s new entry, including the honest caveat that this fix
+cannot be empirically confirmed until *after* it merges (`workflow_run`
+trigger config is read from the default branch's copy of the workflow
+file) -- stated as a plan to verify post-merge, not asserted as already
+proven, specifically to not repeat the mistake this entry corrects.
+
+The `[skip ci]` removal itself is left in place (harmless, and correct
+in spirit -- a human/PAT-authored push, like a reviewed PR merge, does
+still benefit from not having its deploy suppressed); only the "this is
+sufficient" claim was wrong.
+
