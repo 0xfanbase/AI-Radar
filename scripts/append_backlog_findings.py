@@ -131,6 +131,30 @@ def _fmt_pct(value: float | None) -> str:
     return f"{value * 100:.1f}%"
 
 
+def _hijack_summary(subject: str, url: str | None, final_url: str | None) -> str:
+    """One finding summary, honest about what was actually observed.
+
+    A `status == "hijacked"` result means "the current final URL fails the
+    outbound allowlist" -- it cannot by itself distinguish a genuine
+    post-publication redirect hijack from a citation that was simply never
+    added to `data/trusted_domains.json` (`auditor.corrections_feed`'s own
+    `build_hijack_candidates` docstring makes the same point). Asserting
+    "now redirects to X" when `final_url == url` (no redirect at all)
+    previously produced a self-contradictory line; branch on that instead.
+    """
+    if final_url == url:
+        return (
+            f"{subject} {url} resolves (with no redirect) to a destination "
+            "that fails the outbound-link allowlist (data/trusted_domains.json) "
+            "-- either a citation that was never allowlisted, or a real gap "
+            "in the allowlist, not necessarily a hijack."
+        )
+    return (
+        f"{subject} {url} now redirects to {final_url}, which fails the "
+        "outbound-link allowlist (data/trusted_domains.json)."
+    )
+
+
 def derive_findings(
     *,
     link_rot: dict[str, Any],
@@ -187,10 +211,8 @@ def derive_findings(
             {
                 "severity": "high",
                 "category": "hijacked_citation",
-                "summary": (
-                    f"Card citation {result.get('url')} now redirects to "
-                    f"{result.get('final_url')}, which fails the outbound-link "
-                    "allowlist (data/trusted_domains.json)."
+                "summary": _hijack_summary(
+                    "Card citation", result.get("url"), result.get("final_url")
                 ),
             }
         )
@@ -202,11 +224,10 @@ def derive_findings(
             {
                 "severity": "high",
                 "category": "hijacked_company_citation",
-                "summary": (
-                    f"Company profile '{result.get('company_id')}' citation "
-                    f"{result.get('url')} now redirects to "
-                    f"{result.get('final_url')}, which fails the outbound-link "
-                    "allowlist (data/trusted_domains.json)."
+                "summary": _hijack_summary(
+                    f"Company profile '{result.get('company_id')}' citation",
+                    result.get("url"),
+                    result.get("final_url"),
                 ),
             }
         )

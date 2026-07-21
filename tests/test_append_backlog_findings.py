@@ -267,6 +267,27 @@ def test_derive_findings_hijacked_link_is_high_severity():
     assert "https://squatted.example.com/x" in findings[0]["summary"]
 
 
+def test_derive_findings_hijacked_link_with_no_redirect_is_worded_honestly():
+    # final_url == url: never actually redirected -- just off the allowlist.
+    # "now redirects to <same URL>" would be self-contradictory.
+    hijacked_links = {
+        "results": [
+            {
+                "url": "https://huggingface.co/some/model",
+                "status": "hijacked",
+                "final_url": "https://huggingface.co/some/model",
+                "detail": "not trusted",
+            }
+        ]
+    }
+    findings = _derive(hijacked_links=hijacked_links)
+    assert len(findings) == 1
+    summary = findings[0]["summary"]
+    assert "now redirects to" not in summary
+    assert "no redirect" in summary
+    assert "https://huggingface.co/some/model" in summary
+
+
 def test_derive_findings_hijacked_link_trusted_or_unreachable_is_not_a_finding():
     hijacked_links = {
         "results": [
@@ -295,6 +316,26 @@ def test_derive_findings_company_hijacked_link_is_high_severity():
     assert findings[0]["category"] == "hijacked_company_citation"
     assert "anthropic" in findings[0]["summary"]
     assert "https://anthropic.com/hijacked" in findings[0]["summary"]
+
+
+def test_derive_findings_company_hijacked_link_with_no_redirect_is_worded_honestly():
+    company_hijacked_links = {
+        "results": [
+            {
+                "company_id": "moonshot-ai",
+                "url": "https://huggingface.co/moonshotai/Kimi-K2.6",
+                "status": "hijacked",
+                "final_url": "https://huggingface.co/moonshotai/Kimi-K2.6",
+                "detail": "not trusted",
+            }
+        ]
+    }
+    findings = _derive(company_hijacked_links=company_hijacked_links)
+    assert len(findings) == 1
+    summary = findings[0]["summary"]
+    assert "now redirects to" not in summary
+    assert "no redirect" in summary
+    assert "moonshot-ai" in summary
 
 
 def test_derive_findings_company_hijacked_link_trusted_is_not_a_finding():
