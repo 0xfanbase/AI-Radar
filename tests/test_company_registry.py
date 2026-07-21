@@ -130,7 +130,11 @@ def test_trusted_domains_is_valid_json_with_expected_shape():
     assert "path_scoped" in doc and isinstance(doc["path_scoped"], list)
     for entry in doc["path_scoped"]:
         assert isinstance(entry, dict)
-        assert "host" in entry and "path_prefix" in entry
+        # Key is "hostname", matching scripts/check_outbound_links.py's own
+        # _hostname_trusted() (the code that actually enforces this file) --
+        # not "host". This assertion previously checked the wrong key and
+        # was never caught because path_scoped was empty until this pass.
+        assert "hostname" in entry and "path_prefix" in entry
 
 
 def test_trusted_domains_hostnames_are_lowercase_and_unique():
@@ -193,7 +197,7 @@ def test_frontier_board_source_url_hosts_are_covered_by_trusted_domains():
     # site's own already-published sourcing.
     doc = _load(TRUSTED_DOMAINS_PATH)
     hostnames = set(doc["hostnames"])
-    path_scoped_hosts = {entry["host"] for entry in doc["path_scoped"]}
+    path_scoped_hosts = {entry["hostname"] for entry in doc["path_scoped"]}
     multi_tenant_hosts = {"github.com", "huggingface.co"}
 
     board = _load(FRONTIER_BOARD_PATH)

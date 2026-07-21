@@ -12,6 +12,9 @@
     "moonshot.ai",
     "kimi.com"
   ],
+  "official_repos": [
+    "https://huggingface.co/moonshotai"
+  ],
   "founded": "2023-03",
   "profile": {
     "overview": {

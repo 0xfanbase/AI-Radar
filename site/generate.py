@@ -258,16 +258,16 @@ def load_companies_index() -> list[dict]:
     map homepage's marker list (id/name/hq_country/hq_city/hq_lat/
     hq_lng/status only). Returns `[]` if the file doesn't exist yet.
 
-    No `schemas/company_index.schema.json` exists (this summary shape
-    is deliberately not the same as `schemas/company.schema.json`,
-    which describes the fuller per-company profile record at
-    `content/companies/<id>.json` -- a Phase 8 concern this loader
-    doesn't touch) -- logged in IMPROVEMENT_BACKLOG.md, same "loaded
-    unvalidated" tolerance this module's own docstring already applies
-    to `content/primer.json`. `content/companies/` is a subdirectory,
-    not a top-level `content/*.json` file, so `iter_top_level_json()`
-    never sees it -- this is a bespoke loader for the same reason
-    `load_cards()` is."""
+    Validated against `schemas/company_index.schema.json` (when present,
+    same tolerance `load_companies()` applies to `company.schema.json`) --
+    that schema now exists (closed the gap an earlier phase logged here),
+    so this is real validation, not just a docstring claim. Deliberately
+    not the same shape as `schemas/company.schema.json`, which describes
+    the fuller per-company profile record at `content/companies/<id>.json`
+    -- a Phase 8 concern this loader doesn't touch. `content/companies/`
+    is a subdirectory, not a top-level `content/*.json` file, so
+    `iter_top_level_json()` never sees it -- this is a bespoke loader for
+    the same reason `load_cards()` is."""
     path = CONTENT_DIR / "companies" / "index.json"
     if not path.is_file():
         log.warning(
@@ -276,6 +276,16 @@ def load_companies_index() -> list[dict]:
         )
         return []
     payload = load_json(path)
+    schema_path = SCHEMAS_DIR / "company_index.schema.json"
+    if schema_path.exists():
+        jsonschema.validate(
+            payload, load_json(schema_path), format_checker=jsonschema.FormatChecker()
+        )
+    else:
+        log.warning(
+            "no schema found at schemas/company_index.schema.json -- "
+            "content/companies/index.json loaded unvalidated"
+        )
     return list(payload.get("companies", []))
 
 
@@ -319,9 +329,11 @@ def load_and_validate_content() -> dict[str, Any]:
     content/cards/*.json, jsonschema-validating each against its
     schemas/*.schema.json counterpart when one exists. A file with no
     matching schema is loaded unvalidated and logged, rather than treated
-    as fatal -- one such gap (content/primer.json) is inherited from
-    earlier phases and is not this integration commit's to fix; see
-    IMPROVEMENT_BACKLOG.md. `data/audit/latest.json` is loaded separately
+    as fatal -- `schemas/primer.schema.json` now exists (an earlier phase's
+    "content/primer.json is unvalidated" gap is closed; see
+    IMPROVEMENT_BACKLOG.md for when), so `content/primer.json` is real
+    validated input here today, same as everything else this loop covers.
+    `data/audit/latest.json` is loaded separately
     by `site/builders/method.py::load_audit_latest` (it's nested under
     `data/audit/`, not a top-level `data/*.json` file, and doesn't exist
     yet in this environment -- Phase 5 scope)."""

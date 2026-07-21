@@ -13,6 +13,9 @@
     "zhipuai.cn",
     "z.ai"
   ],
+  "official_repos": [
+    "https://huggingface.co/zai-org"
+  ],
   "founded": "2019",
   "profile": {
     "overview": {

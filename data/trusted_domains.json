@@ -2,7 +2,7 @@
   "_meta": {
     "description": "Human-curated, frozen link-safety allowlist for outbound links the site (and, longer-term, an automated link-vetting step) treats as trusted: the reputable-outlet table from CLAUDE.md's corroboration procedure, every content/companies/*.json official_domains[] entry, every citation/source_url hostname actually used in content/frontier_board.json and content/companies/*.json as of the Phase 6 stage-3 build, and arXiv's API/site hosts. This is deliberately separate from schemas/company.schema.json's own official_domains[]/official_repos[] fields (which are PRIMARY-source-classification inputs for the analyst's corroboration procedure only, per that schema's own description) -- this file is the outbound-link-vetting allowlist, a different concern with a different owner.",
     "curation": "This file is human-curated and frozen. It must never be regenerated automatically, rewritten wholesale, or edited by the automated daily analyst/verifier Routine or any other automated pipeline step -- additions/removals are a deliberate, logged decision at an owner/PM checkpoint, the same discipline CLAUDE.md's reputable-outlet table itself is held to.",
-    "path_scoped_note": "No content/companies/*.json file has populated official_repos[] as of this build, so no github.com/huggingface.co path prefix could be derived from that field and path_scoped is empty. Two frontier_board.json source_url citations already point at huggingface.co (huggingface.co/moonshotai/Kimi-K2.6, huggingface.co/blog/zai-org/glm-52-blog) but per this file's own rule -- never add a bare github.com/huggingface.co to hostnames, since both are multi-tenant hosts -- those are not yet covered here. Logged as a follow-up: populate official_repos[] for Moonshot AI and Zhipu AI (and any other company with a real GitHub/Hugging Face org) so a future curation pass can add proper path-scoped entries instead of a bare-domain trust grant."
+    "path_scoped_note": "2026-07-21 curation pass closed the gap this note used to describe: content/companies/moonshot-ai.json and zhipu-ai.json now populate official_repos[] (https://huggingface.co/moonshotai, https://huggingface.co/zai-org), and path_scoped[] now carries the two matching entries (huggingface.co/moonshotai/*, huggingface.co/blog/zai-org/*) covering exactly the two huggingface.co citations already live in frontier_board.json/content/companies/*.json (moonshot-ai's Kimi-K2.6 model card, zhipu-ai's GLM-5.2 blog post) -- both live-verified as real, on-topic, non-redirecting pages before this change, not trusted blind. Still never add a bare github.com/huggingface.co to hostnames -- both remain multi-tenant hosts; any future huggingface.co/github.com citation outside these two prefixes needs its own path-scoped entry, the same way. cursor.com was added as a bare hostnames[] entry in the same pass (not path-scoped) since it's a single-tenant corporate blog, not a multi-tenant host -- live-verified (xai.json's cited Grok 4.5 post) before adding."
   },
   "hostnames": [
     "about.fb.com",
@@ -18,6 +18,7 @@
     "blog.google",
     "bloomberg.com",
     "bytedance.com",
+    "cursor.com",
     "deepmind.google",
     "deepseek.com",
     "deploymentsafety.openai.com",
@@ -50,5 +51,14 @@
     "z.ai",
     "zhipuai.cn"
   ],
-  "path_scoped": []
+  "path_scoped": [
+    {
+      "hostname": "huggingface.co",
+      "path_prefix": "/moonshotai/"
+    },
+    {
+      "hostname": "huggingface.co",
+      "path_prefix": "/blog/zai-org/"
+    }
+  ]
 }

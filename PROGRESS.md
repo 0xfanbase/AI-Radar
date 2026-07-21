@@ -7,6 +7,156 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-21 -- General maintenance pass: four-audit Fable-directed check, real bugs fixed, daily loop's silent failure diagnosed
+
+Owner's instruction was open-ended: "check and make updates as needed to
+the AI radar; use fable as needed where appropriate, and use it as
+project director guiding the process." Followed this repo's own
+established shape for that instruction (see the 2026-07-11 entry below):
+four parallel read-only audits (pipeline/automation health, editorial
+content + open findings, code/CI/schema integrity, site build/UX), a
+Fable synthesis pass turning the combined findings into one prioritized
+plan (including resolving one real strategic fork the audits alone
+couldn't), then sequential implementation, then re-verification. Full
+decision log in `IMPROVEMENT_BACKLOG.md`'s new 2026-07-21 section; this
+entry is the narrative.
+
+**Headline finding: the daily analyst+verifier loop has never produced a
+single commit, across its entire life, despite firing nightly.** The
+Claude Code Remote Routine created 2026-07-12 fired on schedule every
+night through at least 2026-07-20 (confirmed via `list_triggers`), but
+`content/cards/`, `data/run_plan.json`, and a non-empty
+`data/verifier_stats.json.runs[]` have zero occurrences anywhere in this
+repo's history. Root cause, diagnosed by the pipeline-health audit and
+Fable's own follow-up verification: the Routine was configured as a
+**persistent session**, a Routine shape this platform never sends
+completion notifications for, so a silent early exit had no way to reach
+anyone; compounded by the Routine's prompt going stale the day after it
+was written (Phase 8, landed 2026-07-13, added a third LLM step --
+PROFILER -- and a fourth gate, `check_outbound_links.py`, neither of
+which the frozen prompt text knew about) and a cron race against
+`watch.yml` (whose own commit can land after 00:00 UTC, after this
+Routine's 23:32 UTC fire). A full replacement design (fresh-session-per-
+fire, push notifications, a non-racing cron, a prompt that defers to
+`analyze.yml`'s current step list instead of a frozen copy, and an
+unconditional daily heartbeat commit so a future silent failure is
+visible on `main` itself) was produced and is recorded in `CLAUDE.md`'s
+updated "Daily analyst+verifier run" bullet -- **deliberately not
+activated this pass**. Creating/disabling account-level scheduled
+Routines and running a supervised live fire push straight to `main`,
+outside this repo's normal branch/PR flow; that crosses from "check and
+make updates" into a decision the owner should make explicitly, not
+infer from a broad mandate. Flagged to the owner directly, not just
+logged here.
+
+**Second-order discovery this same finding produced:** the 2026-07-13
+site trim (commit `5b8d196`, "Trim live site to Map + Companies; retire
+Wire/Board/Primer/Moving/About from the build" -- see that date's own
+entry below) was never reconciled into `CLAUDE.md`, which still described
+the Wire/cards as the site's sole centerpiece with no mention of the
+pivot. Fixed with a new "Site surface" section in `CLAUDE.md` stating
+what's actually live today and naming the Wire's re-wiring as an open
+owner decision, not a rejected one -- deliberately not done in this pass
+either, since relaunching Wire before the loop above produces any real
+card would just relaunch it empty a second time.
+
+**Real bugs found and fixed this pass** (each independently re-verified
+by me after Fable's synthesis, not just implemented on faith):
+
+1. `.github/workflows/audit.yml`'s commit step never staged
+   `data/pending_corrections.json` -- `auditor.cli.run_audit` computed
+   real hijack-candidate corrections every week and the CI runner
+   silently discarded them on teardown. One-line fix; `git log -p --
+   data/pending_corrections.json` had shown exactly one commit ever (the
+   Phase 3 seed) before this.
+2. The 3 open HIGH "hijacked citation" backlog findings
+   (moonshot-ai/xai/zhipu-ai) were false alarms -- live-fetched, all
+   three are real HTTP 200, zero-redirect, on-topic pages. Closed
+   properly: `content/companies/moonshot-ai.json` / `zhipu-ai.json`
+   gained `official_repos[]`, `data/trusted_domains.json` gained two
+   matching `path_scoped[]` entries plus a `cursor.com` hostname entry
+   (live-verified before adding, per that file's own owner/PM-checkpoint
+   curation rule) -- exactly the remedy the file's own `_meta` note had
+   already prescribed. Verified for real: `classify_url()` now passes all
+   three URLs and still correctly rejects an unrelated huggingface.co
+   path outside the new prefixes.
+3. The findings themselves were worded self-contradictorily ("now
+   redirects to `<same URL>`" when zero redirect occurred) --
+   `scripts/append_backlog_findings.py` gained a `_hijack_summary()`
+   helper that words the no-redirect case honestly, mirroring
+   `auditor/corrections_feed.py`'s existing honest phrasing for the same
+   ambiguity. Two new tests in `tests/test_append_backlog_findings.py`.
+4. A latent, never-exercised test/implementation key-name mismatch:
+   `tests/test_company_registry.py` asserted `path_scoped[]` entries have
+   key `"host"`; the real matcher
+   (`scripts/check_outbound_links.py::_hostname_trusted`) and its own
+   dedicated test suite both use `"hostname"`. Never caught because
+   `path_scoped` had been empty since the file was created. Fixed the
+   test to match the code that actually enforces the allowlist, not the
+   other way around -- writing data to satisfy the wrong key would have
+   silently never matched at runtime.
+5. `site/generate.py::load_companies_index()` never validated
+   `content/companies/index.json` against `schemas/company_index.schema.json`
+   even though that schema has existed since Phase 8 -- a stale docstring
+   claimed no schema existed at all. Wired in real validation (mirroring
+   `load_companies()`'s existing pattern) and corrected both the
+   docstring here and Phase 8's own backlog entry, which had claimed to
+   have "closed" this gap when it only half-closed it. Confirmed via a
+   real build: the "loaded unvalidated" warning for this file is gone.
+6. Similarly corrected a stale claim that `content/primer.json` is
+   unvalidated -- `schemas/primer.schema.json` exists and is validated
+   generically by `load_and_validate_content()`'s existing loop; only the
+   docstring hadn't caught up.
+7. `requirements.txt`, `requirements-dev.txt`, and `site/requirements.txt`
+   were completely unpinned. Added compatible-release pins (`~=MAJOR.MINOR`)
+   from the actual currently-working versions. Verified in a fresh venv:
+   clean install, full suite green (893 passed vs. the prior 891 baseline
+   -- the +2 are this pass's new hijack-wording tests).
+8. `watch.yml` and `audit.yml`'s automated commits both carried
+   `[skip ci]`, which also suppresses `deploy.yml` (path-filtered on
+   `content/**`/`data/**`/`site/**`) -- meaning the live site had been
+   frozen on 2026-07-13's content for eight days. First drafted this
+   entry assuming `deploy.yml`'s own "CANNOT ACTUALLY DEPLOY YET" header
+   comment was still accurate and left `[skip ci]` alone on that basis;
+   before shipping, checked it live instead of trusting an undated
+   comment (`curl -I https://0xfanbase.github.io/AI-Radar/`) and found
+   Pages has actually been enabled and serving real content since at
+   least 2026-07-13 (`Last-Modified` matches that commit exactly). Fixed
+   `deploy.yml`'s stale comment and dropped `[skip ci]` from both
+   workflows' commit messages, so the pipeline now redeploys on every
+   automated commit the way `CLAUDE.md`'s own diagram always said it
+   should. This also resolves a "what remains for the human" item from
+   this file's own Phase 1 entry (enabling Pages) that had already
+   happened without ever being marked done here.
+
+**Deliberately not done this pass, logged as open items in
+`IMPROVEMENT_BACKLOG.md`:** activating the replacement daily Routine;
+re-wiring Wire/Board into the live build; a Hard-Rule-2 "one quote per
+source" scope question for company profiles (per-bullet vs. per-profile)
+that this pass's editorial audit surfaced but didn't resolve; splitting
+`hijacked_citation` severity by whether a redirect actually occurred
+(kept unconditionally `high` this pass -- a severity-mapping change
+deserves its own deliberate pass, not a drive-by alongside a wording
+fix). None of `CLAUDE.md`'s hard rules, the reputable-outlet table, or
+the fortnightly improve-loop's non-activation were touched.
+
+**Verification, run for real:** `python -m pytest` -- 893 passed, 2
+deselected, up from the prior 891/2 baseline (matches exactly: +2 new
+tests, 0 regressions). `python -m pytest site/tests` -- 386 passed,
+unchanged. Both suites re-run clean in a fresh venv against the newly
+pinned requirements files (not just the working-tree venv these edits
+were made under). `python site/generate.py -v` -- clean build, the two
+previously-logged spurious "unvalidated" warnings (company index,
+primer) both gone; only the already-known, deliberately-deferred
+`data/trusted_domains.json` gap remains. All three edited GitHub Actions
+YAML files re-parsed with `pyyaml` to confirm no syntax breakage.
+`classify_url()` re-run directly against the real, updated
+`data/trusted_domains.json` for all three previously-flagged URLs plus a
+deliberately-unrelated huggingface.co path, confirming the path-scoping
+is genuinely scoped, not an accidental bare-domain grant.
+
+---
+
 ## 2026-07-13 -- Fix: "Expand all" replaced with a scan panel; iOS pinch-zoom hardening (owner follow-on)
 
 The owner reported the live site as broken on an iPhone (old nav tabs,
