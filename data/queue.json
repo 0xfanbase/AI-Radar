@@ -1,33 +1,75 @@
 [
   {
-    "cluster_hash": "8c341ca217c5b9c5ca66a2c270eeadb0c7715a019ce457b2e94ede3ed2a26564",
+    "cluster_hash": "66ac737528c0445a474be3d5f89d710a750f5da9a04cf2a8493c656c260da88a",
     "rank": 1,
-    "score": 77.58670597185021,
+    "score": 95.0849124581249,
     "sources": [
       {
-        "outlet": "thenextweb.com",
-        "points": 214,
+        "outlet": "werd.io",
+        "points": 922,
         "source_type": "hn",
-        "title": "AI advice made people 3x less accurate but 2x confident, researchers found",
-        "url": "https://thenextweb.com/news/ai-advice-suppresses-critical-thinking-wrong-answers-study"
+        "title": "China\u2019s open-weights AI strategy is winning",
+        "url": "https://werd.io/american-ai-is-locked-down-and-proprietary-its-losing/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "445430a898f7fee756fbf83b6a02409adc28a42f404c9e3164b9671610801f54",
+    "rank": 2,
+    "score": 30.60568994878375,
+    "sources": [
+      {
+        "outlet": "xcancel.com",
+        "points": 649,
+        "source_type": "hn",
+        "title": "Claude Fable produced a counterexample to the Jacobian Conjecture",
+        "url": "https://xcancel.com/__alpoge__/status/2079028340955197566"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "d48f5eaa9edf710f249a2b1f8e4e2ca8fbdb76d2790d6449ad410ced35888cf3",
+    "rank": 3,
+    "score": 30.573011565732624,
+    "sources": [
+      {
+        "outlet": "emergingtrajectories.com",
+        "points": 270,
+        "source_type": "hn",
+        "title": "Kimi K3, Qwen 3.8, and Anthropic's (Potential) Unravelling",
+        "url": "https://www.emergingtrajectories.com/lh/frontier-lab-economics/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "f7001613249d0c0feea8e282d140620ac0b34d0cbe70efe42ddb973abdff6afa",
+    "rank": 4,
+    "score": 25.23607899887538,
+    "sources": [
+      {
+        "outlet": "unslop.run",
+        "points": 188,
+        "source_type": "hn",
+        "title": "How we measured AI writing across arXiv, and where the measurement breaks",
+        "url": "https://unslop.run/blog/measuring-ai-writing-on-arxiv"
       }
     ]
   },
   {
     "cluster_hash": "cb17425c4feefd90fe7ccbb230fad2fe0053d1624b6b3e12e7cbb2509f7bf7ee",
-    "rank": 2,
-    "score": 48.98178113086691,
+    "rank": 5,
+    "score": 24.03938791572201,
     "sources": [
       {
         "outlet": "twitter.com",
-        "points": 750,
+        "points": 945,
         "source_type": "hn",
         "title": "Qwen 3.8",
         "url": "https://twitter.com/Alibaba_Qwen/status/2078759124914098291"
       },
       {
         "outlet": "qwencloud.com",
-        "points": 215,
+        "points": 220,
         "source_type": "hn",
         "title": "Qwen 3.8 Max Preview",
         "url": "https://www.qwencloud.com/pricing/token-plan"
@@ -36,12 +78,12 @@
   },
   {
     "cluster_hash": "4f0e18b4fccc7d26864438c42e1da103e5bafc84f11ab4dc662784c8b99bf9ca",
-    "rank": 3,
-    "score": 26.419903117069612,
+    "rank": 6,
+    "score": 15.630236861993279,
     "sources": [
       {
         "outlet": "simonwillison.net",
-        "points": 370,
+        "points": 594,
         "source_type": "hn",
         "title": "Claude Code uses Bun written in Rust now",
         "url": "https://simonwillison.net/2026/Jul/19/claude-code-in-bun-in-rust/"
@@ -49,79 +91,30 @@
     ]
   },
   {
-    "cluster_hash": "88d1139971f75245af7dd7ff4daa859b3a35f99266a50dd5ab43b49c3e7014ce",
-    "rank": 4,
-    "score": 24.56143353632199,
+    "cluster_hash": "8c341ca217c5b9c5ca66a2c270eeadb0c7715a019ce457b2e94ede3ed2a26564",
+    "rank": 7,
+    "score": 13.342365793978386,
     "sources": [
       {
-        "outlet": "twitter.com",
-        "points": 197,
+        "outlet": "thenextweb.com",
+        "points": 357,
         "source_type": "hn",
-        "title": "Moonshot AI suspends new subscriptions due to Kimi K3 demand",
-        "url": "https://twitter.com/kimi_moonshot/status/2078855608565207130"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "250938f11e581e76ad9dfb562bf12822d41e8e50071a2b914efba8a55cacec14",
-    "rank": 5,
-    "score": 21.67729438919907,
-    "sources": [
-      {
-        "outlet": "petapixel.com",
-        "points": 560,
-        "source_type": "hn",
-        "title": "NYC may require landlords and realtors to disclose the use of AI in listings",
-        "url": "https://petapixel.com/2026/07/16/mayor-mamdani-says-landlords-cant-secretly-use-ai-images-to-advertise-properties/"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "d1255b05e88d2dc5b9a817e143bb932f3620fa11eac128c62563ea89be0ea609",
-    "rank": 6,
-    "score": 18.080328631399578,
-    "sources": [
-      {
-        "outlet": "github.com",
-        "points": 292,
-        "source_type": "hn",
-        "title": "OpenAI reduces Codex Model Context Size from 372k to 272k",
-        "url": "https://github.com/openai/codex/pull/33972/files"
+        "title": "AI advice made people less accurate but more confident \u2013 sudy",
+        "url": "https://thenextweb.com/news/ai-advice-suppresses-critical-thinking-wrong-answers-study"
       }
     ]
   },
   {
     "cluster_hash": "b412d327294ee8fd7121d0a55a514f493c4b41fb1600d31b1d6abb55d0abbaea",
-    "rank": 7,
-    "score": 16.79043807747987,
+    "rank": 8,
+    "score": 9.362041175101568,
     "sources": [
       {
         "outlet": "ludic.mataroa.blog",
-        "points": 69,
-        "source_type": "hn",
-        "title": "AI Mania Is Eviscerating Global Decision-Making",
-        "url": "https://ludic.mataroa.blog/blog/ai-mania-is-eviscerating-global-decision-making/"
-      },
-      {
-        "outlet": "ludic.mataroa.blog",
-        "points": 379,
+        "points": 436,
         "source_type": "hn",
         "title": "AI Mania Is Eviscerating Global Decision-Making",
         "url": "https://ludic.mataroa.blog/blog/ai-mania-is-eviscerating-global-decision-making/#fnref:3"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "271cd1b24d5ceb6706b5a79c375780f3c38b55b34731387957457a3adb704d9e",
-    "rank": 8,
-    "score": 16.63502406729031,
-    "sources": [
-      {
-        "outlet": "old.reddit.com",
-        "points": 583,
-        "source_type": "hn",
-        "title": "GPT-5.6 used a prompt to close a 30-year gap in convex optimization",
-        "url": "https://old.reddit.com/r/math/comments/1uxj3cy/after_openais_cdc_proof_announcement_gpt56_used_a/"
       }
     ]
   }
