@@ -7,20 +7,28 @@ name: deploy
 # AI-Radar/ serves this site for real -- the "CANNOT ACTUALLY DEPLOY YET"
 # note this comment used to carry was itself stale by then and is
 # corrected here rather than left standing; see IMPROVEMENT_BACKLOG.md's
-# 2026-07-21 entry). Deploys run only when a push actually reaches this
-# workflow -- watch.yml/audit.yml's automated commits used `[skip ci]`
-# (which suppresses every workflow on that push, this one included) until
-# the same 2026-07-21 pass removed it so daily/weekly pipeline commits
-# redeploy the live site the way CLAUDE.md's own diagram always said they
-# should.
+# 2026-07-21 entry).
 #
-# Trigger: push to main touching content/, data/, or site/ (the three
-# directories that can actually change what gets published -- a card, a
-# Frontier Board row, a Lexicon term, whats_moving.json, or the generator/
-# templates/CSS themselves), plus workflow_dispatch for a manual rebuild
-# (e.g. after enabling Pages for the first time, or after a content/data
-# change landed via analyze.yml's own auto-commit rather than a direct
-# push to main).
+# Trigger, three cases:
+# 1. `push` to main touching content/, data/, or site/ -- covers any
+#    human- or PAT-authored push (e.g. a reviewed PR merge like this
+#    workflow's own history so far).
+# 2. `workflow_dispatch` -- manual rebuild.
+# 3. `workflow_run` on watch/audit completing -- covers what (1) cannot:
+#    watch.yml and audit.yml push using the default GITHUB_TOKEN, and
+#    GitHub documents that GITHUB_TOKEN-authored pushes never fire an
+#    `on: push` workflow in the same repo (recursion guard), regardless
+#    of `[skip ci]` -- confirmed empirically 2026-07-21 too (zero of this
+#    workflow's runs, ever, had actor frontier-wire-bot). A same-day
+#    2026-07-21 fix mistakenly assumed dropping `[skip ci]` from those two
+#    workflows would be sufficient; it was not, and is corrected here with
+#    the actual documented workaround (see IMPROVEMENT_BACKLOG.md's
+#    correction-of-record entry for the full story) -- no new PAT/secret
+#    needed. `workflow_run` has no path-filter equivalent, so this fires
+#    on every watch/audit completion, including a "nothing changed"
+#    run -- accepted as a minor, free (public-repo Actions minutes) cost
+#    rather than added complexity to detect "did it actually push."
+#    Gated below to skip if the triggering run didn't succeed.
 on:
   push:
     branches: [main]
@@ -29,6 +37,9 @@ on:
       - "data/**"
       - "site/**"
   workflow_dispatch: {}
+  workflow_run:
+    workflows: ["watch", "audit"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -43,11 +54,24 @@ concurrency:
 
 jobs:
   build:
+    # Only skip for a workflow_run event whose triggering run didn't
+    # succeed (e.g. watch.yml itself failed) -- push/workflow_dispatch
+    # events have no workflow_run context, so the left side of this OR is
+    # what lets them through unconditionally.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
         with:
+          # For a workflow_run trigger, explicitly check out the exact
+          # commit that triggering run ended on -- github.sha alone would
+          # resolve to main's tip at the moment *this* job starts, which
+          # coincidentally is usually the same commit but isn't
+          # guaranteed if another push lands in the gap. Falls back to
+          # github.sha for push/workflow_dispatch, which have no
+          # workflow_run context.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           # Full history, not the default shallow (depth-1) clone -- this
           # repo's established convention (see watch.yml/ci.yml/
           # analyze.yml): some tests shell out to real `git diff`/`git
