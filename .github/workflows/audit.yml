@@ -126,12 +126,12 @@ jobs:
 
       - name: Commit and push audit report + backlog changes (bot identity)
         run: |
-          git add data/audit/ IMPROVEMENT_BACKLOG.md
+          git add data/audit/ data/pending_corrections.json IMPROVEMENT_BACKLOG.md
           if git diff --cached --quiet; then
             echo "No changes to commit."
           else
             git -c user.name="frontier-wire-bot" \
                 -c user.email="bot@users.noreply.github.com" \
-                commit -m "chore(audit): weekly audit report + backlog findings [skip ci]"
+                commit -m "chore(audit): weekly audit report + backlog findings"
             git push
           fi

@@ -70,7 +70,7 @@ jobs:
           else
             git -c user.name="frontier-wire-bot" \
                 -c user.email="bot@users.noreply.github.com" \
-                commit -m "chore(watch): update ledger/queue/whats_moving [skip ci]"
+                commit -m "chore(watch): update ledger/queue/whats_moving"
             git push
           fi
 

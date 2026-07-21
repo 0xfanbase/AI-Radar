@@ -3,16 +3,16 @@ name: deploy
 # Phase 4: builds the static site (site/generate.py) from content/*.json +
 # data/*.json and publishes it to GitHub Pages.
 #
-# *** CANNOT ACTUALLY DEPLOY YET ***
-# This workflow's `deploy` job will fail until the repo owner enables
-# GitHub Pages in repo settings (Settings -> Pages -> Source: "GitHub
-# Actions"). No tool available to any session in this project can toggle
-# that setting itself -- it's a repo-admin-only action. Until it's
-# enabled, `actions/deploy-pages` has no Pages environment to deploy into
-# and errors out; the `build` job (tests + site/generate.py +
-# upload-pages-artifact) runs and can be fully inspected/validated
-# regardless of whether Pages is enabled -- see PROGRESS.md /
-# IMPROVEMENT_BACKLOG.md for the full "what's left for the human" list.
+# GitHub Pages is live (confirmed 2026-07-21: https://0xfanbase.github.io/
+# AI-Radar/ serves this site for real -- the "CANNOT ACTUALLY DEPLOY YET"
+# note this comment used to carry was itself stale by then and is
+# corrected here rather than left standing; see IMPROVEMENT_BACKLOG.md's
+# 2026-07-21 entry). Deploys run only when a push actually reaches this
+# workflow -- watch.yml/audit.yml's automated commits used `[skip ci]`
+# (which suppresses every workflow on that push, this one included) until
+# the same 2026-07-21 pass removed it so daily/weekly pipeline commits
+# redeploy the live site the way CLAUDE.md's own diagram always said they
+# should.
 #
 # Trigger: push to main touching content/, data/, or site/ (the three
 # directories that can actually change what gets published -- a card, a
