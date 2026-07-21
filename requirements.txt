@@ -1,4 +1,4 @@
-requests
-feedparser
-beautifulsoup4
-jsonschema
+requests~=2.34
+feedparser~=6.0
+beautifulsoup4~=4.15
+jsonschema~=4.26
