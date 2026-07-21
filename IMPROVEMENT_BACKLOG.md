@@ -4045,13 +4045,25 @@ pattern -- and this entry is the correction of record.
 
 ## Audit findings -- audit-20260712T012433Z (2026-07-12T01:24:33Z)
 
-- [ ] **[MEDIUM]** Missed story: "GLM 5.2 and the coming AI margin collapse" (https://martinalderson.com/posts/the-upcoming-ai-margin-collapse-part-1-glm-5-2/) -- not covered by any published card or ledger entry.
-- [ ] **[MEDIUM]** Missed story: "GPT-5.6 Sol Ultra will be in Codex" (https://twitter.com/thsottiaux/status/2073933490513752151) -- not covered by any published card or ledger entry.
-- [ ] **[MEDIUM]** Missed story: "AI 2040: Plan A" (https://ai-2040.com/) -- not covered by any published card or ledger entry.
-- [ ] **[MEDIUM]** Missed story: "AMD Ryzen AI Halo – $4k AI Dev Kit" (https://www.lttlabs.com/articles/2026/07/06/amd-ryzen-ai-halo) -- not covered by any published card or ledger entry.
-- [ ] **[MEDIUM]** Missed story: "Small AI Models Gain Traction In places with unreliable networks" (https://spectrum.ieee.org/small-language-models-ai-pharmaceuticals) -- not covered by any published card or ledger entry.
-- [ ] **[MEDIUM]** Missed story: "Anthropic's Method to Losing Goodwill in a Few Easy Steps" (https://raheeljunaid.com/blog/anthropics-method-to-losing-goodwill-in-a-few-easy-steps/) -- not covered by any published card or ledger entry.
-- [ ] **[MEDIUM]** Missed story: "AI content is everywhere on social media, especially LinkedIn" (https://www.pangram.com/blog/ai-in-your-feed) -- not covered by any published card or ledger entry.
+- [x] **[MEDIUM]** Missed story: "GLM 5.2 and the coming AI margin collapse" (https://martinalderson.com/posts/the-upcoming-ai-margin-collapse-part-1-glm-5-2/) -- not covered by any published card or ledger entry.
+- [x] **[MEDIUM]** Missed story: "GPT-5.6 Sol Ultra will be in Codex" (https://twitter.com/thsottiaux/status/2073933490513752151) -- not covered by any published card or ledger entry.
+- [x] **[MEDIUM]** Missed story: "AI 2040: Plan A" (https://ai-2040.com/) -- not covered by any published card or ledger entry.
+- [x] **[MEDIUM]** Missed story: "AMD Ryzen AI Halo – $4k AI Dev Kit" (https://www.lttlabs.com/articles/2026/07/06/amd-ryzen-ai-halo) -- not covered by any published card or ledger entry.
+- [x] **[MEDIUM]** Missed story: "Small AI Models Gain Traction In places with unreliable networks" (https://spectrum.ieee.org/small-language-models-ai-pharmaceuticals) -- not covered by any published card or ledger entry.
+- [x] **[MEDIUM]** Missed story: "Anthropic's Method to Losing Goodwill in a Few Easy Steps" (https://raheeljunaid.com/blog/anthropics-method-to-losing-goodwill-in-a-few-easy-steps/) -- not covered by any published card or ledger entry.
+- [x] **[MEDIUM]** Missed story: "AI content is everywhere on social media, especially LinkedIn" (https://www.pangram.com/blog/ai-in-your-feed) -- not covered by any published card or ledger entry.
+
+**Closed 2026-07-21, all seven, one shared reason:** a 2026-07-21
+maintenance audit (see this file's newest entries and `PROGRESS.md`'s
+2026-07-21 entry) established that the daily analyst+verifier loop these
+"missed story" findings measure against had not produced a single commit
+since it was created 2026-07-12 -- every story queued during that window
+was structurally guaranteed to be "missed," independent of watcher
+ranking quality. Judging watcher/selection coverage from this list would
+be judging it against a pipeline that was never actually consuming its
+own queue. Closed rather than actioned; the stories themselves are now
+over a week stale. Re-judge missed-story coverage from audit runs after
+the loop is confirmed producing real cards again.
 
 ## Phase 7: map frontend -- vendoring, projection, homepage swap (2026-07-13)
 
@@ -4141,7 +4153,16 @@ for the full build description; this entry is the decision log.
 - **2026-07-13 -- Phase 8 (`schemas/company_index.schema.json` +
   `scripts/update_company_index.py`): closed the schema gap Phase 7
   itself logged ("content/companies/index.json has no
-  schemas/company_index.schema.json counterpart").** Rather than derive
+  schemas/company_index.schema.json counterpart"). Correction, logged
+  2026-07-21: this only wrote the schema file and the regenerator --
+  `site/generate.py::load_companies_index()` (the function that actually
+  loads this file for every real site build) was never updated to
+  validate against it, so the gap was half-closed, not closed, and kept
+  logging "no schema found" on every real build for another eight days
+  until a 2026-07-21 maintenance pass wired the validation call in too
+  (mirroring `load_companies()`'s existing pattern for
+  `company.schema.json` exactly). Correcting the claim in place per this
+  file's own convention rather than leaving it standing.** Rather than derive
   the map's marker list directly from the fuller per-company profile
   files (the alternative Phase 7's own entry floated), this phase keeps
   the existing separate summary-index shape but gives it a real schema
@@ -4362,7 +4383,114 @@ for the full build description; this entry is the decision log.
 
 ## Audit findings -- audit-20260719T012237Z (2026-07-19T01:22:37Z)
 
-- [ ] **[HIGH]** Company profile 'moonshot-ai' citation https://huggingface.co/moonshotai/Kimi-K2.6 now redirects to https://huggingface.co/moonshotai/Kimi-K2.6, which fails the outbound-link allowlist (data/trusted_domains.json).
-- [ ] **[HIGH]** Company profile 'xai' citation https://cursor.com/blog/grok-4-5 now redirects to https://cursor.com/blog/grok-4-5, which fails the outbound-link allowlist (data/trusted_domains.json).
-- [ ] **[HIGH]** Company profile 'zhipu-ai' citation https://huggingface.co/blog/zai-org/glm-52-blog now redirects to https://huggingface.co/blog/zai-org/glm-52-blog, which fails the outbound-link allowlist (data/trusted_domains.json).
+- [x] **[HIGH]** Company profile 'moonshot-ai' citation https://huggingface.co/moonshotai/Kimi-K2.6 now redirects to https://huggingface.co/moonshotai/Kimi-K2.6, which fails the outbound-link allowlist (data/trusted_domains.json).
+- [x] **[HIGH]** Company profile 'xai' citation https://cursor.com/blog/grok-4-5 now redirects to https://cursor.com/blog/grok-4-5, which fails the outbound-link allowlist (data/trusted_domains.json).
+- [x] **[HIGH]** Company profile 'zhipu-ai' citation https://huggingface.co/blog/zai-org/glm-52-blog now redirects to https://huggingface.co/blog/zai-org/glm-52-blog, which fails the outbound-link allowlist (data/trusted_domains.json).
+
+**Closed 2026-07-21, all three -- false alarms, not a security incident.**
+A 2026-07-21 maintenance audit live-fetched all three URLs directly: all
+three return HTTP 200, zero actual redirects (`final_url == url` on
+every one), and real, legitimate, on-topic content (a genuine Kimi-K2.6
+model card, a genuine Cursor blog post about Grok 4.5 matching
+`xai.json`'s own cited quote verbatim, a genuine GLM-5.2 blog post) --
+none hijacked, none parked, none off-topic. Two root causes, both fixed:
+(1) `data/trusted_domains.json`'s own `_meta.path_scoped_note` had
+already predicted this exact gap -- huggingface.co is a deliberately
+un-allowlisted multi-tenant host pending `official_repos[]`-driven
+path-scoping, done in this pass (`content/companies/moonshot-ai.json` /
+`zhipu-ai.json` gained `official_repos[]`; `data/trusted_domains.json`
+gained two matching `path_scoped[]` entries and a `cursor.com` hostname
+entry, live-verified before adding, per the file's own owner/PM-checkpoint
+curation rule). (2) The finding text itself asserted "now redirects to
+X" even when `final_url == url` -- self-contradictory, since a URL
+cannot redirect to itself. Fixed at the source
+(`scripts/append_backlog_findings.py::_hijack_summary`, new helper,
+covered by two new tests in `tests/test_append_backlog_findings.py`) so
+future no-redirect allowlist gaps are worded honestly instead of implying
+an observed hijack. Severity policy (hijacked = HIGH regardless of
+redirect vs. no-redirect) intentionally left unchanged this pass -- see
+the new backlog item below.
+
+## 2026-07-21 maintenance pass -- Fable-directed audit, fix pass, and new open items
+
+Owner asked for a general "check and make updates as needed" pass on the
+whole project, with fable used as project director guiding the process --
+same shape as the 2026-07-11 UI/UX pass this file already documents: four
+parallel read-only audits (pipeline/automation health, editorial content
++ open findings, code/CI/schema integrity, site build/UX), a Fable
+synthesis pass turning the combined findings into one prioritized plan,
+then sequential implementation. Full narrative in `PROGRESS.md`'s
+2026-07-21 entry; this section is the decision log for what's still open.
+
+- **The daily analyst+verifier loop was diagnosed silently failing since
+  its creation (2026-07-12) and a replacement was designed but NOT
+  activated this pass -- deliberately left for the owner.** Every
+  commit-producing artifact (`content/cards/`, `data/run_plan.json`, a
+  non-empty `data/verifier_stats.json.runs[]`) has zero occurrences in
+  this repo's entire history despite the Routine firing nightly through
+  at least 2026-07-20. Root cause: a persistent-session Routine (this
+  platform never sends completion notifications for those), a prompt
+  gone stale the day after it was written (missing Phase 8's PROFILER
+  step and `check_outbound_links.py` gate), and a cron race against
+  `watch.yml`. See `CLAUDE.md`'s "Daily analyst+verifier run" bullet
+  (updated this pass) for the full diagnosis and the proposed replacement
+  Routine's design/prompt. Not activated here because doing so means
+  creating/disabling account-level scheduled Routines and a supervised
+  live run that pushes straight to `main`, outside this repo's normal
+  branch/PR flow -- squarely an owner call, not a maintenance-pass
+  default.
+- **Open owner decision: re-wire `/wire/` (and optionally `/board/`) into
+  `site/generate.py::render_pages()` once the analyst/verifier loop above
+  is confirmed producing real cards.** The builders
+  (`site/builders/{wire,board}.py`) are untouched, independently tested,
+  and (per this pass's UX audit) launch-ready as-is, including an honest
+  empty state. Re-wiring them today, before any real card exists, would
+  just relaunch Wire empty a second time -- better to wait for real
+  content. See `CLAUDE.md`'s new "Site surface" section.
+- **Open owner/PM question: does Hard Rule 2's "max one quote per
+  source" apply per-`citedText` bullet (current enforcement,
+  `schemas/company.schema.json`) or per-whole-profile, for
+  `content/companies/*.json`?** This pass's editorial audit found several
+  profiles citing the same URL with different quotes across different
+  bullets (e.g. the same Anthropic or DeepSeek source page cited 3-4
+  times with different quotes across `profile.what_theyve_done[]`
+  entries) -- each individual citation passes today's schema-level check,
+  but Hard Rule 2 reads naturally as a per-card (here, per-profile)
+  constraint. Not resolved this pass since it's a rule-scope
+  interpretation question, not a bug with an obvious fix.
+- **Deferred policy tweak: split `hijacked_citation`/
+  `hijacked_company_citation` severity by whether an actual redirect
+  occurred.** Today both are unconditionally `high`
+  (`scripts/append_backlog_findings.py`'s severity-mapping table). A
+  citation that genuinely started redirecting post-publication (a real
+  security-relevant event) and a citation that was simply never
+  allowlisted (a curation-debt event, per this pass's 3 closed HIGH
+  findings above) currently get the same severity even though they're
+  materially different in urgency. Not changed this pass -- severity
+  mapping is its own logged, deliberate decision (see this file's Phase 9
+  entry on the original mapping) and changing it deserves the same
+  deliberateness, not a drive-by edit alongside an unrelated wording fix.
+- **Fixed, not deferred: `watch.yml` and `audit.yml`'s commit steps both
+  used `[skip ci]`, which also suppresses `deploy.yml` (path-filtered on
+  `content/**`/`data/**`/`site/**`) for every automated commit --
+  initially logged here as a deliberate tradeoff to leave alone, then
+  corrected in the same pass once actually checked.** The first draft of
+  this entry assumed `deploy.yml`'s own header comment ("CANNOT ACTUALLY
+  DEPLOY YET", implying Pages isn't enabled) was still true and left
+  `[skip ci]` in place on that basis. A direct live check
+  (`curl -I https://0xfanbase.github.io/AI-Radar/`) before shipping this
+  entry found that assumption false: Pages has been live since at least
+  2026-07-13 (the response's `Last-Modified` matched that commit exactly,
+  and the served Method page showed real, correctly-rendered content) --
+  the comment itself was simply stale and never updated after the owner
+  enabled Pages. Corrected `deploy.yml`'s header comment and dropped
+  `[skip ci]` from both `watch.yml` and `audit.yml`'s commit messages in
+  this same pass, so daily/weekly pipeline commits now redeploy the live
+  site the way CLAUDE.md's own diagram ("auto-commit -> GitHub Pages
+  redeploys") always said they should -- the site had been frozen on
+  2026-07-13's content for eight days purely because of this. Logged here
+  with the false start intact rather than quietly rewritten, since the
+  lesson (verify a "can't do X yet" code comment against live reality
+  before trusting it, especially one with no date on it) is worth keeping
+  visible.
 

@@ -24,6 +24,28 @@ subscription.
 
 ---
 
+## Site surface (current, since 2026-07-13)
+
+The live build (`site/generate.py`) renders **Map + Companies**
+(`/`, `/companies/`) plus **Lexicon**, **Method**, and **Corrections** —
+not yet the full product this file's Purpose section and the loop diagram
+below describe as the destination. `/wire/`, `/board/`, `/primer/`,
+`/moving/`, and `/about/` were deliberately trimmed from the live build
+(commit `5b8d196`, "Trim live site to Map + Companies; retire
+Wire/Board/Primer/Moving/About from the build"): their builder modules
+(`site/builders/{wire,board,primer,moving,about}.py`) are untouched and
+independently tested, just not called from
+`site/generate.py::render_pages()` today. The Wire remains this charter's
+editorial core (the "fact-checked daily wire" in Purpose, above), and
+re-wiring it once the daily loop below is actually producing real cards is
+an **open owner decision, not a rejected one** — see
+`IMPROVEMENT_BACKLOG.md`. The Method page already discloses the current
+gap honestly to real visitors today (a stats panel: stories tracked vs.
+published vs. analyst/verifier runs completed), independent of whether
+Wire itself is live.
+
+---
+
 ## The daily self-learning loop (spec §4)
 
 This is the target architecture for the full build. Phase 1 (this chassis)
@@ -75,21 +97,45 @@ a `claude_code_oauth_token` repo secret. That is a valid, complete
 implementation, but this project's owner has chosen not to create or
 manage that secret, for either loop.
 
-- **Daily analyst+verifier run — ACTIVE.** This loop already executes via
-  a **Claude Code Remote Routine** ("AI Frontier Wire — daily
-  analyst+verifier refresh," firing daily, 30 minutes after `watch.yml`'s
-  own cron): a scheduled session, external to GitHub Actions, that reads
-  the exact ANALYST/VERIFIER `prompt:` text directly out of `analyze.yml`,
-  runs each half as a fresh subagent via the Agent tool (preserving the
-  verifier's "fresh context, no shared memory with the analyst"
-  property), runs the same pure-code `plan_run.py` →
-  `reconcile_run.py` → `check_path_allowlist.py` →
+- **Daily analyst+verifier run — DIAGNOSED FAILING 2026-07-21; fix
+  designed, activation pending owner decision.** This loop was meant to
+  execute via a **Claude Code Remote Routine** ("AI Frontier Wire — daily
+  analyst+verifier refresh," created 2026-07-12, cron `30 23 * * *`): a
+  scheduled session, external to GitHub Actions, that reads the exact
+  ANALYST/VERIFIER `prompt:` text directly out of `analyze.yml`, runs each
+  half as a fresh subagent via the Agent tool, runs the pure-code
+  `plan_run.py` → `reconcile_run.py` → `check_path_allowlist.py` →
   `validate_changed_schemas.py` sequence, and commits+pushes under the bot
-  identity — no GitHub secret anywhere in that path. `watch.yml` no longer
+  identity — no GitHub secret anywhere in that path. **In practice it
+  fired every night from 2026-07-12 through at least 2026-07-20 and never
+  once produced a commit**: `content/cards/`, `data/run_plan.json`, and a
+  non-empty `data/verifier_stats.json.runs[]` have zero occurrences across
+  this repo's entire history, discovered by a 2026-07-21 maintenance
+  audit, not self-reported by the loop. Root cause, diagnosed the same
+  day: the Routine was configured as a **persistent-session** Routine,
+  which this platform never sends completion notifications for — so a
+  silent early exit had no way to surface to the owner — compounded by
+  the Routine's own prompt text going stale the day after it was written
+  (Phase 8, landed 2026-07-13, added a third LLM step — PROFILER — and a
+  fourth gate, `check_outbound_links.py`, that the original prompt never
+  knew to run), and by a cron race against `watch.yml` (whose own commit
+  can land after 00:00 UTC, after this Routine's 23:32 UTC fire). A
+  replacement design — fresh-session-per-fire Routine with completion
+  notifications, a cron that can't race `watch.yml`, a prompt that defers
+  to `analyze.yml`'s current step list instead of a frozen copy, and an
+  unconditional daily heartbeat commit so a *future* silent failure is
+  visible on `main` itself rather than requiring another audit to find —
+  was proposed the same day. Creating/disabling the actual Routines and
+  running a supervised first fire were deliberately left for the owner to
+  authorize (they push directly to `main`, outside this repo's normal
+  branch/PR flow, and touch account-level scheduling infrastructure this
+  file has no jurisdiction over). See `PROGRESS.md`'s 2026-07-21 entry for
+  the full diagnosis and the proposed Routine prompt, and
+  `IMPROVEMENT_BACKLOG.md` for the open item. `watch.yml` no longer
   dispatches `analyze.yml` (its dispatch step was removed once the
   Routine took over); `analyze.yml` remains in the repo unmodified, as the
-  authoritative reference for exactly what the Routine runs, not as dead
-  code.
+  authoritative reference for exactly what any replacement Routine should
+  run.
 - **Fortnightly improve loop — designed and fully documented, NOT yet
   activated.** `scripts/fortnight_guard.py` (the ISO-week-parity guard
   approximating a fortnightly cadence from a weekly firing) and
@@ -112,15 +158,16 @@ manage that secret, for either loop.
   See `PROGRESS.md`'s final Phase 5 entry for the full "what remains"
   list.
 - **`audit.yml` — a third, independent case: real, active GitHub Actions
-  YAML, no secret and no Routine needed at all.** It has no LLM step
-  anywhere (pure-code `auditor/` package: link rot, lexicon
-  coverage/orphans, verifier pass-rate trend, missed-story check,
-  duplicate-topic detection), so the `CLAUDE_CODE_OAUTH_TOKEN` question
-  that gates the other two loops never applies to it. It already runs as
-  literal committed GitHub Actions YAML with a real weekly cron — it will
-  fire for real, automatically, as soon as this branch is merged to `main`
-  (GitHub Actions only evaluates a workflow's `schedule:` trigger on the
-  repository's default branch).
+  YAML, no secret and no Routine needed at all, live and already running
+  on `main`.** It has no LLM step anywhere (pure-code `auditor/` package:
+  link rot, lexicon coverage/orphans, verifier pass-rate trend,
+  missed-story check, duplicate-topic detection), so the
+  `CLAUDE_CODE_OAUTH_TOKEN` question that gates the other two loops never
+  applies to it. It has fired for real on its weekly cron since this
+  workflow reached `main` (confirmed runs 2026-07-12 and 2026-07-19; see
+  `data/audit/latest.json` and `IMPROVEMENT_BACKLOG.md`'s audit-findings
+  sections) — not a future event gated on a merge that hasn't happened
+  yet.
 
 See `PROGRESS.md` for when the daily switch was made and why, and its
 final Phase 5 entry for the fortnightly loop's own build/non-activation
