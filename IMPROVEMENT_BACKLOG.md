@@ -4528,3 +4528,10 @@ in spirit -- a human/PAT-authored push, like a reviewed PR merge, does
 still benefit from not having its deploy suppressed); only the "this is
 sufficient" claim was wrong.
 
+**Confirmed working, post-merge, empirically (not re-asserted on
+faith):** manually dispatched `watch.yml` after PR #16 merged; it pushed
+a real bot commit, and `deploy.yml` fired automatically via
+`workflow_run` 8 seconds later and succeeded, deploying that exact
+commit. Full evidence in `PROGRESS.md`'s matching entry. This item is
+closed for real, not just closed-pending-verification.
+

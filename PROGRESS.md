@@ -79,6 +79,26 @@ workflow files re-parsed with `pyyaml` to confirm no syntax breakage;
 `deploy.yml`'s new `on.workflow_run` block and `jobs.build.if` condition
 specifically checked for correct structure post-edit.
 
+**Confirmed, post-merge (PR #16 merged as `0923667`) -- the fix genuinely
+works, checked empirically rather than assumed:** manually dispatched
+`watch.yml` on `main` (`workflow_dispatch`, run `29815497635`) rather
+than waiting up to 24h for its next real cron. It completed
+`conclusion: "success"` and pushed a real commit,
+`d7b3c82` ("chore(watch): update ledger/queue/whats_moving"), correctly
+authored `frontier-wire-bot <bot@users.noreply.github.com>`.
+`deploy.yml` then fired **automatically**, unprompted, 8 seconds after
+`watch.yml`'s own completion (`event: "workflow_run"`, run
+`29815549965`), checked out `head_sha: d7b3c82...` -- exactly the
+triggering commit, confirming the explicit `ref:` pin works as designed,
+not just coincidentally matching `main`'s tip -- and itself completed
+`conclusion: "success"`. `curl -I https://0xfanbase.github.io/AI-Radar/`
+immediately after: `Last-Modified: Tue, 21 Jul 2026 08:46:37 GMT`,
+inside `deploy.yml`'s own run window. This is the first time in this
+project's history the live site has redeployed from a fully automated,
+bot-authored commit with zero human push involved -- the actual target
+architecture in CLAUDE.md's own diagram, now real. No further action
+needed on this thread.
+
 ---
 
 ## 2026-07-21 -- General maintenance pass: four-audit Fable-directed check, real bugs fixed, daily loop's silent failure diagnosed
