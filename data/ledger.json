@@ -54,6 +54,15 @@
       ],
       "status": "queued"
     },
+    "02e41d8af40e251093fb237de49bf3af9514e073f3a7f95a2f5dad5e8a3d3ab8": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18225v1"
+      ],
+      "status": "queued"
+    },
     "035cc7bfa71204bdcf3aa8e5a336dde58e97a6f83d535a0c9e3d441b41cdc78c": {
       "card_id": null,
       "first_seen": "2026-07-12",
@@ -69,6 +78,15 @@
       "last_seen": "2026-07-12",
       "member_urls": [
         "https://arxiv.org/abs/2607.08590v1"
+      ],
+      "status": "queued"
+    },
+    "05641fa53c605fb8aff6508682cd39d0369e498d4ddf0e03480c3adbd2580c9b": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://fortune.com/2026/07/14/voters-ai-backlash-politicians-lose-seats"
       ],
       "status": "queued"
     },
@@ -162,6 +180,15 @@
       ],
       "status": "queued"
     },
+    "0c4617cfa5377f60d4a897a34cfbb76e70357c1038791f18a1032e3715b44d44": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18119v1"
+      ],
+      "status": "queued"
+    },
     "0ca98805681839e2bea87e20c602e906c53be975de05c3741c3c15a6ea3ed34a": {
       "card_id": null,
       "first_seen": "2026-07-14",
@@ -213,6 +240,24 @@
       "last_seen": "2026-07-14",
       "member_urls": [
         "https://arxiv.org/abs/2607.01418"
+      ],
+      "status": "queued"
+    },
+    "0f9a4f66818d80aa4eadca19f0c7d9b4a80bc70609e67a8f7d3cb1348cc9ae45": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18164v1"
+      ],
+      "status": "queued"
+    },
+    "0fdf5b344ead9ddc8d945bb5217d30ec6f6b4f03db1801615aa093725be752d4": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18091v1"
       ],
       "status": "queued"
     },
@@ -297,6 +342,24 @@
       ],
       "status": "queued"
     },
+    "1222b74f46df46f0b84fdf79eabb1c3b9dff9998cfee29fc5bcc04da05426ab1": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://asia.nikkei.com/business/technology/five-us-tech-giants-hidden-debts-soar-to-1.65tn-on-opaque-ai-funding"
+      ],
+      "status": "queued"
+    },
+    "13387f5c3195d97b435ef4d77e2e121e0cadcf7f2bb94960510c7ccb423bb34e": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18195v1"
+      ],
+      "status": "queued"
+    },
     "133e2d88faa52d2edb115e492abd9fb6426fafb6e473605ab3e2eeccf375ea7f": {
       "card_id": null,
       "first_seen": "2026-07-09",
@@ -321,6 +384,15 @@
       "last_seen": "2026-07-21",
       "member_urls": [
         "https://deepmind.google/blog/empowering-indias-next-generation-of-innovators-with-atl-saathi"
+      ],
+      "status": "queued"
+    },
+    "14021c760a377a6d887f2a1b29604d65f4cc2ee2b4f57886195bd663b5d2180a": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18235v1"
       ],
       "status": "queued"
     },
@@ -384,6 +456,15 @@
       "last_seen": "2026-07-09",
       "member_urls": [
         "https://github.com/rowboatlabs/rowboat"
+      ],
+      "status": "queued"
+    },
+    "199f4f020609b2226191bd07f14851f75b98b8e9a207d0cf448b829516cbf8db": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18161v1"
       ],
       "status": "queued"
     },
@@ -576,12 +657,30 @@
       ],
       "status": "queued"
     },
+    "23dd6c57503e4021834372e9b26de8e2aa5f53fd5d36013ad5f0c3b50faba863": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18198v1"
+      ],
+      "status": "queued"
+    },
     "24024670a7a72f96742a3702b65905750494ef32d4813e11cb2d7f6a17b9d47c": {
       "card_id": null,
       "first_seen": "2026-07-17",
       "last_seen": "2026-07-18",
       "member_urls": [
         "https://arxiv.org/abs/2607.15241v1"
+      ],
+      "status": "queued"
+    },
+    "24108aba96ea1133bbc6a3a81c04f1f022454409ff6b4dca4e9fe97cbf1097e0": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18101v1"
       ],
       "status": "queued"
     },
@@ -882,6 +981,15 @@
       ],
       "status": "queued"
     },
+    "37dc16526fd94a44a41425adbe0e92d0f6e4ed1ef5f7fcb33436ec1e47fd624c": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18081v1"
+      ],
+      "status": "queued"
+    },
     "38c8688ab65a0a2ab08e9059c6c5f354feafe875a8c8fc98db9393a15ba61ba5": {
       "card_id": null,
       "first_seen": "2026-07-13",
@@ -906,6 +1014,15 @@
       "last_seen": "2026-07-13",
       "member_urls": [
         "https://arxiv.org/abs/2607.09632v1"
+      ],
+      "status": "queued"
+    },
+    "3a8ce924bcd0188d3302c2696c1ac0254f928144797ea4d66fed4135a8129f9e": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18072v1"
       ],
       "status": "queued"
     },
@@ -981,6 +1098,15 @@
       ],
       "status": "queued"
     },
+    "3df59eda4e726b7179d59fd271b9ba32c1428671f55dab66af117dcfdee9d8fe": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18088v1"
+      ],
+      "status": "queued"
+    },
     "3ebeb7426ddbefd622329c0c333067aa74b1514103c8db1fbb7d05142316aa45": {
       "card_id": null,
       "first_seen": "2026-07-21",
@@ -1023,6 +1149,15 @@
       "last_seen": "2026-07-18",
       "member_urls": [
         "https://arxiv.org/abs/2607.15146v1"
+      ],
+      "status": "queued"
+    },
+    "42fae3d7cc09df272f8220f025c6d1161a68393bf167345e890889f00f2f3246": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18110v1"
       ],
       "status": "queued"
     },
@@ -1172,6 +1307,15 @@
       ],
       "status": "queued"
     },
+    "4bd378545381f4ef6636c56091222e0ef728e135e32b5a2efdf51d89c0e4143b": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18181v1"
+      ],
+      "status": "queued"
+    },
     "4c50eff0e4e9fea01ce293370d1651be4e071c17b462496853b4a744ec4a6582": {
       "card_id": null,
       "first_seen": "2026-07-17",
@@ -1253,6 +1397,15 @@
       ],
       "status": "queued"
     },
+    "50af8957cbf02f6ffc63b1f4a277ee05fc64e21a846e9bf6eb8a025bd6528aa5": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18074v1"
+      ],
+      "status": "queued"
+    },
     "515ea0da1f918b8dea667fc6368e2fdf4f96d78ac2d002e9dce51f7dd640b95c": {
       "card_id": null,
       "first_seen": "2026-07-13",
@@ -1268,6 +1421,15 @@
       "last_seen": "2026-07-18",
       "member_urls": [
         "https://ft.com/content/1b8c9d52-88a9-426b-ba47-f1811f859166"
+      ],
+      "status": "queued"
+    },
+    "518bfd0dcd0324cf070ffc39f6905ea8d2357e244edc1a8e8152b0cb0593166d": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18082v1"
       ],
       "status": "queued"
     },
@@ -1376,6 +1538,15 @@
       "last_seen": "2026-07-12",
       "member_urls": [
         "https://api-docs.deepseek.com/news/news250922"
+      ],
+      "status": "queued"
+    },
+    "563d5d7a9566237568d605ccbdb1252833a7a380f0b448b8c711fab6a0c46a33": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18116v1"
       ],
       "status": "queued"
     },
@@ -1631,6 +1802,15 @@
       ],
       "status": "queued"
     },
+    "64835939b02b7e11e8896f42b005f3b679ead612e3a180e1540d7ef0cbc30d57": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18147v1"
+      ],
+      "status": "queued"
+    },
     "64e31864a52c4dd5204cd26841d30aceb12a95c9f5ac7a0fd0fa81e4e8416b0b": {
       "card_id": null,
       "first_seen": "2026-07-17",
@@ -1811,6 +1991,15 @@
       ],
       "status": "queued"
     },
+    "6b9d42ae55524f77bd242fa407aa4db1590147cd21694d798f51844f1359e686": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18200v1"
+      ],
+      "status": "queued"
+    },
     "6bbf3d239ee7fc59d148c47d3620d759751937873845ed4901252a348d24df7e": {
       "card_id": null,
       "first_seen": "2026-07-13",
@@ -1826,6 +2015,15 @@
       "last_seen": "2026-07-09",
       "member_urls": [
         "https://arxiv.org/abs/2607.07707v1"
+      ],
+      "status": "queued"
+    },
+    "6c327d848eaec3dd8b36c55ea6f24a23ad8a332b67e189abf398048fac27d0fd": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18114v1"
       ],
       "status": "queued"
     },
@@ -1901,6 +2099,15 @@
       ],
       "status": "queued"
     },
+    "72484d505b36a344aaf3872b7ff94d77bb2475fa95d8dc155ece1536433823d6": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18228v1"
+      ],
+      "status": "queued"
+    },
     "72ee4e994820c8bcd7a3c5080588ffa3ed16fa31e1ec63aea390c292feae2829": {
       "card_id": null,
       "first_seen": "2026-07-09",
@@ -1916,6 +2123,15 @@
       "last_seen": "2026-07-14",
       "member_urls": [
         "https://arxiv.org/abs/2607.11712v1"
+      ],
+      "status": "queued"
+    },
+    "7385496b26dc1b25cf182632e331cc20ad2b772dfd25f5d41d466ee3002975f9": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18218v1"
       ],
       "status": "queued"
     },
@@ -1988,6 +2204,15 @@
       "last_seen": "2026-07-18",
       "member_urls": [
         "https://blog.zksecurity.xyz/posts/openvm-bugs"
+      ],
+      "status": "queued"
+    },
+    "7821a4f535a0ed0b6164a581f8b18e5316ad356e0e9e2dc3d8e1867556eceaaa": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18144v1"
       ],
       "status": "queued"
     },
@@ -2180,6 +2405,15 @@
       ],
       "status": "queued"
     },
+    "82b661ea3ab3a951c64c3e842f720d910b6168e99be516e7bdc6460f3448b8b6": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18162v1"
+      ],
+      "status": "queued"
+    },
     "832559be7e1d2a7d3b6e79ebce61629a1f404c9ad5c0f185a7e0dce2fd942c14": {
       "card_id": null,
       "first_seen": "2026-07-17",
@@ -2213,6 +2447,15 @@
       "last_seen": "2026-07-21",
       "member_urls": [
         "https://arxiv.org/abs/2607.16030v1"
+      ],
+      "status": "queued"
+    },
+    "85d8ef9781fde7265ed24f99b05996eb5c492eec795c0afa5da2a943b69814d3": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://qwencloud.com/pricing/token-plan"
       ],
       "status": "queued"
     },
@@ -2261,6 +2504,15 @@
       ],
       "status": "queued"
     },
+    "881a4d7393ec87f57719f0a6aef54f0c04e59c29831d0d2d26aa408818145748": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18077v1"
+      ],
+      "status": "queued"
+    },
     "88d1139971f75245af7dd7ff4daa859b3a35f99266a50dd5ab43b49c3e7014ce": {
       "card_id": null,
       "first_seen": "2026-07-20",
@@ -2285,6 +2537,24 @@
       "last_seen": "2026-07-09",
       "member_urls": [
         "https://reuters.com/world/beijing-is-looking-curbing-overseas-access-chinas-top-ai-models-sources-say-2026-07-07"
+      ],
+      "status": "queued"
+    },
+    "8b7a643749a9d21b57aacf371adf47dc82eae2ee3d44e7c52e1f2e973ff8ba70": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18232v1"
+      ],
+      "status": "queued"
+    },
+    "8c106bb1affbbcd99f63c49e9dda55df3a695a35513ebc9c143c3c9299944810": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18102v1"
       ],
       "status": "queued"
     },
@@ -2414,6 +2684,15 @@
       ],
       "status": "queued"
     },
+    "918d6ce11486dbe65fa3fefd8b776b992b63300bd8089333f986b83201b0267f": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18080v1"
+      ],
+      "status": "queued"
+    },
     "92009ad188057a3f701afbbf2f414e45f29e0ac2cad6039d91dfd34508cff04a": {
       "card_id": null,
       "first_seen": "2026-07-09",
@@ -2522,6 +2801,15 @@
       ],
       "status": "queued"
     },
+    "9634dc47f31dc52552af2108dd33b048f5d6461f121589f7fbb0a0b8169090af": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18163v1"
+      ],
+      "status": "queued"
+    },
     "965618c0123d8a71e5eef48d760513b7815bc475f1fbd4fa7184afcb656605ab": {
       "card_id": null,
       "first_seen": "2026-07-09",
@@ -2546,6 +2834,15 @@
       "last_seen": "2026-07-18",
       "member_urls": [
         "https://arxiv.org/abs/2607.15253v1"
+      ],
+      "status": "queued"
+    },
+    "9928f9b616371086303df3d9d7e47c1c6af11bec7a43b6f1dec7276f2af8f7dc": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18068v1"
       ],
       "status": "queued"
     },
@@ -2630,6 +2927,15 @@
       ],
       "status": "queued"
     },
+    "9ba8c8915709f6fa4533e8f02fc21a70f60c17805f4f0cd18a96fda563caec8b": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18209v1"
+      ],
+      "status": "queued"
+    },
     "9bf948aeafab87d5ce13ce5f41f44c89b5f537a2e931b8fb28d5add62b845853": {
       "card_id": null,
       "first_seen": "2026-07-09",
@@ -2711,6 +3017,15 @@
       ],
       "status": "queued"
     },
+    "a04c08e6b1785b22714a9a31105f1094b62571bbdb2c1ca140eade9e9e42169b": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18084v1"
+      ],
+      "status": "queued"
+    },
     "a05e7e9673fcb4b26b1206a2a81150edd927a7562b31ae637980c9f28d614827": {
       "card_id": null,
       "first_seen": "2026-07-12",
@@ -2774,6 +3089,15 @@
       ],
       "status": "queued"
     },
+    "a25ccc97d3d29f566c6a6006bbababde738279c3f6ab38e998fc568f51299ea2": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18199v1"
+      ],
+      "status": "queued"
+    },
     "a2bf3e53171c78b2e751c6020af82fa9bce46fd5b5c4a8e7046d1b5af945ef4b": {
       "card_id": null,
       "first_seen": "2026-07-12",
@@ -2792,12 +3116,30 @@
       ],
       "status": "queued"
     },
+    "a339695819d2bd44ee7234abd7e58f2d2632f9c6067851743981999efb8ba368": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18236v1"
+      ],
+      "status": "queued"
+    },
     "a3dfb41b3e0da104ce94fac70dbe6ed1a5cd2cbe677473fb6e2034f72df0c613": {
       "card_id": null,
       "first_seen": "2026-07-12",
       "last_seen": "2026-07-12",
       "member_urls": [
         "https://pluralistic.net/2025/09/11/vulgar-thatcherism"
+      ],
+      "status": "queued"
+    },
+    "a5818b0687cb419b893cba74ed5cd824efc722955aded9438792f020f55b455c": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18130v1"
       ],
       "status": "queued"
     },
@@ -2828,6 +3170,15 @@
       ],
       "status": "queued"
     },
+    "a6a53c761b0dfa21e0b845b0500ef49414d3522a27290837677edd5c9aaa1808": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18142v1"
+      ],
+      "status": "queued"
+    },
     "a6bce38fadb4b3af75c37fa6074413d21d36d07726817bd39bc00061ce1f8002": {
       "card_id": null,
       "first_seen": "2026-07-14",
@@ -2852,6 +3203,15 @@
       "last_seen": "2026-07-21",
       "member_urls": [
         "https://arxiv.org/abs/2607.16038v1"
+      ],
+      "status": "queued"
+    },
+    "a89715030054a1efc017629217c68a8cfcf4cf639276edcfbb638da7bef26afc": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18086v1"
       ],
       "status": "queued"
     },
@@ -2972,6 +3332,15 @@
       ],
       "status": "queued"
     },
+    "b24ace66c697be7e67433d3c81feda183891f92c0ce6871a9f2291a82463a077": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18213v1"
+      ],
+      "status": "queued"
+    },
     "b372e3a2f08a4a7ff0428704f2a11a38a619e9f5785d0e26673422e22a213cce": {
       "card_id": null,
       "first_seen": "2026-07-21",
@@ -3044,12 +3413,30 @@
       ],
       "status": "queued"
     },
+    "b682454da5d3eb7b979b9cdbc786472fe3583ba31102c78eab7a10fef68a7b9a": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18187v1"
+      ],
+      "status": "queued"
+    },
     "b7195bbec0581aa4f92ada0dd09674535fb070400751141f7e4df598b418145c": {
       "card_id": null,
       "first_seen": "2026-07-09",
       "last_seen": "2026-07-20",
       "member_urls": [
         "https://openai.com/index/mufg"
+      ],
+      "status": "queued"
+    },
+    "b7219abe8804772ec313a494011b61ef83a90d6846ef2c86dcc76148660272db": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18100v1"
       ],
       "status": "queued"
     },
@@ -3095,6 +3482,15 @@
       "last_seen": "2026-07-21",
       "member_urls": [
         "https://arxiv.org/abs/2607.16156v1"
+      ],
+      "status": "queued"
+    },
+    "bc23143feed053cfa048327df93653eac219cc82e08bae5b2d40ddcd7a4a8a48": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18149v1"
       ],
       "status": "queued"
     },
@@ -3159,6 +3555,15 @@
       "last_seen": "2026-07-14",
       "member_urls": [
         "https://arxiv.org/abs/2607.11787v1"
+      ],
+      "status": "queued"
+    },
+    "be5d08fe6da84d5fd3daed062b4e944b6417327f22af1cae59161c6af81279f2": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18127v1"
       ],
       "status": "queued"
     },
@@ -3294,6 +3699,15 @@
       "last_seen": "2026-07-18",
       "member_urls": [
         "https://arxiv.org/abs/2607.15240v1"
+      ],
+      "status": "queued"
+    },
+    "c8b07ead1a55d84eb3193114b9e16faa51e1eb9adb43eb4139baeb6bc58dbbc8": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18171v1"
       ],
       "status": "queued"
     },
@@ -3475,6 +3889,15 @@
       "last_seen": "2026-07-18",
       "member_urls": [
         "https://capitalone.com/tech/open-source/announcing-vulnhunter"
+      ],
+      "status": "queued"
+    },
+    "d2b5e98f88a6cfd9dca8b3e063c0d85cd036a82e87b1f347ace16c4acf321a5b": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18076v1"
       ],
       "status": "queued"
     },
@@ -3802,6 +4225,15 @@
       ],
       "status": "queued"
     },
+    "e84819976f26805cecb43a565f65386cafa99c6b38d2d13f1d9699f5e423e2fb": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18148v1"
+      ],
+      "status": "queued"
+    },
     "e9167e656930e3f1b73261c9a788f5db63117cf4ab761db67ca77af9283c2f81": {
       "card_id": null,
       "first_seen": "2026-07-09",
@@ -3835,6 +4267,15 @@
       "last_seen": "2026-07-21",
       "member_urls": [
         "https://arxiv.org/abs/2607.16087v1"
+      ],
+      "status": "queued"
+    },
+    "e99ef35f7a2292856d9ed0974d6e4ef5aa8d621114ed70ee40c92fa81d9d1fcf": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18069v1"
       ],
       "status": "queued"
     },
@@ -4001,6 +4442,15 @@
       ],
       "status": "queued"
     },
+    "f27ce6da0ef2890a149a37969eb2a9115261c3d4f784f6cf671fb6716fbd2c6e": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18098v1"
+      ],
+      "status": "queued"
+    },
     "f3780e8517a5249c4321e7ce411289f282b4ab4f7ce3859ace931a8773e76217": {
       "card_id": null,
       "first_seen": "2026-07-12",
@@ -4106,6 +4556,15 @@
       "last_seen": "2026-07-14",
       "member_urls": [
         "https://arxiv.org/abs/2607.11873v1"
+      ],
+      "status": "queued"
+    },
+    "f6b02dc33c6c36c26f33c4c0cb9e12997a7c82f6b610986d7ad014157506a238": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18226v1"
       ],
       "status": "queued"
     },
@@ -4217,6 +4676,15 @@
       ],
       "status": "queued"
     },
+    "fd31b22d68ffed5a21e3db7d270e388afc9e5bed604500fa296b9dbfdcf225fa": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18237v1"
+      ],
+      "status": "queued"
+    },
     "fe0c034fcda2f8168f2343257ed462e2571a63d5e0dad498a210e0efb9601292": {
       "card_id": null,
       "first_seen": "2026-07-21",
@@ -4232,6 +4700,15 @@
       "last_seen": "2026-07-12",
       "member_urls": [
         "https://arxiv.org/abs/2607.08642v1"
+      ],
+      "status": "queued"
+    },
+    "ff9ab916b841d4cd6d29b4d801ced278f616be1313e2e7124b8662a7047acdca": {
+      "card_id": null,
+      "first_seen": "2026-07-21",
+      "last_seen": "2026-07-21",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.18230v1"
       ],
       "status": "queued"
     },
