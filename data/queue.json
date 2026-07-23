@@ -2,7 +2,7 @@
   {
     "cluster_hash": "d925d8c91f460a44f07089c2f27b36a626fbcac0f80dde4b561ae3114c0febb2",
     "rank": 1,
-    "score": 911.562876189999,
+    "score": 330.5137574064676,
     "sources": [
       {
         "outlet": null,
@@ -13,7 +13,7 @@
       },
       {
         "outlet": "openai.com",
-        "points": 582,
+        "points": 1541,
         "source_type": "hn",
         "title": "OpenAI and Hugging Face address security incident during model evaluation",
         "url": "https://openai.com/index/hugging-face-model-evaluation-security-incident/"
@@ -23,7 +23,7 @@
   {
     "cluster_hash": "fcd7b3e4de1f9939f0073c07a3cb332a5dd5d1c472cf18c580a80d9b3bb0eff6",
     "rank": 2,
-    "score": 403.7921485529928,
+    "score": 134.9718422060129,
     "sources": [
       {
         "outlet": null,
@@ -41,7 +41,7 @@
       },
       {
         "outlet": "blog.google",
-        "points": 586,
+        "points": 739,
         "source_type": "hn",
         "title": "Gemini 3.6 Flash, 3.5 Flash-Lite, and 3.5 Flash Cyber",
         "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-6-flash-3-5-flash-lite-3-5-flash-cyber/"
@@ -49,13 +49,62 @@
     ]
   },
   {
-    "cluster_hash": "fd601a0300b1240008875d721214c52db4d278174fd5e22b9bcb3230ab6609e1",
+    "cluster_hash": "3c187b67b93c075884c458428bae4127e422a7f78b6920f13dbeef90eaf5ad5a",
     "rank": 3,
-    "score": 50.03649047843406,
+    "score": 82.22737375582577,
+    "sources": [
+      {
+        "outlet": "chatgpt.com",
+        "points": 545,
+        "source_type": "hn",
+        "title": "Terrence Tao's ChatGPT Conversation about the Jacobian Conjecture Counterexample",
+        "url": "https://chatgpt.com/share/6a5fdc7a-d6f8-83e8-bbea-8deb42cfed56"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "2f44a69f2a490321598597dde00108ef299c9c2817df1b2e1748e9a35abcdbcf",
+    "rank": 4,
+    "score": 51.456414692953,
+    "sources": [
+      {
+        "outlet": "dylancastillo.co",
+        "points": 352,
+        "source_type": "hn",
+        "title": "Are AI Labs Pelicanmaxxing?",
+        "url": "https://dylancastillo.co/posts/pelicanmaxxing.html"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "839f7a51d7b587ae6fb6fad7749706514391475c0a696dde71fbacdaca270ce7",
+    "rank": 5,
+    "score": 39.633437722545196,
+    "sources": [
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing OpenAI Presence",
+        "url": "https://openai.com/index/introducing-openai-presence"
+      },
+      {
+        "outlet": "openai.com",
+        "points": 59,
+        "source_type": "hn",
+        "title": "OpenAI Presence",
+        "url": "https://openai.com/index/introducing-openai-presence/"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "fd601a0300b1240008875d721214c52db4d278174fd5e22b9bcb3230ab6609e1",
+    "rank": 6,
+    "score": 36.11088159944831,
     "sources": [
       {
         "outlet": "ads.openai.com",
-        "points": 251,
+        "points": 1053,
         "source_type": "hn",
         "title": "Advertise in ChatGPT",
         "url": "https://ads.openai.com/"
@@ -63,72 +112,30 @@
     ]
   },
   {
-    "cluster_hash": "66ac737528c0445a474be3d5f89d710a750f5da9a04cf2a8493c656c260da88a",
-    "rank": 4,
-    "score": 35.94772252648084,
-    "sources": [
-      {
-        "outlet": "werd.io",
-        "points": 1209,
-        "source_type": "hn",
-        "title": "China\u2019s open-weights AI strategy is winning",
-        "url": "https://werd.io/american-ai-is-locked-down-and-proprietary-its-losing/"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "20f3adc106bb4630636a2677e8bc1e3237cb3817ae65ad0df2f0255eede649d5",
-    "rank": 5,
-    "score": 35.20040638151758,
-    "sources": [
-      {
-        "outlet": "qwen.ai",
-        "points": 537,
-        "source_type": "hn",
-        "title": "Qwen-Image-3.0: Rich Content, Authentic Details, Deep Knowledge",
-        "url": "https://qwen.ai/blog?id=qwen-image-3.0"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "3a7231974ec02593486995b1967de073ec0be769b05eec9a6abd3d29e3837156",
-    "rank": 6,
-    "score": 31.064041418228808,
-    "sources": [
-      {
-        "outlet": "runtimewire.com",
-        "points": 210,
-        "source_type": "hn",
-        "title": "Jack Dorsey launches Buzz to combine team chat, AI agents and Git hosting",
-        "url": "https://runtimewire.com/article/jack-dorsey-block-buzz-team-chat-ai-agents-git"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "d4d93cf9ebc648c36b323e06740bd9afb0307763729157ad022c7524cfc6bc15",
+    "cluster_hash": "1ad73edcca6545e95cf76a73635523836d372203295dbb0de5045c82c6d1a6ae",
     "rank": 7,
-    "score": 24.882747315751093,
+    "score": 18.753285552509784,
     "sources": [
       {
-        "outlet": "tryai.dev",
-        "points": 69,
+        "outlet": "apnews.com",
+        "points": 545,
         "source_type": "hn",
-        "title": "\"Drawing\" the Mona Lisa with GPT-5.6, Claude, Gemini, and Grok",
-        "url": "https://www.tryai.dev/blog/ai-drawing-arena-colored-pencils-claude-gpt-grok"
+        "title": "Judge approves $1.5B Anthropic settlement for pirated books used to train Claude",
+        "url": "https://apnews.com/article/ai-anthropic-copyright-settlement-claude-books-bartz-74b140444023898aeba8579b6e9f0d63"
       }
     ]
   },
   {
-    "cluster_hash": "a23f8e1c9dda21c105e3f6519fbd05eb4cb91f24494311a011bce74977413050",
+    "cluster_hash": "fbef6772a57076df6c2620f43c043d315506d0a0d5ff89ba9b09bdd8a8ad12cc",
     "rank": 8,
-    "score": 24.77504539624778,
+    "score": 14.942650871875125,
     "sources": [
       {
-        "outlet": "cacm.acm.org",
-        "points": 136,
+        "outlet": "blog.fiddery.com",
+        "points": 169,
         "source_type": "hn",
-        "title": "AI makes programming differently difficult",
-        "url": "https://cacm.acm.org/opinion/ai-didnt-make-programming-easier-it-just-made-it-differently-difficult/"
+        "title": "Businesses with ugly AI menu redesigns",
+        "url": "https://blog.fiddery.com/businesses-with-ugly-ai-menu-redesigns/"
       }
     ]
   }
