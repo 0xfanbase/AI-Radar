@@ -133,6 +133,45 @@ def test_build_regions_does_not_crash_on_a_row_with_missing_last_verified():
     assert regions[0].rows[0].pulse_eligible is False
 
 
+@pytest.mark.parametrize(
+    "bad_url", ["javascript:alert(1)", "http://plain.example/x", "data:text/html,x", ""]
+)
+def test_build_regions_neutralizes_non_https_source_url(bad_url):
+    # source_url is LLM-writable (frontier_board.json) and lands in an
+    # href attribute -- autoescape can't defuse a hostile scheme, so the
+    # builder blanks anything that isn't an absolute https URL and the
+    # template renders the host label as inert text instead of a link.
+    raw_row = {
+        "lab": "Synthlab",
+        "region": "US",
+        "model": "Synthbench",
+        "release_date": "2026-01-01",
+        "modality": ["text"],
+        "access": "api",
+        "significance": "sig",
+        "source_url": bad_url,
+        "last_verified": "2026-07-01",
+    }
+    regions = board.build_regions([raw_row], today=date(2026, 7, 9))
+    assert regions[0].rows[0].source_url == ""
+
+
+def test_build_regions_keeps_https_source_url():
+    raw_row = {
+        "lab": "Synthlab",
+        "region": "US",
+        "model": "Synthbench",
+        "release_date": "2026-01-01",
+        "modality": ["text"],
+        "access": "api",
+        "significance": "sig",
+        "source_url": "https://example.com/announcement",
+        "last_verified": "2026-07-01",
+    }
+    regions = board.build_regions([raw_row], today=date(2026, 7, 9))
+    assert regions[0].rows[0].source_url == "https://example.com/announcement"
+
+
 # ---------------------------------------------------------------------------
 # Formatting helpers
 # ---------------------------------------------------------------------------

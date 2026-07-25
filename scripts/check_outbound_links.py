@@ -30,7 +30,15 @@ What this script does, for the working-tree diff against ``HEAD``:
    ``profile.*.citations[]`` a company record can carry
    (``schemas/company.schema.json``'s ``citedText`` shape, reused across
    ``overview``/``what_theyve_done[]``/``strengths[]``/``current_focus``/
-   ``roadmap[]``).
+   ``roadmap[]``) -- plus, since the 2026-07 hardening pass, the two
+   other LLM-writable content files that carry outbound hrefs:
+   ``content/frontier_board.json`` (every row's ``source_url``, fully
+   vetted like card citations -- the Board only ever cites PRIMARY /
+   confirmed-card OUTLET sources, all inside this allowlist's own stated
+   curation scope) and ``content/lexicon.json`` (every ``deeper`` field's
+   inline ``<a href>``, vetted against the *scheme-level* static checks
+   only -- see ``SCHEME_ONLY_DIFF_PATHS`` for why the hostname-allowlist
+   membership check deliberately does not apply there).
 3. **Static vetting** (:func:`classify_url`, no network): reject
    ``http://`` (and any non-``https`` scheme), an IP-literal host,
    userinfo embedded in the URL (``user:pass@host``), a punycode
@@ -70,6 +78,7 @@ from __future__ import annotations
 
 import ipaddress
 import json
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -111,6 +120,34 @@ HEAD_UNSUPPORTED_STATUS_CODES = frozenset({405, 501})
 COMPANIES_PREFIX = "content/companies/"
 CARDS_PREFIX = "content/cards/"
 
+# The two other LLM-writable content files that carry outbound hrefs
+# (2026-07 hardening pass: a `javascript:` href in either previously
+# rendered live on the built site, with no gate anywhere in its path).
+LEXICON_DIFF_PATH = "content/lexicon.json"
+FRONTIER_BOARD_DIFF_PATH = "content/frontier_board.json"
+
+# Files whose URLs get the scheme-level static checks (https-only, no
+# userinfo/IP-literal/punycode/shortener) but NOT the hostname-allowlist
+# membership check or the network redirect-chain re-check. Today exactly
+# one: content/lexicon.json. Its `deeper` citations legitimately point at
+# hosts outside data/trusted_domains.json's own stated curation scope
+# (which covers the outlet table + company official domains + board/
+# company citation hosts -- 4 of the 30 seed lexicon entries cite e.g.
+# github.com/bis.gov/cdn.openai.com today), so requiring allowlist
+# membership here would hard-block the daily pipeline's routine
+# lexicon.json touches (the auto-growth rule appends seen_in[] ids every
+# run) until an owner curation pass -- while the injection-relevant
+# defense (scheme shape) applies in full. Widening the frozen allowlist
+# to cover lexicon hosts is an owner-checkpoint decision, not this
+# gate's.
+SCHEME_ONLY_DIFF_PATHS = frozenset({LEXICON_DIFF_PATH})
+
+# Mirrors site/builders/lexicon.py::_ANCHOR_RE's href half: the one
+# narrow, literal anchor shape a lexicon entry's `deeper` field carries.
+# Kept as a literal twin (not an import) because scripts/ never imports
+# from site/ -- site/ is deliberately not an importable package.
+_DEEPER_ANCHOR_HREF_RE = re.compile(r'<a href="([^"]*)"')
+
 
 @dataclass(frozen=True)
 class UrlCheckResult:
@@ -142,10 +179,13 @@ def diff_touches_trusted_domains(changed_files: list[str]) -> bool:
 
 
 def is_citation_bearing_path(path: str) -> bool:
-    """True if `path` is a real per-record content file this check reads
-    citations from -- a company profile or a card, never either
-    directory's own generated `index.json` manifest."""
+    """True if `path` is a content file this check reads outbound URLs
+    from -- a company profile, a card, the frontier board, or the
+    lexicon; never the card/company directories' own generated
+    `index.json` manifests."""
     normalized = path.replace("\\", "/")
+    if normalized in (LEXICON_DIFF_PATH, FRONTIER_BOARD_DIFF_PATH):
+        return True
     if normalized.startswith(COMPANIES_PREFIX) and normalized.endswith(".json"):
         return normalized != COMPANIES_PREFIX + "index.json"
     if normalized.startswith(CARDS_PREFIX) and normalized.endswith(".json"):
@@ -192,6 +232,34 @@ def extract_citation_urls_from_company(company: dict[str, Any]) -> list[str]:
     return urls
 
 
+def extract_citation_urls_from_lexicon(entries: Any) -> list[str]:
+    """Every inline `<a href>` target across every lexicon entry's
+    `deeper` field (`schemas/lexicon.schema.json` shape: a top-level
+    array of entries)."""
+    urls: list[str] = []
+    for entry in entries or []:
+        if not isinstance(entry, dict):
+            continue
+        for href in _DEEPER_ANCHOR_HREF_RE.findall(str(entry.get("deeper", ""))):
+            if href:
+                urls.append(href)
+    return urls
+
+
+def extract_citation_urls_from_board(rows: Any) -> list[str]:
+    """Every row's `source_url` in the loaded `content/frontier_board.json`
+    (`schemas/frontier_board.schema.json` shape: a top-level array of
+    rows)."""
+    urls: list[str] = []
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        url = row.get("source_url")
+        if url:
+            urls.append(str(url))
+    return urls
+
+
 def extract_citation_urls(path: str, repo_root: Path = REPO_ROOT) -> list[str]:
     """Load `path` (a repo-relative path already confirmed by
     :func:`is_citation_bearing_path`) and return every citation URL it
@@ -209,7 +277,12 @@ def extract_citation_urls(path: str, repo_root: Path = REPO_ROOT) -> list[str]:
             data = json.load(fh)
     except json.JSONDecodeError:
         return []
-    if path.startswith(CARDS_PREFIX):
+    normalized = path.replace("\\", "/")
+    if normalized == LEXICON_DIFF_PATH:
+        return extract_citation_urls_from_lexicon(data)
+    if normalized == FRONTIER_BOARD_DIFF_PATH:
+        return extract_citation_urls_from_board(data)
+    if normalized.startswith(CARDS_PREFIX):
         return extract_citation_urls_from_card(data)
     return extract_citation_urls_from_company(data)
 
@@ -261,14 +334,14 @@ def _hostname_trusted(hostname: str, path: str, trusted: dict[str, Any]) -> bool
     return False
 
 
-def classify_url(url: str, trusted: dict[str, Any]) -> UrlCheckResult:
-    """Static (no-network) vetting of one URL against every rule in the
-    module docstring's step 3. Never raises -- a URL that fails to parse
-    at all (`urlsplit` itself never raises for a plain string, but an
-    empty/garbage value can yield an empty hostname) is rejected with a
-    clear reason rather than propagating an exception up to the CI gate's
-    own top-level error handling.
-    """
+def classify_url_scheme(url: str) -> UrlCheckResult:
+    """The scheme-level static checks alone -- everything in the module
+    docstring's step 3 *except* hostname-allowlist membership: https-only
+    scheme, no embedded userinfo, a parseable hostname that is neither an
+    IP literal nor punycode, and not a denylisted URL shortener. This is
+    the tier applied on its own to `SCHEME_ONLY_DIFF_PATHS` files (see
+    that constant for why), and the first stage of :func:`classify_url`
+    for everything else. Never raises."""
     parsed = urlsplit(url)
 
     if parsed.scheme != "https":
@@ -291,6 +364,25 @@ def classify_url(url: str, trusted: dict[str, Any]) -> UrlCheckResult:
     if normalized in URL_SHORTENER_DENYLIST:
         return UrlCheckResult(url, False, f"host {hostname!r} is a denylisted URL shortener")
 
+    return UrlCheckResult(url, True)
+
+
+def classify_url(url: str, trusted: dict[str, Any]) -> UrlCheckResult:
+    """Full static (no-network) vetting of one URL against every rule in
+    the module docstring's step 3: the scheme-level checks of
+    :func:`classify_url_scheme` plus hostname-allowlist membership.
+    Never raises -- a URL that fails to parse at all (`urlsplit` itself
+    never raises for a plain string, but an empty/garbage value can yield
+    an empty hostname) is rejected with a clear reason rather than
+    propagating an exception up to the CI gate's own top-level error
+    handling.
+    """
+    scheme_result = classify_url_scheme(url)
+    if not scheme_result.ok:
+        return scheme_result
+
+    parsed = urlsplit(url)
+    hostname = parsed.hostname or ""
     if not _hostname_trusted(hostname, parsed.path, trusted):
         return UrlCheckResult(url, False, f"host {hostname!r} is not in data/trusted_domains.json")
 
@@ -408,16 +500,28 @@ def collect_violations(
     urls: list[str] = []
     seen: set[str] = set()
     url_to_files: dict[str, list[str]] = {}
+    fully_vetted_urls: set[str] = set()
     for path in citation_files:
+        normalized_path = path.replace("\\", "/")
         for url in extract_citation_urls(path, repo_root=repo_root):
             url_to_files.setdefault(url, []).append(path)
+            if normalized_path not in SCHEME_ONLY_DIFF_PATHS:
+                fully_vetted_urls.add(url)
             if url not in seen:
                 seen.add(url)
                 urls.append(url)
 
     violations: list[str] = []
     for url in urls:
-        result = check_citation_url(session, url, trusted)
+        if url in fully_vetted_urls:
+            # Full pipeline: static allowlist vetting + redirect-chain
+            # re-check (cards, company profiles, the frontier board).
+            result = check_citation_url(session, url, trusted)
+        else:
+            # Scheme-only tier (lexicon `deeper` hrefs -- see
+            # SCHEME_ONLY_DIFF_PATHS): static scheme checks, no allowlist
+            # membership, no network.
+            result = classify_url_scheme(url)
         if not result.ok:
             files = ", ".join(url_to_files[url])
             violations.append(f"{url} (cited in {files}): {result.reason}")

@@ -271,7 +271,9 @@
         <dl class="board-row__facts">
           <div><dt>Modality</dt><dd>{{ row.modality_display }}</dd></div>
           <div><dt>Context window</dt><dd class="font-data">{{ row.context_window_display }}</dd></div>
-          <div><dt>Source</dt><dd><a href="{{ row.source_url }}">{{ row.source_host }}</a></dd></div>
+          {# source_url is "" when the builder's scheme vetting rejected it
+             (site/lib/safe_url.py) -- render the host as inert text then. #}
+          <div><dt>Source</dt><dd>{% if row.source_url %}<a href="{{ row.source_url }}">{{ row.source_host }}</a>{% else %}{{ row.source_host }}{% endif %}</dd></div>
           <div><dt>Last verified</dt><dd class="font-data">{{ row.last_verified }}</dd></div>
         </dl>
         <p class="board-row__significance">{{ row.significance }}</p>

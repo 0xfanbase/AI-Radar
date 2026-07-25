@@ -138,6 +138,22 @@ def test_board_rows_for_company_sorts_newest_release_first():
     assert [r.model for r in ordered] == ["new", "mid", "old"]
 
 
+def test_board_rows_for_company_neutralizes_non_https_source_url():
+    # Same defense board.py applies to the same LLM-writable field: a
+    # hostile scheme in frontier_board.json's source_url must never reach
+    # a live href on a company profile page (company.html renders the
+    # host as inert text when source_url is "").
+    rows = [
+        {"company_id": "x", "release_date": "2026-06-01", "model": "evil",
+         "source_url": "javascript:alert(1)"},
+        {"company_id": "x", "release_date": "2026-05-01", "model": "good",
+         "source_url": "https://example.com/announcement"},
+    ]
+    ordered = company_builder.board_rows_for_company("x", rows)
+    assert ordered[0].source_url == ""
+    assert ordered[1].source_url == "https://example.com/announcement"
+
+
 # ---------------------------------------------------------------------------
 # cards_for_company -- no cap, unlike map.py's popover version
 # ---------------------------------------------------------------------------

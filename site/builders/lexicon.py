@@ -99,6 +99,7 @@ def _load_module_by_path(name: str, path: Path):
 # `site/builders/wire.py` uses to link card prose to lexicon pages, or
 # the same term could resolve to two different URLs across the site.
 linkify = _load_module_by_path("frontier_wire_site_lib_linkify", LIB_DIR / "linkify.py")
+safe_url = _load_module_by_path("frontier_wire_site_lib_safe_url", LIB_DIR / "safe_url.py")
 
 slugify = linkify.slugify
 build_slug_map = linkify.build_slug_map
@@ -122,18 +123,32 @@ def render_deeper_html(deeper: str) -> Markup:
     escaped again on the way back out, so a stray HTML-special character
     inside an anchor's title or href (not expected in today's seed
     content, but not assumed either) still can't smuggle unescaped markup
-    into the page. A `deeper` string with no matching anchor at all (not
-    expected for real content -- every one of the 30 seed entries has
-    exactly one) falls back to fully-escaped plain text rather than
-    raising, matching this build stage's "handle it, don't crash"
-    convention.
+    into the page. An anchor whose href is not a plain absolute
+    `https://` URL (per `site/lib/safe_url.py::is_safe_href`) is rebuilt
+    as its escaped text only, never as a live link -- escaping can't
+    neutralize a hostile scheme like `javascript:`, and this field is
+    LLM-writable content. A `deeper` string with no matching anchor at
+    all (not expected for real content -- every one of the 30 seed
+    entries has exactly one) falls back to fully-escaped plain text
+    rather than raising, matching this build stage's "handle it, don't
+    crash" convention.
     """
     pieces: list[str] = []
     last_end = 0
     for match in _ANCHOR_RE.finditer(deeper):
         pieces.append(html.escape(deeper[last_end : match.start()]))
         href, text = match.group(1), match.group(2)
-        pieces.append(f'<a href="{html.escape(href, quote=True)}">{html.escape(text)}</a>')
+        if safe_url.is_safe_href(href):
+            pieces.append(
+                f'<a href="{html.escape(href, quote=True)}">{html.escape(text)}</a>'
+            )
+        else:
+            # HTML-escaping alone can't neutralize a hostile *scheme*
+            # (`javascript:alert(1)` is all HTML-benign characters), and
+            # this field is LLM-writable content -- an anchor whose href
+            # isn't a plain absolute https:// URL is rendered as its
+            # escaped text only, never as a live link.
+            pieces.append(html.escape(text))
         last_end = match.end()
     pieces.append(html.escape(deeper[last_end:]))
     return Markup("".join(pieces))

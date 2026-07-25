@@ -38,7 +38,9 @@ explicitly).
 """
 from __future__ import annotations
 
+import importlib.util
 import json
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -49,9 +51,28 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 SITE_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = SITE_DIR.parent
 TEMPLATES_DIR = SITE_DIR / "templates"
+LIB_DIR = SITE_DIR / "lib"
 CONTENT_DIR = REPO_ROOT / "content"
 COMPANIES_DIR = CONTENT_DIR / "companies"
 COMPANIES_INDEX_PATH = COMPANIES_DIR / "index.json"
+
+
+def _load_module_by_path(name: str, path: Path):
+    """Load a module from an explicit file path -- the same convention
+    every sibling builder uses for `site/lib/` modules (`site/` is
+    deliberately never an importable package; it would shadow the stdlib
+    `site` module). The self-sufficiency rule in this module's docstring
+    is about sibling *builders*; `site/lib/` modules are shared by
+    design, exactly like `board.py`/`lexicon.py`'s own linkify loads."""
+    spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+safe_url = _load_module_by_path("frontier_wire_site_lib_safe_url", LIB_DIR / "safe_url.py")
 
 # Same two-working-status chip mapping card.schema.json/map.py use, minus
 # "corrected" -- schemas/company.schema.json's own `status` enum only has
@@ -249,6 +270,11 @@ def board_rows_for_company(
     independently here (formatted rows, not raw dicts)."""
     rows = [r for r in board_rows if r.get("company_id") == company_id]
     rows.sort(key=lambda r: str(r.get("release_date", "")), reverse=True)
+    # source_url is scheme-vetted before it ever reaches an href attribute
+    # (autoescape can't neutralize a hostile scheme like `javascript:`) --
+    # an unsafe value becomes "", and the template renders source_host as
+    # inert text instead of a link. Same defense board.py::build_row_view
+    # applies to the same LLM-writable field.
     return [
         CompanyBoardRowView(
             model=str(r.get("model", "")),
@@ -257,7 +283,11 @@ def board_rows_for_company(
             context_window_display=format_context_window(r.get("context_window")),
             access=str(r.get("access", "")),
             significance=str(r.get("significance", "")),
-            source_url=str(r.get("source_url", "")),
+            source_url=(
+                str(r.get("source_url", ""))
+                if safe_url.is_safe_href(str(r.get("source_url", "")))
+                else ""
+            ),
             source_host=source_host(str(r.get("source_url", ""))),
             last_verified=str(r.get("last_verified", "")),
         )

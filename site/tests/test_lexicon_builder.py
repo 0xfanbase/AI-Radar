@@ -164,6 +164,43 @@ def test_render_deeper_html_with_no_anchor_falls_back_to_escaped_plain_text():
     assert "&lt;b&gt;bold&lt;/b&gt;" in rendered
 
 
+@pytest.mark.parametrize(
+    "bad_href",
+    [
+        "javascript:alert(1)",
+        "JAVASCRIPT:alert(1)",
+        "data:text/html,<script>alert(1)</script>",
+        "http://plain-http.example/x",
+        "//protocol-relative.example/x",
+        "relative/path",
+        "",
+    ],
+)
+def test_render_deeper_html_neutralizes_non_https_anchor_schemes(bad_href):
+    # HTML-escaping alone can't defuse a hostile *scheme* -- `javascript:
+    # alert(1)` contains no HTML-special characters at all, so before this
+    # fix it rendered as a live, clickable script link from LLM-writable
+    # content. A non-https anchor now renders as its escaped text only.
+    rendered = lexicon.render_deeper_html(
+        f'Prose with <a href="{bad_href}">a citation</a> inline.'
+    )
+    assert "<a " not in rendered
+    assert "a citation" in rendered
+    # No trace of the unsafe target as a clickable attribute.
+    assert 'href="' not in rendered
+
+
+def test_render_deeper_html_keeps_https_anchor_alongside_neutralized_one():
+    rendered = lexicon.render_deeper_html(
+        'Good <a href="https://arxiv.org/abs/1706.03762">paper</a> and '
+        'bad <a href="javascript:alert(1)">trap</a>.'
+    )
+    assert '<a href="https://arxiv.org/abs/1706.03762">paper</a>' in rendered
+    assert rendered.count("<a href=") == 1
+    assert "trap" in rendered
+    assert "javascript:" not in rendered
+
+
 # ---------------------------------------------------------------------------
 # related[] resolution
 # ---------------------------------------------------------------------------
