@@ -7,6 +7,97 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-25 -- Duo audit (Opus 5 + Fable 5, blind to each other) and Fable-directed fix pass
+
+Owner asked for a code + UI/UX audit run twice independently -- once on Opus 5, once on Fable
+5, blind to each other -- then a comparison of the two, then fixes with Fable as project
+director. Different shape from the 2026-07-11/2026-07-21 passes this file already documents
+(those split scope across four audits by *topic*; this one ran the *same* full scope twice,
+once per model, specifically to see where two models' independent judgment agreed or
+diverged). Both audits ran as worktree-isolated, read-only subagents against the same repo
+snapshot, same brief, same recipe for building the site and screenshotting it (desktop 1280px
++ mobile 390px, headless Chromium) so UI/UX findings were grounded in the real rendered output.
+Opus additionally self-delegated a sub-agent into `watcher/` (scoped "a lighter pass" in both
+briefs) and came back with the deepest backend findings of the pass; Fable spent the
+equivalent budget on live interaction testing (real keyboard-tab traces, click sequences,
+redirect-chain probes) and caught real behavioral bugs a screenshot-based read wouldn't surface.
+Full findings, comparison, and the four places the two audits actively disagreed are in a
+published comparison artifact (linked in that session's chat) and
+`/tmp/.../scratchpad/reconciled-findings.md` (not committed -- scratch, not repo content); this
+entry is the narrative and the permanent record of what shipped.
+
+**49 distinct findings, 15 confirmed independently by both models.** The single most valuable
+thing running two audits bought: both independently found the same bug class -- an
+LLM-writable field rendering an `<a href>` with no URL-scheme check -- but in *different*
+files (Fable: `content/lexicon.json`'s `deeper` anchors; Opus, via its watcher sub-agent:
+`content/frontier_board.json`'s `source_url`, live on `/companies/<slug>/` pages). Neither
+model flagged the other's instance. The shared root cause was only visible by reading both
+reports together: `scripts/check_outbound_links.py::is_citation_bearing_path` recognized only
+`content/cards/` and `content/companies/`. Fixed both in one commit against the shared cause,
+not as two separate patches (`d4c6787`).
+
+**Most severe shared finding, with a severity split worth recording:** all three pre-commit CI
+gates (path allowlist, schema validation, outbound-link vetting) enumerated work via
+`git diff --name-only --no-renames HEAD`, which only reports already-tracked files --
+`analyze.yml`'s `git add content/ data/` runs *after* the gates, so every first-time card (or
+any other brand-new file) was untracked at gate time and bypassed every check. This defeats the
+exact mechanism CLAUDE.md names as the project's prompt-injection guarantee. Opus rated it
+Critical; Fable rated it High; I sided with Critical when directing the fix priority, given it
+fully defeats the one control the charter names as load-bearing. Fixed by replacing three
+duplicated `get_changed_files()` copies with one shared `scripts/_git_changes.py` that unions
+the tracked diff with `git ls-files --others --exclude-standard`, proven against real git state
+in `tests/test_git_changes.py` (`cbfc301`).
+
+**14 commits, all `frontier-wire-bot` identity, independently re-verified by me after Fable's
+own pass (not just Fable's self-report) before pushing:** re-ran `python -m pytest` fresh
+(1396 passed, 2 deselected -- matches Fable's own run exactly), rebuilt the site fresh
+(`python site/generate.py`, clean, zero warnings -- the `data/trusted_domains.json` warning
+that's been present since Phase 8 is gone), confirmed `CLAUDE.md`/`IMPROVEMENT_BACKLOG.md`/
+`.github/workflows/*` genuinely untouched (`git diff --name-only` across the full range), and
+hand-read the diffs for the two highest-stakes commits myself (the CI-gate fix above and the
+href-scheme fix) rather than trusting the summary alone. Test count rose from the pre-pass
+baseline of 895+386=1281 collected to 1398 (1396 passed + 2 deselected) -- a clean +117, matching
+Fable's own arithmetic. All 15 Section-A (both-confirmed) findings fixed; 20 of 25 Opus-only
+and 8 of 9 Fable-only findings fixed; the remainder deliberately deferred with reasons (see
+`IMPROVEMENT_BACKLOG.md`'s new entry for this pass -- notably, one of them closes a policy
+question the 2026-07-21 pass explicitly left open: `check_hijack` now distinguishes a real
+redirect hijack from a host that was simply never allowlisted, the same severity-mapping split
+that pass logged as "deserves its own deliberate pass, not a drive-by edit" -- this was that
+pass).
+
+Other fixes of note beyond the two headlined above: `format: uri`/`format: date-time` schema
+validation was a silent no-op repo-wide (missing optional `jsonschema[format]` extras) --
+every citation URL and timestamp was actually unconstrained; the Method page's transparency
+section permanently reported "0 finding(s)" because it read a schema key that doesn't exist,
+while the real audit had recorded 3; the world map's marker-declutter offsets multiplied with
+zoom instead of holding a constant screen distance (a live contradiction of the code's own
+docstring), and the mobile default view showed as few as 3 of 13 labs (my own pre-fix
+measurement was worse than either audit's); the map trapped both mouse-wheel and touch scroll
+unconditionally; the entire Lexicon (31 of 49 built pages) was reachable from nowhere but the
+404 page; and 88KB of CSS plus 252KB of GeoJSON were shipped to every visitor for content only
+a `<noscript>` fallback ever uses.
+
+**Deliberately deferred, logged as open items, not silently dropped** (full reasons in
+`IMPROVEMENT_BACKLOG.md`): making the "What's Moving" 7-day trend window actually hold 7 days
+of history (needs new persisted cross-run state -- a data-design decision, not a mechanical
+fix); the degradation-ladder "digest" mode's product semantics; a Lexicon A-Z index; some
+cosmetic layout ragging on the Method and Companies pages; wiring `linkify` into company
+profiles (a real feature, not a bug -- the false claim that it already happens was removed
+instead); Open Graph tags (favicon + canonical shipped, `og:`/Twitter tags did not); and the
+lowest-value third of a duplicated-logic catalog (`update_card_index.py`/
+`update_company_index.py` remain near-duplicates -- the git-helper and timestamp-helper
+duplication in the same finding were consolidated).
+
+Verification, run for real, by me, after Fable's own: `python -m pytest` -- 1396 passed, 2
+deselected, from a completely fresh process, not reused from Fable's run. `python
+site/generate.py` -- clean build. `git worktree list` / `git branch --list` -- cleaned up two
+leftover worktree-tracking artifacts from the audit subagents (one had a stray untracked
+`.coverage` file that blocked automatic cleanup; its worktree and orphaned branch were both
+verified fully contained in `HEAD` before deletion). Nothing in this pass touched `CLAUDE.md`'s
+hard rules, the reputable-outlet table, or any editorial/pipeline policy text.
+
+---
+
 ## 2026-07-21 -- Correction: the [skip ci] removal didn't fix the deploy gap it targeted; workflow_run added instead
 
 The previous entry below (same day, PR #15, already merged to `main`)
