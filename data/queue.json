@@ -1,12 +1,68 @@
 [
   {
-    "cluster_hash": "e3f3a5eb05a479c86e2451c1b0669df4ff4ce58a90ec1b470e6a564cc5a90f77",
+    "cluster_hash": "7b8185bb33e0bdd00afd4037a64c624af6ac8d234de869787ff15cb0394a91b9",
     "rank": 1,
-    "score": 78.03736546607512,
+    "score": 1016.0518799757607,
+    "sources": [
+      {
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing Claude Opus 5",
+        "url": "https://www.anthropic.com/news/claude-opus-5"
+      },
+      {
+        "outlet": "anthropic.com",
+        "points": 73,
+        "source_type": "hn",
+        "title": "Claude Opus 5",
+        "url": "https://www.anthropic.com/news/claude-opus-5"
+      },
+      {
+        "outlet": "anthropic.com",
+        "points": 1222,
+        "source_type": "hn",
+        "title": "Claude Opus 5",
+        "url": "https://www.anthropic.com/news/claude-opus-5"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "ac01b28f85e133214755b7cc96477f7669b21f4f614b570a2f54a780d0eebd15",
+    "rank": 2,
+    "score": 50.925687697038576,
+    "sources": [
+      {
+        "outlet": "theguardian.com",
+        "points": 388,
+        "source_type": "hn",
+        "title": "Be skeptical of OpenAI's rogue hacker agent story",
+        "url": "https://www.theguardian.com/technology/2026/jul/24/openai-rogue-hacker"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "ea0b9960b25ff2dec7aa3f223a52e5e74c785d4adf0a2930123fecd4c6f2a5d9",
+    "rank": 3,
+    "score": 43.90794152281271,
+    "sources": [
+      {
+        "outlet": "cnbc.com",
+        "points": 467,
+        "source_type": "hn",
+        "title": "Nvidia, Microsoft, Meta warn against overregulating open-weight models",
+        "url": "https://www.cnbc.com/2026/07/24/nvidia-microsoft-meta-open-weight-ai-models.html"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "e3f3a5eb05a479c86e2451c1b0669df4ff4ce58a90ec1b470e6a564cc5a90f77",
+    "rank": 4,
+    "score": 31.551937194840267,
     "sources": [
       {
         "outlet": "politico.com",
-        "points": 686,
+        "points": 1037,
         "source_type": "hn",
         "title": "Startup founders urge U.S. government not to shut off Chinese open weight AI",
         "url": "https://www.politico.com/news/2026/07/22/startup-founders-urge-trump-not-to-shut-off-chinese-open-weight-ai-01008992"
@@ -15,12 +71,12 @@
   },
   {
     "cluster_hash": "c2b72901f9de6df7eb0b36129dd16349fca005b86d9c88478c100ac3c76b8b0b",
-    "rank": 2,
-    "score": 52.881570618490336,
+    "rank": 5,
+    "score": 19.329173156735912,
     "sources": [
       {
         "outlet": "futurism.com",
-        "points": 579,
+        "points": 677,
         "source_type": "hn",
         "title": "AI Companies Are Trying to Hide a Staggering Amount of Debt",
         "url": "https://futurism.com/artificial-intelligence/ai-companies-hide-debt-off-balance-sheet"
@@ -28,86 +84,44 @@
     ]
   },
   {
-    "cluster_hash": "3c187b67b93c075884c458428bae4127e422a7f78b6920f13dbeef90eaf5ad5a",
-    "rank": 3,
-    "score": 35.468341512093765,
-    "sources": [
-      {
-        "outlet": "chatgpt.com",
-        "points": 1085,
-        "source_type": "hn",
-        "title": "Terence Tao's ChatGPT conversation about the Jacobian Conjecture counterexample",
-        "url": "https://chatgpt.com/share/6a5fdc7a-d6f8-83e8-bbea-8deb42cfed56"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "e3d4281bc1e8014e50627ded17f7ca04b25a34433283e5f89eba4fef1e4b294d",
-    "rank": 4,
-    "score": 25.587157201124565,
-    "sources": [
-      {
-        "outlet": "tombedor.dev",
-        "points": 186,
-        "source_type": "hn",
-        "title": "The arguments against open source AI are bad",
-        "url": "https://tombedor.dev/arguments-against-open-source-ai-are-very-bad/"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "c6adbc41c6a9598803a12d56a4ac86b37ce2b9a27ab06f22fb605d67b531d425",
-    "rank": 5,
-    "score": 24.682597880981355,
-    "sources": [
-      {
-        "outlet": "axios.com",
-        "points": 274,
-        "source_type": "hn",
-        "title": "OpenAI and Anthropic unite against open-weight AI risks to their bottom line",
-        "url": "https://www.axios.com/2026/07/22/openai-anthropic-open-models-trump-china"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "bcf5f1e30d849701bc840cb5513f74c806d7780867f3d328a32af2526d63435a",
+    "cluster_hash": "c0249fe790f20b7f078bf7020b590b214b81e691a054ba8eac8c6b9e4c0e9568",
     "rank": 6,
-    "score": 23.2291232895687,
+    "score": 14.98155756355609,
     "sources": [
       {
-        "outlet": "reuters.com",
-        "points": 254,
+        "outlet": "platform.claude.com",
+        "points": 285,
         "source_type": "hn",
-        "title": "Alphabet's cash burn raises alarm for Big Tech as AI spending climbs",
-        "url": "https://www.reuters.com/business/retail-consumer/alphabets-cash-burn-raises-alarm-big-tech-ai-spending-climbs-2026-07-23/"
+        "title": "Claude Cookbook",
+        "url": "https://platform.claude.com/cookbook/"
       }
     ]
   },
   {
-    "cluster_hash": "2f44a69f2a490321598597dde00108ef299c9c2817df1b2e1748e9a35abcdbcf",
+    "cluster_hash": "cb0acfe200913bdbcee5eeb5ed8799d24b548e7d356dbbd7751d4e0b152b8787",
     "rank": 7,
-    "score": 21.361251632650976,
+    "score": 12.130385582376066,
     "sources": [
       {
-        "outlet": "dylancastillo.co",
-        "points": 658,
+        "outlet": "simonwillison.net",
+        "points": 569,
         "source_type": "hn",
-        "title": "Are AI labs pelicanmaxxing?",
-        "url": "https://dylancastillo.co/posts/pelicanmaxxing.html"
+        "title": "OpenAI\u2019s accidental attack against Hugging Face is science fiction that happened",
+        "url": "https://simonwillison.net/2026/Jul/22/openai-cyberattack/"
       }
     ]
   },
   {
-    "cluster_hash": "cba996bb94a48bb06c88edac878608fb01ddc6eb242553a4b00ad6305ae91606",
+    "cluster_hash": "de7a1b7cfdbed7567025f8482bf3067cee630bc6b7955e1a878bc6f0d6f0cd83",
     "rank": 8,
-    "score": 16.824756919428314,
+    "score": 10.87429759941171,
     "sources": [
       {
-        "outlet": "arxiv.org",
-        "points": 21,
+        "outlet": "images.nvidia.com",
+        "points": 111,
         "source_type": "hn",
-        "title": "A Taxonomy of Omnicidal Futures Involving Artificial Intelligence",
-        "url": "https://arxiv.org/abs/2507.09369"
+        "title": "Open Weights and American AI Leadership [pdf]",
+        "url": "https://images.nvidia.com/pdf/Open-Weights-and-American-AI-Leadership.pdf"
       }
     ]
   }

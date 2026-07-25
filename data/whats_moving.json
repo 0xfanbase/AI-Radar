@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-24T00:06:06Z",
+  "generated_at": "2026-07-25T00:10:39Z",
   "topics": [
     {
       "daily_counts": [
@@ -7,8 +7,8 @@
         0,
         0,
         0,
-        0,
         1,
+        5,
         0
       ],
       "topic": "models",
@@ -34,11 +34,11 @@
         0,
         0,
         0,
-        0,
+        1,
         0
       ],
       "topic": "chips/compute",
-      "trend": "flat"
+      "trend": "accelerating"
     },
     {
       "daily_counts": [
@@ -46,8 +46,8 @@
         0,
         0,
         0,
-        0,
         1,
+        0,
         0
       ],
       "topic": "policy",
@@ -60,11 +60,11 @@
         0,
         0,
         0,
-        0,
+        1,
         0
       ],
       "topic": "products",
-      "trend": "flat"
+      "trend": "accelerating"
     },
     {
       "daily_counts": [
@@ -85,8 +85,8 @@
         0,
         0,
         0,
-        0,
         2,
+        1,
         0
       ],
       "topic": "open-source",
@@ -98,8 +98,8 @@
         0,
         0,
         0,
-        0,
         1,
+        0,
         0
       ],
       "topic": "China",
@@ -111,8 +111,8 @@
         0,
         0,
         0,
-        0,
         1,
+        0,
         0
       ],
       "topic": "funding",
