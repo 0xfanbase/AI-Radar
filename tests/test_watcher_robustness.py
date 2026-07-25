@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import json
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
 
 import pytest
 import requests
@@ -189,7 +188,7 @@ def _hn_hit(object_id, title, created_at, points=100):
 
 
 def test_one_malformed_hn_timestamp_skips_the_item_not_the_source(
-    requests_mock, caplog
+    requests_mock, caplog, tmp_path
 ):
     requests_mock.get("https://hn.algolia.com/robots.txt", status_code=404)
     requests_mock.get(
@@ -203,7 +202,7 @@ def test_one_malformed_hn_timestamp_skips_the_item_not_the_source(
     )
     session = watcher_http.build_session()
     with caplog.at_level("WARNING"):
-        items = hn.fetch_hn_items(session, now=FIXED_NOW, cache_dir=Path("/nonexistent"))
+        items = hn.fetch_hn_items(session, now=FIXED_NOW, cache_dir=tmp_path)
     # Previously the malformed timestamp raised ValueError and aborted
     # the WHOLE HN source for the day; now only that item is dropped.
     assert [i.extra["objectID"] for i in items] == ["2"]
