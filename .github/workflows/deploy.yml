@@ -99,18 +99,24 @@ jobs:
       - name: Install site generator dependencies
         run: pip install -r site/requirements.txt
 
+      # Explicit `tests` argument (not bare `python -m pytest`): pytest.ini's
+      # `testpaths` lists `tests site/tests` (a bare invocation covers both,
+      # for local convenience), but this step only needs to prove the root
+      # suite itself is green -- site/tests/ gets its own explicit run right
+      # below. Both dependency sets are already installed by this point in
+      # this workflow (unlike ci.yml, which deliberately runs its root-suite
+      # step before site/requirements.txt is installed), so a bare
+      # `python -m pytest` here would work too, just redundantly re-run
+      # site/tests/ a second time.
       - name: Run tests
-        run: python -m pytest
+        run: python -m pytest tests
 
-      # site/tests/ is a separate suite from tests/ (pytest.ini's own
-      # `testpaths = tests` deliberately doesn't collect it -- see
-      # site/tests/test_build.py's own docstring / IMPROVEMENT_BACKLOG.md)
-      # but it's exactly the suite that proves the site this job is about
-      # to build and publish is accessible and well-formed (one <h1>, one
-      # <main id="main-content">, skip-link first, sitemap/robots/404
-      # present) -- run it explicitly here too, before the build step,
-      # so a real accessibility/build regression blocks deploy the same
-      # way a tests/ regression does.
+      # site/tests/ is a separate suite from tests/, and exactly the suite
+      # that proves the site this job is about to build and publish is
+      # accessible and well-formed (one <h1>, one <main id="main-content">,
+      # skip-link first, sitemap/robots/404 present) -- run it explicitly
+      # here too, before the build step, so a real accessibility/build
+      # regression blocks deploy the same way a tests/ regression does.
       - name: Run site generator tests
         run: python -m pytest site/tests
 

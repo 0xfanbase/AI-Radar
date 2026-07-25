@@ -39,8 +39,17 @@ jobs:
       # (which had jinja2 installed for other reasons) and fatal in real CI.
       # If site deps were installed first, a recurrence of that misplacement
       # would silently pass this step; with this ordering it fails here.
+      #
+      # Explicit `tests` argument required (not bare `python -m pytest`):
+      # pytest.ini's `testpaths` now lists `tests site/tests` (so a local
+      # bare `python -m pytest` covers both suites -- see that file's own
+      # comment), but an explicit path on the command line overrides
+      # `testpaths` entirely. Without it, this step would try to collect
+      # site/tests/ too, before site/requirements.txt below is installed,
+      # and fail on a missing jinja2/markupsafe -- exactly the regression
+      # this comment is here to prevent a second occurrence of.
       - name: Run tests
-        run: python -m pytest
+        run: python -m pytest tests
 
       # site/tests/ exercises site/builders/*.py + site/lib/*.py, which
       # depend on jinja2/markupsafe -- requirements-dev.txt does not
@@ -49,9 +58,7 @@ jobs:
       - name: Install site generator dependencies
         run: pip install -r site/requirements.txt
 
-      # Mirrors deploy.yml's own existing "Run site generator tests" step
-      # -- pytest.ini's `testpaths = tests` deliberately does not collect
-      # site/tests/, so it must be run explicitly here too, or a PR could
-      # pass this gate while silently breaking the site builders.
+      # Mirrors deploy.yml's own existing "Run site generator tests" step.
+      # Explicit path, same reasoning as the "Run tests" step above.
       - name: Run site generator tests
         run: python -m pytest site/tests
