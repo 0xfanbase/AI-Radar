@@ -57,6 +57,12 @@ EXACT_PATH_SCHEMAS = {
     # this file daily). Added here as the simplest reasonable extension of
     # the given table; logged in IMPROVEMENT_BACKLOG.md.
     "data/whats_moving.json": "whats_moving",
+    # Shape-validated like every other persisted data/ artifact. Note the
+    # outbound-link gate (scripts/check_outbound_links.py) hard-fails ANY
+    # diff touching this frozen, human-curated file first -- this mapping
+    # is belt-and-suspenders for a human-reviewed curation commit, not a
+    # path for automated edits.
+    "data/trusted_domains.json": "trusted_domains",
 }
 
 # Any JSON file directly under content/cards/ (other than index.json,

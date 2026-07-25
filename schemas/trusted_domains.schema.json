@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://frontier-wire.example/schemas/trusted_domains.schema.json",
+  "title": "Trusted Domains",
+  "description": "Shape of data/trusted_domains.json, the human-curated, frozen outbound-link-vetting allowlist scripts/check_outbound_links.py enforces. This schema exists so the one persisted data/ artifact that previously had no schemas/*.schema.json counterpart is validated like everything else (per CLAUDE.md's schema conventions) -- it validates *shape only*; the file's contents remain human-curated and frozen (its own _meta.curation field), and any diff touching it still hard-fails the outbound-link CI gate regardless of schema validity.",
+  "type": "object",
+  "required": ["_meta", "hostnames", "path_scoped"],
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "description": "Human-written provenance/curation notes. description and curation are load-bearing (check_outbound_links.py's frozen-file guard cites _meta.curation); additional prose note fields may be added by a human curator without a schema change.",
+      "required": ["description", "curation"],
+      "properties": {
+        "description": { "type": "string", "minLength": 1 },
+        "curation": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": { "type": "string" }
+    },
+    "hostnames": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Exact-match trusted hostnames (lowercase; check_outbound_links.py's own matching is www.-insensitive, so a www. entry is allowed but redundant). Never a bare multi-tenant host like github.com/huggingface.co -- those belong in path_scoped[].",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9.-]*\\.[a-z][a-z0-9-]*$"
+      }
+    },
+    "path_scoped": {
+      "type": "array",
+      "uniqueItems": true,
+      "description": "Multi-tenant hosts trusted only under an explicit path prefix (e.g. huggingface.co/moonshotai/).",
+      "items": {
+        "type": "object",
+        "required": ["hostname", "path_prefix"],
+        "properties": {
+          "hostname": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.-]*\\.[a-z][a-z0-9-]*$"
+          },
+          "path_prefix": {
+            "type": "string",
+            "pattern": "^/.+"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

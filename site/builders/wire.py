@@ -33,12 +33,15 @@ logic here.
 from __future__ import annotations
 
 import importlib.util
+import logging
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
+
+log = logging.getLogger("frontier_wire.site.builders.wire")
 
 BUILDERS_DIR = Path(__file__).resolve().parent
 SITE_DIR = BUILDERS_DIR.parent
@@ -150,7 +153,23 @@ def cards_in_window(
     if today is None:
         today = datetime.now(timezone.utc).date()
     cutoff = today - timedelta(days=window_days - 1)
-    windowed = [c for c in cards if cutoff <= date.fromisoformat(str(c["date"])) <= today]
+    windowed = []
+    for c in cards:
+        try:
+            card_date = date.fromisoformat(str(c["date"]))
+        except ValueError:
+            # A schema-valid-but-non-ISO date must not crash the whole
+            # build (card.schema.json now pattern-locks `date`, but a
+            # pre-pattern artifact or hand-edited file could still carry
+            # one) -- skip the card loudly instead.
+            log.warning(
+                "card %r has unparseable date %r -- excluded from the wire window",
+                c.get("id"),
+                c.get("date"),
+            )
+            continue
+        if cutoff <= card_date <= today:
+            windowed.append(c)
     return sorted(windowed, key=_sort_key, reverse=True)
 
 

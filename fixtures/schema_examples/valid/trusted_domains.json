@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "description": "Example allowlist fixture for schema tests.",
+    "curation": "Human-curated and frozen; never edited by automated pipeline steps.",
+    "path_scoped_note": "Extra prose note fields are allowed."
+  },
+  "hostnames": [
+    "anthropic.com",
+    "asia.nikkei.com",
+    "blog.google",
+    "x.ai"
+  ],
+  "path_scoped": [
+    {
+      "hostname": "huggingface.co",
+      "path_prefix": "/moonshotai/"
+    }
+  ]
+}
