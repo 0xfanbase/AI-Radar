@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="/static/css/tokens.css">
   <link rel="stylesheet" href="/static/css/components.css">
   <link rel="stylesheet" href="/static/css/matrix.css">
-  <link rel="stylesheet" href="/static/css/matrix-tiles.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -25,7 +24,14 @@
   <canvas id="matrix-rain-canvas" aria-hidden="true"></canvas>
 
   <noscript>
+  {# matrix-tiles.css (~88KB of per-tile data-URI SVGs) is consumed ONLY
+     by the static no-JS rain fallback below -- linking it from <head>
+     shipped it render-blocking to every JS-enabled visitor who would
+     never instantiate a single rule from it. A <link> inside <noscript>
+     is valid HTML and only ever fetched when scripts are off, i.e.
+     exactly when the fallback that needs it renders. #}
   {% if matrix_rain_columns is defined and matrix_rain_columns %}
+  <link rel="stylesheet" href="/static/css/matrix-tiles.css">
   {% include "_matrix_rain.html" %}
   {% endif %}
   </noscript>

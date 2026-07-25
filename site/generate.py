@@ -380,10 +380,15 @@ def build_jinja_env() -> Environment:
 
 
 def copy_static(public_dir: Path) -> None:
+    """Copy site/static/ into the build output, EXCLUDING static/geo/:
+    the 252KB vendored Natural Earth GeoJSON is a build-time input only
+    (site/builders/map.py projects it to inline SVG during generation)
+    -- no rendered page ever fetches it, so shipping it in every deploy
+    was pure dead weight in the published artifact."""
     dest = public_dir / "static"
     if dest.exists():
         shutil.rmtree(dest)
-    shutil.copytree(STATIC_DIR, dest)
+    shutil.copytree(STATIC_DIR, dest, ignore=shutil.ignore_patterns("geo"))
 
 
 def write_matrix_tiles_css(unique_tiles: list[str], public_dir: Path) -> Path:

@@ -152,6 +152,31 @@ def test_matrix_css_and_matrix_tiles_css_are_copied_to_every_build(tmp_path):
     assert (tmp_path / "static" / "css" / "matrix-tiles.css").is_file()
 
 
+def test_geo_source_data_is_not_shipped_in_the_build(tmp_path):
+    # The 252KB vendored GeoJSON is a build-time input (map.py projects
+    # it to inline SVG); no page ever fetches it -- it must not be
+    # copied into the published artifact.
+    generate.generate(public_dir=tmp_path)
+    assert not (tmp_path / "static" / "geo").exists()
+
+
+def test_matrix_tiles_css_is_linked_only_inside_noscript(tmp_path):
+    # The ~88KB tile sheet's sole consumer is the <noscript> rain
+    # fallback -- a <head> link shipped it render-blocking to every
+    # JS-enabled visitor who never uses a byte of it. The link must live
+    # inside the same <noscript> block as its one consumer.
+    generate.generate(public_dir=tmp_path)
+    html = (tmp_path / "index.html").read_text(encoding="utf-8")
+    link_at = html.index("matrix-tiles.css")
+    noscript_start = html.index("<noscript>")
+    noscript_end = html.index("</noscript>")
+    assert noscript_start < link_at < noscript_end, (
+        "matrix-tiles.css must be linked inside <noscript>, not <head>"
+    )
+    head_end = html.index("</head>")
+    assert "matrix-tiles.css" not in html[:head_end]
+
+
 def test_matrix_tiles_css_contains_the_live_signal_green_hex_percent_encoded(tmp_path):
     generate.generate(public_dir=tmp_path)
     css = (tmp_path / "static" / "css" / "matrix-tiles.css").read_text(encoding="utf-8")
