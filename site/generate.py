@@ -666,9 +666,6 @@ def generate(public_dir: Path = PUBLIC_DIR) -> Path:
     # is exactly site/lib/svg_sparkline.py's already-logged duplicate-hex
     # bug this call avoids repeating).
     rain_color = read_color_token("signal-green")
-    # Also feeds base.html's inline data-URI favicon -- same
-    # single-source-of-truth rule as the rain color itself.
-    env.globals["signal_green_hex"] = rain_color
     rain_columns = matrix_rain.build_rain_columns(rain_color)
     unique_tiles = list(dict.fromkeys(col.tile_data_uri for col in rain_columns))
     tile_index = {uri: i for i, uri in enumerate(unique_tiles)}
