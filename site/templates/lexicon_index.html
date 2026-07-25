@@ -38,11 +38,17 @@
 </style>
 
 <h1>Lexicon</h1>
+{# No "auto-links from company profiles" claim here: company-profile
+   prose does NOT run through site/lib/linkify.py today (only the
+   retired Wire/Board builders do), and this page must not describe a
+   mechanism the live site doesn't have. If linkify is ever wired into
+   the company builder, this copy can say so again -- see
+   IMPROVEMENT_BACKLOG.md. #}
 <p class="lexicon-intro">A plain-English glossary of {{ total_terms }} AI
   terms, alphabetically ordered. Each term has a one-sentence definition,
   a deeper cut with a live source citation, and links to related terms --
-  the same terms a <a href="/companies/">company profile</a>'s own prose
-  auto-links on first mention.</p>
+  built so a newcomer reading a <a href="/companies/">company profile</a>
+  can look up any unfamiliar term here.</p>
 
 {% if entries %}
 <ul class="lexicon-list">

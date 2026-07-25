@@ -160,6 +160,30 @@ def test_geo_source_data_is_not_shipped_in_the_build(tmp_path):
     assert not (tmp_path / "static" / "geo").exists()
 
 
+def test_every_page_footer_links_to_the_lexicon(built_site):
+    # Reachability regression (2026-07 audit): the only page linking to
+    # /lexicon/ was 404.html, leaving all 31 lexicon pages outside the
+    # homepage's real link graph. The shared footer must carry the link
+    # on every rendered page.
+    # built_site is post-apply_base_path output, so internal hrefs carry
+    # the GitHub Pages project prefix.
+    lexicon_href = f'href="{generate.BASE_PATH}/lexicon/"'
+    for html_path in _all_html_files(built_site):
+        html = html_path.read_text(encoding="utf-8")
+        footer_start = html.index('class="site-footer"')
+        assert lexicon_href in html[footer_start:], (
+            f"{html_path} footer has no {lexicon_href} link"
+        )
+
+
+def test_lexicon_index_makes_no_false_autolink_claim(built_site):
+    # The live build does not run company-profile prose through
+    # linkify.py -- the Lexicon index must not tell readers it does.
+    html = (built_site / "lexicon" / "index.html").read_text(encoding="utf-8")
+    assert "auto-link" not in html
+    assert "auto-links" not in html
+
+
 def test_matrix_tiles_css_is_linked_only_inside_noscript(tmp_path):
     # The ~88KB tile sheet's sole consumer is the <noscript> rain
     # fallback -- a <head> link shipped it render-blocking to every

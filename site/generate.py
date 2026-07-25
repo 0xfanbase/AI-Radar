@@ -34,9 +34,14 @@ a real dead end, not just an unlinked-from-nav page. Current route table:
                             one entry point
     /companies/             Companies index (Phase 8)
     /companies/<slug>/      One fact-checked profile page per company (Phase 8)
-    /lexicon/               Lexicon index -- kept: term pages link back to it
-    /lexicon/<slug>/        one page per Lexicon term -- kept: company-profile
-                            prose auto-links into these via site/lib/linkify.py
+    /lexicon/               Lexicon index -- kept: term pages link back to it,
+                            and the site footer links here on every page
+    /lexicon/<slug>/        one page per Lexicon term -- kept: the index and
+                            each term's "Related terms" chips link into these
+                            (company-profile prose does NOT auto-link lexicon
+                            terms today -- linkify.py is only wired into the
+                            retired Wire/Board builders; see
+                            IMPROVEMENT_BACKLOG.md)
     /method/                Method & Audit -- compliance page, footer-linked
     /corrections/           Corrections -- compliance page, footer-linked
     /404.html               GitHub Pages' own not-found page
