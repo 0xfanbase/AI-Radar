@@ -176,6 +176,38 @@ def test_every_page_footer_links_to_the_lexicon(built_site):
         )
 
 
+def test_every_page_declares_a_favicon(built_site):
+    # B23: every page previously 404ed on /favicon.ico. The inline
+    # data-URI icon adds zero requests and its glyph color is sourced
+    # from tokens.css via generate.py's env global.
+    expected_color = "%23" + generate.read_color_token("signal-green").lstrip("#")
+    for html_path in _all_html_files(built_site):
+        html = html_path.read_text(encoding="utf-8")
+        assert 'rel="icon"' in html, f"{html_path} has no favicon link"
+        assert expected_color in html, (
+            f"{html_path} favicon does not carry the live signal-green token"
+        )
+
+
+def test_every_page_declares_its_own_canonical_url(built_site):
+    # B23: no page previously declared a canonical URL. Each page's
+    # canonical is derived from its own output path under SITE_BASE_URL.
+    for html_path in _all_html_files(built_site):
+        html = html_path.read_text(encoding="utf-8")
+        if html_path.name == "404.html":
+            assert 'rel="canonical"' not in html  # an error page isn't canonical
+            continue
+        rel = html_path.relative_to(built_site)
+        if rel.name == "index.html":
+            route = "/" + "/".join(rel.parts[:-1])
+            if not route.endswith("/"):
+                route += "/"
+        else:
+            route = "/" + "/".join(rel.parts)
+        expected = f'<link rel="canonical" href="{generate.SITE_BASE_URL}{route}">'
+        assert expected in html, f"{html_path} missing canonical {expected}"
+
+
 def test_lexicon_index_makes_no_false_autolink_claim(built_site):
     # The live build does not run company-profile prose through
     # linkify.py -- the Lexicon index must not tell readers it does.

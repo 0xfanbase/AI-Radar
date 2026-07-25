@@ -121,9 +121,20 @@ def test_build_steps_term_display_names_match_real_lexicon_terms():
         assert step.term == slug_to_entry[step.slug]["term"]
 
 
-def test_build_steps_raises_key_error_for_an_unresolvable_slug():
-    with pytest.raises(KeyError):
-        primer.build_steps(["not-a-real-slug"], REAL_LEXICON)
+def test_build_steps_skips_an_unresolvable_slug_with_a_warning(caplog):
+    # B16 regression: this used to raise KeyError -- one lexicon term
+    # renamed/retired by the analyst's auto-growth rule would have
+    # hard-crashed the whole site build via this optional page. It now
+    # degrades per-step (logged), and numbering is recomputed over the
+    # steps that resolve.
+    real_slug = primer.build_slug_to_entry(REAL_LEXICON)
+    some_real = next(iter(real_slug))
+    with caplog.at_level("WARNING"):
+        steps = primer.build_steps(["not-a-real-slug", some_real], REAL_LEXICON)
+    assert [s.slug for s in steps] == [some_real]
+    assert steps[0].step == 1
+    assert steps[0].total_steps == 1
+    assert any("not-a-real-slug" in rec.message for rec in caplog.records)
 
 
 # ---------------------------------------------------------------------------

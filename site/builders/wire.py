@@ -179,10 +179,31 @@ def available_months(cards: Iterable[Mapping[str, Any]]) -> list[str]:
     return sorted(months, reverse=True)
 
 
+# English month names, indexed 1-12. strftime("%B") is LOCALE-DEPENDENT:
+# under a non-English LC_TIME (a contributor's machine, a differently-
+# configured CI image) the archive headings would silently render in
+# that locale's language. An explicit table keeps the site's one
+# publication language deterministic everywhere.
+_MONTH_NAMES = (
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+)
+
+
 def month_label(year_month: str) -> str:
     """`"2026-07"` -> `"July 2026"`, for the archive page's human-readable
-    heading/nav text."""
-    return datetime.strptime(year_month, "%Y-%m").strftime("%B %Y")
+    heading/nav text. Locale-independent (see `_MONTH_NAMES`); raises
+    `ValueError` for a malformed `year_month`, same contract as the
+    previous strptime-based implementation."""
+    year_str, _, month_str = year_month.partition("-")
+    try:
+        year = int(year_str)
+        month = int(month_str)
+    except ValueError:
+        raise ValueError(f"invalid year-month string {year_month!r}") from None
+    if not 1 <= month <= 12:
+        raise ValueError(f"invalid month in {year_month!r}")
+    return f"{_MONTH_NAMES[month - 1]} {year}"
 
 
 def cards_for_month(cards: Iterable[Mapping[str, Any]], year_month: str) -> list[Mapping[str, Any]]:

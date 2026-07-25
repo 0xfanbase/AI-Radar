@@ -3,7 +3,10 @@
 
 {% block title %}{{ company.name }} — AI Frontier Wire{% endblock %}
 
-{% block meta_description %}{{ company.overview.text }}{% endblock %}
+{# C9: the builder truncates the overview at a sentence boundary near
+   155 chars (meta_description_from) -- the full paragraph ran to ~380
+   chars and search engines cut it mid-sentence arbitrarily. #}
+{% block meta_description %}{{ company.meta_description }}{% endblock %}
 
 {% block content %}
 
@@ -72,6 +75,18 @@
     display: flex;
     flex-direction: column;
     gap: 0.15rem;
+  }
+
+  /* C8: outbound citation/source links get a visible external-link cue
+     (they were indistinguishable from internal nav). The arrow is
+     decorative reinforcement -- the rel="external" attribute on each
+     anchor is the machine-readable signal. */
+  .company-profile__sources a::after,
+  .board-row__facts a[rel~="external"]::after,
+  .company-profile__facts a[rel~="external"]::after {
+    content: " \2197";
+    opacity: 0.7;
+    font-size: 0.85em;
   }
 
   .company-profile__roadmap-note {
@@ -157,7 +172,7 @@
       <span>{{ company.hq_city }}, {{ company.hq_country }}</span>
       <span>Founded {{ company.founded }}</span>
       {% if company.official_site_url %}
-      <a href="{{ company.official_site_url }}">{{ company.official_site_label }}</a>
+      <a href="{{ company.official_site_url }}" rel="noopener external">{{ company.official_site_label }}</a>
       {% endif %}
       <span class="{{ company.status_chip_class }}">{{ company.status_label }}</span>
     </p>
@@ -170,7 +185,7 @@
     {% if company.overview.citations %}
     <ul class="company-profile__sources" aria-label="Sources">
       {% for citation in company.overview.citations %}
-      <li><a href="{{ citation.url }}">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
+      <li><a href="{{ citation.url }}" rel="noopener external">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
       {% endfor %}
     </ul>
     {% endif %}
@@ -186,7 +201,7 @@
         {% if item.citations %}
         <ul class="company-profile__sources" aria-label="Sources">
           {% for citation in item.citations %}
-          <li><a href="{{ citation.url }}">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
+          <li><a href="{{ citation.url }}" rel="noopener external">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
           {% endfor %}
         </ul>
         {% endif %}
@@ -208,7 +223,7 @@
         {% if item.citations %}
         <ul class="company-profile__sources" aria-label="Sources">
           {% for citation in item.citations %}
-          <li><a href="{{ citation.url }}">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
+          <li><a href="{{ citation.url }}" rel="noopener external">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
           {% endfor %}
         </ul>
         {% endif %}
@@ -226,7 +241,7 @@
     {% if company.current_focus.citations %}
     <ul class="company-profile__sources" aria-label="Sources">
       {% for citation in company.current_focus.citations %}
-      <li><a href="{{ citation.url }}">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
+      <li><a href="{{ citation.url }}" rel="noopener external">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
       {% endfor %}
     </ul>
     {% endif %}
@@ -245,7 +260,7 @@
         {% if item.citations %}
         <ul class="company-profile__sources" aria-label="Sources">
           {% for citation in item.citations %}
-          <li><a href="{{ citation.url }}">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
+          <li><a href="{{ citation.url }}" rel="noopener external">{{ citation.outlet }}</a>{% if citation.quote %} -- &ldquo;{{ citation.quote }}&rdquo;{% endif %}</li>
           {% endfor %}
         </ul>
         {% endif %}
@@ -273,7 +288,7 @@
           <div><dt>Context window</dt><dd class="font-data">{{ row.context_window_display }}</dd></div>
           {# source_url is "" when the builder's scheme vetting rejected it
              (site/lib/safe_url.py) -- render the host as inert text then. #}
-          <div><dt>Source</dt><dd>{% if row.source_url %}<a href="{{ row.source_url }}">{{ row.source_host }}</a>{% else %}{{ row.source_host }}{% endif %}</dd></div>
+          <div><dt>Source</dt><dd>{% if row.source_url %}<a href="{{ row.source_url }}" rel="noopener external">{{ row.source_host }}</a>{% else %}{{ row.source_host }}{% endif %}</dd></div>
           <div><dt>Last verified</dt><dd class="font-data">{{ row.last_verified }}</dd></div>
         </dl>
         <p class="board-row__significance">{{ row.significance }}</p>

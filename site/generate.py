@@ -470,6 +470,40 @@ def apply_base_path(public_dir: Path, base_path: str = BASE_PATH) -> int:
     return rewritten
 
 
+def inject_canonical_links(public_dir: Path, base_url: str = SITE_BASE_URL) -> int:
+    """Insert one `<link rel="canonical" href="{base_url}{route}">` into
+    every generated page's `<head>`, deriving each page's route from its
+    own output path (`companies/anthropic/index.html` ->
+    `/companies/anthropic/`). No page previously declared a canonical
+    URL at all. Done as a post-render pass for the same reason
+    `apply_base_path` is one: threading a per-page route into every
+    independently-tested builder/template would touch all of them for a
+    value the output path already encodes. `404.html` is skipped -- an
+    error page is not a canonical resource. Returns the number of files
+    updated.
+    """
+    injected = 0
+    for html_path in public_dir.rglob("*.html"):
+        if html_path.name == "404.html":
+            continue
+        rel = html_path.relative_to(public_dir)
+        if rel.name == "index.html":
+            route = "/" + "/".join(rel.parts[:-1])
+            if not route.endswith("/"):
+                route += "/"
+        else:
+            route = "/" + "/".join(rel.parts)
+        text = html_path.read_text(encoding="utf-8")
+        if 'rel="canonical"' in text or "</head>" not in text:
+            continue
+        canonical = f'  <link rel="canonical" href="{base_url}{route}">\n'
+        html_path.write_text(
+            text.replace("</head>", canonical + "</head>", 1), encoding="utf-8"
+        )
+        injected += 1
+    return injected
+
+
 def collect_routes(
     cards: list[dict], lexicon_entries: list[dict], companies: list[dict] | None = None
 ) -> list[str]:
@@ -632,6 +666,9 @@ def generate(public_dir: Path = PUBLIC_DIR) -> Path:
     # is exactly site/lib/svg_sparkline.py's already-logged duplicate-hex
     # bug this call avoids repeating).
     rain_color = read_color_token("signal-green")
+    # Also feeds base.html's inline data-URI favicon -- same
+    # single-source-of-truth rule as the rain color itself.
+    env.globals["signal_green_hex"] = rain_color
     rain_columns = matrix_rain.build_rain_columns(rain_color)
     unique_tiles = list(dict.fromkeys(col.tile_data_uri for col in rain_columns))
     tile_index = {uri: i for i, uri in enumerate(unique_tiles)}
@@ -658,6 +695,7 @@ def generate(public_dir: Path = PUBLIC_DIR) -> Path:
     # documented sequencing).
     write_matrix_tiles_css(unique_tiles, public_dir)
     apply_base_path(public_dir)
+    inject_canonical_links(public_dir)
     return public_dir
 
 

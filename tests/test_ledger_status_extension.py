@@ -197,6 +197,28 @@ def test_reconcile_ledger_publishes_a_cluster_with_a_resulting_card():
     validate(new_ledger, "ledger")
 
 
+def test_reconcile_ledger_republish_clears_stale_verifier_outcome():
+    # B8 regression: an entry carrying a verifier_outcome from an earlier
+    # dropped attempt must not keep it when a later run publishes -- a
+    # published entry with last run's dropped_reason attached would
+    # poison the audit's read of the ledger.
+    ledger = _queued_ledger()
+    ledger["entries"][CLUSTER_HASH]["verifier_outcome"] = {
+        "last_attempted_at": "2026-07-08T12:00:00Z",
+        "dropped_reason": DROPPED_REASON_NO_CARD,
+    }
+    clusters = [_cluster()]
+    cards_by_cluster = {CLUSTER_HASH: _card()}
+
+    new_ledger = reconcile_ledger(clusters, ledger, cards_by_cluster, now=NOW)
+
+    entry = new_ledger["entries"][CLUSTER_HASH]
+    assert entry["status"] == "published"
+    assert entry["card_id"] == CARD_ID
+    assert "verifier_outcome" not in entry
+    validate(new_ledger, "ledger")
+
+
 def test_reconcile_ledger_does_not_mutate_the_input_ledger():
     ledger = _queued_ledger()
     original_entry = dict(ledger["entries"][CLUSTER_HASH])

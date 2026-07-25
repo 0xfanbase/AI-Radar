@@ -36,12 +36,15 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import logging
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
+
+log = logging.getLogger("frontier_wire.site.builders.primer")
 
 BUILDERS_DIR = Path(__file__).resolve().parent
 SITE_DIR = BUILDERS_DIR.parent
@@ -101,24 +104,35 @@ def build_steps(
     """Resolve `content/primer.json`'s ordered slug list against the
     loaded lexicon into the full ordered step sequence.
 
-    Raises `KeyError` (naming the offending slug) if any primer slug has
-    no matching lexicon entry -- a primer slug that can't resolve is a
-    content-authoring bug in `content/primer.json`/`content/lexicon.json`
-    themselves (both are hand-authored seed content, not user input), so
-    this fails loudly at build time rather than silently skipping a step
-    or rendering a broken link. All 10 of the real, committed primer
-    slugs resolve today -- see `site/tests/test_primer_builder.py`.
+    A primer slug with no matching lexicon entry is LOGGED AND SKIPPED,
+    with step numbering recomputed over the steps that do resolve -- not
+    raised on. An earlier version raised `KeyError` here on the theory
+    that both files were hand-authored seed content; that stopped being
+    true the day the analyst's lexicon auto-growth rule (CLAUDE.md's
+    corroboration procedure, step 7) started editing
+    `content/lexicon.json` on every run -- one renamed/retired lexicon
+    term would have hard-crashed the ENTIRE site build via this one
+    optional page's builder. Skipping degrades exactly like every
+    sibling builder's malformed-input path; the warning keeps the
+    content bug visible in build logs. All 10 of the real, committed
+    primer slugs resolve today -- see `site/tests/test_primer_builder.py`.
     """
     slug_to_entry = build_slug_to_entry(lexicon_entries)
-    total = len(primer_terms)
-    steps: list[PrimerStepView] = []
-    for i, slug in enumerate(primer_terms, start=1):
+    resolved: list[tuple[str, Mapping[str, Any]]] = []
+    for slug in primer_terms:
         if slug not in slug_to_entry:
-            raise KeyError(
-                f"content/primer.json references lexicon slug {slug!r}, "
-                "which has no matching content/lexicon.json entry"
+            log.warning(
+                "content/primer.json references lexicon slug %r, which has "
+                "no matching content/lexicon.json entry -- skipping this "
+                "primer step (fix the primer/lexicon content mismatch)",
+                slug,
             )
-        entry = slug_to_entry[slug]
+            continue
+        resolved.append((slug, slug_to_entry[slug]))
+
+    total = len(resolved)
+    steps: list[PrimerStepView] = []
+    for i, (slug, entry) in enumerate(resolved, start=1):
         steps.append(
             PrimerStepView(
                 step=i,
