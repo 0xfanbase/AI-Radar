@@ -4583,3 +4583,34 @@ instead of filing both as `high`. That's the same severity-mapping split
 the 2026-07-21 entry logged as "deserves its own deliberate pass, not a
 drive-by edit alongside an unrelated wording fix" -- this was that pass.
 
+## 2026-07-25 -- Companies-index disclosure design; replacement-Routine mechanics
+
+- **The `/companies/` index's company-name link sits outside the new
+  `<details>`/`<summary>` disclosure entirely, as a sibling, rather than
+  either design proposal's own placement** (one kept it inside `<summary>`;
+  the other moved it into the collapsed body, costing a second click to
+  reach a profile). Neither is wrong exactly, but the sibling placement
+  gets both properties at once -- never a descendant of a `<summary>`'s
+  own implicit toggle control (the real accessibility concern), and still
+  reachable in one click regardless of the disclosure's open/closed state.
+  Logged since neither independent design pass proposed this exact
+  structure. See `PROGRESS.md`'s matching entry for the full comparison.
+- **The replacement daily Routine's heartbeat re-uses `data/run_plan.json`**
+  (already written every run by `scripts/plan_run.py`, skip-day included)
+  rather than a new dedicated heartbeat file/schema. A missing
+  `chore(analyze)` commit touching that file on a given date is therefore
+  the whole failure signal -- simplest thing that could work, no new
+  schema needed for a problem `plan_run.py` already incidentally solves.
+- **Replacement Routine's cron set to 01:00 UTC**, a 2-hour buffer after
+  `watch.yml`'s 23:00 UTC cron, picked as a round, generously safe number
+  rather than measuring `watch.yml`'s actual typical runtime -- revisit
+  with a tighter number only if a real scheduling conflict ever actually
+  shows up in practice.
+- **The cross-company ledger-vs-Board staleness check this pass ran
+  (8 of 13 companies with unfetched primary-source items newer than their
+  published Board row) did not fetch or verify any of them.** That
+  verification is the ANALYST's own job under CLAUDE.md's corroboration
+  procedure; doing it ad hoc here would bypass the verifier step this
+  project's Hard Rule 1 depends on. Left for the (now replaced) daily loop
+  to actually process.
+
