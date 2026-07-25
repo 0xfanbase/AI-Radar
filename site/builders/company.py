@@ -194,14 +194,20 @@ class CompanyBoardRowView:
 @dataclass(frozen=True)
 class CompanyCardView:
     """One wire card mentioning this company, for the page's "Wire
-    history" section."""
+    history" section.
+
+    `retired_wire_href` (deliberately not `href`): the computed
+    `/wire/<YYYY-MM>/#card-<id>` target points into the Wire archive the
+    live build no longer generates (see site/generate.py's module
+    docstring) -- the template renders plain text today, and the name
+    makes any future template edit confront that before linking it."""
 
     id: str
     headline: str
     date: str
     status_label: str
     status_chip_class: str
-    href: str
+    retired_wire_href: str
 
 
 @dataclass(frozen=True)
@@ -329,7 +335,7 @@ def cards_for_company(
                 date=date_str,
                 status_label=status.upper(),
                 status_chip_class=status_chip,
-                href=f"/wire/{year_month}/#card-{card['id']}",
+                retired_wire_href=f"/wire/{year_month}/#card-{card['id']}",
             )
         )
     return views

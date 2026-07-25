@@ -192,7 +192,7 @@ def test_cards_for_company_filters_and_sorts_newest_first():
     ]
     views = company_builder.cards_for_company("anthropic", cards)
     assert [v.id for v in views] == ["card-2", "card-1"]
-    assert views[0].href == "/wire/2026-07/#card-card-2"
+    assert views[0].retired_wire_href == "/wire/2026-07/#card-card-2"
     assert views[0].status_label == "REPORTED"
 
 

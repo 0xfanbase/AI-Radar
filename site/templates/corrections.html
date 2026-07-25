@@ -70,7 +70,7 @@
     <p><strong>Was:</strong> {{ correction.original_claim }}</p>
     <p><strong>Now:</strong> {{ correction.corrected_claim }}</p>
     <p><strong>Why:</strong> {{ correction.reason }}</p>
-    {# correction.card_href is not linked here: it points into the retired
+    {# correction.retired_wire_href is not linked here: it points into the retired
        /wire/ archive, which this trimmed build no longer generates -- see
        site/generate.py's module docstring. The card id is still shown, as
        plain text, so the correction stays traceable to its original
