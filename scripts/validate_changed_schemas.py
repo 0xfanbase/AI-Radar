@@ -19,7 +19,6 @@ checked here.
 from __future__ import annotations
 
 import json
-import subprocess
 import sys
 from pathlib import Path
 
@@ -32,6 +31,7 @@ import jsonschema
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from scripts._git_changes import get_changed_files  # noqa: E402, F401
 from watcher.schema_validate import validate  # noqa: E402
 
 # Exact repo-relative path -> schema name (schemas/<name>.schema.json).
@@ -79,23 +79,6 @@ def schema_name_for_path(path: str) -> str | None:
     if normalized.startswith(COMPANIES_DIR_PREFIX) and normalized.endswith(".json"):
         return "company"
     return None
-
-
-def get_changed_files(ref: str = "HEAD") -> list[str]:
-    """Return the changed file paths in the working-tree diff against
-    `ref`, via ``git diff --name-only --no-renames`` -- identical
-    mechanism to ``check_path_allowlist.get_changed_files`` (see that
-    module's docstring for why ``--no-renames`` matters here too: it keeps
-    a renamed file's old and new paths as separate, independently-checked
-    entries)."""
-    result = subprocess.run(
-        ["git", "diff", "--name-only", "--no-renames", ref],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return [line for line in result.stdout.splitlines() if line.strip()]
 
 
 def validate_changed_files(

@@ -3,7 +3,8 @@
 against the frozen, human-curated ``data/trusted_domains.json`` allowlist.
 
 Modeled on ``scripts/check_path_allowlist.py``'s own CLI/diff-reading
-conventions (``git diff --name-only --no-renames HEAD``, print every
+conventions (the shared ``scripts/_git_changes.py`` helper: tracked diff
+against ``HEAD`` plus untracked, non-ignored files; print every
 violation, exit nonzero) -- this is a sibling CI gate, not a replacement
 for it. Where ``check_path_allowlist.py`` protects *which files* an
 automated run may touch, this script protects *what a card/company
@@ -69,7 +70,6 @@ from __future__ import annotations
 
 import ipaddress
 import json
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -84,6 +84,7 @@ import requests
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from scripts._git_changes import get_changed_files  # noqa: E402, F401
 from watcher import http  # noqa: E402
 from watcher.config import REQUEST_TIMEOUT_SECONDS  # noqa: E402
 
@@ -368,25 +369,9 @@ def check_citation_url(
 
 
 # --------------------------------------------------------------------------
-# get_changed_files -- identical mechanism to
-# scripts/check_path_allowlist.py's own (see that module's docstring for
-# why --no-renames matters).
-# --------------------------------------------------------------------------
-
-
-def get_changed_files(ref: str = "HEAD", repo_root: Path = REPO_ROOT) -> list[str]:
-    result = subprocess.run(
-        ["git", "diff", "--name-only", "--no-renames", ref],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return [line for line in result.stdout.splitlines() if line.strip()]
-
-
-# --------------------------------------------------------------------------
-# Orchestration
+# Orchestration -- get_changed_files comes from the shared
+# scripts/_git_changes.py helper (tracked diff + untracked files; see that
+# module's docstring for why untracked files must be included pre-commit).
 # --------------------------------------------------------------------------
 
 
