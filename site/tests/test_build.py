@@ -178,14 +178,35 @@ def test_every_page_footer_links_to_the_lexicon(built_site):
 
 def test_every_page_declares_a_favicon(built_site):
     # B23: every page previously 404ed on /favicon.ico. The inline
-    # data-URI icon adds zero requests and its glyph color is sourced
-    # from tokens.css via generate.py's env global.
-    expected_color = "%23" + generate.read_color_token("signal-green").lstrip("#")
+    # data-URI icon adds zero requests -- a dark-grey square with an
+    # italic "AI" wordmark, the site's fixed brand mark (not derived from
+    # a design token, unlike the rain layer's green).
     for html_path in _all_html_files(built_site):
         html = html_path.read_text(encoding="utf-8")
         assert 'rel="icon"' in html, f"{html_path} has no favicon link"
-        assert expected_color in html, (
-            f"{html_path} favicon does not carry the live signal-green token"
+        assert "%233A3A3C" in html, (
+            f"{html_path} favicon does not carry the dark-grey brand-mark color"
+        )
+        assert "%3EAI%3C" in html, (
+            f"{html_path} favicon does not carry the AI wordmark text"
+        )
+
+
+def test_every_page_declares_an_apple_touch_icon(built_site):
+    # iOS "Add to Home Screen" reads this link, not the favicon above --
+    # Safari's SVG support for apple-touch-icon is unreliable, so this
+    # points at a real PNG (same AI-on-dark-grey wordmark) rather than
+    # another inline data URI.
+    icon_path = built_site / "static" / "icons" / "apple-touch-icon.png"
+    assert icon_path.is_file(), "apple-touch-icon.png was not copied into the build"
+    assert icon_path.stat().st_size > 0
+    for html_path in _all_html_files(built_site):
+        html = html_path.read_text(encoding="utf-8")
+        assert 'rel="apple-touch-icon"' in html, (
+            f"{html_path} has no apple-touch-icon link"
+        )
+        assert f'href="{generate.BASE_PATH}/static/icons/apple-touch-icon.png"' in html, (
+            f"{html_path} apple-touch-icon does not point at the real asset"
         )
 
 

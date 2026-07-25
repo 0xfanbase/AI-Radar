@@ -6,12 +6,19 @@
   <title>{% block title %}AI Frontier Wire{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}A fact-checked daily wire of frontier AI news, a living tracker of frontier models, and a plain-English glossary.{% endblock %}">
   {# Inline data-URI favicon (zero extra requests; also stops every page
-     load 404ing on /favicon.ico in browsers that honor the link). The
-     glyph color comes from tokens.css via generate.py's env global --
-     never a second hardcoded copy of the signal-green hex. The default
-     keeps builder-level unit renders (which bypass generate.py's
-     globals) working. #}
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23000000'/%3E%3Ccircle cx='8' cy='8' r='4.5' fill='{{ (signal_green_hex | default('#39FF6E')) | replace('#', '%23') }}'/%3E%3C/svg%3E">
+     load 404ing on /favicon.ico in browsers that honor the link) -- a
+     dark-grey square with an italic "AI" wordmark, the site's icon/logo
+     mark. Static, not derived from a design token: this is a fixed brand
+     mark, not a themed UI color, so (unlike the rain layer's green) it
+     doesn't move with the palette. #}
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%233A3A3C'/%3E%3Ctext x='16' y='17' text-anchor='middle' dominant-baseline='central' font-family='Liberation Sans,Arial,sans-serif' font-style='italic' font-weight='700' font-size='19' fill='%23ffffff'%3EAI%3C/text%3E%3C/svg%3E">
+  {# iOS "Add to Home Screen" uses this, not the favicon above -- Safari's
+     support for SVG here is unreliable, so this is a real PNG. Deliberately
+     a full-bleed square with no pre-rounded corners/transparency: iOS
+     applies its own corner mask to whatever is here, and pre-rounding it
+     ourselves would double up with that mask. Same wordmark/colors as the
+     favicon so the two stay visually consistent. #}
+  <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
   <link rel="stylesheet" href="/static/css/tokens.css">
   <link rel="stylesheet" href="/static/css/components.css">
   <link rel="stylesheet" href="/static/css/matrix.css">
