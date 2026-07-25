@@ -4614,3 +4614,36 @@ drive-by edit alongside an unrelated wording fix" -- this was that pass.
   project's Hard Rule 1 depends on. Left for the (now replaced) daily loop
   to actually process.
 
+## 2026-07-25 -- Frontier Board schema has no access tier for a gated/restricted model
+
+- **`schemas/frontier_board.schema.json`'s `access` enum (`api`/
+  `open-weights`/`consumer`) has no value for a model that's real, shipped,
+  and named, but access-gated to a restricted set of users/partners** --
+  the concrete case that surfaced this: Anthropic's Claude Mythos 5, which
+  `content/companies/anthropic.json`'s own already-cited profile
+  describes as "Project-Glasswing-restricted." Forcing it into `api` would
+  overstate how available it actually is (Hard Rule 3, claims hygiene);
+  there's no honest existing value, so it was left off the Board entirely
+  rather than routed around with a wrong-but-technically-valid enum value.
+  A fourth enum value (`restricted`, or similar) is a real, deliberate
+  schema change, not a drive-by edit alongside the row additions this
+  same pass made -- logged here for an owner/PM checkpoint decision, per
+  this file's own precedent for the reputable-outlet table and other
+  named, deliberate-amendment-only lists.
+- **Not every already-cited "also mentioned" model in a company profile
+  held up under a direct fetch of its own primary source.** ByteDance
+  Seed's profile text says Seed 2.1 shipped "in Pro and lighter Turbo
+  variants," but fetching `seed.bytedance.com`'s own release post directly
+  found no distinct mention of a "Turbo" variant at all -- the existing,
+  already-published profile claim itself may be resting on thinner
+  sourcing than its citation implies. Not corrected in this pass (that's
+  a `data/pending_corrections.json` -- and possibly VERIFIER-re-check --
+  question about `content/companies/bytedance-seed.json`'s own existing
+  text, a different scope than this pass's Board-row additions); logged
+  so it isn't silently lost. Anthropic's Claude Sonnet 5 similarly wasn't
+  added as a new Board row: its own announcement page's byline date didn't
+  clearly line up with the profile's "alongside Fable 5" framing, and
+  neither context window nor modality could be confirmed from that one
+  fetch -- publishable with the ANALYST/VERIFIER's full two-pass procedure,
+  not from a single fetch here.
+

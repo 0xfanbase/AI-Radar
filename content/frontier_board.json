@@ -31,6 +31,21 @@
     "last_verified": "2026-07-09"
   },
   {
+    "lab": "DeepSeek",
+    "region": "China",
+    "company_id": "deepseek",
+    "model": "DeepSeek-V4 Flash",
+    "release_date": "2026-04-24",
+    "modality": [
+      "text"
+    ],
+    "context_window": 1000000,
+    "access": "open-weights",
+    "significance": "DeepSeek-V4 Flash is the lighter sibling released alongside V4 Pro on the same day: a 284-billion-parameter (13 billion active) model that, per DeepSeek's own release notes, shares the same 1-million-token default context now standard across the company's official services, at a smaller active-parameter footprint than Pro.",
+    "source_url": "https://api-docs.deepseek.com/news/news260424/",
+    "last_verified": "2026-07-25"
+  },
+  {
     "lab": "Ai2",
     "region": "open-weights",
     "company_id": "ai2",
@@ -75,6 +90,36 @@
     "significance": "OpenAI began a limited preview of its GPT-5.6 family on June 26, 2026, led by Sol, the line's new flagship, alongside the mid-tier Terra and the fast, low-cost Luna. Per OpenAI's own preview system card, Sol pushes coding, biology, and cybersecurity capability further than any prior OpenAI release and adds new \"max\"/\"ultra\" reasoning and multi-subagent modes for long, complex problems, alongside a hardened safety stack with activation-classifier monitoring. OpenAI initially limited the preview to a small group of trusted partners coordinated with the U.S. government; that restriction lifted on July 9, 2026, when all three variants -- Sol, Terra, and Luna -- reached general availability across ChatGPT, Codex, and the OpenAI API.",
     "source_url": "https://techcrunch.com/2026/07/09/openai-launches-its-new-family-of-models-with-gpt-5-6/",
     "last_verified": "2026-07-13"
+  },
+  {
+    "lab": "OpenAI",
+    "region": "US",
+    "company_id": "openai",
+    "model": "GPT-5.6 Terra",
+    "release_date": "2026-06-26",
+    "modality": [
+      "text"
+    ],
+    "context_window": null,
+    "access": "api",
+    "significance": "Terra is the GPT-5.6 family's mid-tier model, entering the same limited preview as flagship Sol on June 26, 2026 and reaching general availability alongside it on July 9, 2026 across ChatGPT, Codex, and the OpenAI API. OpenAI prices it at $2.50/$15 per million input/output tokens, well below Sol, for teams that don't need the flagship's full capability.",
+    "source_url": "https://techcrunch.com/2026/07/09/openai-launches-its-new-family-of-models-with-gpt-5-6/",
+    "last_verified": "2026-07-25"
+  },
+  {
+    "lab": "OpenAI",
+    "region": "US",
+    "company_id": "openai",
+    "model": "GPT-5.6 Luna",
+    "release_date": "2026-06-26",
+    "modality": [
+      "text"
+    ],
+    "context_window": null,
+    "access": "api",
+    "significance": "Luna is the GPT-5.6 family's fast, low-cost model, entering the same limited preview as flagship Sol on June 26, 2026 and reaching general availability alongside it on July 9, 2026 across ChatGPT, Codex, and the OpenAI API. OpenAI prices it at $1/$6 per million input/output tokens, the cheapest of the three variants.",
+    "source_url": "https://techcrunch.com/2026/07/09/openai-launches-its-new-family-of-models-with-gpt-5-6/",
+    "last_verified": "2026-07-25"
   },
   {
     "lab": "Google DeepMind",
@@ -156,6 +201,22 @@
     "significance": "Mistral Large 3, released December 2, 2025, is Mistral's flagship sparse mixture-of-experts model -- 675 billion total parameters with 41 billion active per token -- released fully open under the Apache 2.0 license alongside the smaller Ministral 3 family (14B/8B/3B). It adds image understanding on top of text, supports 40-plus languages, and Mistral's own announcement places it at #2 among open-weight non-reasoning models on the LMArena leaderboard at launch. Mistral is headquartered in the EU, not the US, but this Board -- per this project's own logged taxonomy decision -- buckets it into the US section rather than a third regional column, since the Board's three tracked lanes are US, China, and notable open-weights releases, not a geography-complete list of every lab's home country.",
     "source_url": "https://mistral.ai/news/mistral-3/",
     "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "Mistral",
+    "region": "US",
+    "company_id": "mistral",
+    "model": "Ministral 3",
+    "release_date": "2025-12-02",
+    "modality": [
+      "text",
+      "image"
+    ],
+    "context_window": null,
+    "access": "open-weights",
+    "significance": "Ministral 3, released the same day as flagship Mistral Large 3, is a smaller sibling family in three sizes (3B, 8B, 14B parameters), each with native image understanding alongside text, released fully open under the same Apache 2.0 license.",
+    "source_url": "https://mistral.ai/news/mistral-3/",
+    "last_verified": "2026-07-25"
   },
   {
     "lab": "Alibaba Qwen",

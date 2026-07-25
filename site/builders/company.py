@@ -3,8 +3,9 @@
 Renders each `content/companies/<slug>.json` (the wiki-like fact-checked
 profile written under `schemas/company.schema.json` -- Overview, What
 they've done, Strengths, Current focus, Roadmap, each claim independently
-cited) at `/companies/<slug>/`, plus a plain `/companies/` index page
-listing every company with a link.
+cited) at `/companies/<slug>/`, plus a `/companies/` index page listing
+every company with a link and, per row, a zero-JS `<details>` disclosure
+of its latest tracked Frontier Board model(s).
 
 That index page is this build's own explicit accessibility/graceful-
 degradation requirement: `site/builders/map.py`'s marker popovers already
@@ -12,9 +13,9 @@ link to `/companies/<slug>/` via a plain `<a class="map-marker__name">`
 that works with no JS (see that module's own docstring for the
 glyph-vs-name split), but the map itself is still one single page a
 reader has to land on first. `/companies/` is a second, independent path
-into every company profile -- a plain list, zero JS, reachable from the
-masthead nav -- so no company page is reachable *only* by finding it on
-the map.
+into every company profile -- reachable from the masthead nav, no JS
+required for any of it including the per-row disclosure -- so no company
+page is reachable *only* by finding it on the map.
 
 Two-step build usage, mirroring every sibling builder in this directory
 (`board.py`, `lexicon.py`, `map.py`):

@@ -62,7 +62,7 @@
   }
 
   /* Native disclosure triangle first (Firefox); Blink/WebKit's own marker
-     is suppressed and replaced with the ::after chevron below -- setting
+     is suppressed and replaced with the chevron span below -- setting
      `display: flex` on <summary> silently drops their marker entirely
      (true of board.html's identical pattern today too), so a visible
      affordance still needs to exist deliberately rather than being
@@ -71,13 +71,23 @@
     display: none;
   }
 
-  .companies-list__summary::after {
-    content: "\25B8";
+  /* A real, `aria-hidden="true"` element, not a ::after on <summary>
+     itself -- co-auditor finding (2026-07-25 pass): Chromium includes
+     ::after content in a <summary>'s own accessible name, and
+     aria-hidden cannot be applied to a pseudo-element directly, so the
+     decorative glyph was leaking into what a screen reader announces for
+     the whole disclosure control. Putting the swap on this span's own
+     ::before instead keeps the glyph purely decorative. */
+  .companies-list__chevron {
     margin-inline-start: auto;
     opacity: 0.7;
   }
 
-  .companies-list__disclosure[open] > .companies-list__summary::after {
+  .companies-list__chevron::before {
+    content: "\25B8";
+  }
+
+  .companies-list__disclosure[open] .companies-list__chevron::before {
     content: "\25BE";
   }
 
@@ -120,7 +130,8 @@
 <p class="companies-intro">Every AI lab this site tracks, alphabetically.
   Each name links to a fact-checked profile -- overview, track record,
   strengths, current focus, and the company's own stated roadmap, each
-  claim independently cited. Expand a row for its latest tracked model(s).
+  claim independently cited. Its latest tracked model is shown below the
+  name; expand a row for release date, access, and any earlier models.
   See the <a href="/">map</a> for the same companies plotted by
   headquarters.</p>
 
@@ -131,8 +142,10 @@
     <a class="companies-list__name" href="{{ company.href }}">{{ company.name }}</a>
     <details class="companies-list__disclosure">
       <summary class="companies-list__summary">
+        <span class="sr-only">{{ company.name }}: </span>
         <span class="{{ company.status_chip_class }}">{{ company.status_label }}</span>
         <span class="companies-list__meta">{{ company.hq_city }}, {{ company.hq_country }}{% if company.latest_model %} &middot; {{ company.latest_model }}{% endif %}</span>
+        <span class="companies-list__chevron" aria-hidden="true"></span>
       </summary>
       <div class="companies-list__body">
         {% if company.board_rows %}
