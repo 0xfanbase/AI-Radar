@@ -3,8 +3,9 @@
 Renders each `content/companies/<slug>.json` (the wiki-like fact-checked
 profile written under `schemas/company.schema.json` -- Overview, What
 they've done, Strengths, Current focus, Roadmap, each claim independently
-cited) at `/companies/<slug>/`, plus a plain `/companies/` index page
-listing every company with a link.
+cited) at `/companies/<slug>/`, plus a `/companies/` index page listing
+every company with a link and, per row, a zero-JS `<details>` disclosure
+of its latest tracked Frontier Board model(s).
 
 That index page is this build's own explicit accessibility/graceful-
 degradation requirement: `site/builders/map.py`'s marker popovers already
@@ -12,9 +13,9 @@ link to `/companies/<slug>/` via a plain `<a class="map-marker__name">`
 that works with no JS (see that module's own docstring for the
 glyph-vs-name split), but the map itself is still one single page a
 reader has to land on first. `/companies/` is a second, independent path
-into every company profile -- a plain list, zero JS, reachable from the
-masthead nav -- so no company page is reachable *only* by finding it on
-the map.
+into every company profile -- reachable from the masthead nav, no JS
+required for any of it including the per-row disclosure -- so no company
+page is reachable *only* by finding it on the map.
 
 Two-step build usage, mirroring every sibling builder in this directory
 (`board.py`, `lexicon.py`, `map.py`):
@@ -249,7 +250,7 @@ class CompanyView:
 
 @dataclass(frozen=True)
 class CompanyIndexRow:
-    """One row of the `/companies/` plain listing page."""
+    """One row of the `/companies/` listing page."""
 
     id: str
     name: str
@@ -258,6 +259,8 @@ class CompanyIndexRow:
     status_label: str
     status_chip_class: str
     href: str
+    latest_model: str
+    board_rows: tuple[CompanyBoardRowView, ...]
 
 
 # ---------------------------------------------------------------------------
@@ -438,21 +441,36 @@ def sorted_companies(companies: Iterable[Mapping[str, Any]]) -> list[Mapping[str
     return sorted(companies, key=lambda c: str(c.get("name", "")).lower())
 
 
-def build_index_context(companies: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    """Full Jinja context for `/companies/` (`company_index.html`)."""
+def build_index_context(
+    companies: Sequence[Mapping[str, Any]],
+    board_rows: Iterable[Mapping[str, Any]] = (),
+) -> dict[str, Any]:
+    """Full Jinja context for `/companies/` (`company_index.html`).
+
+    `board_rows` (default `()`, matching every other optional-collection
+    param in this module) is `content/frontier_board.json`'s rows -- each
+    company's own subset is computed via the same `board_rows_for_company`
+    the full profile page uses, so the index and the profile page can
+    never disagree on a company's latest model or its ordering."""
     ordered = sorted_companies(companies)
-    rows = [
-        CompanyIndexRow(
-            id=str(c["id"]),
-            name=str(c["name"]),
-            hq_city=str(c.get("hq_city", "")),
-            hq_country=str(c.get("hq_country", "")),
-            status_label=str(c.get("status", "")).upper(),
-            status_chip_class=STATUS_CHIP_CLASS.get(str(c.get("status", "")), "chip"),
-            href=f"/companies/{c['id']}/",
+    board_rows = list(board_rows)
+    rows = []
+    for c in ordered:
+        company_id = str(c["id"])
+        rows_for_company = tuple(board_rows_for_company(company_id, board_rows))
+        rows.append(
+            CompanyIndexRow(
+                id=company_id,
+                name=str(c["name"]),
+                hq_city=str(c.get("hq_city", "")),
+                hq_country=str(c.get("hq_country", "")),
+                status_label=str(c.get("status", "")).upper(),
+                status_chip_class=STATUS_CHIP_CLASS.get(str(c.get("status", "")), "chip"),
+                href=f"/companies/{company_id}/",
+                latest_model=rows_for_company[0].model if rows_for_company else "",
+                board_rows=rows_for_company,
+            )
         )
-        for c in ordered
-    ]
     return {
         "companies": rows,
         "total_companies": len(rows),
@@ -520,10 +538,13 @@ def render_company_page(
 
 
 def render_companies_index(
-    companies: Sequence[Mapping[str, Any]], *, env: Environment | None = None
+    companies: Sequence[Mapping[str, Any]],
+    board_rows: Iterable[Mapping[str, Any]] = (),
+    *,
+    env: Environment | None = None,
 ) -> str:
     jinja_env = env or build_jinja_env()
-    context = build_index_context(companies)
+    context = build_index_context(companies, board_rows)
     return jinja_env.get_template("company_index.html").render(**context)
 
 
@@ -546,7 +567,7 @@ def write_company_pages(
     cards = list(cards)
     written: list[Path] = []
 
-    index_html = render_companies_index(companies, env=env)
+    index_html = render_companies_index(companies, board_rows, env=env)
     index_path = public_dir / "companies" / "index.html"
     index_path.parent.mkdir(parents=True, exist_ok=True)
     index_path.write_text(index_html, encoding="utf-8")

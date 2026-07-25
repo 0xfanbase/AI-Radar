@@ -57,6 +57,21 @@
             "quote": "Scaling horizontally to 300 sub-agents executing 4,000 coordinated steps"
           }
         ]
+      },
+      {
+        "text": "It announced Kimi K3 on July 16, 2026: a 2.8-trillion-parameter model built on Moonshot's own Kimi Delta Attention architecture, with native vision and a 1-million-token context window. SCMP calls it the world's largest open-source AI model, though the open-weight release itself is still pending.",
+        "citations": [
+          {
+            "url": "https://kimi.com/blog/kimi-k3",
+            "outlet": "Moonshot AI (official blog)",
+            "quote": "The full model weights will be released by July 27, 2026"
+          },
+          {
+            "url": "https://www.scmp.com/tech/tech-trends/article/3360885/moonshot-ai-unveils-worlds-largest-open-source-ai-model-china-narrows-gap-us-rivals",
+            "outlet": "South China Morning Post",
+            "quote": "the world's largest open-source artificial intelligence model"
+          }
+        ]
       }
     ],
     "strengths": [
@@ -96,5 +111,5 @@
   "status": "confirmed",
   "generated_at": "2026-07-13T00:00:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-13"
+  "last_verified": "2026-07-25"
 }

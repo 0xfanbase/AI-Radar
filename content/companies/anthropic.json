@@ -64,6 +64,26 @@
             "quote": "built to be the most agentic Sonnet model yet"
           }
         ]
+      },
+      {
+        "text": "On June 12, 2026 the US government applied export controls to Claude Fable 5 and Claude Mythos 5, and Anthropic disabled both models for all customers to comply. Fable 5 returned for everyone on July 1 with a new safety classifier, but Mythos 5 was restored only for a set of US organizations under Anthropic's Glasswing program.",
+        "citations": [
+          {
+            "url": "https://www.anthropic.com/news/redeploying-fable-5",
+            "outlet": "Anthropic (official)",
+            "quote": "On Friday, June 12, the US government applied export controls to our newest models"
+          }
+        ]
+      },
+      {
+        "text": "On July 24, 2026 it added Claude Opus 5 to the lineup, priced and positioned between Fable 5 and Sonnet 5. Anthropic's own docs describe it as built for complex agentic coding and enterprise work, at roughly half Fable 5's per-token price for capability the company says comes close to it.",
+        "citations": [
+          {
+            "url": "https://platform.claude.com/docs/en/about-claude/models/overview",
+            "outlet": "Anthropic (official docs)",
+            "quote": "For complex agentic coding and enterprise work"
+          }
+        ]
       }
     ],
     "strengths": [
@@ -89,17 +109,12 @@
       }
     ],
     "current_focus": {
-      "text": "Anthropic's current lineup is led by Claude Fable 5 and the restricted Claude Mythos 5 as its top-tier models, with Claude Sonnet 5 positioned as a cheaper, still highly agentic mid-tier model that narrows the performance gap to the Opus-class flagship at a lower price, and the company's own developer guidance now points users who need maximum capability at Fable 5 rather than Opus 4.8.",
+      "text": "Anthropic's current lineup spans four models: Claude Fable 5 at the top tier (its Mythos 5 sibling remains restricted to a set of US organizations following a June 2026 export-control action), Claude Opus 5 next, and Claude Sonnet 5 as the cheaper mid-tier option. Anthropic's own pricing table lists Opus 5 at $5/$25 per million input/output tokens, between Fable 5's $10/$50 and Sonnet 5's $3/$15, and the company's own developer guidance still points users who need maximum capability at Fable 5. Opus 4.8, the prior Opus-branded flagship, has moved to a \"Legacy models\" table in Anthropic's own docs.",
       "citations": [
         {
           "url": "https://www.anthropic.com/news/claude-sonnet-5",
           "outlet": "Anthropic (official)",
           "quote": "its performance is close to that of Opus 4.8"
-        },
-        {
-          "url": "https://platform.claude.com/docs/en/about-claude/models/overview",
-          "outlet": "Anthropic (official docs)",
-          "quote": "the highest available capability, use Claude Fable 5"
         }
       ]
     },
@@ -108,5 +123,5 @@
   "status": "confirmed",
   "generated_at": "2026-07-13T00:00:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-13"
+  "last_verified": "2026-07-25"
 }

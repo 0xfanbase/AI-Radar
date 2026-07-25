@@ -43,6 +43,26 @@
             "quote": "Frontier performance, open access"
           }
         ]
+      },
+      {
+        "text": "In April 2026 it released Mistral Medium 3.5, filling the gap between Ministral 3 and Large 3: a 128-billion-parameter dense model on a 256,000-token context window, released open-weight under a Modified MIT license with parallel API pricing.",
+        "citations": [
+          {
+            "url": "https://docs.mistral.ai/getting-started/models/models_overview/",
+            "outlet": "Mistral AI (official docs)",
+            "quote": "Accepts both text and image input, with text output"
+          }
+        ]
+      },
+      {
+        "text": "On July 8, 2026 it released Robostral Navigate, an 8-billion-parameter embodied-navigation model that takes a single RGB camera feed and plain-language instructions to autonomously navigate complex environments. Mistral's own announcement doesn't state an access mechanism -- only a sales-contact page -- so this site can't yet classify it under any of its api/open-weights/consumer categories.",
+        "citations": [
+          {
+            "url": "https://mistral.ai/news/robostral-navigate/",
+            "outlet": "Mistral AI (official)",
+            "quote": "8B model taking RGB images and plain-language instructions to autonomously navigate complex environments"
+          }
+        ]
       }
     ],
     "strengths": [
@@ -93,5 +113,5 @@
   "status": "confirmed",
   "generated_at": "2026-07-13T00:00:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-13"
+  "last_verified": "2026-07-25"
 }

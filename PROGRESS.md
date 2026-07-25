@@ -7,6 +7,118 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-25 -- End-to-end fact-check pass across all 13 companies: Board grows from 18 to 31 rows
+
+Owner asked for an end-to-end refresh of every company and every Board row,
+fact-checked against the latest real information -- not just re-reading
+what's already cited on the site. Ran this as the same shape the daily
+ANALYST/VERIFIER pipeline is supposed to run, by hand: a research pass per
+company against live primary sources, then an independent adversarial
+verification pass (fable and opus, split across the 13 companies) that
+re-fetched every proposed source from scratch before anything was written,
+exactly like `CLAUDE.md`'s VERIFIER procedure. Nothing was published from
+the research pass alone.
+
+**The verification pass earned its keep.** Of 14 candidate items handed to
+it, 8 needed a real correction before they were publishable -- not typos,
+substantive problems: two quotes were stitched together from non-contiguous
+sentences (a direct Hard Rule 2 violation the research pass didn't catch),
+one quote silently substituted a word, one was 18 words over the 15-word
+cap, one model's actual release date was a full year off (2025 vs. 2026),
+and one date was sourced from the wrong blog post entirely (a later feature
+announcement, not the original release). Every correction is attributed to
+whichever verifier caught it in the diffs below.
+
+**31 Frontier Board rows, up from 18** (all schema-validated,
+`data/trusted_domains.json` extended with 3 newly-cited single-tenant
+hosts): Claude Opus 5 and Claude Sonnet 5 (Anthropic -- Opus 5 closes the
+open item from earlier the same day); Gemini 3.6 Flash and Gemini 3.5
+Flash-Lite (Google DeepMind); DeepSeek-V4 Flash; Ministral 3's sibling
+Mistral Medium 3.5 (release date corrected 05-22 -> 04-28 by fable, who
+found the model card version string the research pass missed); Kimi K3
+(Moonshot -- open-weight release still pending, per Moonshot's own blog,
+confirmed not yet on Hugging Face); Nemotron 3 Nano, Super, and Nano Omni
+(NVIDIA -- Nano's date corrected 2026 -> 2025-12-15 by opus); Seed 2.1
+Turbo (ByteDance); GPT-Live-1 and GPT-Live-1 mini (OpenAI). Every company
+profile touched by a new row also got its `what_theyve_done`/
+`current_focus`/`roadmap` prose updated to match, and every one of the 13
+profiles' `last_verified` moved to today, including the ones with no
+content change (DeepSeek, xAI, Zhipu AI, Alibaba Qwen) -- a genuine
+re-check with nothing new found is still a real verification.
+
+**Anthropic also got a real correction, not just an addition.** The
+research pass surfaced a Fable 5/Mythos 5 "suspension" rumor; fable's
+re-fetch found the real story is both more specific and more serious than
+that framing: a US government export-control action (June 12, 2026), not
+a voluntary pause, and Mythos 5 never fully returned -- only restored for
+a set of US organizations under Anthropic's own-named Glasswing program.
+Published the corrected version, not the vaguer first draft.
+
+**Deliberately NOT added, each for a stated reason (full detail in
+`IMPROVEMENT_BACKLOG.md`):** Qwen3.8-Max-Preview (opus: primary source
+returned HTTP 402 on re-fetch, only one reputable-table outlet --
+`reported`, not `confirmed`, under Hard Rule 1); Gemini 3.5 Flash Cyber and
+Robostral Navigate (both real, but their actual access mechanism --
+government/partner-pilot-only, and enterprise-sales-only respectively --
+has no honest value in `frontier_board.schema.json`'s `api`/`open-weights`/
+`consumer` enum; logged as a schema gap, not routed around); NVIDIA's
+"Nemotron-Labs-TwoTower" (opus's own reasoned call: a decoding-speed
+research technique on an already-tracked frozen backbone, not a release,
+version update, or access change under Hard Rule 8); Grok 4.6, GLM-5.5,
+Olmo 3.2/4, a DeepSeek V4 GA transition, and a Mistral Large 3 reasoning
+variant (all real leads that, on direct re-fetch, hadn't actually shipped
+or didn't clear the corroboration bar yet).
+
+**Also surfaced, not this pass's to fix:** ByteDance Seed's existing
+profile claim about a "Turbo" variant cited a blog post that, on direct
+re-fetch, never actually mentions Turbo -- the citation was pointing at the
+wrong page. The claim itself held up (a different ByteDance page confirms
+it with a benchmark table, now added as the citation), but this is exactly
+the kind of already-published, thinly-sourced claim `data/
+pending_corrections.json` exists for if a future case doesn't hold up.
+
+**Verified:** `python -m pytest` -- 1404 passed, 2 deselected (9 hardcoded
+row-count assertions in `site/tests/test_board_builder.py` moved 18 -> 31;
+3 Anthropic-specific board-row assertions across `test_company_builder.py`
+and `test_map_builder.py` updated for the new newest-first order --
+Opus 5, Sonnet 5, Fable 5 -- and the `what_theyve_done` count 3 -> 5).
+`python site/generate.py` clean build. Rendered and screenshotted the real
+companies index and Anthropic's own profile page post-build: every
+company's latest model, multi-row expansion, and citation list confirmed
+correct by eye, not just by test count.
+
+---
+
+## 2026-07-25 -- Co-auditor fixes on the companies-index disclosure; Frontier Board grows 4 rows from already-cited sourcing
+
+Follow-on to the same day's companies-index entry below. Two threads: (1) fable and opus's independent co-auditor pass against the actual shipped diff (not the design proposal) landed with a verdict of CONFIRMED WORKING plus a small number of real findings; (2) the owner asked to see "the full list of latest models" per company on expand -- e.g. Anthropic showing Opus 5, Fable 5, Sonnet, Haiku -- which turned out to be a data-coverage question, not a UI one: `board_rows_for_company` already renders every row that exists for a company (Meta AI's 2 rows already proved this), so the gap was that `content/frontier_board.json` tracks each lab's frontier-tier release(s), not a full product catalog.
+
+**Co-auditor findings, both fixed:** (1) opus measured the actual accessible name Chromium computes for each row's `<summary>` and found it omits the company name entirely (`"CONFIRMED Seattle, US · Olmo 3.1..."` with no "Ai2" anywhere) -- a real regression from moving the name link outside the disclosure, since `board.html`'s own precedent (the file this design cited) keeps the entity name inside its summary. Fixed with a new site-wide `.sr-only` utility (`site/static/css/components.css` -- clip-based, not `display:none`, so it stays in the accessibility tree) holding just the company name inside each summary. (2) Same finding also caught the decorative chevron leaking into that accessible name -- Chromium includes `::after` content in a `<summary>`'s own accessible name and `aria-hidden` cannot target a pseudo-element directly. Moved the glyph swap onto a real `<span aria-hidden="true">`'s own `::before` instead of `<summary>`'s `::after`; a real DOM attribute correctly excludes it. Verified after the fix, not just asserted: each row's `.sr-only` span now holds the exact company name (checked all 13), the chevron carries `aria-hidden="true"` on a real element. Also fixed: fable's docstring nit (`site/builders/company.py`'s module docstring still called the index "a plain list" after this build's own disclosure feature landed) and opus's copy nit (intro text said "expand ... for its latest model" when the latest model is now shown without expanding at all).
+
+**Frontier Board data**, `content/frontier_board.json`: read every one of the 13 companies' own already-cited profile prose (`content/companies/*.json`) looking for a second current model already named with a citation but not yet its own Board row -- same discipline as a PROFILER refresh, minus the fetch, since every citation involved was already published on this site. Found candidates for 6 companies; independently fetched each one's own cited primary source directly (not just re-reading the already-published prose) before writing anything, because two of the six turned out to not hold up: ByteDance's own page never actually named a distinct "Turbo" variant the way the existing profile text implied, and Anthropic's own Sonnet 5 announcement page's date didn't match the "alongside Fable 5" framing closely enough to publish with confidence (no independent context-window/modality confirmation either) -- both left alone rather than guessed at. **Added, each independently fetched and schema-validated:** DeepSeek-V4 Flash (284B/13B-active sibling to the existing V4 Pro row, same 1M context, same source/date), Ministral 3 (3B/8B/14B, text+image, same Dec 2, 2025 Mistral Large 3 announcement), and GPT-5.6 Terra + Luna (OpenAI's mid-tier and fast-tier siblings to the existing Sol row, same July 9 GA date and source, pricing cited, context window left `null` since neither fetch disclosed one for those two tiers specifically). Board grew from 14 to 18 rows, schema-validated clean.
+
+**Deliberately not added, and why (see IMPROVEMENT_BACKLOG.md for the full log):** Claude Opus 5 -- still the same unprocessed, unverified queue item from the entry below; nothing about this pass changes that. Claude Mythos 5 -- `schemas/frontier_board.schema.json`'s `access` enum is exactly `api`/`open-weights`/`consumer`, with no value that honestly represents a gated/restricted-access model, so adding it would mean misdescribing its access tier to force a fit; logged as a real schema gap rather than routed around. Claude Haiku -- zero citation anywhere in this repo's content for any current Haiku-tier Anthropic model; nothing to publish.
+
+**Verified:** `python -m pytest` -- 1404 passed, 2 deselected (no new tests added this round; existing coverage plus 9 hardcoded-row-count assertions in `site/tests/test_board_builder.py` updated from 14 to 18 to match the real content they exercise). `python site/generate.py` clean build. Rendered and inspected the real DOM post-fix (not just re-reading the template) confirming the `.sr-only` text and `aria-hidden` chevron both landed correctly, and that OpenAI's now-3-row expansion and DeepSeek/Mistral's now-2-row expansions render without any layout regression.
+
+---
+
+## 2026-07-25 -- Companies-index chip-wrap fix + latest-model disclosure; daily Routine's silent failure re-confirmed and replaced
+
+Owner reported (via a live screenshot) the `/companies/` index's Google DeepMind row wrapping its status chip onto its own orphaned second line, asked whether "the data sweeping" was working given Anthropic's page not reflecting a real "Claude Opus 5" release, asked whether company-profile dates update periodically (and to add a weekly scan if not), and asked for a simple expand affordance to see each company's latest tracked model(s) -- with fable and opus explicitly requested as co-project-directors (design) and co-auditors (verification), the same shape the 2026-07-21/07-25 entries above already established for open-ended maintenance asks.
+
+**Data-sweep diagnosis: the watcher is fine; the daily analyst/verifier/profiler loop is not, and re-confirmed to have never once produced a commit.** `data/queue.json`'s rank-1 cluster (score 1016 vs #2's 51) correctly identified "Introducing Claude Opus 5" from a primary anthropic.com source plus 1,222 HN points -- exactly the story class this pipeline exists to catch. It was never processed. Cross-referencing `data/ledger.json` against every tracked company's `official_domains[]` found this is systemic, not Anthropic-specific: 8 of 13 companies have primary-source lab news sitting `card_id: null` for 2+ weeks, dated newer than what's currently published on their Frontier Board row. Reading the unverified URL slugs only (Anthropic/Opus 5, Google DeepMind/Gemini 3.6 Flash family, Mistral/"Robostral", Alibaba Qwen/Qwen Image 3.0 read as the more confident likely model misses; the remaining backlog across DeepSeek/Meta/NVIDIA/OpenAI looks like non-board-worthy corporate news -- grants, partnerships, a policy PDF -- that would correctly still get skipped even once the loop runs). None of these were fetched or verified in this pass; that is deliberately the ANALYST's job under CLAUDE.md's corroboration procedure, not something to shortcut in a diagnostic check.
+
+Root cause, this time confirmed empirically rather than re-citing the 2026-07-21 diagnosis: the "AI Frontier Wire -- daily analyst+verifier refresh" Routine (created 2026-07-12) was still `enabled` and had fired again as recently as 2026-07-24T23:32 UTC -- but `git log --all` across this repo's entire history turns up zero commits carrying any analyst/verifier-run message, ever, while `watch.yml`'s own pure-code `chore(watch)` commits keep landing on schedule. The persistent-session shape (no completion notification on a silent failure), the frozen ANALYST/VERIFIER-only prompt (missing the later PROFILER step and `check_outbound_links.py` gate), and -- newly suspected, by direct analogy to a sibling project's own documented incident (see this Routine's own new prompt text) -- no explicit isolated-clone step, are the combined likely cause.
+
+**Fix, with the owner's explicit go-ahead obtained before any live scheduling infrastructure was touched** (offered three options -- activate now, review the prompt first, or just log the plan -- owner chose activate now): created a replacement Routine (`trig_01UhNoP2hPT76CX3uSiu1KWb`) -- fresh-session-per-fire (unlocks real completion notifications on failure, unlike the old persistent-session shape), an explicit `rm -rf`+clone+`register_repo_root` step every firing, a prompt that reads `.github/workflows/analyze.yml` live each run rather than embedding a copy that can go stale again, cron moved to 01:00 UTC (a 2-hour clear buffer after `watch.yml`'s 23:00 UTC, closing the race the 2026-07-21 entry flagged), and an unconditional heartbeat commit of `data/run_plan.json` every firing so a missed night is visible on `main` itself rather than requiring another manual git-log audit. The old broken Routine was deleted only after the new one was confirmed created (never a gap with zero working automation). A supervised live test was fired immediately rather than waiting ~21 hours for the natural cron -- its outcome is not yet known as of this commit; a following entry (or the owner directly) will confirm what actually happened rather than this one assuming success.
+
+**Companies-index UI fix**, `site/builders/company.py` + `site/templates/company_index.html` + `site/tests/test_company_builder.py`: the reported chip-wrap bug reproduced on 4 of 13 real companies at 390px (Alibaba Qwen, Anthropic, ByteDance Seed, Google DeepMind -- not just the one the owner happened to screenshot), confirmed by two independent design passes (fable, opus) each building and screenshotting the real page rather than guessing. Both agreed on the underlying mechanism (the status chip must never share a flex-wrap group with variable-length text unprotected) and on showing model/release_date/access -- not the full Board `significance` paragraph -- behind a per-row disclosure reusing the exact `<details>/<summary>` convention `board.html` already established, with every company (not just multi-model ones -- only `meta-ai` has 2 of the 13 real rows) getting uniform treatment. The two passes disagreed on one real point: opus flagged nesting the profile-link `<a>` inside `<summary>` as a genuine accessibility anti-pattern, citing (correctly, independently re-checked against the real markup) that `board.html`'s own row disclosures never put a link inside `<summary>`, only in the body; fable's design kept the link inside `<summary>`. Resolved with a synthesis neither proposed outright, favoring the verified-correct precedent: the company name stays a real, always-one-click `<a>` as a sibling of the `<details>` element, never a descendant of `<summary>`, while the latest model name now surfaces in the always-visible summary line regardless (opus's separate, undisputed point that hiding the one fact 12 of 13 companies have behind a click wastes the feature almost every time).
+
+Verified, not assumed: every one of the 13 real companies' status chip measured at an identical 27.125px rendered height at 390px (the orphaning bug structurally can't recur, not just patched for the one row that was screenshotted); keyboard-tabbed through the live build and confirmed exactly two focusable stops per row (name link, then disclosure toggle), Enter correctly toggles `details.open`, and the focus ring correctly inherits the site's signal-green token on both stops; full `python -m pytest` run fresh -- 1404 passed, 2 deselected, up from the prior 1398 baseline (a clean +6, matching the new tests added, zero regressions); `python site/generate.py` clean build. Screenshots (390px and 1280px, collapsed and forced-open) sent to the owner directly. A second, independent co-auditor pass (fable, opus again, against the real committed diff this time rather than the design proposal) was still running as of this commit -- see a following entry for its verdict.
+
+---
+
 ## 2026-07-25 -- Duo audit (Opus 5 + Fable 5, blind to each other) and Fable-directed fix pass
 
 Owner asked for a code + UI/UX audit run twice independently -- once on Opus 5, once on Fable

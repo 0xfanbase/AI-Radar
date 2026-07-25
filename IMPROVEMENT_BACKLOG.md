@@ -4583,3 +4583,140 @@ instead of filing both as `high`. That's the same severity-mapping split
 the 2026-07-21 entry logged as "deserves its own deliberate pass, not a
 drive-by edit alongside an unrelated wording fix" -- this was that pass.
 
+## 2026-07-25 -- Companies-index disclosure design; replacement-Routine mechanics
+
+- **The `/companies/` index's company-name link sits outside the new
+  `<details>`/`<summary>` disclosure entirely, as a sibling, rather than
+  either design proposal's own placement** (one kept it inside `<summary>`;
+  the other moved it into the collapsed body, costing a second click to
+  reach a profile). Neither is wrong exactly, but the sibling placement
+  gets both properties at once -- never a descendant of a `<summary>`'s
+  own implicit toggle control (the real accessibility concern), and still
+  reachable in one click regardless of the disclosure's open/closed state.
+  Logged since neither independent design pass proposed this exact
+  structure. See `PROGRESS.md`'s matching entry for the full comparison.
+- **The replacement daily Routine's heartbeat re-uses `data/run_plan.json`**
+  (already written every run by `scripts/plan_run.py`, skip-day included)
+  rather than a new dedicated heartbeat file/schema. A missing
+  `chore(analyze)` commit touching that file on a given date is therefore
+  the whole failure signal -- simplest thing that could work, no new
+  schema needed for a problem `plan_run.py` already incidentally solves.
+- **Replacement Routine's cron set to 01:00 UTC**, a 2-hour buffer after
+  `watch.yml`'s 23:00 UTC cron, picked as a round, generously safe number
+  rather than measuring `watch.yml`'s actual typical runtime -- revisit
+  with a tighter number only if a real scheduling conflict ever actually
+  shows up in practice.
+- **The cross-company ledger-vs-Board staleness check this pass ran
+  (8 of 13 companies with unfetched primary-source items newer than their
+  published Board row) did not fetch or verify any of them.** That
+  verification is the ANALYST's own job under CLAUDE.md's corroboration
+  procedure; doing it ad hoc here would bypass the verifier step this
+  project's Hard Rule 1 depends on. Left for the (now replaced) daily loop
+  to actually process.
+
+## 2026-07-25 -- Frontier Board schema has no access tier for a gated/restricted model
+
+- **`schemas/frontier_board.schema.json`'s `access` enum (`api`/
+  `open-weights`/`consumer`) has no value for a model that's real, shipped,
+  and named, but access-gated to a restricted set of users/partners** --
+  the concrete case that surfaced this: Anthropic's Claude Mythos 5, which
+  `content/companies/anthropic.json`'s own already-cited profile
+  describes as "Project-Glasswing-restricted." Forcing it into `api` would
+  overstate how available it actually is (Hard Rule 3, claims hygiene);
+  there's no honest existing value, so it was left off the Board entirely
+  rather than routed around with a wrong-but-technically-valid enum value.
+  A fourth enum value (`restricted`, or similar) is a real, deliberate
+  schema change, not a drive-by edit alongside the row additions this
+  same pass made -- logged here for an owner/PM checkpoint decision, per
+  this file's own precedent for the reputable-outlet table and other
+  named, deliberate-amendment-only lists.
+- **Not every already-cited "also mentioned" model in a company profile
+  held up under a direct fetch of its own primary source.** ByteDance
+  Seed's profile text says Seed 2.1 shipped "in Pro and lighter Turbo
+  variants," but fetching `seed.bytedance.com`'s own release post directly
+  found no distinct mention of a "Turbo" variant at all -- the existing,
+  already-published profile claim itself may be resting on thinner
+  sourcing than its citation implies. Not corrected in this pass (that's
+  a `data/pending_corrections.json` -- and possibly VERIFIER-re-check --
+  question about `content/companies/bytedance-seed.json`'s own existing
+  text, a different scope than this pass's Board-row additions); logged
+  so it isn't silently lost. Anthropic's Claude Sonnet 5 similarly wasn't
+  added as a new Board row: its own announcement page's byline date didn't
+  clearly line up with the profile's "alongside Fable 5" framing, and
+  neither context window nor modality could be confirmed from that one
+  fetch -- publishable with the ANALYST/VERIFIER's full two-pass procedure,
+  not from a single fetch here.
+
+## 2026-07-25 -- End-to-end fact-check pass: resolutions, new exclusions, and the schema gap confirmed as a real pattern
+
+Follow-on to this same day's two entries above and `PROGRESS.md`'s matching
+entry. The owner asked for a full 13-company refresh; this is the decision
+log for what a real two-pass verification (fable + opus, adversarial,
+independent re-fetch) did and didn't clear for publication.
+
+**Both open items from the entry directly above are now resolved, not
+still open:**
+- **Claude Sonnet 5**: fable found Anthropic's own newsroom index states
+  the date plainly ("Sonnet 5 (Jun 30, 2026)") and separately confirmed
+  modality/context window from the docs overview page. Added to the Board.
+- **ByteDance Seed's "Turbo" claim**: opus found the actual confirming page
+  (`seed.bytedance.com/en/seed2_1`, distinct from the originally-cited
+  blog post), with a benchmark table naming both Pro and Turbo. The
+  existing profile claim was accurate all along; only the citation was
+  pointing at the wrong URL. Fixed by adding the correct URL as a second
+  citation on the same sentence, not by rewriting the claim.
+
+**The Mythos-5 schema gap (logged two entries above) is a real, recurring
+pattern, not a one-off.** This pass hit it twice more independently:
+Gemini 3.5 Flash Cyber (Google's own words: "exclusively available to
+governments and trusted partners") and Mistral's Robostral Navigate (no
+stated access mechanism at all -- a sales-contact page only). Neither
+could be honestly forced into `api`/`open-weights`/`consumer`. Both are
+real, both are mentioned in their company's profile prose (where free text
+can carry the nuance), neither is a Board row. Three independent hits in
+one day raises this from "one odd case" to "the schema is missing a real
+category" -- still logged for a deliberate owner/PM checkpoint decision,
+not fixed ad hoc, but now with three concrete precedents to design against
+instead of one.
+
+**New exclusions this pass, each for a stated, re-checked reason:**
+- **Qwen3.8-Max-Preview** (Alibaba) -- real (SCMP corroborates), but its
+  claimed primary source (Qwen's own X/Twitter post) returned HTTP 402 on
+  opus's independent re-fetch, and only one reputable-table outlet exists.
+  Primary-unverifiable + one outlet clears `reported`, not `confirmed`,
+  under Hard Rule 1 -- correctly not a Board row yet. Revisit if the
+  primary post becomes fetchable again or a second table outlet covers it.
+- **"Nemotron-Labs-TwoTower"** (NVIDIA) -- opus's own reasoned judgment
+  call: an arXiv diffusion-decoding paper on NVIDIA's already-tracked,
+  frozen Nemotron-3-Nano-30B-A3B backbone, retaining 98.7% of baseline
+  quality (i.e. a research speed/quality trade-off, not an improvement) at
+  2.42x throughput. Fails all three Hard Rule 8 triggers: not a new
+  release, not a version update (same weights), not an access-tier change
+  (Nano was already open-weight). The `Nemotron-Labs-` prefix is itself
+  NVIDIA's own signal this sits outside the Nano/Super/Ultra product
+  taxonomy. If it's newsworthy at all, it's Wire-card material, not a
+  Board row -- and the Wire isn't in the live build regardless (see
+  `CLAUDE.md`'s "Site surface" section).
+- **Grok 4.6** (xAI/SpaceXAI) -- Musk's own social-media claim of a
+  finished pre-training run, no public release, no reputable-table outlet
+  coverage (only off-table aggregators), and x.ai's own docs still show
+  Grok 4.5 as newest. Doesn't clear the corroboration bar even at
+  `reported`, and hasn't shipped regardless.
+- **GLM-5.5** (Zhipu) -- "expected August 2026" appears only in
+  speculative third-party posts; no Zhipu statement found. Rumor, not a
+  lead.
+- **Olmo 3.2/4** (Ai2), a **DeepSeek V4 GA transition** (DeepSeek's own
+  homepage still reads "Preview" as of this pass's fetch, contradicting
+  secondary reports of a mid-July GA), and a **shipped Mistral Large 3
+  reasoning variant** ("coming soon" per Mistral's own site, unchanged) --
+  all real leads that didn't hold up on direct re-fetch. None added.
+
+**Cross-cutting finding worth its own line:** the first-pass research
+agents' proposed quotes needed correction in 5 of 14 cases -- two stitched
+from non-contiguous sentences (a direct Hard Rule 2 violation), one with a
+silent word substitution, one 18 words over the 15-word cap, and one
+citing the wrong announcement post entirely for its date. Every one of
+these would have passed a casual read. This is the concrete, in-repo
+evidence for why CLAUDE.md's VERIFIER role re-fetches everything from
+scratch instead of proofreading the ANALYST's draft -- a lesson this
+pass's own two-stage design was built to demonstrate, not just assert.

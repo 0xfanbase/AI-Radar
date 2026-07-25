@@ -8,12 +8,12 @@ than an `import site.builders.board` package import, since `site` is also
 a stdlib module name and this directory is deliberately not turned into
 an importable package -- see IMPROVEMENT_BACKLOG.md.
 
-Exercises the real, committed ``content/frontier_board.json`` (14 seeded
-rows spanning US/China/open-weights, per Phase 3) for the
-region/row-count/source-link assertions, and small synthetic row dicts
-for the pulse-eligibility assertions -- the real file's 14 rows all share
-today's own `last_verified` date, so a synthetic recent-vs-old pair is
-the only way to exercise both branches of the 7-day pulse window
+Exercises the real, committed ``content/frontier_board.json`` (31 seeded
+rows spanning US/China/open-weights, per Phase 3 plus later additions) for
+the region/row-count/source-link assertions, and small synthetic row
+dicts for the pulse-eligibility assertions -- the real file's rows don't
+reliably share one `last_verified` date, so a synthetic recent-vs-old
+pair is the only way to exercise both branches of the 7-day pulse window
 deterministically.
 """
 from __future__ import annotations
@@ -218,7 +218,7 @@ def test_build_regions_against_real_content_has_correct_total_row_count():
     rows = _load_real_board_rows()
     regions = board.build_regions(rows, today=REAL_CONTENT_TODAY)
     total = sum(len(region.rows) for region in regions)
-    assert total == len(rows) == 14
+    assert total == len(rows) == 31
 
 
 def test_build_regions_against_real_content_has_correct_per_region_counts():
@@ -255,7 +255,7 @@ def test_build_regions_handles_empty_input_gracefully():
 def test_build_context_reports_total_rows_and_pulse_window():
     rows = _load_real_board_rows()
     context = board.build_context(rows, today=REAL_CONTENT_TODAY)
-    assert context["total_rows"] == 14
+    assert context["total_rows"] == 31
     assert context["pulse_window_days"] == board.PULSE_WINDOW_DAYS
     assert context["today"] == "2026-07-09"
 
@@ -327,7 +327,7 @@ def test_render_board_page_facts_dt_labels_present_once_per_row():
     # Context window, and Source -- Lab/Model/Released/Access are
     # self-evident from their position/styling in the summary line.
     for label in ("Modality", "Context window", "Source"):
-        assert html.count(f"<dt>{label}</dt>") == 14
+        assert html.count(f"<dt>{label}</dt>") == 31
 
 
 def test_render_board_page_row_count_matches_real_content():
@@ -335,7 +335,7 @@ def test_render_board_page_row_count_matches_real_content():
     html = board.render_board_page(rows, today=REAL_CONTENT_TODAY)
     # One <details class="board-row"> per Board row, across all regions
     # combined.
-    assert html.count('<details class="board-row">') == 14
+    assert html.count('<details class="board-row">') == 31
 
 
 def test_render_board_page_never_uses_the_old_monospace_table_styling():
@@ -345,8 +345,8 @@ def test_render_board_page_never_uses_the_old_monospace_table_styling():
     # entirely -- monospace is now scoped only to the genuinely tabular
     # Released/Context values via `.font-data`.
     assert "board-table data" not in html
-    assert html.count('class="board-row__released font-data"') == 14
-    assert html.count('class="font-data"') == 14  # the Context window <dd>s
+    assert html.count('class="board-row__released font-data"') == 31
+    assert html.count('class="font-data"') == 31  # the Context window <dd>s
     assert 'class="board-row__significance"' in html
     assert 'board-row__significance font-data' not in html
 
@@ -383,7 +383,7 @@ def test_render_board_page_source_link_count_matches_row_count():
     # shared shell's own nav links (Board/Lexicon/Primer/... in
     # base.html, present on every page) don't inflate the count.
     hrefs = re.findall(r'<dd><a href="[^"]+">', html)
-    assert len(hrefs) == 14
+    assert len(hrefs) == 31
 
 
 # ---------------------------------------------------------------------------
@@ -409,7 +409,7 @@ def test_render_board_page_with_real_lexicon_linkifies_significance_prose():
         rows, today=REAL_CONTENT_TODAY, lexicon_entries=lexicon_entries
     )
     paragraphs = _significance_paragraphs(html)
-    assert len(paragraphs) == 14
+    assert len(paragraphs) == 31
     # The real seed data genuinely contains literal lexicon-term matches
     # (e.g. "context window" appears in several of the 14 rows'
     # significance prose) -- at least one significance paragraph must
@@ -427,7 +427,7 @@ def test_render_board_page_without_lexicon_entries_has_raw_text_and_no_lexicon_a
     # always links to "/lexicon/" (the Lexicon index page) on every page,
     # so the absence check must not be a whole-page substring search.
     paragraphs = _significance_paragraphs(html)
-    assert len(paragraphs) == 14
+    assert len(paragraphs) == 31
     assert not any("/lexicon/" in p for p in paragraphs)
     # A verbatim (HTML-special-character-free) fragment of the DeepSeek
     # row's real significance prose survives untouched.

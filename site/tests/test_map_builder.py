@@ -238,9 +238,11 @@ def test_marker_offset_europe_cluster_members_are_distinct_and_nonzero():
 
 
 def test_board_rows_for_company_finds_the_real_anthropic_row():
+    # Anthropic has 3 real rows as of the 2026-07-25 fact-check pass; Opus 5
+    # (2026-07-24) is now the newest, ahead of Sonnet 5 and Fable 5.
     rows = map_builder.board_rows_for_company("anthropic", REAL_BOARD_ROWS)
-    assert len(rows) == 1
-    assert rows[0]["model"] == "Claude Fable 5"
+    assert len(rows) == 3
+    assert rows[0]["model"] == "Claude Opus 5"
 
 
 def test_board_rows_for_company_empty_for_unknown_company():

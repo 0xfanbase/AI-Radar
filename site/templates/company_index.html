@@ -27,11 +27,20 @@
     gap: 0.85rem;
   }
 
-  .companies-list li {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.5rem 0.85rem;
+  /* The bordered "card" is the <li> itself, not the flex row inside it --
+     the old version put the border/flex on one element and let the
+     status chip join the same flex-wrap group as the name+HQ text, so
+     whichever row's combined text was a few px too wide for its viewport
+     orphaned the chip alone on its own second line (Companies cards
+     varying in height at 390px, logged in IMPROVEMENT_BACKLOG.md's
+     2026-07-25 duo-audit entry as deferred pending an exact repro). The
+     name link now sits outside the disclosure entirely (a real,
+     always-one-click link is never nested inside a <summary>'s implicit
+     toggle control -- board.html's own row disclosures keep the same
+     rule: no link ever lives inside a <summary>, only inside the body),
+     so the status chip's only wrap partner is the short HQ+model text
+     next to it, never the name. */
+  .companies-list__row {
     border: 1px solid var(--color-hairline);
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
@@ -39,12 +48,81 @@
   }
 
   .companies-list__name {
+    display: block;
     font-family: var(--font-display);
+    margin-bottom: 0.35rem;
   }
 
-  .companies-list__hq {
+  .companies-list__summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.35rem 0.85rem;
+    cursor: pointer;
+  }
+
+  /* Native disclosure triangle first (Firefox); Blink/WebKit's own marker
+     is suppressed and replaced with the chevron span below -- setting
+     `display: flex` on <summary> silently drops their marker entirely
+     (true of board.html's identical pattern today too), so a visible
+     affordance still needs to exist deliberately rather than being
+     assumed present. */
+  .companies-list__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  /* A real, `aria-hidden="true"` element, not a ::after on <summary>
+     itself -- co-auditor finding (2026-07-25 pass): Chromium includes
+     ::after content in a <summary>'s own accessible name, and
+     aria-hidden cannot be applied to a pseudo-element directly, so the
+     decorative glyph was leaking into what a screen reader announces for
+     the whole disclosure control. Putting the swap on this span's own
+     ::before instead keeps the glyph purely decorative. */
+  .companies-list__chevron {
+    margin-inline-start: auto;
+    opacity: 0.7;
+  }
+
+  .companies-list__chevron::before {
+    content: "\25B8";
+  }
+
+  .companies-list__disclosure[open] .companies-list__chevron::before {
+    content: "\25BE";
+  }
+
+  .companies-list__meta {
     opacity: 0.85;
     font-size: 0.9rem;
+  }
+
+  .companies-list__body {
+    margin-top: 0.6rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--color-hairline);
+  }
+
+  .companies-list__models {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+  }
+
+  .companies-list__models li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.3rem 1rem;
+  }
+
+  .companies-list__model {
+    font-family: var(--font-display);
+    color: var(--color-star-white);
+    flex: 1 1 10rem;
   }
 </style>
 
@@ -52,16 +130,39 @@
 <p class="companies-intro">Every AI lab this site tracks, alphabetically.
   Each name links to a fact-checked profile -- overview, track record,
   strengths, current focus, and the company's own stated roadmap, each
-  claim independently cited. See the <a href="/">map</a> for the same
-  companies plotted by headquarters.</p>
+  claim independently cited. Its latest tracked model is shown below the
+  name; expand a row for release date, access, and any earlier models.
+  See the <a href="/">map</a> for the same companies plotted by
+  headquarters.</p>
 
 {% if companies %}
 <ul class="companies-list">
   {% for company in companies %}
-  <li>
+  <li class="companies-list__row">
     <a class="companies-list__name" href="{{ company.href }}">{{ company.name }}</a>
-    <span class="companies-list__hq">{{ company.hq_city }}, {{ company.hq_country }}</span>
-    <span class="{{ company.status_chip_class }}">{{ company.status_label }}</span>
+    <details class="companies-list__disclosure">
+      <summary class="companies-list__summary">
+        <span class="sr-only">{{ company.name }}: </span>
+        <span class="{{ company.status_chip_class }}">{{ company.status_label }}</span>
+        <span class="companies-list__meta">{{ company.hq_city }}, {{ company.hq_country }}{% if company.latest_model %} &middot; {{ company.latest_model }}{% endif %}</span>
+        <span class="companies-list__chevron" aria-hidden="true"></span>
+      </summary>
+      <div class="companies-list__body">
+        {% if company.board_rows %}
+        <ul class="companies-list__models">
+          {% for row in company.board_rows %}
+          <li>
+            <span class="companies-list__model">{{ row.model }}</span>
+            <span class="font-data"><time datetime="{{ row.release_date }}">{{ row.release_date }}</time></span>
+            <span>{{ row.access }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p>No Frontier Board rows for {{ company.name }} yet.</p>
+        {% endif %}
+      </div>
+    </details>
   </li>
   {% endfor %}
 </ul>
