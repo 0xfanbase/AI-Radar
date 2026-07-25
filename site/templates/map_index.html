@@ -89,11 +89,23 @@
   }
 
   /*
-   * The pan/zoom "window" (requirement 1: real vertical presence, ~70-85%
-   * of viewport height on both desktop and mobile; requirement 3:
-   * `touch-action: none` so a one-finger drag pans the map instead of
-   * also scrolling the page). `overflow: hidden` is what actually clips
-   * the pannable/zoomable content -- see .map-wrap below.
+   * The pan/zoom "window" (requirement 1: real vertical presence on
+   * desktop; `overflow: hidden` is what actually clips the pannable/
+   * zoomable content -- see .map-wrap below).
+   *
+   * touch-action is `pan-y`, NOT `none`, at rest: `none` across a
+   * ~76vh-tall band turned the homepage into a scroll trap on touch
+   * devices -- a vertical swipe landing anywhere on the map panned the
+   * (unzoomed, unpannable) map instead of scrolling the page, with no
+   * way past it but the thin margins. `pan-y` hands vertical swipes to
+   * the browser (page scrolls normally) while horizontal drags and
+   * two-finger pinches still reach map.js's own Pointer Event handlers
+   * (pinch-zoom is deliberately NOT granted to the browser here).
+   * map.js tightens this to `none` dynamically -- inline style -- only
+   * while the map is actually zoomed in past its rest scale (the only
+   * state where vertical map panning exists to protect), and restores
+   * `pan-y` on reset/zoom-out. With no JS at all this stays `pan-y`
+   * forever: correct, since a no-JS map has no pan to trap scroll for.
    */
   .map-viewport {
     position: relative;
@@ -102,10 +114,23 @@
     min-height: 22rem;
     max-height: 50rem;
     overflow: hidden;
-    touch-action: none;
+    touch-action: pan-y;
     background: var(--color-panel);
     border-block: 1px solid var(--color-hairline);
     cursor: grab;
+  }
+
+  /* Narrow viewports: the default view fits the WHOLE world to the
+     screen width (map.js's fillScale returns 1x under its breakpoint --
+     the previous fill-to-height default zoomed a 390px phone to ~3.2x
+     and cropped 10 of 13 markers out of the initial view), so the
+     viewport doesn't need desktop's 76vh: cap it enough to hold the
+     letterboxed world strip plus an opened popover (whose own
+     max-height is 22rem = the min-height floor below). */
+  @media (max-width: 40rem) {
+    .map-viewport {
+      height: 48vh;
+    }
   }
 
   .map-viewport.is-panning {
@@ -176,26 +201,46 @@
    * HQ cluster (SF Bay Area, Beijing/Hangzhou) rendering as one
    * unreadable jumble of overlapping labels: they nudge a clustered
    * marker's whole box away from its true `left/top: N%` anchor point
-   * by a FIXED on-screen distance, composed into the same translate()
-   * as the existing -50%/-50% centering -- deliberately BEFORE the
-   * counter-scale, not after, so the nudge shrinks proportionally as
-   * the user zooms in (exactly like every other marker's own rendered
-   * size), converging back toward the marker's true position at high
-   * zoom rather than staying a fixed, increasingly-wrong-looking offset
-   * forever. This is a real fix for a bug in an earlier version of this
-   * rule, which folded the same declutter offset directly into
-   * `pct_x`/`pct_y` -- a PERCENTAGE of the map's own rendered box, which
-   * made the offset's real on-screen distance shrink on a narrower
-   * viewport instead of staying constant, so the exact same offset
-   * table that (mostly) worked on desktop rendered visibly tighter and
-   * more collision-prone on mobile, where the map box itself is
-   * smallest. A `var(--dx, 0px)` fixed-pixel transform has no such
-   * dependency on the map's own rendered size.
+   * by a FIXED on-screen distance.
+   *
+   * ORDER IS LOAD-BEARING: the counter-scale comes FIRST in this
+   * transform list, so the centering/declutter translate happens inside
+   * the already-counter-scaled local space and renders as a CONSTANT
+   * real screen distance at every zoom level -- the same invariant that
+   * keeps the marker's own rendered size constant. (An earlier version
+   * of this rule put the translate before the counter-scale, which
+   * multiplied both the -50% centering and the declutter nudge by the
+   * live map scale: measured 37.5px -> 72.7px of drift between
+   * anthropic/openai across two zoom-ins on desktop, and a 3.2x-
+   * inflated cluster layout on the mobile default view -- the offsets
+   * only ever looked right at scale 1. transform-origin: 0 0 is part of
+   * the same fix: with the default 50% 50% origin, the leading scale()
+   * introduces its own scale-dependent displacement.) At scale 1 -- and
+   * therefore in the no-JS render, where --map-scale never gets set --
+   * this composes to exactly the plain translate it always was.
    */
   .map-marker {
     position: absolute;
-    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px)))
-      scale(calc(1 / var(--map-scale, 1)));
+    transform-origin: 0 0;
+    transform: scale(calc(1 / var(--map-scale, 1)))
+      translate(
+        calc(-50% + var(--dx, 0px) * var(--offset-scale, 1)),
+        calc(-50% + var(--dy, 0px) * var(--offset-scale, 1))
+      );
+  }
+
+  /* Narrow viewports: shrink every declutter offset to 60% -- at a
+     390px map width the US cluster's own anchor sits only ~63px from
+     the left edge, so the full-size -96px column offset pushed three
+     markers clean off the canvas (and, with fit-width pan clamped at
+     rest, unreachable without zooming first). 0.6 keeps every dot
+     on-canvas at 360-640px widths while the clusters stay separated
+     (verified with a headless bounding-box overlap check across all
+     three clusters). */
+  @media (max-width: 40rem) {
+    .map-marker {
+      --offset-scale: 0.6;
+    }
   }
 
   /* NOT bumped to a 44px min touch target like the zoom/pan controls
@@ -236,9 +281,14 @@
     background: var(--color-star-white);
   }
 
+  /* 0.65rem/0.75rem (10.4px/12px), up from 0.6/0.7 -- the old sizes sat
+     below a legible floor for body-adjacent UI text. Bump verified with
+     a headless bounding-box overlap re-check across all three hand-
+     offset clusters at 1280px and 390px (the MARKER_OFFSET_PX table's
+     gaps absorb the ~6% label growth). */
   .map-marker__badge {
     font-family: var(--font-data);
-    font-size: 0.6rem;
+    font-size: 0.65rem;
     letter-spacing: 0.03em;
     color: var(--color-bg);
     background: var(--color-star-white);
@@ -249,7 +299,7 @@
   .map-marker__name {
     display: block;
     font-family: var(--font-display);
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     white-space: nowrap;
     text-decoration: none;
     color: var(--color-ink);

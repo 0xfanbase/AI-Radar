@@ -101,10 +101,30 @@
     function clampPopoverOnScreen(popover) {
       popover.style.transform = ""; // reset before measuring fresh
       var rect = popover.getBoundingClientRect();
-      var maxRight = window.innerWidth - EDGE_MARGIN;
-      var minLeft = EDGE_MARGIN;
-      var maxBottom = window.innerHeight - EDGE_MARGIN;
-      var minTop = EDGE_MARGIN;
+      // Clamp within the intersection of the true window and the map
+      // viewport's own box: .map-viewport is overflow:hidden, so a
+      // popover pushed merely inside the WINDOW can still be clipped by
+      // the viewport's edge whenever the viewport is shorter than the
+      // window (the narrow-viewport 48vh map, or a partially-scrolled
+      // page). The viewport element is looked up fresh here rather than
+      // via the pan/zoom controller's own variable so this stays correct
+      // even if that controller bails out early.
+      var boundLeft = 0;
+      var boundTop = 0;
+      var boundRight = window.innerWidth;
+      var boundBottom = window.innerHeight;
+      var vpEl = document.getElementById("map-viewport");
+      if (vpEl) {
+        var vpRect = vpEl.getBoundingClientRect();
+        boundLeft = Math.max(boundLeft, vpRect.left);
+        boundTop = Math.max(boundTop, vpRect.top);
+        boundRight = Math.min(boundRight, vpRect.right);
+        boundBottom = Math.min(boundBottom, vpRect.bottom);
+      }
+      var maxRight = boundRight - EDGE_MARGIN;
+      var minLeft = boundLeft + EDGE_MARGIN;
+      var maxBottom = boundBottom - EDGE_MARGIN;
+      var minTop = boundTop + EDGE_MARGIN;
       var dx = 0;
       var dy = 0;
       if (rect.right > maxRight) {
@@ -172,6 +192,23 @@
       return false;
     }
 
+    function closeAllPopovers(except) {
+      for (var j = 0; j < markers.length; j++) {
+        if (markers[j] !== except) {
+          setExpanded(markers[j], false);
+        }
+      }
+    }
+
+    function anyPopoverOpen() {
+      for (var j = 0; j < markers.length; j++) {
+        if (isExpanded(markers[j])) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     for (var i = 0; i < markers.length; i++) {
       (function (marker) {
         var glyph = glyphOf(marker);
@@ -188,10 +225,77 @@
           // closeScanPanel()'s own comment below for why "show
           // everything at once" moved off the map entirely.
           closeScanPanel();
-          setExpanded(marker, !isExpanded(marker));
+          // One popover at a time: opening a second marker previously
+          // STACKED it over the first (they could pile up until one
+          // blocked clicks on a third marker underneath -- the same
+          // failure mode the "Scan all labs" panel replaced for the
+          // bulk case, still reachable one click at a time). Capture
+          // this marker's own state before closing the others, then
+          // toggle it alone.
+          var wasOpen = isExpanded(marker);
+          closeAllPopovers(marker);
+          setExpanded(marker, !wasOpen);
         });
       })(markers[i]);
     }
+
+    // Escape closes whatever map overlay is open (any marker popover
+    // and/or the scan panel) -- standard dismissal affordance neither
+    // surface had. Focus is returned to the popover's own marker glyph
+    // when focus was inside the popover being hidden, so keyboard users
+    // aren't dumped to <body>.
+    document.addEventListener("keydown", function (event) {
+      if (event.key !== "Escape" && event.key !== "Esc") {
+        return;
+      }
+      var active = document.activeElement;
+      for (var j = 0; j < markers.length; j++) {
+        var popover = popoverOf(markers[j]);
+        if (
+          popover &&
+          !popover.hasAttribute("hidden") &&
+          active &&
+          popover.contains(active)
+        ) {
+          var glyph = glyphOf(markers[j]);
+          if (glyph) {
+            glyph.focus();
+          }
+        }
+      }
+      closeAllPopovers(null);
+      closeScanPanel();
+    });
+
+    // Clicking the map outside any marker/popover/control dismisses the
+    // open popover (and the scan panel) -- the other half of the
+    // standard dismissal affordance. Runs at the document level in the
+    // bubble phase, so a marker glyph's own click handler (above) has
+    // already consumed the drag-suppression flag and handled its own
+    // toggle before this ever fires; the closest() guards keep this
+    // from double-acting on those same clicks.
+    document.addEventListener("click", function (event) {
+      if (!anyPopoverOpen() && !scanOpen) {
+        return;
+      }
+      // A click synthesized at the end of a drag/pan gesture is not a
+      // dismissal request -- consume the suppression flag exactly like
+      // the glyph handler would and leave everything open.
+      if (wasProbablyADrag()) {
+        return;
+      }
+      var target = event.target;
+      if (
+        target.closest &&
+        target.closest(
+          ".map-marker, .map-scan, .map-toggle, .map-zoom-btn"
+        )
+      ) {
+        return;
+      }
+      closeAllPopovers(null);
+      closeScanPanel();
+    });
 
     // -----------------------------------------------------------------
     // "Scan all labs" overview panel -- replaces the old "Expand all"
@@ -301,8 +405,22 @@
     var MAX_SCALE = 6;
     var WHEEL_ZOOM_RATIO = 1.15;
     var BUTTON_ZOOM_RATIO = 1.4;
+    // Below this window width the default/reset view CONTAINS the whole
+    // world (scale 1, letterboxed) instead of filling the viewport's
+    // height: the fill-to-height default meant a 390px phone landed at
+    // ~3.2x zoom with 10 of 13 lab markers cropped out of the initial
+    // view entirely. 640px matches map_index.html's own 40rem layout
+    // breakpoint.
+    var FIT_WIDTH_BREAKPOINT = 640;
 
     var state = { scale: MIN_SCALE, x: 0, y: 0 };
+    // The scale the current default/reset view uses -- kept up to date by
+    // resetView()/the resize handler, and compared against in commit()'s
+    // touch-action toggle: at rest there is no vertical map panning to
+    // protect (the content fits or letterboxes vertically), so vertical
+    // touch swipes belong to the page; zoomed in past rest, they belong
+    // to the map.
+    var restScale = MIN_SCALE;
 
     // The wrap's own natural (scale 1) layout size never changes with
     // zoom (CSS `transform` doesn't affect layout, only paint) -- it's
@@ -366,6 +484,17 @@
       wrap.style.setProperty("--map-scale", String(state.scale));
     }
 
+    function updateTouchAction() {
+      // See the .map-viewport CSS comment (map_index.html): `pan-y` at
+      // rest so the map never traps page scroll on touch devices,
+      // tightened to `none` only while actually zoomed in past the rest
+      // scale -- the only state where vertical map panning exists for
+      // touch-action to protect. The small epsilon absorbs float noise
+      // from ratio-multiplied zoom steps landing back on the rest scale.
+      viewport.style.touchAction =
+        state.scale > restScale * 1.001 ? "none" : "pan-y";
+    }
+
     function commit(nextState, opts) {
       clampPan(nextState);
       state.scale = nextState.scale;
@@ -377,6 +506,7 @@
         wrap.classList.remove("map-transition");
       }
       applyTransform();
+      updateTouchAction();
     }
 
     function fillScale() {
@@ -384,16 +514,22 @@
       if (!naturalHeight) {
         return MIN_SCALE;
       }
-      // "Bigger" (requirement 1): the default/reset view fills at least
-      // the viewport's own height (the wrap already fills its width by
-      // construction), clamped to the same 1x-6x range every other zoom
-      // action respects, rather than a separate unbounded computation.
+      // Narrow viewports: CONTAIN, don't cover -- the whole world map
+      // visible at 1x (the wrap already fills the viewport's width by
+      // construction, so 1x IS fit-to-width), letterboxed vertically.
+      if (window.innerWidth <= FIT_WIDTH_BREAKPOINT) {
+        return MIN_SCALE;
+      }
+      // Wide viewports keep the "bigger" default (requirement 1): fill
+      // at least the viewport's own height, clamped to the same 1x-6x
+      // range every other zoom action respects.
       return clamp(vpRect.height / naturalHeight, MIN_SCALE, MAX_SCALE);
     }
 
     function resetView(opts) {
       refreshNaturalWidth();
       var scale = fillScale();
+      restScale = scale;
       var vpRect = viewport.getBoundingClientRect();
       var next = {
         scale: scale,
@@ -458,25 +594,39 @@
       });
     }
 
-    // --- Mouse-wheel zoom toward the cursor (desktop).
+    // --- Mouse-wheel zoom toward the cursor (desktop). preventDefault
+    // ONLY when the wheel event will actually change the zoom: at
+    // MIN_SCALE a scroll-down (zoom-out attempt) is a no-op, and
+    // unconditionally swallowing it turned the tall map band into a
+    // page-scroll trap -- a reader scrolling down the homepage got
+    // stuck the moment their cursor crossed the map. When the zoom is
+    // already pinned at the relevant bound, the event is left alone and
+    // the page scrolls normally.
     viewport.addEventListener(
       "wheel",
       function (event) {
+        var ratio = event.deltaY < 0 ? WHEEL_ZOOM_RATIO : 1 / WHEEL_ZOOM_RATIO;
+        var newScale = clamp(state.scale * ratio, MIN_SCALE, MAX_SCALE);
+        if (newScale === state.scale) {
+          return; // no zoom change -> let the page scroll
+        }
         event.preventDefault();
         var vpRect = viewport.getBoundingClientRect();
         var cx = event.clientX - vpRect.left;
         var cy = event.clientY - vpRect.top;
-        var ratio = event.deltaY < 0 ? WHEEL_ZOOM_RATIO : 1 / WHEEL_ZOOM_RATIO;
         zoomAt(cx, cy, ratio, { animate: false });
       },
       { passive: false }
     );
 
     // Defensive hardening for Safari/WebKit (iOS Chrome is WebKit under
-    // the hood too -- Apple requires it): `touch-action: none` on
-    // .map-viewport is the correct, load-bearing mechanism that hands
-    // pinch/pan gestures to this file's own Pointer Event handlers
-    // instead of the browser's native page zoom, but WebKit ALSO fires
+    // the hood too -- Apple requires it): .map-viewport's touch-action
+    // (`pan-y` at rest, tightened to `none` while zoomed -- see
+    // updateTouchAction above; pinch-zoom is never granted to the
+    // browser in either state) is the correct, load-bearing mechanism
+    // that hands pinch gestures to this file's own Pointer Event
+    // handlers instead of the browser's native page zoom, but WebKit
+    // ALSO fires
     // its own proprietary, non-standard gesture* events for a
     // multi-touch gesture, via a separate native gesture recognizer
     // that has -- in some WebKit versions -- won a race against
@@ -498,11 +648,14 @@
 
     // --- Drag-to-pan (mouse) + single-finger drag-to-pan (touch) +
     // two-pointer pinch-to-zoom, all via the unified Pointer Events API
-    // so the same code path handles mouse, touch, and pen. `touch-action:
-    // none` on .map-viewport (CSS) is what stops a touch drag from also
-    // scrolling the page (requirement 3); `preventDefault()` below on an
-    // actual drag/pinch move additionally stops touch text-selection/
-    // refresh-gesture side effects some browsers still apply.
+    // so the same code path handles mouse, touch, and pen. Touch
+    // ownership is split by .map-viewport's touch-action (`pan-y` at
+    // rest -- vertical swipes scroll the PAGE; `none` while zoomed in --
+    // see updateTouchAction), so at rest a touch drag reaching these
+    // handlers is horizontal-ish or a pinch, and zoomed in every drag
+    // pans the map; `preventDefault()` below on an actual drag/pinch
+    // move additionally stops touch text-selection/refresh-gesture side
+    // effects some browsers still apply.
     var activePointers = {}; // pointerId -> {x, y}
     var activeCount = 0;
     var dragState = null; // {pointerId, startX, startY, originX, originY, moved}
@@ -662,9 +815,90 @@
     viewport.addEventListener("pointerup", endPointer);
     viewport.addEventListener("pointercancel", endPointer);
 
+    // --- Keyboard focus follows the pan (WCAG 2.4.7/2.4.11): tabbing
+    // to a marker that the current pan/zoom has pushed outside the
+    // clipped viewport previously left focus on an invisible control --
+    // 4 of 13 glyphs off-screen on the old mobile default view, more at
+    // higher zooms. On any focus landing inside the marker layer, pan
+    // just enough to bring that marker into the viewport (reusing the
+    // same clamped commit() every other pan goes through). The browser
+    // separately auto-scrolls the focused element into the WINDOW; this
+    // handles the map's own internal clipping, which the browser cannot
+    // see past.
+    var FOCUS_MARGIN = 24; // px of breathing room inside the viewport edge
+    var FOCUS_ASSIST_ZOOM = 1.8; // one-shot zoom step when pan alone can't reach
+
+    function markerInView(marker) {
+      var mRect = marker.getBoundingClientRect();
+      var vRect = viewport.getBoundingClientRect();
+      return (
+        mRect.left >= vRect.left &&
+        mRect.right <= vRect.right &&
+        mRect.top >= vRect.top &&
+        mRect.bottom <= vRect.bottom
+      );
+    }
+
+    function panMarkerIntoView(marker) {
+      var mRect = marker.getBoundingClientRect();
+      var vRect = viewport.getBoundingClientRect();
+      var dx = 0;
+      var dy = 0;
+      if (mRect.right > vRect.right - FOCUS_MARGIN) {
+        dx = vRect.right - FOCUS_MARGIN - mRect.right;
+      } else if (mRect.left < vRect.left + FOCUS_MARGIN) {
+        dx = vRect.left + FOCUS_MARGIN - mRect.left;
+      }
+      if (mRect.bottom > vRect.bottom - FOCUS_MARGIN) {
+        dy = vRect.bottom - FOCUS_MARGIN - mRect.bottom;
+      } else if (mRect.top < vRect.top + FOCUS_MARGIN) {
+        dy = vRect.top + FOCUS_MARGIN - mRect.top;
+      }
+      if (dx !== 0 || dy !== 0) {
+        commit(
+          { scale: state.scale, x: state.x + dx, y: state.y + dy },
+          { animate: true }
+        );
+      }
+      return markerInView(marker);
+    }
+
+    viewport.addEventListener("focusin", function (event) {
+      var marker =
+        event.target.closest && event.target.closest(".map-marker");
+      if (!marker) {
+        return;
+      }
+      if (panMarkerIntoView(marker)) {
+        return;
+      }
+      // Pan alone couldn't reach: the letterboxed rest view on narrow
+      // screens clamps pan to zero slack, yet a hand-offset cluster
+      // member can still hang past the canvas edge there (e.g. the US
+      // cluster's left column at a 390px width). Zoom one assist step
+      // toward the marker -- creating pan slack -- and pan again, so
+      // keyboard focus is never left sitting on an invisible control.
+      var mRect = marker.getBoundingClientRect();
+      var vRect = viewport.getBoundingClientRect();
+      var cx = clamp(
+        (mRect.left + mRect.right) / 2 - vRect.left,
+        0,
+        vRect.width
+      );
+      var cy = clamp(
+        (mRect.top + mRect.bottom) / 2 - vRect.top,
+        0,
+        vRect.height
+      );
+      zoomAt(cx, cy, FOCUS_ASSIST_ZOOM, { animate: true });
+      panMarkerIntoView(marker);
+    });
+
     // --- Resize handling: re-derive the natural size from the (fluid-
-    // width) viewport and re-clamp the current pan/zoom into bounds so
-    // a rotate/resize never leaves the map panned out of view.
+    // width) viewport, refresh the rest scale (the fit-width breakpoint
+    // and fill-to-height target both depend on the new size), and
+    // re-clamp the current pan/zoom into bounds so a rotate/resize never
+    // leaves the map panned out of view.
     var resizeQueued = false;
     window.addEventListener("resize", function () {
       if (resizeQueued) {
@@ -674,6 +908,7 @@
       window.requestAnimationFrame(function () {
         resizeQueued = false;
         refreshNaturalWidth();
+        restScale = fillScale();
         commit({ scale: state.scale, x: state.x, y: state.y }, { animate: false });
       });
     });
