@@ -115,7 +115,7 @@ def fetch_rss_lab_items(
     "drop that source, never circumvent a disallow" per CLAUDE.md, applied
     uniformly here exactly as it is for every other Phase 1 fetcher.
     """
-    if not check_robots_allowed(url):
+    if not check_robots_allowed(url, session=session):
         logger.warning(
             "robots.txt disallows %s -- skipping %s for this run.",
             url, source_name,

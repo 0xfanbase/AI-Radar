@@ -29,6 +29,22 @@ outbound call still raises immediately unless the test is marked ``live``.
 import pytest
 import requests
 
+from watcher import http as watcher_http
+
+
+@pytest.fixture(autouse=True)
+def reset_robots_policy_cache():
+    """Isolate watcher.http's per-run robots.txt memo between tests.
+
+    The memo is module-level state sized for the watcher's real
+    process-per-run lifetime; without this reset, one test's mocked
+    robots.txt verdict for a host would leak into every later test
+    touching the same host.
+    """
+    watcher_http.clear_robots_cache()
+    yield
+    watcher_http.clear_robots_cache()
+
 
 @pytest.fixture(autouse=True)
 def block_live_network_calls(request, monkeypatch):

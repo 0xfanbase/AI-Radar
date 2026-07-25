@@ -30,7 +30,7 @@ def fetch_anthropic_items(
     Returns ``[]`` (never raises) if ``robots.txt`` disallows the fetch --
     same "skip cleanly" posture as every other Phase 1 fetcher.
     """
-    if not check_robots_allowed(ANTHROPIC_NEWS_URL):
+    if not check_robots_allowed(ANTHROPIC_NEWS_URL, session=session):
         return []
 
     result = fetch(session, ANTHROPIC_NEWS_URL, cache_dir=cache_dir)

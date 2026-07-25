@@ -104,9 +104,17 @@ def _parse_iso8601(value: str) -> datetime | None:
     if not value:
         return None
     try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError:
         return None
+    if parsed.tzinfo is None:
+        # A timezone-NAIVE timestamp would make every `now - parsed`
+        # subtraction (and any aware/naive mixed sort) raise TypeError,
+        # crashing ranking outright. No current fetcher emits one, but
+        # this function's whole job is tolerating malformed upstream
+        # values -- coerce to UTC, the only zone this pipeline uses.
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed
 
 
 # --------------------------------------------------------------------------

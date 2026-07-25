@@ -12,6 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import re
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -126,6 +127,77 @@ def _utcnow_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+# Only the ETag/body entries this module itself writes -- 64 lowercase hex
+# chars (sha256) + ".json". Other state files that share data/.cache/
+# (e.g. the DeepSeek fetcher's sitemap-seen list) are never touched by
+# pruning.
+_CACHE_ENTRY_NAME_RE = re.compile(r"^[0-9a-f]{64}\.json$")
+
+# How long an unused ETag cache entry survives before pruning. Two weeks
+# comfortably covers every polling cadence in this project (once/twice
+# daily) while keeping data/.cache/ from accumulating one orphaned entry
+# per never-again-requested URL forever.
+CACHE_MAX_AGE_DAYS = 14
+
+
+def prune_cache(
+    cache_dir: Path = CACHE_DIR,
+    *,
+    max_age_days: int = CACHE_MAX_AGE_DAYS,
+    now: datetime | None = None,
+) -> int:
+    """Delete ETag cache entries not fetched within ``max_age_days``.
+
+    Nothing previously evicted anything from ``data/.cache/`` -- and
+    because several cached URLs embed run timestamps (see
+    ``watcher/sources/hn.py``), the directory would otherwise grow by a
+    handful of never-hit-again entries every single run, forever. An
+    entry with a missing/unparseable ``fetched_at`` is deleted too (the
+    loader already treats such an entry as a cache miss, so it serves no
+    purpose). Returns the number of files removed; never raises for an
+    absent cache directory or a file deleted underneath it.
+    """
+    now = now or datetime.now(timezone.utc)
+    max_age_seconds = max_age_days * 24 * 3600
+    removed = 0
+    if not cache_dir.is_dir():
+        return 0
+    for path in cache_dir.iterdir():
+        if not _CACHE_ENTRY_NAME_RE.match(path.name):
+            continue
+        entry = _load_cache_entry_path(path)
+        stale = True
+        if entry is not None:
+            fetched_at = entry.get("fetched_at")
+            if isinstance(fetched_at, str):
+                try:
+                    fetched = datetime.fromisoformat(fetched_at.replace("Z", "+00:00"))
+                except ValueError:
+                    fetched = None
+                if fetched is not None:
+                    if fetched.tzinfo is None:
+                        fetched = fetched.replace(tzinfo=timezone.utc)
+                    stale = (now - fetched).total_seconds() > max_age_seconds
+        if stale:
+            try:
+                path.unlink()
+                removed += 1
+            except OSError:
+                pass
+    if removed:
+        logger.info("Pruned %d stale ETag cache entr%s from %s.",
+                    removed, "y" if removed == 1 else "ies", cache_dir)
+    return removed
+
+
+def _load_cache_entry_path(path: Path) -> dict | None:
+    try:
+        with path.open("r", encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
 # --------------------------------------------------------------------------
 # fetch()
 # --------------------------------------------------------------------------
@@ -193,14 +265,31 @@ def fetch(
 
     assert response is not None  # max_retries >= 1 guarantees at least one GET
 
-    if response.status_code == 304 and cached is not None:
-        return FetchResult(
-            url=url,
-            status_code=304,
-            text=cached["body"],
-            from_cache=True,
-            headers=dict(response.headers),
+    if response.status_code == 304:
+        if cached is not None:
+            return FetchResult(
+                url=url,
+                status_code=304,
+                text=cached["body"],
+                from_cache=True,
+                headers=dict(response.headers),
+            )
+        # A 304 with no local cache entry is a server anomaly (this
+        # request sent no validators to be conditional on). Previously
+        # this fell through to the success path and CACHED THE 304's
+        # empty body as if it were real content -- poisoning every later
+        # fetch of this URL. Refetch once, unconditionally; a second 304
+        # is a hard error for the caller's own skip-this-source handling.
+        logger.warning(
+            "Unexpected 304 for %s with no local cache entry -- "
+            "refetching unconditionally.", url,
         )
+        response = session.get(url, timeout=timeout)
+        if response.status_code == 304:
+            raise requests.HTTPError(
+                f"server keeps answering 304 for {url} despite an "
+                "unconditional request", response=response,
+            )
 
     response.raise_for_status()
 
@@ -229,41 +318,34 @@ def fetch(
 # --------------------------------------------------------------------------
 
 
-def check_robots_allowed(url: str, user_agent: str = USER_AGENT) -> bool:
-    """Return True iff ``robots.txt`` permits ``user_agent`` to fetch ``url``.
+# Per-run memo of each host's robots.txt policy, keyed by
+# (scheme, netloc): a parsed RobotFileParser for a real policy, True for
+# "no policy published" (404 = allow-all), False for "couldn't confirm"
+# (fetch failure / unparseable / error status = skip for the run).
+# Previously robots.txt was refetched for EVERY candidate URL -- the
+# DeepSeek fetcher alone re-downloads the same file once per new article
+# -- and via a bare requests.get that bypassed the shared session's
+# UA/retry configuration entirely. The watcher is a process-per-run CLI,
+# so module lifetime == run lifetime; tests reset via
+# clear_robots_cache() (autouse fixture in tests/conftest.py).
+_ROBOTS_POLICY_CACHE: dict[tuple[str, str], "RobotFileParser | bool"] = {}
 
-    Rules (never circumvented):
-    - A ``404`` on ``robots.txt`` itself is treated as allow-all (no
-      published policy = no restriction), the common convention.
-    - Any other failure -- a non-2xx/404 status, a network error, or an
-      unparseable body -- is treated as "skip this source for the run":
-      returns False and logs why, rather than guessing allow-all.
-    - An explicit disallow from a parseable ``robots.txt`` returns False.
 
-    Documented-API exemption (CLAUDE.md's fetch-discipline exception,
-    deliberately narrow): if ``url``'s host is in
-    ``watcher.config.ROBOTS_EXEMPT_API_HOSTS``, this short-circuits to
-    ``True`` without ever fetching that host's ``robots.txt`` at all --
-    the host's own published API terms of use are the governing contract
-    for these requests, not a crawl directive aimed at page-indexing
-    crawlers. Every other host (including any HTML page on the same
-    domain the exemption doesn't name) is unaffected and stays fully
-    gated by the logic below.
-    """
-    parsed = urlsplit(url)
+def clear_robots_cache() -> None:
+    """Reset the per-run robots.txt memo (test isolation hook)."""
+    _ROBOTS_POLICY_CACHE.clear()
 
-    if parsed.netloc in ROBOTS_EXEMPT_API_HOSTS:
-        logger.info(
-            "robots.txt check skipped for %s -- documented-API exemption "
-            "per CLAUDE.md (host %r is in ROBOTS_EXEMPT_API_HOSTS).",
-            url, parsed.netloc,
-        )
-        return True
 
-    robots_url = urlunsplit((parsed.scheme, parsed.netloc, "/robots.txt", "", ""))
-
+def _fetch_robots_policy(
+    scheme: str,
+    netloc: str,
+    user_agent: str,
+    session: requests.Session | None,
+) -> "RobotFileParser | bool":
+    robots_url = urlunsplit((scheme, netloc, "/robots.txt", "", ""))
+    getter = session.get if session is not None else requests.get
     try:
-        response = requests.get(
+        response = getter(
             robots_url,
             headers={"User-Agent": user_agent},
             timeout=REQUEST_TIMEOUT_SECONDS,
@@ -296,7 +378,69 @@ def check_robots_allowed(url: str, user_agent: str = USER_AGENT) -> bool:
         )
         return False
 
-    allowed = parser.can_fetch(user_agent, url)
+    return parser
+
+
+def check_robots_allowed(
+    url: str,
+    user_agent: str = USER_AGENT,
+    session: requests.Session | None = None,
+) -> bool:
+    """Return True iff ``robots.txt`` permits ``user_agent`` to fetch ``url``.
+
+    Rules (never circumvented):
+    - A ``404`` on ``robots.txt`` itself is treated as allow-all (no
+      published policy = no restriction), the common convention.
+    - Any other failure -- a non-2xx/404 status, a network error, or an
+      unparseable body -- is treated as "skip this source for the run":
+      returns False and logs why, rather than guessing allow-all.
+    - An explicit disallow from a parseable ``robots.txt`` returns False.
+
+    Each host's policy is fetched at most once per run (memoized per
+    ``(scheme, netloc)``; the allow/deny verdict is still evaluated per
+    full URL against the memoized parser). Pass the shared ``session``
+    (from :func:`build_session`) so the robots fetch itself carries the
+    project's own UA/retry configuration instead of a bare default GET.
+
+    Documented-API exemption (CLAUDE.md's fetch-discipline exception,
+    deliberately narrow): if ``url``'s host is in
+    ``watcher.config.ROBOTS_EXEMPT_API_HOSTS`` AND its path is under
+    ``/api/``, this short-circuits to ``True`` without ever fetching that
+    host's ``robots.txt`` at all -- the host's own published API terms of
+    use are the governing contract for these requests, not a crawl
+    directive aimed at page-indexing crawlers. The path scoping is
+    load-bearing: CLAUDE.md promises the exemption "never applies to
+    HTML/website fetching," and today's one exempt host
+    (``export.arxiv.org``) serves its documented API under ``/api/``
+    exactly -- a non-API URL on the same host stays fully robots-gated
+    like every other URL.
+    """
+    parsed = urlsplit(url)
+
+    if parsed.netloc in ROBOTS_EXEMPT_API_HOSTS and parsed.path.startswith("/api/"):
+        logger.info(
+            "robots.txt check skipped for %s -- documented-API exemption "
+            "per CLAUDE.md (host %r is in ROBOTS_EXEMPT_API_HOSTS, path "
+            "under /api/).",
+            url, parsed.netloc,
+        )
+        return True
+
+    key = (parsed.scheme, parsed.netloc)
+    if key not in _ROBOTS_POLICY_CACHE:
+        _ROBOTS_POLICY_CACHE[key] = _fetch_robots_policy(
+            parsed.scheme, parsed.netloc, user_agent, session
+        )
+
+    policy = _ROBOTS_POLICY_CACHE[key]
+    if policy is True:
+        return True
+    if policy is False:
+        # Reason already logged when the failed fetch was memoized; keep
+        # later same-host calls quiet-but-consistent.
+        return False
+
+    allowed = policy.can_fetch(user_agent, url)
     if not allowed:
         logger.warning(
             "robots.txt disallows %s for UA %r -- skipping source for this run.",
