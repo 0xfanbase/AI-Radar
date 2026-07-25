@@ -149,25 +149,31 @@ def test_full_real_environment_render_end_to_end_regardless_of_audit_file_presen
 
 
 # ---------------------------------------------------------------------------
-# A hypothetical PRESENT data/audit/latest.json -- defensive path, since
-# schemas/audit.schema.json doesn't exist yet and this repo has never
-# seen a real one.
+# A PRESENT data/audit/latest.json -- schemas/audit.schema.json's real
+# shape (findings_appended_to_backlog, an int count), including the real
+# committed artifact. The pre-schema version of these tests invented a
+# `findings` list the schema never had, which is exactly how the page
+# falsely reported "0 finding(s)" against a real audit that logged 3.
 # ---------------------------------------------------------------------------
 
 
 def test_load_audit_latest_reads_a_present_file(tmp_path):
     path = tmp_path / "latest.json"
-    path.write_text(json.dumps({"generated_at": "2026-08-01T00:00:00Z", "findings": []}))
+    path.write_text(
+        json.dumps(
+            {"generated_at": "2026-08-01T00:00:00Z", "findings_appended_to_backlog": 0}
+        )
+    )
     assert method.load_audit_latest(path) == {
         "generated_at": "2026-08-01T00:00:00Z",
-        "findings": [],
+        "findings_appended_to_backlog": 0,
     }
 
 
 def test_build_audit_section_for_a_present_file_reports_available():
     audit_latest = {
         "generated_at": "2026-08-01T00:00:00Z",
-        "findings": [{"severity": "low"}, {"severity": "medium"}],
+        "findings_appended_to_backlog": 2,
     }
     section = method.build_audit_section(audit_latest)
     assert section["available"] is True
@@ -175,12 +181,46 @@ def test_build_audit_section_for_a_present_file_reports_available():
     assert section["findings_count"] == 2
 
 
+def test_build_audit_section_against_the_real_committed_artifact():
+    # The load-bearing regression test: run against the REAL on-disk
+    # data/audit/latest.json (present in this repo since audit.yml's
+    # first live weekly run), not a synthetic stand-in -- the count shown
+    # on /method/ must be the artifact's own findings_appended_to_backlog.
+    real = method.load_audit_latest()
+    assert real is not None, "data/audit/latest.json should exist in this repo"
+    section = method.build_audit_section(real)
+    assert section["available"] is True
+    assert section["findings_count"] == real["findings_appended_to_backlog"]
+    assert isinstance(section["findings_count"], int)
+
+
+def test_build_audit_section_with_unreadable_count_degrades_to_none():
+    audit_latest = {
+        "generated_at": "2026-08-01T00:00:00Z",
+        "findings_appended_to_backlog": "not-an-int",
+    }
+    section = method.build_audit_section(audit_latest)
+    assert section["available"] is True
+    assert section["findings_count"] is None
+
+
 def test_render_method_page_with_a_present_audit_shows_its_summary():
-    audit_latest = {"generated_at": "2026-08-01T00:00:00Z", "findings": [{"a": 1}]}
+    audit_latest = {
+        "generated_at": "2026-08-01T00:00:00Z",
+        "findings_appended_to_backlog": 1,
+    }
     html = method.render_method_page(REAL_LEDGER, REAL_VERIFIER_STATS, audit_latest)
     assert "No audit has run yet" not in html
     assert "2026-08-01T00:00:00Z" in html
     assert "1 finding" in html
+
+
+def test_render_method_page_omits_count_sentence_when_count_unreadable():
+    audit_latest = {"generated_at": "2026-08-01T00:00:00Z"}
+    html = method.render_method_page(REAL_LEDGER, REAL_VERIFIER_STATS, audit_latest)
+    assert "2026-08-01T00:00:00Z" in html
+    assert "finding(s)" not in html
+    assert "None finding" not in html
 
 
 # ---------------------------------------------------------------------------

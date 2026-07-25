@@ -144,22 +144,26 @@ def build_verifier_summary(verifier_stats: Mapping[str, Any]) -> dict[str, Any]:
 def build_audit_section(audit_latest: Mapping[str, Any] | None) -> dict[str, Any]:
     """The Audit section's own view model.
 
-    `audit_latest is None` -- the real, current state of this
-    environment -- renders the honest `NO_AUDIT_MESSAGE` placeholder
-    (`available: False`). A real future `data/audit/latest.json`
-    (Phase 5 -- `schemas/audit.schema.json` doesn't exist yet as of this
-    build stage, so its exact shape is undefined) is read defensively
-    (`.get()` with fallbacks, never assuming a required key) rather than
-    hard-coding field names this codebase hasn't fixed yet; see
-    IMPROVEMENT_BACKLOG.md.
+    `audit_latest is None` renders the honest `NO_AUDIT_MESSAGE`
+    placeholder (`available: False`). A present file is read against
+    `schemas/audit.schema.json`'s real shape: the findings count is that
+    schema's required `findings_appended_to_backlog` field ("a plain
+    count of how many checkbox findings scripts/append_backlog_findings
+    .py actually wrote to IMPROVEMENT_BACKLOG.md this run") -- NOT a
+    `findings` list, which the schema doesn't have and never did
+    (`additionalProperties: false`); reading that phantom key here is
+    exactly how this page falsely reported "0 finding(s)" against a real
+    audit that had logged 3. A malformed/absent count degrades to `None`
+    (the template then omits the count sentence rather than asserting a
+    number that isn't in the artifact).
     """
     if audit_latest is None:
         return {"available": False, "message": NO_AUDIT_MESSAGE}
-    findings = audit_latest.get("findings", [])
+    findings_count = audit_latest.get("findings_appended_to_backlog")
     return {
         "available": True,
         "generated_at": audit_latest.get("generated_at"),
-        "findings_count": len(findings) if isinstance(findings, list) else None,
+        "findings_count": findings_count if isinstance(findings_count, int) else None,
     }
 
 

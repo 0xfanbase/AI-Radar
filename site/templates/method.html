@@ -174,8 +174,14 @@
 <section class="method-section" aria-labelledby="method-audit-heading">
   <h2 id="method-audit-heading">6. Auditing itself</h2>
   {% if audit.available %}
+  {% if audit.findings_count is not none %}
   <p>The most recent self-audit ran {{ audit.generated_at }} and recorded
     {{ audit.findings_count }} finding(s).</p>
+  {% else %}
+  {# A present artifact with no readable count: state when it ran, never
+     assert a number the artifact doesn't carry. #}
+  <p>The most recent self-audit ran {{ audit.generated_at }}.</p>
+  {% endif %}
   {% else %}
   <p class="method-audit-pending">{{ audit.message }}</p>
   {% endif %}
