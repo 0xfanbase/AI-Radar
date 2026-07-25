@@ -1,4 +1,8 @@
 requests~=2.34
 feedparser~=6.0
 beautifulsoup4~=4.15
-jsonschema~=4.26
+# [format] extras (rfc3987, rfc3339-validator, ...) are load-bearing: without
+# them jsonschema's FormatChecker has no "uri"/"date-time" checkers registered
+# and every schema's format constraint on citation URLs and timestamps is a
+# silent no-op.
+jsonschema[format]~=4.26

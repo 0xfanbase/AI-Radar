@@ -203,6 +203,11 @@ def reconcile_ledger(
         if card is not None:
             updated["card_id"] = card["id"]
             updated["status"] = "published"
+            # A cluster that publishes must not keep a stale
+            # verifier_outcome from an earlier dropped attempt -- a
+            # published entry carrying last run's dropped_reason would
+            # poison the audit's read of this ledger row.
+            updated.pop("verifier_outcome", None)
         else:
             updated["card_id"] = None
             updated["status"] = "dropped"

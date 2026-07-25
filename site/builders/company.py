@@ -38,7 +38,10 @@ explicitly).
 """
 from __future__ import annotations
 
+import importlib.util
 import json
+import re
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
@@ -49,20 +52,48 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoes
 SITE_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = SITE_DIR.parent
 TEMPLATES_DIR = SITE_DIR / "templates"
+LIB_DIR = SITE_DIR / "lib"
 CONTENT_DIR = REPO_ROOT / "content"
 COMPANIES_DIR = CONTENT_DIR / "companies"
 COMPANIES_INDEX_PATH = COMPANIES_DIR / "index.json"
 
-# Same two-working-status chip mapping card.schema.json/map.py use, minus
-# "corrected" -- schemas/company.schema.json's own `status` enum only has
-# confirmed/reported (company profiles don't have their own corrections
-# workflow wiring yet; see that schema's own field description). Reuses
-# the `.chip`/`.chip--confirmed|reported` classes already shipped in
-# site/static/css/components.css, so this builder introduces no new
-# status-color CSS.
-STATUS_CHIP_CLASS = {
+
+def _load_module_by_path(name: str, path: Path):
+    """Load a module from an explicit file path -- the same convention
+    every sibling builder uses for `site/lib/` modules (`site/` is
+    deliberately never an importable package; it would shadow the stdlib
+    `site` module). The self-sufficiency rule in this module's docstring
+    is about sibling *builders*; `site/lib/` modules are shared by
+    design, exactly like `board.py`/`lexicon.py`'s own linkify loads."""
+    spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+safe_url = _load_module_by_path("frontier_wire_site_lib_safe_url", LIB_DIR / "safe_url.py")
+
+# The full card-status chip mapping (same classes wire.py/map.py use,
+# already shipped in site/static/css/components.css) -- the ONE table
+# both this module's status-to-chip lookups derive from. A previous
+# version kept a second, inline 3-entry copy inside cards_for_company
+# next to this 2-entry module constant; the two had already diverged
+# ("corrected" existed in one and not the other).
+CARD_STATUS_CHIP_CLASS = {
     "confirmed": "chip chip--confirmed",
     "reported": "chip chip--reported",
+    "corrected": "chip chip--corrected",
+}
+
+# Company profiles: schemas/company.schema.json's own `status` enum only
+# has confirmed/reported (no company corrections workflow yet; see that
+# schema's field description) -- a derived subset of the card table,
+# never a hand-maintained second copy.
+STATUS_CHIP_CLASS = {
+    status: css for status, css in CARD_STATUS_CHIP_CLASS.items()
+    if status != "corrected"
 }
 
 # Reader-facing empty state for a company's wire-history section, scanned
@@ -173,14 +204,20 @@ class CompanyBoardRowView:
 @dataclass(frozen=True)
 class CompanyCardView:
     """One wire card mentioning this company, for the page's "Wire
-    history" section."""
+    history" section.
+
+    `retired_wire_href` (deliberately not `href`): the computed
+    `/wire/<YYYY-MM>/#card-<id>` target points into the Wire archive the
+    live build no longer generates (see site/generate.py's module
+    docstring) -- the template renders plain text today, and the name
+    makes any future template edit confront that before linking it."""
 
     id: str
     headline: str
     date: str
     status_label: str
     status_chip_class: str
-    href: str
+    retired_wire_href: str
 
 
 @dataclass(frozen=True)
@@ -200,6 +237,7 @@ class CompanyView:
     generated_at: str
     model: str
     last_verified: str
+    meta_description: str
     overview: CitedTextView
     what_theyve_done: tuple[CitedTextView, ...]
     strengths: tuple[CitedTextView, ...]
@@ -249,6 +287,11 @@ def board_rows_for_company(
     independently here (formatted rows, not raw dicts)."""
     rows = [r for r in board_rows if r.get("company_id") == company_id]
     rows.sort(key=lambda r: str(r.get("release_date", "")), reverse=True)
+    # source_url is scheme-vetted before it ever reaches an href attribute
+    # (autoescape can't neutralize a hostile scheme like `javascript:`) --
+    # an unsafe value becomes "", and the template renders source_host as
+    # inert text instead of a link. Same defense board.py::build_row_view
+    # applies to the same LLM-writable field.
     return [
         CompanyBoardRowView(
             model=str(r.get("model", "")),
@@ -257,7 +300,11 @@ def board_rows_for_company(
             context_window_display=format_context_window(r.get("context_window")),
             access=str(r.get("access", "")),
             significance=str(r.get("significance", "")),
-            source_url=str(r.get("source_url", "")),
+            source_url=(
+                str(r.get("source_url", ""))
+                if safe_url.is_safe_href(str(r.get("source_url", "")))
+                else ""
+            ),
             source_host=source_host(str(r.get("source_url", ""))),
             last_verified=str(r.get("last_verified", "")),
         )
@@ -287,11 +334,7 @@ def cards_for_company(
         date_str = str(card.get("date", ""))
         year_month = date_str[:7]
         status = str(card.get("status", ""))
-        status_chip = {
-            "confirmed": "chip chip--confirmed",
-            "reported": "chip chip--reported",
-            "corrected": "chip chip--corrected",
-        }.get(status, "chip")
+        status_chip = CARD_STATUS_CHIP_CLASS.get(status, "chip")
         views.append(
             CompanyCardView(
                 id=str(card["id"]),
@@ -299,10 +342,38 @@ def cards_for_company(
                 date=date_str,
                 status_label=status.upper(),
                 status_chip_class=status_chip,
-                href=f"/wire/{year_month}/#card-{card['id']}",
+                retired_wire_href=f"/wire/{year_month}/#card-{card['id']}",
             )
         )
     return views
+
+
+# Practical ceiling for a <meta name="description"> -- search engines
+# truncate around 155-160 characters; shipping the full overview
+# paragraph (up to ~380 chars in the real seeded profiles) just hands
+# them an arbitrary mid-sentence cut instead of a deliberate one.
+META_DESCRIPTION_MAX_CHARS = 155
+
+_SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
+
+
+def meta_description_from(text: str, limit: int = META_DESCRIPTION_MAX_CHARS) -> str:
+    """Reduce a profile's overview paragraph to a meta-description-sized
+    string: whole sentences while they fit within `limit`; when even the
+    first sentence exceeds it, a word-boundary cut with an ellipsis --
+    never a mid-word or mid-entity chop."""
+    text = " ".join(str(text).split())
+    if len(text) <= limit:
+        return text
+    kept = ""
+    for sentence in _SENTENCE_SPLIT_RE.split(text):
+        candidate = f"{kept} {sentence}".strip()
+        if len(candidate) > limit:
+            break
+        kept = candidate
+    if kept:
+        return kept
+    return text[:limit].rsplit(" ", 1)[0].rstrip(",;:") + "…"
 
 
 def build_company_view(
@@ -330,6 +401,9 @@ def build_company_view(
         generated_at=str(raw["generated_at"]),
         model=str(raw["model"]),
         last_verified=str(raw["last_verified"]),
+        meta_description=meta_description_from(
+            str(profile["overview"].get("text", ""))
+        ),
         overview=build_cited_text_view(profile["overview"]),
         what_theyve_done=tuple(
             build_cited_text_view(item) for item in profile.get("what_theyve_done", [])

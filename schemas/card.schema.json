@@ -27,7 +27,8 @@
     "date": {
       "type": "string",
       "format": "date",
-      "description": "Calendar day (YYYY-MM-DD) this card belongs to on the Wire."
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$",
+      "description": "Calendar day (YYYY-MM-DD) this card belongs to on the Wire. The pattern backstops 'format' (which only constrains anything when a FormatChecker is passed): site/builders/wire.py feeds this straight into date.fromisoformat(), so a non-ISO value here must fail validation, not crash a page build."
     },
     "headline": {
       "type": "string",

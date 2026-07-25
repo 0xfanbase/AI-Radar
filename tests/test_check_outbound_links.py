@@ -109,6 +109,36 @@ def test_classify_url_path_scoped_wrong_prefix_fails():
     assert result.ok is False
 
 
+@pytest.mark.parametrize(
+    "traversal_url",
+    [
+        # Raw dot segments: startswith("/anthropics/") is true but the
+        # server resolves the path right back out of the prefix.
+        "https://github.com/anthropics/../someone-else/repo",
+        # Percent-encoded dot segments, decoded by the server.
+        "https://github.com/anthropics/%2E%2E/someone-else/repo",
+        "https://github.com/anthropics/..%2Fsomeone-else/repo",
+        # Double-encoded: one decode still leaves a %, whose server-side
+        # meaning this check can't be confident about -- never trusted.
+        "https://github.com/anthropics/%252E%252E/someone-else/repo",
+    ],
+)
+def test_classify_url_path_scoped_prefix_cannot_be_escaped_by_traversal(traversal_url):
+    # B7 regression: the prefix compare previously ran on the raw path.
+    result = mod.classify_url(traversal_url, TRUSTED)
+    assert result.ok is False
+
+
+def test_classify_url_path_scoped_benign_encoded_chars_still_pass():
+    # A single, ordinary percent-encoding (a space) inside the scoped
+    # prefix must keep working -- the hardening rejects traversal and
+    # double-encoding, not normal URLs.
+    result = mod.classify_url(
+        "https://github.com/anthropics/some%20repo", TRUSTED
+    )
+    assert result.ok is True
+
+
 # --------------------------------------------------------------------------
 # diff_touches_trusted_domains -- the unconditional frozen-file guard
 # --------------------------------------------------------------------------
@@ -141,6 +171,10 @@ def test_diff_touches_trusted_domains_regardless_of_other_changes():
         "content/companies/anthropic.json",
         "content/companies/deepseek.json",
         "content/cards/2026-07-09-example.json",
+        # 2026-07 hardening: the two other LLM-writable content files
+        # that carry outbound hrefs are now in scope too.
+        "content/lexicon.json",
+        "content/frontier_board.json",
     ],
 )
 def test_is_citation_bearing_path_true(path):
@@ -152,7 +186,8 @@ def test_is_citation_bearing_path_true(path):
     [
         "content/companies/index.json",
         "content/cards/index.json",
-        "content/lexicon.json",
+        "content/primer.json",
+        "content/corrections.json",
         "data/trusted_domains.json",
         "schemas/company.schema.json",
     ],
@@ -168,10 +203,13 @@ def test_changed_citation_files_filters_and_preserves_order():
         "content/lexicon.json",
         "content/cards/2026-07-09-a.json",
         "content/cards/index.json",
+        "content/frontier_board.json",
     ]
     assert mod.changed_citation_files(diff) == [
         "content/companies/anthropic.json",
+        "content/lexicon.json",
         "content/cards/2026-07-09-a.json",
+        "content/frontier_board.json",
     ]
 
 
@@ -245,6 +283,65 @@ def test_extract_citation_urls_from_company_handles_empty_roadmap():
         }
     }
     assert mod.extract_citation_urls_from_company(company) == []
+
+
+def test_extract_citation_urls_from_lexicon_reads_deeper_anchors():
+    entries = [
+        {
+            "term": "transformer",
+            "deeper": 'Prose with <a href="https://arxiv.org/abs/1706.03762">one anchor</a>.',
+        },
+        {"term": "no-anchor", "deeper": "Prose with no anchor at all."},
+        {
+            "term": "evil",
+            "deeper": 'Prose with <a href="javascript:alert(1)">a hostile anchor</a>.',
+        },
+    ]
+    assert mod.extract_citation_urls_from_lexicon(entries) == [
+        "https://arxiv.org/abs/1706.03762",
+        "javascript:alert(1)",
+    ]
+
+
+def test_extract_citation_urls_from_board_reads_source_urls():
+    rows = [
+        {"model": "A", "source_url": "https://anthropic.com/news/a"},
+        {"model": "B", "source_url": "https://reuters.com/article"},
+        {"model": "C"},
+    ]
+    assert mod.extract_citation_urls_from_board(rows) == [
+        "https://anthropic.com/news/a",
+        "https://reuters.com/article",
+    ]
+
+
+# --------------------------------------------------------------------------
+# classify_url_scheme -- the scheme-only tier
+# --------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "bad_url",
+    [
+        "javascript:alert(1)",
+        "http://example.com/plain",
+        "data:text/html,<script>x</script>",
+        "https://user:pass@example.com/x",
+        "https://192.168.1.1/x",
+        "https://xn--80ak6aa92e.com/x",
+        "https://bit.ly/abc",
+    ],
+)
+def test_classify_url_scheme_rejects_hostile_shapes(bad_url):
+    assert mod.classify_url_scheme(bad_url).ok is False
+
+
+def test_classify_url_scheme_accepts_off_allowlist_https():
+    # The scheme tier deliberately does NOT check allowlist membership --
+    # lexicon `deeper` citations legitimately point at hosts outside
+    # data/trusted_domains.json's curation scope (see
+    # SCHEME_ONLY_DIFF_PATHS).
+    assert mod.classify_url_scheme("https://www.bis.gov/press-release/x").ok is True
 
 
 # --------------------------------------------------------------------------
@@ -323,6 +420,40 @@ def test_check_citation_url_allowlisted_url_that_redirects_off_allowlist_fails(r
     assert result.ok is False
     assert "redirects to a URL that fails vetting" in result.reason
     assert result.final_url == "https://not-trusted.example.com/landing"
+    # C7 regression: the gate must never itself issue a request to the
+    # untrusted redirect target -- each hop is vetted BEFORE being
+    # fetched. Only the trusted first hop was requested.
+    requested_hosts = {r.hostname for r in requests_mock.request_history}
+    assert "not-trusted.example.com" not in requested_hosts
+
+
+def test_resolve_final_url_bounds_a_redirect_loop(requests_mock):
+    requests_mock.head(
+        "https://anthropic.com/loop",
+        status_code=302,
+        headers={"Location": "https://anthropic.com/loop"},
+    )
+    session = http.build_session()
+    final_url, error = mod.resolve_final_url(
+        session, "https://anthropic.com/loop", trusted=TRUSTED
+    )
+    assert final_url is None
+    assert "exceeded" in error
+
+
+def test_resolve_final_url_follows_relative_location(requests_mock):
+    requests_mock.head(
+        "https://anthropic.com/old",
+        status_code=301,
+        headers={"Location": "/new"},
+    )
+    requests_mock.head("https://anthropic.com/new", status_code=200)
+    session = http.build_session()
+    final_url, error = mod.resolve_final_url(
+        session, "https://anthropic.com/old", trusted=TRUSTED
+    )
+    assert error is None
+    assert final_url == "https://anthropic.com/new"
 
 
 def test_check_citation_url_unresolvable_redirect_fails_closed(requests_mock):
@@ -358,7 +489,7 @@ def test_collect_violations_trusted_domains_diff_short_circuits_regardless_of_co
 
 
 def test_collect_violations_no_citation_files_passes():
-    changed = ["content/lexicon.json", "schemas/company.schema.json"]
+    changed = ["content/primer.json", "schemas/company.schema.json"]
     assert mod.collect_violations(changed, repo_root=REPO_ROOT, trusted=TRUSTED) == []
 
 
@@ -412,6 +543,73 @@ def test_collect_violations_deleted_file_yields_no_urls(tmp_path):
         ["content/companies/deleted-co.json"], repo_root=tmp_path, trusted=TRUSTED
     )
     assert violations == []
+
+
+def test_collect_violations_lexicon_javascript_href_is_caught(tmp_path, requests_mock):
+    # The C1 regression: a hostile scheme smuggled into a lexicon entry's
+    # `deeper` anchor must fail the gate -- previously content/lexicon.json
+    # was entirely out of this check's scope.
+    _write_json(
+        tmp_path / "content" / "lexicon.json",
+        [
+            {
+                "term": "evil",
+                "one_liner": "x",
+                "deeper": 'See <a href="javascript:alert(1)">this</a>.',
+                "related": [],
+                "seen_in": [],
+            }
+        ],
+    )
+    violations = mod.collect_violations(
+        ["content/lexicon.json"], repo_root=tmp_path, trusted=TRUSTED
+    )
+    assert len(violations) == 1
+    assert "javascript" in violations[0]
+    assert requests_mock.call_count == 0
+
+
+def test_collect_violations_lexicon_off_allowlist_https_is_tolerated(
+    tmp_path, requests_mock
+):
+    # Scheme-only tier: an https href to a host outside the allowlist is
+    # fine for lexicon `deeper` citations (4 of the 30 real seed entries
+    # cite such hosts today), and no network request is ever issued.
+    _write_json(
+        tmp_path / "content" / "lexicon.json",
+        [
+            {
+                "term": "export controls",
+                "one_liner": "x",
+                "deeper": 'See <a href="https://www.bis.gov/press-release/x">BIS</a>.',
+                "related": [],
+                "seen_in": [],
+            }
+        ],
+    )
+    violations = mod.collect_violations(
+        ["content/lexicon.json"], repo_root=tmp_path, trusted=TRUSTED
+    )
+    assert violations == []
+    assert requests_mock.call_count == 0
+
+
+def test_collect_violations_board_gets_full_vetting(tmp_path, requests_mock):
+    # The B13 sibling: frontier_board.json source_urls get the FULL
+    # pipeline -- allowlist membership plus redirect-chain re-check.
+    requests_mock.head("https://anthropic.com/news/model", status_code=200)
+    _write_json(
+        tmp_path / "content" / "frontier_board.json",
+        [
+            {"model": "Good", "source_url": "https://anthropic.com/news/model"},
+            {"model": "Bad", "source_url": "https://not-trusted.example.com/x"},
+        ],
+    )
+    violations = mod.collect_violations(
+        ["content/frontier_board.json"], repo_root=tmp_path, trusted=TRUSTED
+    )
+    assert len(violations) == 1
+    assert "not-trusted.example.com" in violations[0]
 
 
 # --------------------------------------------------------------------------

@@ -103,16 +103,27 @@ topics_lib = _load_module_by_path(
 )
 
 # Human display text for data/whats_moving.json's own precomputed trend
-# enum (accelerating/cooling/flat). Deliberately distinct from
-# svg_sparkline.py's own independently-computed rising/falling/flat
-# vocabulary rendered inside each sparkline's own <text> label -- see that
-# module's docstring for why the two vocabularies coexist; this builder
-# never conflates them, it just displays both, redundantly, which is the
-# point (never color/slope alone).
+# enum (accelerating/cooling/flat).
 TREND_DISPLAY: dict[str, str] = {
     "accelerating": "Accelerating",
     "cooling": "Cooling",
     "flat": "Flat",
+}
+
+# The stored trend, translated into svg_sparkline.py's own
+# rising/falling/flat vocabulary and passed INTO render_sparkline, so the
+# sparkline's aria-label/<title>/visible word state the exact same trend
+# as this page's own visible copy. Before this mapping the sparkline
+# recomputed its own trend under a different rule (mean-of-halves vs
+# velocity.py's sum-of-3-vs-3), and the two genuinely disagree on real
+# series shapes -- a reader could see "Cooling" in the row text while
+# the same row's sparkline was labeled "rising". data/whats_moving.json's
+# stored value is the single source of truth; this builder only ever
+# restates it.
+STORED_TREND_TO_SPARKLINE: dict[str, str] = {
+    "accelerating": "rising",
+    "cooling": "falling",
+    "flat": "flat",
 }
 
 # The masthead strip's sparklines render smaller than the full /moving/
@@ -181,7 +192,15 @@ def build_topic_row(raw: Mapping[str, Any]) -> TopicRowView:
     display_name = _display_name(topic)
     daily_counts = tuple(int(c) for c in raw["daily_counts"])
     trend = str(raw["trend"])
-    rendered = svg_sparkline.render_sparkline(display_name, daily_counts)
+    # Stored trend passed through (see STORED_TREND_TO_SPARKLINE) so the
+    # sparkline can never contradict this row's own visible trend text.
+    # An unknown stored value falls back to None -> the sparkline's own
+    # classification, rather than crashing the build.
+    rendered = svg_sparkline.render_sparkline(
+        display_name,
+        daily_counts,
+        trend=STORED_TREND_TO_SPARKLINE.get(trend),
+    )
     total_mentions = sum(daily_counts)
     mentions_label = f"{total_mentions} mention{'s' if total_mentions != 1 else ''} / 7d"
     return TopicRowView(
@@ -229,6 +248,10 @@ def build_masthead_sparklines(
             daily_counts,
             width=MASTHEAD_SPARKLINE_WIDTH,
             height=MASTHEAD_SPARKLINE_HEIGHT,
+            # Same stored-trend pass-through as build_topic_row -- the
+            # masthead strip must never state a different trend than the
+            # /moving/ page does for the identical topic/data.
+            trend=STORED_TREND_TO_SPARKLINE.get(str(raw.get("trend", ""))),
         )
         views.append(
             MastheadSparklineView(

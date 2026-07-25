@@ -39,6 +39,7 @@ import random
 from dataclasses import dataclass
 from urllib.parse import quote
 from xml.sax.saxutils import escape as xml_escape
+from xml.sax.saxutils import quoteattr as xml_quoteattr
 
 # Half-width katakana (U+FF66-U+FF9D) is the actual Unicode block the
 # source material's on-screen "code" effect draws its glyphs from, mixed
@@ -128,12 +129,16 @@ def _build_tile_svg(rng: random.Random, glyphs_per_tile: int, color: str) -> str
     center_x = TILE_WIDTH_UNITS / 2
     rows = "".join(
         '<text x="{x}" y="{y}" text-anchor="middle" font-size="{size}" '
-        'font-family="monospace" fill="{color}" fill-opacity="{opacity:.2f}">'
+        # fill is an ATTRIBUTE value: xml_quoteattr (which supplies its
+        # own surrounding quotes and escapes embedded quotes) is the
+        # right escaper there -- xml_escape leaves double quotes alone,
+        # so it's only correct for element TEXT like the glyph below.
+        "font-family=\"monospace\" fill={color} fill-opacity=\"{opacity:.2f}\">"
         "{glyph}</text>".format(
             x=center_x,
             y=(i + 1) * GLYPH_UNIT_HEIGHT - (GLYPH_UNIT_HEIGHT - FONT_SIZE_UNITS),
             size=FONT_SIZE_UNITS,
-            color=xml_escape(color),
+            color=xml_quoteattr(color),
             opacity=_trail_opacity(i, cycle_length),
             glyph=xml_escape(glyph),
         )

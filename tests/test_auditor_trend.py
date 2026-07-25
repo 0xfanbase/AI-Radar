@@ -118,22 +118,35 @@ def test_classify_trend_negative_boundary_is_inclusive_flat():
     assert classify_trend(current, prior) == "flat"
 
 
-def test_classify_trend_just_above_positive_boundary_is_rising():
-    """The next representable float above `TREND_FLAT_EPSILON`, via
-    `math.nextafter` -- guaranteed strictly greater by construction, unlike
-    a decimal literal that floating point might round differently than
-    intended."""
+def test_classify_trend_meaningfully_above_boundary_is_rising():
+    """A delta genuinely past the flat band (beyond the float-noise
+    tolerance) classifies as a real move. The old version of this test
+    used `math.nextafter(TREND_FLAT_EPSILON, 1.0)` -- ONE ULP past the
+    boundary, i.e. exactly the binary-representation noise regime that
+    fired a spurious finding at a nominally-exact boundary delta (the
+    B11 bug); that regime is now deliberately inside the flat band."""
+    assert classify_trend(0.0311, 0.0) == "rising"
+
+
+def test_classify_trend_meaningfully_below_boundary_is_falling():
+    assert classify_trend(0.0, 0.0311) == "falling"
+
+
+def test_classify_trend_float_noise_at_exact_boundary_is_flat():
+    # B11 regression: 0.90 - 0.87 computes to 0.030000000000000027 in
+    # binary floating point -- NOMINALLY exactly the documented
+    # boundary-inclusive flat band, but a bare `> TREND_FLAT_EPSILON`
+    # comparison classified it as "rising" (and the mirror case as
+    # "falling", firing a spurious HIGH falling-trend backlog finding).
+    assert (0.90 - 0.87) > TREND_FLAT_EPSILON  # the raw float fact
+    assert classify_trend(0.90, 0.87) == "flat"
+    assert classify_trend(0.87, 0.90) == "flat"
+
+
+def test_classify_trend_one_ulp_past_boundary_is_still_flat():
     current = math.nextafter(TREND_FLAT_EPSILON, 1.0)
-    prior = 0.0
-    assert current - prior > TREND_FLAT_EPSILON
-    assert classify_trend(current, prior) == "rising"
-
-
-def test_classify_trend_just_below_negative_boundary_is_falling():
-    prior = math.nextafter(TREND_FLAT_EPSILON, 1.0)
-    current = 0.0
-    assert current - prior < -TREND_FLAT_EPSILON
-    assert classify_trend(current, prior) == "falling"
+    assert classify_trend(current, 0.0) == "flat"
+    assert classify_trend(0.0, current) == "flat"
 
 
 # ---------------------------------------------------------------------------

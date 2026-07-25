@@ -163,7 +163,15 @@ def build_hijack_candidates(
 ) -> list[dict[str, Any]]:
     """Turn `auditor.linkrot.audit_company_hijacked_links`'s own
     `results[]` into `target_type: "company"` pending-correction
-    candidates -- one per result with `status == "hijacked"`. Every
+    candidates -- one per result with `status == "hijacked"`. Since
+    `check_hijack` grew its own `not_allowlisted` status (the published
+    URL fails the allowlist as written, no redirect involved), a
+    `"hijacked"` result here specifically means a real redirect off the
+    allowlist from a still-allowlist-clean citation; `not_allowlisted`
+    results are deliberately NOT queued as corrections -- an allowlist
+    curation gap is the owner's backlog item
+    (`scripts/append_backlog_findings.py` files it at medium), not a
+    card/profile-content error for the analyst to act on. Every
     candidate omits `card_id` entirely, same as
     :func:`build_staleness_candidates` -- see module docstring.
     """
@@ -186,12 +194,10 @@ def build_hijack_candidates(
                     f"Citation {url} in company profile '{company_id}' "
                     f"currently resolves to {result.get('final_url')}, which "
                     "fails the outbound-link allowlist "
-                    "(data/trusted_domains.json). This may be a genuine "
-                    "post-publication redirect hijack (the domain was "
-                    "trusted when cited and has since started redirecting "
-                    "elsewhere), or the destination may simply never have "
-                    "been added to the allowlist -- either way, this "
-                    "citation's current target needs a human/analyst look."
+                    "(data/trusted_domains.json) even though the citation's "
+                    "own URL still clears it -- a post-publication redirect "
+                    "off the allowlist. This citation's current target "
+                    "needs a human/analyst look."
                 ),
                 "evidence_url": url,
                 "flagged_at": flagged_at,

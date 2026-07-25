@@ -159,19 +159,19 @@ def test_render_corrections_page_orders_newest_correction_first_in_markup():
 
 
 # ---------------------------------------------------------------------------
-# card_href -- cross-link back to the original card (T6, CLAUDE.md Hard
+# retired_wire_href -- provenance pointer to the original card (T6, Hard
 # Rule 5: corrections must link back to the card they correct).
 # ---------------------------------------------------------------------------
 
 
-def test_card_href_for_computes_month_archive_anchor():
+def test_retired_wire_card_href_for_computes_month_archive_anchor():
     assert (
-        corrections.card_href_for("2026-07-09-example-story")
+        corrections.retired_wire_card_href_for("2026-07-09-example-story")
         == "/wire/2026-07/#card-2026-07-09-example-story"
     )
 
 
-def test_build_correction_view_sets_card_href():
+def test_build_correction_view_sets_retired_wire_href():
     view = corrections.build_correction_view(
         {
             "id": "corr-x",
@@ -183,7 +183,7 @@ def test_build_correction_view_sets_card_href():
             "corrected_at": "2026-07-09T00:00:00Z",
         }
     )
-    assert view.card_href == "/wire/2026-07/#card-2026-07-09-example-story"
+    assert view.retired_wire_href == "/wire/2026-07/#card-2026-07-09-example-story"
 
 
 def test_render_corrections_page_names_the_original_card_as_plain_text():
@@ -194,8 +194,8 @@ def test_render_corrections_page_names_the_original_card_as_plain_text():
     # wire.write_wire_pages()), so site/templates/corrections.html was
     # deliberately changed to name the corrected card's id as plain,
     # unlinked text instead of linking into a page that would 404.
-    # `corrections.py` itself (card_href_for(), build_correction_view())
-    # is completely unchanged -- it still computes a `card_href` field on
+    # `corrections.py` itself (retired_wire_card_href_for(), build_correction_view())
+    # is completely unchanged -- it still computes a `retired_wire_href` field on
     # each view -- the template simply no longer emits it as an `<a>`.
     fixture = [
         {

@@ -55,6 +55,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from auditor._time import utcnow_iso as _utcnow_iso
 from scripts.plan_run import (
     COMPANIES_DIR,
     PROFILE_STALE_THRESHOLD_DAYS,
@@ -68,10 +69,6 @@ __all__ = [
     "find_stale_companies",
     "audit_profile_staleness",
 ]
-
-
-def _utcnow_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
 
 
 @dataclass(frozen=True)

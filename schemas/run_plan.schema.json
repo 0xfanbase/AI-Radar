@@ -55,7 +55,8 @@
           "proposed_card_id": {
             "type": "string",
             "minLength": 1,
-            "description": "Pre-computed content/cards/<id>.json slug so the analyst never invents or collides IDs."
+            "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}-[a-z0-9-]+$",
+            "description": "Pre-computed content/cards/<id>.json slug so the analyst never invents or collides IDs. Pattern-locked to scripts/plan_run.py::compute_proposed_card_id's own '<YYYY-MM-DD>-<kebab-slug>-<hash6>' output: this value is concatenated into a filesystem path by scripts/reconcile_run.py, so a free-form string here (e.g. one containing '../') would be a path-traversal vector from analyst-writable data/run_plan.json."
           },
           "rank": {
             "type": "integer",

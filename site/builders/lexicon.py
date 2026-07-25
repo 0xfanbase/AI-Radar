@@ -99,6 +99,7 @@ def _load_module_by_path(name: str, path: Path):
 # `site/builders/wire.py` uses to link card prose to lexicon pages, or
 # the same term could resolve to two different URLs across the site.
 linkify = _load_module_by_path("frontier_wire_site_lib_linkify", LIB_DIR / "linkify.py")
+safe_url = _load_module_by_path("frontier_wire_site_lib_safe_url", LIB_DIR / "safe_url.py")
 
 slugify = linkify.slugify
 build_slug_map = linkify.build_slug_map
@@ -122,40 +123,56 @@ def render_deeper_html(deeper: str) -> Markup:
     escaped again on the way back out, so a stray HTML-special character
     inside an anchor's title or href (not expected in today's seed
     content, but not assumed either) still can't smuggle unescaped markup
-    into the page. A `deeper` string with no matching anchor at all (not
-    expected for real content -- every one of the 30 seed entries has
-    exactly one) falls back to fully-escaped plain text rather than
-    raising, matching this build stage's "handle it, don't crash"
-    convention.
+    into the page. An anchor whose href is not a plain absolute
+    `https://` URL (per `site/lib/safe_url.py::is_safe_href`) is rebuilt
+    as its escaped text only, never as a live link -- escaping can't
+    neutralize a hostile scheme like `javascript:`, and this field is
+    LLM-writable content. A `deeper` string with no matching anchor at
+    all (not expected for real content -- every one of the 30 seed
+    entries has exactly one) falls back to fully-escaped plain text
+    rather than raising, matching this build stage's "handle it, don't
+    crash" convention.
     """
     pieces: list[str] = []
     last_end = 0
     for match in _ANCHOR_RE.finditer(deeper):
         pieces.append(html.escape(deeper[last_end : match.start()]))
         href, text = match.group(1), match.group(2)
-        pieces.append(f'<a href="{html.escape(href, quote=True)}">{html.escape(text)}</a>')
+        if safe_url.is_safe_href(href):
+            pieces.append(
+                f'<a href="{html.escape(href, quote=True)}">{html.escape(text)}</a>'
+            )
+        else:
+            # HTML-escaping alone can't neutralize a hostile *scheme*
+            # (`javascript:alert(1)` is all HTML-benign characters), and
+            # this field is LLM-writable content -- an anchor whose href
+            # isn't a plain absolute https:// URL is rendered as its
+            # escaped text only, never as a live link.
+            pieces.append(html.escape(text))
         last_end = match.end()
     pieces.append(html.escape(deeper[last_end:]))
     return Markup("".join(pieces))
 
 
-def seen_in_href(card_id: str) -> str:
-    """Best-effort link target for a `seen_in[]` card id.
+def retired_wire_seen_in_href(card_id: str) -> str:
+    """Best-effort RETIRED-archive link target for a `seen_in[]` card id.
 
     `card.schema.json` documents card ids as `YYYY-MM-DD-slug` (e.g.
     `"2026-07-09-gpt-5-5-release"`, not schema-enforced but the only
     convention in use). When the leading 10 characters parse as an ISO
-    date, this links to that month's Wire archive page
+    date, this targets that month's Wire archive page
     (`site/builders/wire.py`'s `/wire/<YYYY-MM>/` route), anchored at the
     card's own headline heading id -- `site/templates/card.html` already
-    gives every rendered card's `<h2>` the id `card-<id>-headline`, so
-    this resolves to an in-page scroll target once that month's archive
-    is built. Falls back to the bare Wire home route if the id doesn't
-    start with a parseable date -- still a valid, resolvable link, just
-    without the same-page scroll-to-card behavior. `seen_in[]` is empty
-    for all 30 real seed terms today (see `EMPTY_SEEN_IN_MESSAGE`), so
-    this path is only exercised by synthetic fixtures until the analyst's
-    auto-growth rule starts populating it for real.
+    gives every rendered card's `<h2>` the id `card-<id>-headline`.
+    Falls back to the bare Wire home route if the id doesn't start with
+    a parseable date. The Wire archive is RETIRED from the live build
+    (see site/generate.py's module docstring): the template renders the
+    label as plain text today, and the `retired_wire_` naming exists so
+    any future template edit reaching for this value has to confront
+    that it points at an unbuilt route. `seen_in[]` is empty for all 30
+    real seed terms today (see `EMPTY_SEEN_IN_MESSAGE`), so this path is
+    only exercised by synthetic fixtures until the analyst's auto-growth
+    rule starts populating it for real.
     """
     prefix = card_id[:10]
     try:
@@ -184,19 +201,20 @@ class RelatedTermView:
 
 @dataclass(frozen=True)
 class SeenInView:
-    """One `seen_in[]` reference, resolved to a best-effort href plus a
-    human-readable link label.
+    """One `seen_in[]` reference, resolved to a human-readable label plus
+    a `retired_wire_href` (see :func:`retired_wire_seen_in_href` for why
+    the name announces the target is an unbuilt, retired route).
 
     `label` is the referenced card's real headline when the id resolves
     against a supplied `headline_by_id` mapping, falling back to the bare
     `card_id` machine slug (e.g. `"2026-07-09-gpt-5-5-release"`) only when
     it doesn't -- a stale/unresolvable reference, not the common case.
     Readers should never have to parse a slug to know what they're
-    clicking into.
+    reading about.
     """
 
     card_id: str
-    href: str
+    retired_wire_href: str
     label: str
 
 
@@ -253,7 +271,7 @@ def resolve_seen_in(
     return tuple(
         SeenInView(
             card_id=cid,
-            href=seen_in_href(cid),
+            retired_wire_href=retired_wire_seen_in_href(cid),
             label=headline_by_id.get(cid) or cid,
         )
         for cid in card_ids

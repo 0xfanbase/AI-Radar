@@ -298,6 +298,48 @@ def test_derive_findings_hijacked_link_trusted_or_unreachable_is_not_a_finding()
     assert _derive(hijacked_links=hijacked_links) == []
 
 
+def test_derive_findings_not_allowlisted_citation_is_medium_severity():
+    # B2 regression: the never-allowlisted case used to arrive here as
+    # status == "hijacked" and get filed at HIGH -- three real committed-
+    # audit false alarms. It now has its own status and a medium-severity
+    # curation-gap finding.
+    hijacked_links = {
+        "results": [
+            {
+                "url": "https://huggingface.co/some/model",
+                "status": "not_allowlisted",
+                "final_url": None,
+                "detail": "host 'huggingface.co' is not in data/trusted_domains.json",
+            }
+        ]
+    }
+    findings = _derive(hijacked_links=hijacked_links)
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "medium"
+    assert findings[0]["category"] == "citation_not_allowlisted"
+    assert "curation gap" in findings[0]["summary"]
+    assert "not a redirect" in findings[0]["summary"]
+
+
+def test_derive_findings_company_not_allowlisted_citation_is_medium_severity():
+    company_hijacked_links = {
+        "results": [
+            {
+                "company_id": "moonshot-ai",
+                "url": "https://huggingface.co/moonshotai/model",
+                "status": "not_allowlisted",
+                "final_url": None,
+                "detail": "host 'huggingface.co' is not in data/trusted_domains.json",
+            }
+        ]
+    }
+    findings = _derive(company_hijacked_links=company_hijacked_links)
+    assert len(findings) == 1
+    assert findings[0]["severity"] == "medium"
+    assert findings[0]["category"] == "company_citation_not_allowlisted"
+    assert "moonshot-ai" in findings[0]["summary"]
+
+
 def test_derive_findings_company_hijacked_link_is_high_severity():
     company_hijacked_links = {
         "results": [

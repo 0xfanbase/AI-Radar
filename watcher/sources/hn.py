@@ -95,6 +95,16 @@ BROAD_POOL_POINTS_THRESHOLD = 20
 # window against a real ~2300-hits/48h day).
 _SEARCH_WINDOW_HOURS = 12
 
+# The windows' anchor timestamp is floored to this grid before any URL is
+# built. Un-quantized, every run's URLs embedded that run's own
+# second-precision `now`, so the ETag cache (keyed on the exact URL)
+# could never hit across runs -- and grew by a fresh set of never-again-
+# requested entries every run (watcher/http.py's prune_cache is the
+# companion cleanup). Cost of flooring: stories from the current partial
+# hour are picked up one run later instead -- immaterial under a 48h
+# lookback re-scanned daily.
+_WINDOW_ALIGN_SECONDS = 3600
+
 # Floor for age-in-hours when computing velocity, so a story posted only
 # seconds ago can't divide-by-near-zero into an absurd number. One minute
 # is generously small: reaching BROAD_POOL_POINTS_THRESHOLD (20 points)
@@ -201,7 +211,7 @@ def fetch_hn_items(
     caller, and wraps this call in ``_fetch_source`` so the decision is
     "skip HN for the run," never "crash the whole run."
     """
-    if not check_robots_allowed(SEARCH_BY_DATE_URL):
+    if not check_robots_allowed(SEARCH_BY_DATE_URL, session=session):
         logger.warning(
             "robots.txt disallows the HN Algolia API query -- skipping HN "
             "source for this run."
@@ -209,14 +219,30 @@ def fetch_hn_items(
         return []
 
     now = now or datetime.now(timezone.utc)
+    # Floor to the hour grid so nearby runs build IDENTICAL window URLs
+    # and the ETag cache can actually hit -- see _WINDOW_ALIGN_SECONDS.
     now_ts = int(now.timestamp())
+    anchor_ts = now_ts - (now_ts % _WINDOW_ALIGN_SECONDS)
 
     hits_by_id: dict[str, dict] = {}
-    for lower_ts, upper_ts in _search_windows(now_ts, lookback_hours, _SEARCH_WINDOW_HOURS):
+    for lower_ts, upper_ts in _search_windows(anchor_ts, lookback_hours, _SEARCH_WINDOW_HOURS):
         url = _build_search_url(lower_ts, upper_ts)
         result = fetch(session, url, cache_dir=cache_dir)
         payload = json.loads(result.text)
-        for hit in payload.get("hits", []):
+        hits = payload.get("hits", [])
+        nb_hits = payload.get("nbHits")
+        if isinstance(nb_hits, int) and nb_hits > len(hits):
+            # Algolia caps any single query at 1000 accessible hits (see
+            # module docstring point 2) -- the windowing keeps real-world
+            # volumes well under it, but if a window ever does exceed the
+            # cap the truncation must be visible, not silent.
+            logger.warning(
+                "HN window %d..%d returned %d of %d reported hits -- "
+                "Algolia's pagination cap likely truncated this window; "
+                "consider shrinking _SEARCH_WINDOW_HOURS.",
+                lower_ts, upper_ts, len(hits), nb_hits,
+            )
+        for hit in hits:
             object_id = hit.get("objectID")
             if object_id is not None:
                 hits_by_id[object_id] = hit
@@ -236,7 +262,19 @@ def fetch_hn_items(
             logger.warning("Skipping HN hit missing created_at: %r", hit.get("objectID"))
             continue
 
-        age_hours = _age_hours(_parse_created_at(created_at_raw), now)
+        try:
+            created_at = _parse_created_at(created_at_raw)
+        except ValueError:
+            # Degrade per-item like every sibling malformed-input path in
+            # this loop -- one malformed timestamp previously aborted the
+            # WHOLE HN source for the day.
+            logger.warning(
+                "Skipping HN hit %r with malformed created_at %r",
+                hit.get("objectID"), created_at_raw,
+            )
+            continue
+
+        age_hours = _age_hours(created_at, now)
         velocity = points / age_hours
 
         if points < points_threshold and velocity < velocity_threshold:

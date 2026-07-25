@@ -153,6 +153,20 @@ def test_cards_in_window_handles_empty_input():
     assert wire.cards_in_window([], window_days=14, today=TODAY) == []
 
 
+def test_cards_in_window_skips_unparseable_date_instead_of_crashing(caplog):
+    # A schema-valid-but-non-ISO date (possible before card.schema.json's
+    # pattern lock, or via a hand-edited artifact) must not crash the
+    # whole build via date.fromisoformat -- the bad card is skipped with
+    # a warning and every parseable card still renders.
+    bad_card = dict(CARD_CONFIRMED, id="2026-07-08-bad-date", date="07/08/2026")
+    with caplog.at_level("WARNING"):
+        windowed = wire.cards_in_window(
+            [bad_card, CARD_CONFIRMED], window_days=14, today=TODAY
+        )
+    assert windowed == [CARD_CONFIRMED]
+    assert any("unparseable date" in rec.message for rec in caplog.records)
+
+
 def test_available_months_sorted_newest_first():
     assert wire.available_months(ALL_CARDS) == ["2026-07", "2026-05"]
 

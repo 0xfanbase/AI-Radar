@@ -100,7 +100,7 @@ def fetch_deepseek_items(
     aborting the whole run -- consistent with every other Phase 1
     fetcher's "degrade gracefully" posture.
     """
-    if not check_robots_allowed(sitemap_url):
+    if not check_robots_allowed(sitemap_url, session=session):
         logger.warning(
             "robots.txt disallows %s -- skipping %s for this run.",
             sitemap_url, SOURCE_NAME,
@@ -111,13 +111,25 @@ def fetch_deepseek_items(
     current_urls = parse_sitemap_urls(sitemap_result.text)
     previous_urls = _load_previous_sitemap_urls(cache_dir)
     new_urls = diff_new_sitemap_urls(previous_urls, current_urls)
-    _store_sitemap_urls(cache_dir, current_urls)
+
+    # "Seen" state is persisted AFTER the per-article loop, and a URL only
+    # counts as handled once its outcome is PERMANENT (an emitted Item, a
+    # non-news path, a page with no <h1>). Previously the whole current
+    # sitemap was stored up front, so one transient article-fetch failure
+    # (or a temporarily-unreachable robots.txt) marked the story seen and
+    # lost it forever -- the next run's diff no longer surfaced it. A URL
+    # left unhandled stays "new" and is simply retried next run.
+    handled_urls: set[str] = set()
 
     items: list[Item] = []
     for url in new_urls:
         if not _is_news_article_url(url):
+            handled_urls.add(url)  # permanent property of the URL itself
             continue
-        if not check_robots_allowed(url):
+        if not check_robots_allowed(url, session=session):
+            # NOT marked handled: check_robots_allowed's False conflates a
+            # genuine disallow with a transient robots-fetch failure, and
+            # only the caller's retry-next-run posture is safe for both.
             logger.warning(
                 "robots.txt disallows %s -- skipping this DeepSeek article.",
                 url,
@@ -126,12 +138,14 @@ def fetch_deepseek_items(
         try:
             article_result = fetch(session, url, cache_dir=cache_dir)
         except requests.exceptions.RequestException as exc:
+            # Transient failure -- retried next run, never marked seen.
             logger.warning("Failed to fetch new DeepSeek article %s: %s", url, exc)
             continue
 
         title = extract_h1_text(article_result.text)
         if not title:
             logger.warning("Skipping DeepSeek article with no <h1>: %s", url)
+            handled_urls.add(url)  # a parsed page without an <h1> stays that way
             continue
 
         items.append(
@@ -146,5 +160,16 @@ def fetch_deepseek_items(
                 extra={"slug": urlsplit(url).path.rsplit("/", 1)[-1]},
             )
         )
+        handled_urls.add(url)
+
+    # Persist: every previously-seen URL still in the current sitemap
+    # (dropped URLs age out, matching the old full-replace semantics)
+    # plus everything handled this run. Unhandled new URLs are excluded
+    # so the next run's diff surfaces them again.
+    current_set = set(current_urls)
+    retained = [u for u in previous_urls if u in current_set]
+    retained_set = set(retained)
+    to_store = retained + [u for u in current_urls if u in handled_urls and u not in retained_set]
+    _store_sitemap_urls(cache_dir, to_store)
 
     return items

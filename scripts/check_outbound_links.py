@@ -3,7 +3,8 @@
 against the frozen, human-curated ``data/trusted_domains.json`` allowlist.
 
 Modeled on ``scripts/check_path_allowlist.py``'s own CLI/diff-reading
-conventions (``git diff --name-only --no-renames HEAD``, print every
+conventions (the shared ``scripts/_git_changes.py`` helper: tracked diff
+against ``HEAD`` plus untracked, non-ignored files; print every
 violation, exit nonzero) -- this is a sibling CI gate, not a replacement
 for it. Where ``check_path_allowlist.py`` protects *which files* an
 automated run may touch, this script protects *what a card/company
@@ -29,7 +30,15 @@ What this script does, for the working-tree diff against ``HEAD``:
    ``profile.*.citations[]`` a company record can carry
    (``schemas/company.schema.json``'s ``citedText`` shape, reused across
    ``overview``/``what_theyve_done[]``/``strengths[]``/``current_focus``/
-   ``roadmap[]``).
+   ``roadmap[]``) -- plus, since the 2026-07 hardening pass, the two
+   other LLM-writable content files that carry outbound hrefs:
+   ``content/frontier_board.json`` (every row's ``source_url``, fully
+   vetted like card citations -- the Board only ever cites PRIMARY /
+   confirmed-card OUTLET sources, all inside this allowlist's own stated
+   curation scope) and ``content/lexicon.json`` (every ``deeper`` field's
+   inline ``<a href>``, vetted against the *scheme-level* static checks
+   only -- see ``SCHEME_ONLY_DIFF_PATHS`` for why the hostname-allowlist
+   membership check deliberately does not apply there).
 3. **Static vetting** (:func:`classify_url`, no network): reject
    ``http://`` (and any non-``https`` scheme), an IP-literal host,
    userinfo embedded in the URL (``user:pass@host``), a punycode
@@ -40,18 +49,20 @@ What this script does, for the working-tree diff against ``HEAD``:
    ``path_scoped[]`` entries (``{hostname, path_prefix}``) with the URL's
    path actually starting with that prefix.
 4. **Redirect-chain vetting** (:func:`resolve_final_url`): for a URL that
-   passes step 3, follow its real redirect chain (HEAD, falling back to
-   GET only on a 405/501 HEAD-not-supported response -- same fallback
+   passes step 3, walk its redirect chain hop by hop (HEAD, falling back
+   to GET only on a 405/501 HEAD-not-supported response -- same fallback
    rule ``auditor/linkrot.py::check_url`` already uses) via the shared,
    retry/backoff-configured session from ``watcher.http.build_session()``
-   (reused, not reimplemented), and re-apply the exact same
-   :func:`classify_url` checks to the *final* resolved URL. This is what
-   catches a post-approval hijack: a citation that was written against a
-   trusted domain but whose target has since started redirecting
-   somewhere untrusted. Run at commit time, on every commit touching
-   these files -- not only as part of the weekly audit (see
-   ``auditor/linkrot.py``'s own separate, complementary weekly
-   re-resolution check for already-published citations).
+   (reused, not reimplemented), statically vetting EVERY hop's target
+   with :func:`classify_url` *before* requesting it -- a hop that fails
+   vetting ends the walk as the resolved URL without this gate ever
+   issuing a request to the untrusted host itself. This is what catches
+   a post-approval hijack: a citation that was written against a trusted
+   domain but whose target has since started redirecting somewhere
+   untrusted. Run at commit time, on every commit touching these files
+   -- not only as part of the weekly audit (see ``auditor/linkrot.py``'s
+   own separate, complementary weekly re-resolution check for
+   already-published citations).
 
 A URL whose redirect chain cannot be resolved at all (timeout, connection
 error, any other network failure) is treated as a violation, not silently
@@ -69,12 +80,13 @@ from __future__ import annotations
 
 import ipaddress
 import json
-import subprocess
+import posixpath
+import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urljoin, urlsplit
 
 import requests
 
@@ -84,6 +96,7 @@ import requests
 REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO_ROOT))
 
+from scripts._git_changes import get_changed_files  # noqa: E402, F401
 from watcher import http  # noqa: E402
 from watcher.config import REQUEST_TIMEOUT_SECONDS  # noqa: E402
 
@@ -109,6 +122,34 @@ HEAD_UNSUPPORTED_STATUS_CODES = frozenset({405, 501})
 # below, not swept up by these prefixes alone.
 COMPANIES_PREFIX = "content/companies/"
 CARDS_PREFIX = "content/cards/"
+
+# The two other LLM-writable content files that carry outbound hrefs
+# (2026-07 hardening pass: a `javascript:` href in either previously
+# rendered live on the built site, with no gate anywhere in its path).
+LEXICON_DIFF_PATH = "content/lexicon.json"
+FRONTIER_BOARD_DIFF_PATH = "content/frontier_board.json"
+
+# Files whose URLs get the scheme-level static checks (https-only, no
+# userinfo/IP-literal/punycode/shortener) but NOT the hostname-allowlist
+# membership check or the network redirect-chain re-check. Today exactly
+# one: content/lexicon.json. Its `deeper` citations legitimately point at
+# hosts outside data/trusted_domains.json's own stated curation scope
+# (which covers the outlet table + company official domains + board/
+# company citation hosts -- 4 of the 30 seed lexicon entries cite e.g.
+# github.com/bis.gov/cdn.openai.com today), so requiring allowlist
+# membership here would hard-block the daily pipeline's routine
+# lexicon.json touches (the auto-growth rule appends seen_in[] ids every
+# run) until an owner curation pass -- while the injection-relevant
+# defense (scheme shape) applies in full. Widening the frozen allowlist
+# to cover lexicon hosts is an owner-checkpoint decision, not this
+# gate's.
+SCHEME_ONLY_DIFF_PATHS = frozenset({LEXICON_DIFF_PATH})
+
+# Mirrors site/builders/lexicon.py::_ANCHOR_RE's href half: the one
+# narrow, literal anchor shape a lexicon entry's `deeper` field carries.
+# Kept as a literal twin (not an import) because scripts/ never imports
+# from site/ -- site/ is deliberately not an importable package.
+_DEEPER_ANCHOR_HREF_RE = re.compile(r'<a href="([^"]*)"')
 
 
 @dataclass(frozen=True)
@@ -141,10 +182,13 @@ def diff_touches_trusted_domains(changed_files: list[str]) -> bool:
 
 
 def is_citation_bearing_path(path: str) -> bool:
-    """True if `path` is a real per-record content file this check reads
-    citations from -- a company profile or a card, never either
-    directory's own generated `index.json` manifest."""
+    """True if `path` is a content file this check reads outbound URLs
+    from -- a company profile, a card, the frontier board, or the
+    lexicon; never the card/company directories' own generated
+    `index.json` manifests."""
     normalized = path.replace("\\", "/")
+    if normalized in (LEXICON_DIFF_PATH, FRONTIER_BOARD_DIFF_PATH):
+        return True
     if normalized.startswith(COMPANIES_PREFIX) and normalized.endswith(".json"):
         return normalized != COMPANIES_PREFIX + "index.json"
     if normalized.startswith(CARDS_PREFIX) and normalized.endswith(".json"):
@@ -191,6 +235,34 @@ def extract_citation_urls_from_company(company: dict[str, Any]) -> list[str]:
     return urls
 
 
+def extract_citation_urls_from_lexicon(entries: Any) -> list[str]:
+    """Every inline `<a href>` target across every lexicon entry's
+    `deeper` field (`schemas/lexicon.schema.json` shape: a top-level
+    array of entries)."""
+    urls: list[str] = []
+    for entry in entries or []:
+        if not isinstance(entry, dict):
+            continue
+        for href in _DEEPER_ANCHOR_HREF_RE.findall(str(entry.get("deeper", ""))):
+            if href:
+                urls.append(href)
+    return urls
+
+
+def extract_citation_urls_from_board(rows: Any) -> list[str]:
+    """Every row's `source_url` in the loaded `content/frontier_board.json`
+    (`schemas/frontier_board.schema.json` shape: a top-level array of
+    rows)."""
+    urls: list[str] = []
+    for row in rows or []:
+        if not isinstance(row, dict):
+            continue
+        url = row.get("source_url")
+        if url:
+            urls.append(str(url))
+    return urls
+
+
 def extract_citation_urls(path: str, repo_root: Path = REPO_ROOT) -> list[str]:
     """Load `path` (a repo-relative path already confirmed by
     :func:`is_citation_bearing_path`) and return every citation URL it
@@ -208,7 +280,12 @@ def extract_citation_urls(path: str, repo_root: Path = REPO_ROOT) -> list[str]:
             data = json.load(fh)
     except json.JSONDecodeError:
         return []
-    if path.startswith(CARDS_PREFIX):
+    normalized = path.replace("\\", "/")
+    if normalized == LEXICON_DIFF_PATH:
+        return extract_citation_urls_from_lexicon(data)
+    if normalized == FRONTIER_BOARD_DIFF_PATH:
+        return extract_citation_urls_from_board(data)
+    if normalized.startswith(CARDS_PREFIX):
         return extract_citation_urls_from_card(data)
     return extract_citation_urls_from_company(data)
 
@@ -247,27 +324,50 @@ def _has_punycode_label(hostname: str) -> bool:
     return any(label.lower().startswith("xn--") for label in hostname.split("."))
 
 
+def _normalized_url_path(path: str) -> str | None:
+    """Percent-decode and dot-segment-resolve a URL path for the
+    path-scoped prefix compare, so `/moonshotai/../evil` or
+    `/moonshotai/%2E%2E/evil` can't satisfy a `/moonshotai/` prefix the
+    server itself will resolve right back out of. Returns ``None`` (never
+    trusted) when a ``%`` survives one full decode -- a double-encoded
+    path whose server-side interpretation this check can't be confident
+    about has no business clearing a security allowlist."""
+    decoded = unquote(path or "/")
+    if "%" in decoded:
+        return None
+    # posixpath.normpath resolves `/./`, `//`, and `/../` (against the
+    # root, for the absolute paths URL paths always are) but strips a
+    # trailing slash that matters for prefix semantics -- restore it.
+    normalized = posixpath.normpath(decoded)
+    if decoded.endswith("/") and not normalized.endswith("/"):
+        normalized += "/"
+    return normalized
+
+
 def _hostname_trusted(hostname: str, path: str, trusted: dict[str, Any]) -> bool:
     normalized = _normalized_hostname(hostname)
     trusted_hostnames = {h.lower() for h in trusted.get("hostnames", [])}
     if normalized in trusted_hostnames:
         return True
+    normalized_path = _normalized_url_path(path)
+    if normalized_path is None:
+        return False
     for entry in trusted.get("path_scoped", None) or []:
         entry_host = _normalized_hostname(str(entry.get("hostname", "")))
         prefix = str(entry.get("path_prefix", ""))
-        if normalized == entry_host and path.startswith(prefix):
+        if normalized == entry_host and normalized_path.startswith(prefix):
             return True
     return False
 
 
-def classify_url(url: str, trusted: dict[str, Any]) -> UrlCheckResult:
-    """Static (no-network) vetting of one URL against every rule in the
-    module docstring's step 3. Never raises -- a URL that fails to parse
-    at all (`urlsplit` itself never raises for a plain string, but an
-    empty/garbage value can yield an empty hostname) is rejected with a
-    clear reason rather than propagating an exception up to the CI gate's
-    own top-level error handling.
-    """
+def classify_url_scheme(url: str) -> UrlCheckResult:
+    """The scheme-level static checks alone -- everything in the module
+    docstring's step 3 *except* hostname-allowlist membership: https-only
+    scheme, no embedded userinfo, a parseable hostname that is neither an
+    IP literal nor punycode, and not a denylisted URL shortener. This is
+    the tier applied on its own to `SCHEME_ONLY_DIFF_PATHS` files (see
+    that constant for why), and the first stage of :func:`classify_url`
+    for everything else. Never raises."""
     parsed = urlsplit(url)
 
     if parsed.scheme != "https":
@@ -290,6 +390,25 @@ def classify_url(url: str, trusted: dict[str, Any]) -> UrlCheckResult:
     if normalized in URL_SHORTENER_DENYLIST:
         return UrlCheckResult(url, False, f"host {hostname!r} is a denylisted URL shortener")
 
+    return UrlCheckResult(url, True)
+
+
+def classify_url(url: str, trusted: dict[str, Any]) -> UrlCheckResult:
+    """Full static (no-network) vetting of one URL against every rule in
+    the module docstring's step 3: the scheme-level checks of
+    :func:`classify_url_scheme` plus hostname-allowlist membership.
+    Never raises -- a URL that fails to parse at all (`urlsplit` itself
+    never raises for a plain string, but an empty/garbage value can yield
+    an empty hostname) is rejected with a clear reason rather than
+    propagating an exception up to the CI gate's own top-level error
+    handling.
+    """
+    scheme_result = classify_url_scheme(url)
+    if not scheme_result.ok:
+        return scheme_result
+
+    parsed = urlsplit(url)
+    hostname = parsed.hostname or ""
     if not _hostname_trusted(hostname, parsed.path, trusted):
         return UrlCheckResult(url, False, f"host {hostname!r} is not in data/trusted_domains.json")
 
@@ -301,32 +420,75 @@ def classify_url(url: str, trusted: dict[str, Any]) -> UrlCheckResult:
 # --------------------------------------------------------------------------
 
 
-def resolve_final_url(
-    session: requests.Session, url: str, *, timeout: float = REQUEST_TIMEOUT_SECONDS
-) -> tuple[str | None, str | None]:
-    """Follow `url`'s real redirect chain and return `(final_url, None)`,
-    or `(None, error_detail)` if the chain could not be resolved at all.
+# Redirect statuses this check follows manually. 300 Multiple Choices is
+# not followable (no single canonical target); anything else 3xx without
+# a Location header is treated as the chain's end.
+_REDIRECT_STATUS_CODES = frozenset({301, 302, 303, 307, 308})
 
-    HEAD first (cheaper), falling back to GET only when HEAD itself
-    reports method-not-allowed/not-implemented (405/501) -- identical
-    fallback rule to `auditor/linkrot.py::check_url`, reused as a
-    convention (not as shared code, since that module's own error
+# Hop budget for the manual redirect walk -- generous against any real
+# citation (one or two hops in practice) while bounding a malicious/
+# looping chain.
+MAX_REDIRECT_HOPS = 10
+
+
+def resolve_final_url(
+    session: requests.Session,
+    url: str,
+    *,
+    timeout: float = REQUEST_TIMEOUT_SECONDS,
+    trusted: dict[str, Any] | None = None,
+    max_hops: int = MAX_REDIRECT_HOPS,
+) -> tuple[str | None, str | None]:
+    """Walk `url`'s redirect chain hop by hop and return `(final_url,
+    None)`, or `(None, error_detail)` if the chain could not be resolved.
+
+    The walk is manual (`allow_redirects=False` + an explicit loop),
+    deliberately: with `trusted` supplied, EVERY hop's target is
+    statically vetted (:func:`classify_url`) *before* any request is
+    issued to it -- the previous `allow_redirects=True` implementation
+    had `requests` fetch the entire chain first and only then classified
+    the final URL, meaning this security gate itself issued a request to
+    whatever untrusted host a hijacked citation redirected to before
+    ever deciding it was untrusted. A hop that fails vetting is returned
+    as the resolved final URL *without being requested*; the caller's own
+    `classify_url` pass over the returned URL then reports the violation
+    exactly as before. (`trusted=None` skips per-hop vetting -- the walk
+    itself still never exceeds `max_hops`.)
+
+    Per hop: HEAD first (cheaper), falling back to GET only when HEAD
+    itself reports method-not-allowed/not-implemented (405/501) --
+    identical fallback rule to `auditor/linkrot.py::check_url`, reused as
+    a convention (not as shared code, since that module's own error
     handling classifies failures as "unreachable, retry next week" while
-    this one must fail closed as a hard CI violation instead). Both calls
-    pass `allow_redirects=True` explicitly, since `requests`' own
-    `Session.head()` defaults it to `False` unlike every other verb.
+    this one must fail closed as a hard CI violation instead).
     """
-    try:
-        response = session.head(url, timeout=timeout, allow_redirects=True)
-        if response.status_code in HEAD_UNSUPPORTED_STATUS_CODES:
-            response = session.get(url, timeout=timeout, allow_redirects=True)
-    except requests.Timeout as exc:
-        return None, f"timeout: {exc}"
-    except requests.ConnectionError as exc:
-        return None, f"connection error: {exc}"
-    except requests.RequestException as exc:
-        return None, f"request error: {exc}"
-    return response.url, None
+    current = url
+    for _hop in range(max_hops + 1):
+        try:
+            response = session.head(current, timeout=timeout, allow_redirects=False)
+            if response.status_code in HEAD_UNSUPPORTED_STATUS_CODES:
+                response = session.get(
+                    current, timeout=timeout, allow_redirects=False
+                )
+        except requests.Timeout as exc:
+            return None, f"timeout: {exc}"
+        except requests.ConnectionError as exc:
+            return None, f"connection error: {exc}"
+        except requests.RequestException as exc:
+            return None, f"request error: {exc}"
+
+        location = response.headers.get("Location")
+        if response.status_code not in _REDIRECT_STATUS_CODES or not location:
+            return current, None
+
+        next_url = urljoin(current, location)
+        if trusted is not None and not classify_url(next_url, trusted).ok:
+            # The chain leads somewhere untrusted -- report that target
+            # as the resolution WITHOUT ever requesting it.
+            return next_url, None
+        current = next_url
+
+    return None, f"redirect chain exceeded {max_hops} hops"
 
 
 def check_citation_url(
@@ -349,7 +511,7 @@ def check_citation_url(
     if not static_result.ok:
         return static_result
 
-    final_url, error = resolve_final_url(session, url, timeout=timeout)
+    final_url, error = resolve_final_url(session, url, timeout=timeout, trusted=trusted)
     if error is not None:
         return UrlCheckResult(
             url, False, f"could not resolve redirect chain: {error}"
@@ -368,25 +530,9 @@ def check_citation_url(
 
 
 # --------------------------------------------------------------------------
-# get_changed_files -- identical mechanism to
-# scripts/check_path_allowlist.py's own (see that module's docstring for
-# why --no-renames matters).
-# --------------------------------------------------------------------------
-
-
-def get_changed_files(ref: str = "HEAD", repo_root: Path = REPO_ROOT) -> list[str]:
-    result = subprocess.run(
-        ["git", "diff", "--name-only", "--no-renames", ref],
-        cwd=repo_root,
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return [line for line in result.stdout.splitlines() if line.strip()]
-
-
-# --------------------------------------------------------------------------
-# Orchestration
+# Orchestration -- get_changed_files comes from the shared
+# scripts/_git_changes.py helper (tracked diff + untracked files; see that
+# module's docstring for why untracked files must be included pre-commit).
 # --------------------------------------------------------------------------
 
 
@@ -423,16 +569,28 @@ def collect_violations(
     urls: list[str] = []
     seen: set[str] = set()
     url_to_files: dict[str, list[str]] = {}
+    fully_vetted_urls: set[str] = set()
     for path in citation_files:
+        normalized_path = path.replace("\\", "/")
         for url in extract_citation_urls(path, repo_root=repo_root):
             url_to_files.setdefault(url, []).append(path)
+            if normalized_path not in SCHEME_ONLY_DIFF_PATHS:
+                fully_vetted_urls.add(url)
             if url not in seen:
                 seen.add(url)
                 urls.append(url)
 
     violations: list[str] = []
     for url in urls:
-        result = check_citation_url(session, url, trusted)
+        if url in fully_vetted_urls:
+            # Full pipeline: static allowlist vetting + redirect-chain
+            # re-check (cards, company profiles, the frontier board).
+            result = check_citation_url(session, url, trusted)
+        else:
+            # Scheme-only tier (lexicon `deeper` hrefs -- see
+            # SCHEME_ONLY_DIFF_PATHS): static scheme checks, no allowlist
+            # membership, no network.
+            result = classify_url_scheme(url)
         if not result.ok:
             files = ", ".join(url_to_files[url])
             violations.append(f"{url} (cited in {files}): {result.reason}")

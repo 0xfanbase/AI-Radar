@@ -9,20 +9,28 @@ anything is ever committed. This is the concrete mechanism behind the
 project's prompt-injection guarantee: at absolute worst, a hostile input can
 influence the text of one card, never the pipeline that produces it.
 
-This script computes the working-tree diff of changed files against HEAD
-(``git diff --name-only``, since this is meant to run pre-commit -- i.e.
-after changes are staged but before they're committed) and exits nonzero,
-printing every offending path, if any changed file lies outside
-``content/`` or ``data/``. Exits 0 if every changed file is allowed
-(including the trivial case of no changes at all).
+This script computes the set of changed files via the shared
+``scripts/_git_changes.py`` helper -- the working-tree diff against HEAD
+*plus* every untracked, non-ignored file, since this runs pre-commit,
+before ``analyze.yml``'s ``git add`` has staged anything (a brand-new
+file is untracked at that point and a tracked-only diff would never see
+it) -- and exits nonzero, printing every offending path, if any changed
+file lies outside ``content/`` or ``data/``. Exits 0 if every changed
+file is allowed (including the trivial case of no changes at all).
 """
 from __future__ import annotations
 
-import subprocess
 import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# Allow running as `python scripts/check_path_allowlist.py` (no package
+# install / no `-m` needed) -- same sys.path convention as every sibling
+# script here (scripts/validate_changed_schemas.py, ...).
+sys.path.insert(0, str(REPO_ROOT))
+
+from scripts._git_changes import get_changed_files  # noqa: E402, F401
 
 # Top-level directories the automated commit step may write to. Trailing
 # slash is deliberate: it makes the prefix check exact-directory-scoped, so
@@ -43,28 +51,6 @@ def find_violations(changed_files: list[str]) -> list[str]:
     allowlist, preserving their original order. An empty input list (no
     changes at all) yields an empty (passing) result."""
     return [f for f in changed_files if f and not is_allowed(f)]
-
-
-def get_changed_files(ref: str = "HEAD") -> list[str]:
-    """Return the changed file paths in the working-tree diff against
-    `ref`, via ``git diff --name-only --no-renames``.
-
-    ``--no-renames`` is deliberate: without it, git may collapse a renamed
-    file to a single "new path only" line (governed by the repo's/user's
-    rename-detection settings), which would let a file moved *out* of the
-    allowlist silently escape this check if only the new path were ever
-    inspected. With ``--no-renames``, a rename is reported as a plain
-    delete-of-old-path + add-of-new-path pair, so both the old and the new
-    path are independently checked against the allowlist.
-    """
-    result = subprocess.run(
-        ["git", "diff", "--name-only", "--no-renames", ref],
-        cwd=REPO_ROOT,
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    return [line for line in result.stdout.splitlines() if line.strip()]
 
 
 def main() -> int:

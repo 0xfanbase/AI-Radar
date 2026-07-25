@@ -111,6 +111,29 @@ def test_build_topic_rows_preserves_daily_counts_and_totals():
         assert row.trend == raw["trend"]
 
 
+def test_sparkline_states_the_stored_trend_even_when_its_own_rule_disagrees():
+    # B4 regression: [1, 0, 0, 4, 0, 0, 0] classifies as "cooling" under
+    # watcher/velocity.py's stored rule (sum of last 3 < sum of first 3)
+    # but "rising" under svg_sparkline's own mean-of-halves rule. The
+    # stored trend is the single source of truth: the row's visible text
+    # AND the sparkline's aria-label/visible word must both state it --
+    # a reader must never see "Cooling" beside a chart labeled "rising".
+    raw = {"topic": "models", "daily_counts": [1, 0, 0, 4, 0, 0, 0], "trend": "cooling"}
+    row = moving.build_topic_row(raw)
+    assert row.trend_label == "Cooling"
+    svg = str(row.sparkline_svg)
+    assert "falling" in svg  # stored "cooling", in sparkline vocabulary
+    assert "rising" not in svg
+
+
+def test_masthead_sparklines_state_the_stored_trend_too():
+    raw = {"topic": "models", "daily_counts": [1, 0, 0, 4, 0, 0, 0], "trend": "cooling"}
+    views = moving.build_masthead_sparklines([raw])
+    svg = str(views[0].sparkline_svg)
+    assert "falling" in svg
+    assert "rising" not in svg
+
+
 def test_build_topic_row_mentions_label_singular_for_a_total_of_one():
     raw = {
         "topic": "products",

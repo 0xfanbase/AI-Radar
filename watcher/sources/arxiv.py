@@ -199,7 +199,7 @@ def fetch_arxiv_items(
     """
     query_url = build_query_url(categories=categories, max_results=max_results)
 
-    if not check_robots_allowed(query_url):
+    if not check_robots_allowed(query_url, session=session):
         logger.warning(
             "robots.txt disallows the arXiv API query -- skipping arXiv "
             "source for this run."

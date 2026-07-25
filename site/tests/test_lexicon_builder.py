@@ -164,6 +164,43 @@ def test_render_deeper_html_with_no_anchor_falls_back_to_escaped_plain_text():
     assert "&lt;b&gt;bold&lt;/b&gt;" in rendered
 
 
+@pytest.mark.parametrize(
+    "bad_href",
+    [
+        "javascript:alert(1)",
+        "JAVASCRIPT:alert(1)",
+        "data:text/html,<script>alert(1)</script>",
+        "http://plain-http.example/x",
+        "//protocol-relative.example/x",
+        "relative/path",
+        "",
+    ],
+)
+def test_render_deeper_html_neutralizes_non_https_anchor_schemes(bad_href):
+    # HTML-escaping alone can't defuse a hostile *scheme* -- `javascript:
+    # alert(1)` contains no HTML-special characters at all, so before this
+    # fix it rendered as a live, clickable script link from LLM-writable
+    # content. A non-https anchor now renders as its escaped text only.
+    rendered = lexicon.render_deeper_html(
+        f'Prose with <a href="{bad_href}">a citation</a> inline.'
+    )
+    assert "<a " not in rendered
+    assert "a citation" in rendered
+    # No trace of the unsafe target as a clickable attribute.
+    assert 'href="' not in rendered
+
+
+def test_render_deeper_html_keeps_https_anchor_alongside_neutralized_one():
+    rendered = lexicon.render_deeper_html(
+        'Good <a href="https://arxiv.org/abs/1706.03762">paper</a> and '
+        'bad <a href="javascript:alert(1)">trap</a>.'
+    )
+    assert '<a href="https://arxiv.org/abs/1706.03762">paper</a>' in rendered
+    assert rendered.count("<a href=") == 1
+    assert "trap" in rendered
+    assert "javascript:" not in rendered
+
+
 # ---------------------------------------------------------------------------
 # related[] resolution
 # ---------------------------------------------------------------------------
@@ -197,20 +234,20 @@ def test_resolve_seen_in_empty_list_is_empty_tuple():
     assert lexicon.resolve_seen_in([]) == ()
 
 
-def test_seen_in_href_links_into_the_cards_month_with_a_scroll_anchor():
-    href = lexicon.seen_in_href("2026-07-09-gpt-5-5-release")
+def test_retired_wire_seen_in_href_targets_the_cards_month_with_a_scroll_anchor():
+    href = lexicon.retired_wire_seen_in_href("2026-07-09-gpt-5-5-release")
     assert href == "/wire/2026-07/#card-2026-07-09-gpt-5-5-release-headline"
 
 
-def test_seen_in_href_falls_back_for_a_non_date_prefixed_id():
-    assert lexicon.seen_in_href("not-a-date-id") == "/wire/"
+def test_retired_wire_seen_in_href_falls_back_for_a_non_date_prefixed_id():
+    assert lexicon.retired_wire_seen_in_href("not-a-date-id") == "/wire/"
 
 
 def test_resolve_seen_in_synthetic_non_empty_case():
     resolved = lexicon.resolve_seen_in(["2026-07-09-test-card"])
     assert len(resolved) == 1
     assert resolved[0].card_id == "2026-07-09-test-card"
-    assert resolved[0].href == "/wire/2026-07/#card-2026-07-09-test-card-headline"
+    assert resolved[0].retired_wire_href == "/wire/2026-07/#card-2026-07-09-test-card-headline"
     # No headline_by_id supplied at all (the default) -- label falls back
     # to the bare card id, matching this function's pre-headline-lookup
     # behavior exactly.
@@ -356,7 +393,7 @@ def test_render_lexicon_term_with_synthetic_non_empty_seen_in_renders_plain_text
     # (site/generate.py no longer calls wire.write_wire_pages()), so
     # site/templates/lexicon_term.html was deliberately changed to render
     # each `seen_in[]` reference as plain, unlinked text instead of a link
-    # into a page that would 404. `lexicon.py` itself (seen_in_href(),
+    # into a page that would 404. `lexicon.py` itself (retired_wire_seen_in_href(),
     # resolve_seen_in()) is completely unchanged -- it still computes an
     # `href` field on each view -- the template simply no longer emits it
     # as an `<a>`. This test now asserts that narrower, still-true claim.

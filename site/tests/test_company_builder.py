@@ -138,6 +138,59 @@ def test_board_rows_for_company_sorts_newest_release_first():
     assert [r.model for r in ordered] == ["new", "mid", "old"]
 
 
+def test_meta_description_from_short_text_passes_through():
+    assert company_builder.meta_description_from("A short overview.") == (
+        "A short overview."
+    )
+
+
+def test_meta_description_from_truncates_at_a_sentence_boundary():
+    text = (
+        "First sentence about the lab, fairly compact. Second sentence "
+        "adds considerably more detail that unmistakably pushes well past "
+        "the one-hundred-and-fifty-five-character meta limit when combined "
+        "with the first. Third sentence goes on and on with even more "
+        "color about products and papers and history."
+    )
+    result = company_builder.meta_description_from(text)
+    assert result == "First sentence about the lab, fairly compact."
+    assert len(result) <= company_builder.META_DESCRIPTION_MAX_CHARS
+
+
+def test_meta_description_from_hard_truncates_a_giant_first_sentence():
+    text = "word " * 80  # one 400-char "sentence", no punctuation
+    result = company_builder.meta_description_from(text.strip())
+    assert len(result) <= company_builder.META_DESCRIPTION_MAX_CHARS + 1
+    assert result.endswith("…")
+    assert " wor…" not in result  # never a mid-word chop
+
+
+def test_real_profiles_meta_description_within_limit():
+    # C9 regression: the rendered <meta name="description"> previously
+    # carried the full overview paragraph (up to ~380 chars in the real
+    # seeded profiles).
+    for raw in REAL_COMPANIES:
+        view = company_builder.build_company_view(raw, REAL_BOARD_ROWS, [])
+        assert len(view.meta_description) <= company_builder.META_DESCRIPTION_MAX_CHARS
+        assert view.meta_description  # never empty for a real profile
+
+
+def test_board_rows_for_company_neutralizes_non_https_source_url():
+    # Same defense board.py applies to the same LLM-writable field: a
+    # hostile scheme in frontier_board.json's source_url must never reach
+    # a live href on a company profile page (company.html renders the
+    # host as inert text when source_url is "").
+    rows = [
+        {"company_id": "x", "release_date": "2026-06-01", "model": "evil",
+         "source_url": "javascript:alert(1)"},
+        {"company_id": "x", "release_date": "2026-05-01", "model": "good",
+         "source_url": "https://example.com/announcement"},
+    ]
+    ordered = company_builder.board_rows_for_company("x", rows)
+    assert ordered[0].source_url == ""
+    assert ordered[1].source_url == "https://example.com/announcement"
+
+
 # ---------------------------------------------------------------------------
 # cards_for_company -- no cap, unlike map.py's popover version
 # ---------------------------------------------------------------------------
@@ -176,7 +229,7 @@ def test_cards_for_company_filters_and_sorts_newest_first():
     ]
     views = company_builder.cards_for_company("anthropic", cards)
     assert [v.id for v in views] == ["card-2", "card-1"]
-    assert views[0].href == "/wire/2026-07/#card-card-2"
+    assert views[0].retired_wire_href == "/wire/2026-07/#card-card-2"
     assert views[0].status_label == "REPORTED"
 
 

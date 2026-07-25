@@ -53,7 +53,12 @@ class CorrectionView:
 
     id: str
     card_id: str
-    card_href: str
+    # Deliberately not named `card_href`: the computed target points into
+    # the Wire archive the live build no longer generates (see
+    # site/generate.py's module docstring) -- the template renders the
+    # card id as plain text today, and this name makes any future
+    # template edit confront that before linking it.
+    retired_wire_href: str
     original_claim: str
     corrected_claim: str
     reason: str
@@ -68,16 +73,18 @@ def _sort_key(correction: Mapping[str, Any]) -> str:
     return str(correction.get("corrected_at", ""))
 
 
-def card_href_for(card_id: str) -> str:
-    """The corrected card's own page + anchor, given its `card_id`.
+def retired_wire_card_href_for(card_id: str) -> str:
+    """The corrected card's would-be page + anchor, given its `card_id`.
 
     Card ids are always `YYYY-MM-DD-slug` (`card.schema.json`'s `id`
     pattern), so the first 7 characters are always that card's month
     archive key -- `site/builders/wire.py::write_wire_pages` writes one
     `/wire/<YYYY-MM>/` page per month any card exists in, and
     `site/templates/card.html` gives every rendered card article the
-    matching `id="card-<card_id>"` anchor (added alongside this field),
-    so this href always resolves for any real, published card."""
+    matching `id="card-<card_id>"` anchor. The Wire archive is RETIRED
+    from the live build (see site/generate.py's module docstring), so
+    this value is provenance data the template shows as plain text
+    today, never a link -- hence the `retired_wire_` naming."""
     return f"/wire/{card_id[:7]}/#card-{card_id}"
 
 
@@ -86,7 +93,7 @@ def build_correction_view(raw: Mapping[str, Any]) -> CorrectionView:
     return CorrectionView(
         id=str(raw["id"]),
         card_id=card_id,
-        card_href=card_href_for(card_id),
+        retired_wire_href=retired_wire_card_href_for(card_id),
         original_claim=str(raw["original_claim"]),
         corrected_claim=str(raw["corrected_claim"]),
         reason=str(raw["reason"]),

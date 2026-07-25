@@ -1,0 +1,9 @@
+{
+  "_meta": {
+    "description": "Invalid fixture: missing required curation field."
+  },
+  "hostnames": [
+    "anthropic.com"
+  ],
+  "path_scoped": []
+}

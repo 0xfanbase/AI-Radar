@@ -84,6 +84,7 @@ def _load_module_by_path(name: str, path: Path):
 
 
 linkify = _load_module_by_path("frontier_wire_site_lib_linkify", LIB_DIR / "linkify.py")
+safe_url = _load_module_by_path("frontier_wire_site_lib_safe_url", LIB_DIR / "safe_url.py")
 
 # A row is "pulse-eligible" -- gets the small dot next to its Model cell --
 # when its last_verified date is within this many days at-or-before
@@ -230,6 +231,12 @@ def _to_board_row(
     significance_html = linkify.linkify(
         significance, list(terms), slug_map or {}
     ).html
+    # Scheme-vet the LLM-writable source_url before it ever reaches an
+    # href attribute: autoescape can't neutralize a hostile *scheme*
+    # (`javascript:alert(1)` is all HTML-benign characters). An unsafe
+    # value renders as inert text -- the template shows source_host
+    # without a link when source_url is "".
+    raw_source_url = str(raw["source_url"])
     return BoardRow(
         lab=str(raw["lab"]),
         model=str(raw["model"]),
@@ -239,8 +246,8 @@ def _to_board_row(
         access=str(raw["access"]),
         significance=significance,
         significance_html=significance_html,
-        source_url=str(raw["source_url"]),
-        source_host=source_host(str(raw["source_url"])),
+        source_url=raw_source_url if safe_url.is_safe_href(raw_source_url) else "",
+        source_host=source_host(raw_source_url),
         last_verified=last_verified,
         pulse_eligible=is_pulse_eligible(last_verified, today),
     )

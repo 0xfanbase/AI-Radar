@@ -260,6 +260,7 @@
           "properties": {
             "trusted": { "type": "integer", "minimum": 0 },
             "hijacked": { "type": "integer", "minimum": 0 },
+            "not_allowlisted": { "type": "integer", "minimum": 0 },
             "unreachable": { "type": "integer", "minimum": 0 }
           },
           "additionalProperties": false
@@ -273,7 +274,7 @@
               "url": { "type": "string" },
               "status": {
                 "type": "string",
-                "enum": ["trusted", "hijacked", "unreachable"]
+                "enum": ["trusted", "hijacked", "not_allowlisted", "unreachable"]
               },
               "final_url": { "type": ["string", "null"] },
               "detail": { "type": ["string", "null"] }
@@ -297,6 +298,7 @@
           "properties": {
             "trusted": { "type": "integer", "minimum": 0 },
             "hijacked": { "type": "integer", "minimum": 0 },
+            "not_allowlisted": { "type": "integer", "minimum": 0 },
             "unreachable": { "type": "integer", "minimum": 0 }
           },
           "additionalProperties": false
@@ -311,7 +313,7 @@
               "url": { "type": "string" },
               "status": {
                 "type": "string",
-                "enum": ["trusted", "hijacked", "unreachable"]
+                "enum": ["trusted", "hijacked", "not_allowlisted", "unreachable"]
               },
               "final_url": { "type": ["string", "null"] },
               "detail": { "type": ["string", "null"] }

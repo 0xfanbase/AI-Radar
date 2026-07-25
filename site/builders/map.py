@@ -349,10 +349,14 @@ def cards_for_company(
     Card pages don't exist as their own standalone route on this site
     (see `site/templates/card.html`'s own docstring: cards render
     inline inside the Wire index/month archive, each with a stable
-    `id="card-<id>"` anchor) -- so a card's link here is a fragment
-    link into its month's archive page,
-    `/wire/<YYYY-MM>/#card-<id>`, matching that existing convention
-    rather than inventing a second one.
+    `id="card-<id>"` anchor) -- so a card's link target here is a
+    fragment link into its month's archive page,
+    `/wire/<YYYY-MM>/#card-<id>`. That archive is RETIRED from the live
+    build (see site/generate.py's module docstring), which is why the
+    field is named `retired_wire_href`, not `href`: the template renders
+    plain text today, and any future template edit reaching for this
+    value has to confront what it points at. Rename it back only when
+    the Wire archive actually renders again.
     """
     matching = [c for c in cards if company_id in c.get("companies", [])]
     matching.sort(key=_card_sort_key, reverse=True)
@@ -368,7 +372,7 @@ def cards_for_company(
                 "date": date_str,
                 "status_label": status.upper(),
                 "status_chip_class": STATUS_CHIP_CLASS.get(status, "chip"),
-                "href": f"/wire/{year_month}/#card-{card['id']}",
+                "retired_wire_href": f"/wire/{year_month}/#card-{card['id']}",
             }
         )
     return views

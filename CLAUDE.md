@@ -571,8 +571,10 @@ real material, never a license to invent news when there isn't any.
   `jsonschema` before it is ever committed. Schema files are named
   `<artifact>.schema.json` (e.g. `card.schema.json`,
   `frontier_board.schema.json`, `lexicon.schema.json`).
-- Tests live under `tests/` (`pytest.ini` sets `testpaths = tests`).
-  `python -m pytest` must be green before every commit.
+- Tests live under `tests/` (pipeline/watcher code) and `site/tests/`
+  (site generator code); `pytest.ini` sets `testpaths = tests site/tests`,
+  so a bare `python -m pytest` collects both. `python -m pytest` must be
+  green before every commit.
 - **No live network calls in the default test run — structurally
   enforced, not just a convention.** `tests/conftest.py` defines an
   autouse fixture that monkeypatches `requests.sessions.Session.request`

@@ -33,12 +33,15 @@ logic here.
 from __future__ import annotations
 
 import importlib.util
+import logging
 import sys
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable, Mapping
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
+
+log = logging.getLogger("frontier_wire.site.builders.wire")
 
 BUILDERS_DIR = Path(__file__).resolve().parent
 SITE_DIR = BUILDERS_DIR.parent
@@ -150,7 +153,23 @@ def cards_in_window(
     if today is None:
         today = datetime.now(timezone.utc).date()
     cutoff = today - timedelta(days=window_days - 1)
-    windowed = [c for c in cards if cutoff <= date.fromisoformat(str(c["date"])) <= today]
+    windowed = []
+    for c in cards:
+        try:
+            card_date = date.fromisoformat(str(c["date"]))
+        except ValueError:
+            # A schema-valid-but-non-ISO date must not crash the whole
+            # build (card.schema.json now pattern-locks `date`, but a
+            # pre-pattern artifact or hand-edited file could still carry
+            # one) -- skip the card loudly instead.
+            log.warning(
+                "card %r has unparseable date %r -- excluded from the wire window",
+                c.get("id"),
+                c.get("date"),
+            )
+            continue
+        if cutoff <= card_date <= today:
+            windowed.append(c)
     return sorted(windowed, key=_sort_key, reverse=True)
 
 
@@ -160,10 +179,31 @@ def available_months(cards: Iterable[Mapping[str, Any]]) -> list[str]:
     return sorted(months, reverse=True)
 
 
+# English month names, indexed 1-12. strftime("%B") is LOCALE-DEPENDENT:
+# under a non-English LC_TIME (a contributor's machine, a differently-
+# configured CI image) the archive headings would silently render in
+# that locale's language. An explicit table keeps the site's one
+# publication language deterministic everywhere.
+_MONTH_NAMES = (
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+)
+
+
 def month_label(year_month: str) -> str:
     """`"2026-07"` -> `"July 2026"`, for the archive page's human-readable
-    heading/nav text."""
-    return datetime.strptime(year_month, "%Y-%m").strftime("%B %Y")
+    heading/nav text. Locale-independent (see `_MONTH_NAMES`); raises
+    `ValueError` for a malformed `year_month`, same contract as the
+    previous strptime-based implementation."""
+    year_str, _, month_str = year_month.partition("-")
+    try:
+        year = int(year_str)
+        month = int(month_str)
+    except ValueError:
+        raise ValueError(f"invalid year-month string {year_month!r}") from None
+    if not 1 <= month <= 12:
+        raise ValueError(f"invalid month in {year_month!r}")
+    return f"{_MONTH_NAMES[month - 1]} {year}"
 
 
 def cards_for_month(cards: Iterable[Mapping[str, Any]], year_month: str) -> list[Mapping[str, Any]]:

@@ -34,9 +34,14 @@ a real dead end, not just an unlinked-from-nav page. Current route table:
                             one entry point
     /companies/             Companies index (Phase 8)
     /companies/<slug>/      One fact-checked profile page per company (Phase 8)
-    /lexicon/               Lexicon index -- kept: term pages link back to it
-    /lexicon/<slug>/        one page per Lexicon term -- kept: company-profile
-                            prose auto-links into these via site/lib/linkify.py
+    /lexicon/               Lexicon index -- kept: term pages link back to it,
+                            and the site footer links here on every page
+    /lexicon/<slug>/        one page per Lexicon term -- kept: the index and
+                            each term's "Related terms" chips link into these
+                            (company-profile prose does NOT auto-link lexicon
+                            terms today -- linkify.py is only wired into the
+                            retired Wire/Board builders; see
+                            IMPROVEMENT_BACKLOG.md)
     /method/                Method & Audit -- compliance page, footer-linked
     /corrections/           Corrections -- compliance page, footer-linked
     /404.html               GitHub Pages' own not-found page
@@ -380,10 +385,15 @@ def build_jinja_env() -> Environment:
 
 
 def copy_static(public_dir: Path) -> None:
+    """Copy site/static/ into the build output, EXCLUDING static/geo/:
+    the 252KB vendored Natural Earth GeoJSON is a build-time input only
+    (site/builders/map.py projects it to inline SVG during generation)
+    -- no rendered page ever fetches it, so shipping it in every deploy
+    was pure dead weight in the published artifact."""
     dest = public_dir / "static"
     if dest.exists():
         shutil.rmtree(dest)
-    shutil.copytree(STATIC_DIR, dest)
+    shutil.copytree(STATIC_DIR, dest, ignore=shutil.ignore_patterns("geo"))
 
 
 def write_matrix_tiles_css(unique_tiles: list[str], public_dir: Path) -> Path:
@@ -458,6 +468,40 @@ def apply_base_path(public_dir: Path, base_path: str = BASE_PATH) -> int:
             html_path.write_text(new_text, encoding="utf-8")
             rewritten += 1
     return rewritten
+
+
+def inject_canonical_links(public_dir: Path, base_url: str = SITE_BASE_URL) -> int:
+    """Insert one `<link rel="canonical" href="{base_url}{route}">` into
+    every generated page's `<head>`, deriving each page's route from its
+    own output path (`companies/anthropic/index.html` ->
+    `/companies/anthropic/`). No page previously declared a canonical
+    URL at all. Done as a post-render pass for the same reason
+    `apply_base_path` is one: threading a per-page route into every
+    independently-tested builder/template would touch all of them for a
+    value the output path already encodes. `404.html` is skipped -- an
+    error page is not a canonical resource. Returns the number of files
+    updated.
+    """
+    injected = 0
+    for html_path in public_dir.rglob("*.html"):
+        if html_path.name == "404.html":
+            continue
+        rel = html_path.relative_to(public_dir)
+        if rel.name == "index.html":
+            route = "/" + "/".join(rel.parts[:-1])
+            if not route.endswith("/"):
+                route += "/"
+        else:
+            route = "/" + "/".join(rel.parts)
+        text = html_path.read_text(encoding="utf-8")
+        if 'rel="canonical"' in text or "</head>" not in text:
+            continue
+        canonical = f'  <link rel="canonical" href="{base_url}{route}">\n'
+        html_path.write_text(
+            text.replace("</head>", canonical + "</head>", 1), encoding="utf-8"
+        )
+        injected += 1
+    return injected
 
 
 def collect_routes(
@@ -622,6 +666,9 @@ def generate(public_dir: Path = PUBLIC_DIR) -> Path:
     # is exactly site/lib/svg_sparkline.py's already-logged duplicate-hex
     # bug this call avoids repeating).
     rain_color = read_color_token("signal-green")
+    # Also feeds base.html's inline data-URI favicon -- same
+    # single-source-of-truth rule as the rain color itself.
+    env.globals["signal_green_hex"] = rain_color
     rain_columns = matrix_rain.build_rain_columns(rain_color)
     unique_tiles = list(dict.fromkeys(col.tile_data_uri for col in rain_columns))
     tile_index = {uri: i for i, uri in enumerate(unique_tiles)}
@@ -648,6 +695,7 @@ def generate(public_dir: Path = PUBLIC_DIR) -> Path:
     # documented sequencing).
     write_matrix_tiles_css(unique_tiles, public_dir)
     apply_base_path(public_dir)
+    inject_canonical_links(public_dir)
     return public_dir
 
 

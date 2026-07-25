@@ -4528,3 +4528,58 @@ in spirit -- a human/PAT-authored push, like a reviewed PR merge, does
 still benefit from not having its deploy suppressed); only the "this is
 sufficient" claim was wrong.
 
+## 2026-07-25 -- Duo audit (Opus 5 + Fable 5) fix pass: deliberately deferred items
+
+Full narrative in `PROGRESS.md`'s matching entry. Two audits run blind to each
+other produced 49 findings; 43 were fixed across 14 commits. These were not:
+
+- **"What's Moving" 7-day trend window doesn't actually hold 7 days of
+  history**, so the "cooling" state is currently unreachable
+  (`watcher/velocity.py`). Fixing this for real means a new persisted
+  cross-run artifact (daily HN-mention counts accumulated over time, its
+  own schema, and a new commit surface in `watch.yml`) -- a data-design
+  decision, not a mechanical bug fix, so left open rather than improvised
+  mid-pass.
+- **Degradation-ladder level 3 ("digest") semantics.** `scripts/plan_run.py`
+  computes a `digest` run mode CLAUDE.md defines as "one summary card," but
+  nothing downstream implements summary behavior -- the analyst prompt
+  never branches on it, so it would actually produce one ordinary card
+  about the top-ranked cluster. Left as-is: this rung of the ladder has
+  never fired in production (queue volume hasn't required level 3 yet), and
+  deciding what a "digest" card actually looks like is a product call.
+- **Lexicon index has no A-Z jump or search.** Fine at the current ~30
+  terms; will need one once the analyst's daily auto-growth rule has run
+  for a while. Revisit when the index gets long enough to matter.
+- **Minor layout ragging left un-fixed**: the Method page's stat tiles form
+  an uneven grid, and Companies cards vary in height at 390px from
+  inconsistent status-chip wrapping. Both cosmetic; fixing them without the
+  originating audits' exact pixel measurements in hand risked churn for
+  unclear benefit, so deferred rather than guessed at.
+- **`linkify` still isn't wired into company profiles**, so Lexicon terms
+  used in profile prose don't auto-link (the way Wire cards and Board rows
+  already do). This pass found the Lexicon index's own copy falsely
+  claiming this already happens and removed the false claim -- but did not
+  implement the underlying feature, since threading lexicon data through
+  the company builder's citation/citedText view-model path is a real,
+  non-trivial feature addition, not a one-line fix.
+- **Open Graph / Twitter card meta tags remain unshipped.** This pass added
+  a favicon and per-page canonical links (`site/generate.py`'s post-render
+  pass), closing the easy half of that finding; `og:title`/`og:description`
+  etc. need real per-page title/description threading through every
+  builder's view model and were left for a dedicated pass.
+- **`scripts/update_card_index.py` and `scripts/update_company_index.py`
+  remain near-verbatim copies** (differing only in `INDEX_FIELDS`, schema
+  name, and sort key). This pass consolidated the higher-value duplication
+  in the same finding (the three CI gates' `get_changed_files()`, and
+  `auditor/`'s four divergent timestamp helpers) but left this lower-value
+  pair alone rather than touching every duplicated-logic instance in one
+  pass.
+
+Also closed as a side effect of this pass, worth recording since it
+resolves a question the 2026-07-21 entry above explicitly left open:
+**`check_hijack` now distinguishes a real redirect hijack from a host that
+was simply never allowlisted** (`not_allowlisted`, `auditor/linkrot.py`),
+instead of filing both as `high`. That's the same severity-mapping split
+the 2026-07-21 entry logged as "deserves its own deliberate pass, not a
+drive-by edit alongside an unrelated wording fix" -- this was that pass.
+

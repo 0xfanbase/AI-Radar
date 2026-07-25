@@ -152,6 +152,87 @@ def test_matrix_css_and_matrix_tiles_css_are_copied_to_every_build(tmp_path):
     assert (tmp_path / "static" / "css" / "matrix-tiles.css").is_file()
 
 
+def test_geo_source_data_is_not_shipped_in_the_build(tmp_path):
+    # The 252KB vendored GeoJSON is a build-time input (map.py projects
+    # it to inline SVG); no page ever fetches it -- it must not be
+    # copied into the published artifact.
+    generate.generate(public_dir=tmp_path)
+    assert not (tmp_path / "static" / "geo").exists()
+
+
+def test_every_page_footer_links_to_the_lexicon(built_site):
+    # Reachability regression (2026-07 audit): the only page linking to
+    # /lexicon/ was 404.html, leaving all 31 lexicon pages outside the
+    # homepage's real link graph. The shared footer must carry the link
+    # on every rendered page.
+    # built_site is post-apply_base_path output, so internal hrefs carry
+    # the GitHub Pages project prefix.
+    lexicon_href = f'href="{generate.BASE_PATH}/lexicon/"'
+    for html_path in _all_html_files(built_site):
+        html = html_path.read_text(encoding="utf-8")
+        footer_start = html.index('class="site-footer"')
+        assert lexicon_href in html[footer_start:], (
+            f"{html_path} footer has no {lexicon_href} link"
+        )
+
+
+def test_every_page_declares_a_favicon(built_site):
+    # B23: every page previously 404ed on /favicon.ico. The inline
+    # data-URI icon adds zero requests and its glyph color is sourced
+    # from tokens.css via generate.py's env global.
+    expected_color = "%23" + generate.read_color_token("signal-green").lstrip("#")
+    for html_path in _all_html_files(built_site):
+        html = html_path.read_text(encoding="utf-8")
+        assert 'rel="icon"' in html, f"{html_path} has no favicon link"
+        assert expected_color in html, (
+            f"{html_path} favicon does not carry the live signal-green token"
+        )
+
+
+def test_every_page_declares_its_own_canonical_url(built_site):
+    # B23: no page previously declared a canonical URL. Each page's
+    # canonical is derived from its own output path under SITE_BASE_URL.
+    for html_path in _all_html_files(built_site):
+        html = html_path.read_text(encoding="utf-8")
+        if html_path.name == "404.html":
+            assert 'rel="canonical"' not in html  # an error page isn't canonical
+            continue
+        rel = html_path.relative_to(built_site)
+        if rel.name == "index.html":
+            route = "/" + "/".join(rel.parts[:-1])
+            if not route.endswith("/"):
+                route += "/"
+        else:
+            route = "/" + "/".join(rel.parts)
+        expected = f'<link rel="canonical" href="{generate.SITE_BASE_URL}{route}">'
+        assert expected in html, f"{html_path} missing canonical {expected}"
+
+
+def test_lexicon_index_makes_no_false_autolink_claim(built_site):
+    # The live build does not run company-profile prose through
+    # linkify.py -- the Lexicon index must not tell readers it does.
+    html = (built_site / "lexicon" / "index.html").read_text(encoding="utf-8")
+    assert "auto-link" not in html
+    assert "auto-links" not in html
+
+
+def test_matrix_tiles_css_is_linked_only_inside_noscript(tmp_path):
+    # The ~88KB tile sheet's sole consumer is the <noscript> rain
+    # fallback -- a <head> link shipped it render-blocking to every
+    # JS-enabled visitor who never uses a byte of it. The link must live
+    # inside the same <noscript> block as its one consumer.
+    generate.generate(public_dir=tmp_path)
+    html = (tmp_path / "index.html").read_text(encoding="utf-8")
+    link_at = html.index("matrix-tiles.css")
+    noscript_start = html.index("<noscript>")
+    noscript_end = html.index("</noscript>")
+    assert noscript_start < link_at < noscript_end, (
+        "matrix-tiles.css must be linked inside <noscript>, not <head>"
+    )
+    head_end = html.index("</head>")
+    assert "matrix-tiles.css" not in html[:head_end]
+
+
 def test_matrix_tiles_css_contains_the_live_signal_green_hex_percent_encoded(tmp_path):
     generate.generate(public_dir=tmp_path)
     css = (tmp_path / "static" / "css" / "matrix-tiles.css").read_text(encoding="utf-8")

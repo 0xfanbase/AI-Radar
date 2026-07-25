@@ -24,7 +24,7 @@ from typing import Any
 import requests
 
 from watcher.clustering import cluster_items
-from watcher.http import build_session
+from watcher.http import build_session, prune_cache
 from watcher.ledger import LEDGER_PATH, apply_run, load_ledger, save_ledger
 from watcher.models import Item
 from watcher.queue_writer import QUEUE_PATH, write_queue
@@ -157,6 +157,12 @@ def run(
     ledger_size_after = len(new_ledger.get("entries", {}))
 
     save_whats_moving(hn_items, now=now, path=whats_moving_path)
+
+    # End-of-run housekeeping: evict ETag cache entries no fetch has
+    # touched in CACHE_MAX_AGE_DAYS. Nothing else ever prunes
+    # data/.cache/, and several cached URLs embed run timestamps, so the
+    # directory otherwise grows a little every single run, forever.
+    prune_cache(now=now)
 
     return RunResult(
         hn_items=len(hn_items),

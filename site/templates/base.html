@@ -5,10 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}AI Frontier Wire{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}A fact-checked daily wire of frontier AI news, a living tracker of frontier models, and a plain-English glossary.{% endblock %}">
+  {# Inline data-URI favicon (zero extra requests; also stops every page
+     load 404ing on /favicon.ico in browsers that honor the link). The
+     glyph color comes from tokens.css via generate.py's env global --
+     never a second hardcoded copy of the signal-green hex. The default
+     keeps builder-level unit renders (which bypass generate.py's
+     globals) working. #}
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23000000'/%3E%3Ccircle cx='8' cy='8' r='4.5' fill='{{ (signal_green_hex | default('#39FF6E')) | replace('#', '%23') }}'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="/static/css/tokens.css">
   <link rel="stylesheet" href="/static/css/components.css">
   <link rel="stylesheet" href="/static/css/matrix.css">
-  <link rel="stylesheet" href="/static/css/matrix-tiles.css">
 </head>
 <body>
   <a class="skip-link" href="#main-content">Skip to content</a>
@@ -25,7 +31,14 @@
   <canvas id="matrix-rain-canvas" aria-hidden="true"></canvas>
 
   <noscript>
+  {# matrix-tiles.css (~88KB of per-tile data-URI SVGs) is consumed ONLY
+     by the static no-JS rain fallback below -- linking it from <head>
+     shipped it render-blocking to every JS-enabled visitor who would
+     never instantiate a single rule from it. A <link> inside <noscript>
+     is valid HTML and only ever fetched when scripts are off, i.e.
+     exactly when the fallback that needs it renders. #}
   {% if matrix_rain_columns is defined and matrix_rain_columns %}
+  <link rel="stylesheet" href="/static/css/matrix-tiles.css">
   {% include "_matrix_rain.html" %}
   {% endif %}
   </noscript>
@@ -58,8 +71,14 @@
       <p class="disclaimer">AI-curated and AI-written; links go to primary
         sources; see the <a href="/method/">Method page</a> for how
         verification works.</p>
+      {# Lexicon sits here, not in the masthead: the owner's post-Phase-9
+         trim fixed the top tabs at Map + Companies, but the Lexicon
+         pages stayed in the build -- and before this link the ONLY page
+         linking to /lexicon/ was 404.html, leaving all 31 lexicon pages
+         unreachable from the homepage's real link graph. #}
       <nav class="site-footer__nav" aria-label="More">
         <ul>
+          <li><a href="/lexicon/">Lexicon</a></li>
           <li><a href="/method/">Method</a></li>
           <li><a href="/corrections/">Corrections</a></li>
         </ul>

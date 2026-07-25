@@ -43,12 +43,22 @@ def validate(instance: Any, schema_name: str) -> None:
     onto the message so failures are traceable to a specific artifact --
     on the first validation failure. Raises FileNotFoundError if no such
     schema exists.
+
+    A ``FormatChecker`` is always passed: without one, jsonschema silently
+    *ignores* every ``"format"`` keyword (``date``, ``date-time``,
+    ``uri``, ...), turning each into a no-op annotation instead of a
+    constraint -- so e.g. a garbage ``generated_at`` would sail through
+    the commit gate here and only blow up later inside a page builder's
+    own date parsing. The ``uri``/``date-time`` checkers need the
+    ``jsonschema[format]`` extras (pinned in requirements.txt) to be
+    active; ``FormatChecker`` degrades to skipping a format it has no
+    checker for, so this is strictly tightening, never breaking.
     """
     schema = load_schema(schema_name)
     validator_cls = jsonschema.validators.validator_for(schema)
     validator_cls.check_schema(schema)
 
-    validator = validator_cls(schema)
+    validator = validator_cls(schema, format_checker=jsonschema.FormatChecker())
     errors = sorted(validator.iter_errors(instance), key=lambda e: list(e.path))
     if errors:
         first = errors[0]
