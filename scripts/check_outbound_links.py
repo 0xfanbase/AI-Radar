@@ -49,18 +49,20 @@ What this script does, for the working-tree diff against ``HEAD``:
    ``path_scoped[]`` entries (``{hostname, path_prefix}``) with the URL's
    path actually starting with that prefix.
 4. **Redirect-chain vetting** (:func:`resolve_final_url`): for a URL that
-   passes step 3, follow its real redirect chain (HEAD, falling back to
-   GET only on a 405/501 HEAD-not-supported response -- same fallback
+   passes step 3, walk its redirect chain hop by hop (HEAD, falling back
+   to GET only on a 405/501 HEAD-not-supported response -- same fallback
    rule ``auditor/linkrot.py::check_url`` already uses) via the shared,
    retry/backoff-configured session from ``watcher.http.build_session()``
-   (reused, not reimplemented), and re-apply the exact same
-   :func:`classify_url` checks to the *final* resolved URL. This is what
-   catches a post-approval hijack: a citation that was written against a
-   trusted domain but whose target has since started redirecting
-   somewhere untrusted. Run at commit time, on every commit touching
-   these files -- not only as part of the weekly audit (see
-   ``auditor/linkrot.py``'s own separate, complementary weekly
-   re-resolution check for already-published citations).
+   (reused, not reimplemented), statically vetting EVERY hop's target
+   with :func:`classify_url` *before* requesting it -- a hop that fails
+   vetting ends the walk as the resolved URL without this gate ever
+   issuing a request to the untrusted host itself. This is what catches
+   a post-approval hijack: a citation that was written against a trusted
+   domain but whose target has since started redirecting somewhere
+   untrusted. Run at commit time, on every commit touching these files
+   -- not only as part of the weekly audit (see ``auditor/linkrot.py``'s
+   own separate, complementary weekly re-resolution check for
+   already-published citations).
 
 A URL whose redirect chain cannot be resolved at all (timeout, connection
 error, any other network failure) is treated as a violation, not silently
@@ -78,12 +80,13 @@ from __future__ import annotations
 
 import ipaddress
 import json
+import posixpath
 import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urljoin, urlsplit
 
 import requests
 
@@ -321,15 +324,38 @@ def _has_punycode_label(hostname: str) -> bool:
     return any(label.lower().startswith("xn--") for label in hostname.split("."))
 
 
+def _normalized_url_path(path: str) -> str | None:
+    """Percent-decode and dot-segment-resolve a URL path for the
+    path-scoped prefix compare, so `/moonshotai/../evil` or
+    `/moonshotai/%2E%2E/evil` can't satisfy a `/moonshotai/` prefix the
+    server itself will resolve right back out of. Returns ``None`` (never
+    trusted) when a ``%`` survives one full decode -- a double-encoded
+    path whose server-side interpretation this check can't be confident
+    about has no business clearing a security allowlist."""
+    decoded = unquote(path or "/")
+    if "%" in decoded:
+        return None
+    # posixpath.normpath resolves `/./`, `//`, and `/../` (against the
+    # root, for the absolute paths URL paths always are) but strips a
+    # trailing slash that matters for prefix semantics -- restore it.
+    normalized = posixpath.normpath(decoded)
+    if decoded.endswith("/") and not normalized.endswith("/"):
+        normalized += "/"
+    return normalized
+
+
 def _hostname_trusted(hostname: str, path: str, trusted: dict[str, Any]) -> bool:
     normalized = _normalized_hostname(hostname)
     trusted_hostnames = {h.lower() for h in trusted.get("hostnames", [])}
     if normalized in trusted_hostnames:
         return True
+    normalized_path = _normalized_url_path(path)
+    if normalized_path is None:
+        return False
     for entry in trusted.get("path_scoped", None) or []:
         entry_host = _normalized_hostname(str(entry.get("hostname", "")))
         prefix = str(entry.get("path_prefix", ""))
-        if normalized == entry_host and path.startswith(prefix):
+        if normalized == entry_host and normalized_path.startswith(prefix):
             return True
     return False
 
@@ -394,32 +420,75 @@ def classify_url(url: str, trusted: dict[str, Any]) -> UrlCheckResult:
 # --------------------------------------------------------------------------
 
 
-def resolve_final_url(
-    session: requests.Session, url: str, *, timeout: float = REQUEST_TIMEOUT_SECONDS
-) -> tuple[str | None, str | None]:
-    """Follow `url`'s real redirect chain and return `(final_url, None)`,
-    or `(None, error_detail)` if the chain could not be resolved at all.
+# Redirect statuses this check follows manually. 300 Multiple Choices is
+# not followable (no single canonical target); anything else 3xx without
+# a Location header is treated as the chain's end.
+_REDIRECT_STATUS_CODES = frozenset({301, 302, 303, 307, 308})
 
-    HEAD first (cheaper), falling back to GET only when HEAD itself
-    reports method-not-allowed/not-implemented (405/501) -- identical
-    fallback rule to `auditor/linkrot.py::check_url`, reused as a
-    convention (not as shared code, since that module's own error
+# Hop budget for the manual redirect walk -- generous against any real
+# citation (one or two hops in practice) while bounding a malicious/
+# looping chain.
+MAX_REDIRECT_HOPS = 10
+
+
+def resolve_final_url(
+    session: requests.Session,
+    url: str,
+    *,
+    timeout: float = REQUEST_TIMEOUT_SECONDS,
+    trusted: dict[str, Any] | None = None,
+    max_hops: int = MAX_REDIRECT_HOPS,
+) -> tuple[str | None, str | None]:
+    """Walk `url`'s redirect chain hop by hop and return `(final_url,
+    None)`, or `(None, error_detail)` if the chain could not be resolved.
+
+    The walk is manual (`allow_redirects=False` + an explicit loop),
+    deliberately: with `trusted` supplied, EVERY hop's target is
+    statically vetted (:func:`classify_url`) *before* any request is
+    issued to it -- the previous `allow_redirects=True` implementation
+    had `requests` fetch the entire chain first and only then classified
+    the final URL, meaning this security gate itself issued a request to
+    whatever untrusted host a hijacked citation redirected to before
+    ever deciding it was untrusted. A hop that fails vetting is returned
+    as the resolved final URL *without being requested*; the caller's own
+    `classify_url` pass over the returned URL then reports the violation
+    exactly as before. (`trusted=None` skips per-hop vetting -- the walk
+    itself still never exceeds `max_hops`.)
+
+    Per hop: HEAD first (cheaper), falling back to GET only when HEAD
+    itself reports method-not-allowed/not-implemented (405/501) --
+    identical fallback rule to `auditor/linkrot.py::check_url`, reused as
+    a convention (not as shared code, since that module's own error
     handling classifies failures as "unreachable, retry next week" while
-    this one must fail closed as a hard CI violation instead). Both calls
-    pass `allow_redirects=True` explicitly, since `requests`' own
-    `Session.head()` defaults it to `False` unlike every other verb.
+    this one must fail closed as a hard CI violation instead).
     """
-    try:
-        response = session.head(url, timeout=timeout, allow_redirects=True)
-        if response.status_code in HEAD_UNSUPPORTED_STATUS_CODES:
-            response = session.get(url, timeout=timeout, allow_redirects=True)
-    except requests.Timeout as exc:
-        return None, f"timeout: {exc}"
-    except requests.ConnectionError as exc:
-        return None, f"connection error: {exc}"
-    except requests.RequestException as exc:
-        return None, f"request error: {exc}"
-    return response.url, None
+    current = url
+    for _hop in range(max_hops + 1):
+        try:
+            response = session.head(current, timeout=timeout, allow_redirects=False)
+            if response.status_code in HEAD_UNSUPPORTED_STATUS_CODES:
+                response = session.get(
+                    current, timeout=timeout, allow_redirects=False
+                )
+        except requests.Timeout as exc:
+            return None, f"timeout: {exc}"
+        except requests.ConnectionError as exc:
+            return None, f"connection error: {exc}"
+        except requests.RequestException as exc:
+            return None, f"request error: {exc}"
+
+        location = response.headers.get("Location")
+        if response.status_code not in _REDIRECT_STATUS_CODES or not location:
+            return current, None
+
+        next_url = urljoin(current, location)
+        if trusted is not None and not classify_url(next_url, trusted).ok:
+            # The chain leads somewhere untrusted -- report that target
+            # as the resolution WITHOUT ever requesting it.
+            return next_url, None
+        current = next_url
+
+    return None, f"redirect chain exceeded {max_hops} hops"
 
 
 def check_citation_url(
@@ -442,7 +511,7 @@ def check_citation_url(
     if not static_result.ok:
         return static_result
 
-    final_url, error = resolve_final_url(session, url, timeout=timeout)
+    final_url, error = resolve_final_url(session, url, timeout=timeout, trusted=trusted)
     if error is not None:
         return UrlCheckResult(
             url, False, f"could not resolve redirect chain: {error}"

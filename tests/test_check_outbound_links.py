@@ -109,6 +109,36 @@ def test_classify_url_path_scoped_wrong_prefix_fails():
     assert result.ok is False
 
 
+@pytest.mark.parametrize(
+    "traversal_url",
+    [
+        # Raw dot segments: startswith("/anthropics/") is true but the
+        # server resolves the path right back out of the prefix.
+        "https://github.com/anthropics/../someone-else/repo",
+        # Percent-encoded dot segments, decoded by the server.
+        "https://github.com/anthropics/%2E%2E/someone-else/repo",
+        "https://github.com/anthropics/..%2Fsomeone-else/repo",
+        # Double-encoded: one decode still leaves a %, whose server-side
+        # meaning this check can't be confident about -- never trusted.
+        "https://github.com/anthropics/%252E%252E/someone-else/repo",
+    ],
+)
+def test_classify_url_path_scoped_prefix_cannot_be_escaped_by_traversal(traversal_url):
+    # B7 regression: the prefix compare previously ran on the raw path.
+    result = mod.classify_url(traversal_url, TRUSTED)
+    assert result.ok is False
+
+
+def test_classify_url_path_scoped_benign_encoded_chars_still_pass():
+    # A single, ordinary percent-encoding (a space) inside the scoped
+    # prefix must keep working -- the hardening rejects traversal and
+    # double-encoding, not normal URLs.
+    result = mod.classify_url(
+        "https://github.com/anthropics/some%20repo", TRUSTED
+    )
+    assert result.ok is True
+
+
 # --------------------------------------------------------------------------
 # diff_touches_trusted_domains -- the unconditional frozen-file guard
 # --------------------------------------------------------------------------
@@ -390,6 +420,40 @@ def test_check_citation_url_allowlisted_url_that_redirects_off_allowlist_fails(r
     assert result.ok is False
     assert "redirects to a URL that fails vetting" in result.reason
     assert result.final_url == "https://not-trusted.example.com/landing"
+    # C7 regression: the gate must never itself issue a request to the
+    # untrusted redirect target -- each hop is vetted BEFORE being
+    # fetched. Only the trusted first hop was requested.
+    requested_hosts = {r.hostname for r in requests_mock.request_history}
+    assert "not-trusted.example.com" not in requested_hosts
+
+
+def test_resolve_final_url_bounds_a_redirect_loop(requests_mock):
+    requests_mock.head(
+        "https://anthropic.com/loop",
+        status_code=302,
+        headers={"Location": "https://anthropic.com/loop"},
+    )
+    session = http.build_session()
+    final_url, error = mod.resolve_final_url(
+        session, "https://anthropic.com/loop", trusted=TRUSTED
+    )
+    assert final_url is None
+    assert "exceeded" in error
+
+
+def test_resolve_final_url_follows_relative_location(requests_mock):
+    requests_mock.head(
+        "https://anthropic.com/old",
+        status_code=301,
+        headers={"Location": "/new"},
+    )
+    requests_mock.head("https://anthropic.com/new", status_code=200)
+    session = http.build_session()
+    final_url, error = mod.resolve_final_url(
+        session, "https://anthropic.com/old", trusted=TRUSTED
+    )
+    assert error is None
+    assert final_url == "https://anthropic.com/new"
 
 
 def test_check_citation_url_unresolvable_redirect_fails_closed(requests_mock):
