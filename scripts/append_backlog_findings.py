@@ -25,6 +25,7 @@ instruction:**
 | Declining verifier pass-rate trend (`verifier_trend.trend == "falling"`) | **high** |
 | Hijacked card citation (`hijacked_links.results[].status == "hijacked"`) | **high** -- Phase 9 addition, not part of this turn's original given mapping; a citation that was trusted at publish time and now redirects off the allowlist is a live security-relevant finding, the same severity class as a falling verifier-trend, not a mere content-quality nit. |
 | Hijacked company-profile citation (`company_hijacked_links.results[].status == "hijacked"`) | **high** -- Phase 9 addition, same rationale as the card-citation case above. |
+| Never-allowlisted citation (`*.results[].status == "not_allowlisted"`, card or company) | **medium** -- 2026-07 split out of "hijacked": the published URL itself fails the allowlist as written, no redirect involved -- an allowlist curation gap for an owner checkpoint, not a live hijack (the conflation previously filed three real false alarms at HIGH). |
 | Missed story (`missed_stories.missed_stories[]`)             | **medium** |
 | Duplicate-topic pair (`duplicates.duplicate_pairs[]`)        | **medium** |
 | Dead citation link (`link_rot.results[].status == "dead"`)   | **low** |
@@ -60,11 +61,11 @@ line) per category:**
   correctly-declined story is the corroboration rule working as intended,
   not a finding).
 - **duplicates** -- every entry in `duplicates.duplicate_pairs[]`.
-- **hijacked_links / company_hijacked_links** -- only `status ==
-  "hijacked"`, same "unreachable is retry-next-week, not confirmed" logic
-  as link rot above (`auditor.linkrot.check_hijack`'s own docstring makes
-  the identical distinction for its own `"unreachable"` bucket); `trusted`
-  needs no action.
+- **hijacked_links / company_hijacked_links** -- `status == "hijacked"`
+  (high) and `status == "not_allowlisted"` (medium; see the table above);
+  `"unreachable"` stays retry-next-week, not confirmed, same logic as
+  link rot above (`auditor.linkrot.check_hijack`'s own docstring makes
+  the identical distinction), and `trusted` needs no action.
 - **profile_staleness** -- every entry in `profile_staleness.results[]`
   with `stale == true`.
 
@@ -132,26 +133,43 @@ def _fmt_pct(value: float | None) -> str:
 
 
 def _hijack_summary(subject: str, url: str | None, final_url: str | None) -> str:
-    """One finding summary, honest about what was actually observed.
+    """One finding summary for a `status == "hijacked"` result.
 
-    A `status == "hijacked"` result means "the current final URL fails the
-    outbound allowlist" -- it cannot by itself distinguish a genuine
-    post-publication redirect hijack from a citation that was simply never
-    added to `data/trusted_domains.json` (`auditor.corrections_feed`'s own
-    `build_hijack_candidates` docstring makes the same point). Asserting
-    "now redirects to X" when `final_url == url` (no redirect at all)
-    previously produced a self-contradictory line; branch on that instead.
+    Since `auditor.linkrot.check_hijack` grew its own `not_allowlisted`
+    status (a URL that fails the allowlist AS WRITTEN, no redirect
+    involved -- see :func:`_not_allowlisted_summary`), a `"hijacked"`
+    result now specifically means "the published URL itself still clears
+    the allowlist, but its current redirect target does not" -- the
+    summary can state the redirect confidently. The `final_url == url`
+    branch survives purely defensively (a response URL can differ from
+    the request URL by normalization alone), no longer as the
+    never-allowlisted hedge it used to be.
     """
     if final_url == url:
         return (
             f"{subject} {url} resolves (with no redirect) to a destination "
-            "that fails the outbound-link allowlist (data/trusted_domains.json) "
-            "-- either a citation that was never allowlisted, or a real gap "
-            "in the allowlist, not necessarily a hijack."
+            "that fails the outbound-link allowlist "
+            "(data/trusted_domains.json)."
         )
     return (
         f"{subject} {url} now redirects to {final_url}, which fails the "
         "outbound-link allowlist (data/trusted_domains.json)."
+    )
+
+
+def _not_allowlisted_summary(subject: str, url: str | None, detail: str | None) -> str:
+    """One finding summary for a `status == "not_allowlisted"` result: the
+    published citation's own URL fails the allowlist as written -- a
+    curation gap for the owner's allowlist checkpoint (medium), not
+    evidence of a post-publication hijack (high). Previously conflated
+    into `"hijacked"`, which filed three real committed-audit false
+    alarms (moonshot-ai / xai / zhipu-ai) at HIGH severity."""
+    reason = f" ({detail})" if detail else ""
+    return (
+        f"{subject} {url} is not covered by the outbound-link allowlist "
+        f"(data/trusted_domains.json) as published{reason} -- an allowlist "
+        "curation gap to review at an owner checkpoint, not a redirect "
+        "hijack."
     )
 
 
@@ -205,32 +223,49 @@ def derive_findings(
         )
 
     for result in (hijacked_links or {}).get("results", []) or []:
-        if result.get("status") != "hijacked":
-            continue
-        findings.append(
-            {
-                "severity": "high",
-                "category": "hijacked_citation",
-                "summary": _hijack_summary(
-                    "Card citation", result.get("url"), result.get("final_url")
-                ),
-            }
-        )
+        if result.get("status") == "hijacked":
+            findings.append(
+                {
+                    "severity": "high",
+                    "category": "hijacked_citation",
+                    "summary": _hijack_summary(
+                        "Card citation", result.get("url"), result.get("final_url")
+                    ),
+                }
+            )
+        elif result.get("status") == "not_allowlisted":
+            findings.append(
+                {
+                    "severity": "medium",
+                    "category": "citation_not_allowlisted",
+                    "summary": _not_allowlisted_summary(
+                        "Card citation", result.get("url"), result.get("detail")
+                    ),
+                }
+            )
 
     for result in (company_hijacked_links or {}).get("results", []) or []:
-        if result.get("status") != "hijacked":
-            continue
-        findings.append(
-            {
-                "severity": "high",
-                "category": "hijacked_company_citation",
-                "summary": _hijack_summary(
-                    f"Company profile '{result.get('company_id')}' citation",
-                    result.get("url"),
-                    result.get("final_url"),
-                ),
-            }
-        )
+        subject = f"Company profile '{result.get('company_id')}' citation"
+        if result.get("status") == "hijacked":
+            findings.append(
+                {
+                    "severity": "high",
+                    "category": "hijacked_company_citation",
+                    "summary": _hijack_summary(
+                        subject, result.get("url"), result.get("final_url")
+                    ),
+                }
+            )
+        elif result.get("status") == "not_allowlisted":
+            findings.append(
+                {
+                    "severity": "medium",
+                    "category": "company_citation_not_allowlisted",
+                    "summary": _not_allowlisted_summary(
+                        subject, result.get("url"), result.get("detail")
+                    ),
+                }
+            )
 
     for gap in lexicon.get("coverage_gaps", []) or []:
         terms = ", ".join(gap.get("missing_terms", []) or [])

@@ -486,6 +486,44 @@ def test_check_hijack_unreachable_is_its_own_bucket_not_hijacked(requests_mock):
     assert result.detail is not None
 
 
+def test_check_hijack_never_allowlisted_url_is_not_a_hijack(requests_mock):
+    # B2 regression: a published citation whose OWN host was simply never
+    # in the allowlist previously came back "hijacked" -- three real
+    # committed-audit false alarms (moonshot-ai/xai/zhipu-ai) were filed
+    # at HIGH severity that way. It's a curation gap, its own status --
+    # and no network request is issued for it at all (the static check
+    # already answers the question).
+    session = http.build_session()
+
+    result = linkrot.check_hijack(
+        session, "https://never-allowlisted.example.com/post", TRUSTED
+    )
+
+    assert result.status == "not_allowlisted"
+    assert result.final_url is None
+    assert result.detail is not None
+    assert requests_mock.call_count == 0
+
+
+def test_shared_prober_probes_each_url_once_across_linkrot_and_hijack(requests_mock):
+    # B9 regression: audit_link_rot and audit_hijacked_links previously
+    # each issued their own HEAD for the same citation URLs -- every URL
+    # fetched twice per weekly audit. With a shared UrlProber, once.
+    requests_mock.head("https://anthropic.com/a", status_code=200)
+    requests_mock.head("https://anthropic.com/b", status_code=200)
+    session = http.build_session()
+    cards = [
+        _card_with_citation("https://anthropic.com/a"),
+        _card_with_citation("https://anthropic.com/b"),
+    ]
+
+    prober = linkrot.UrlProber(session)
+    linkrot.audit_link_rot(cards, session=session, prober=prober)
+    linkrot.audit_hijacked_links(cards, trusted=TRUSTED, session=session, prober=prober)
+
+    assert requests_mock.call_count == 2  # one probe per unique URL, total
+
+
 def test_check_hijacks_checks_every_url_in_order(requests_mock):
     requests_mock.head("https://anthropic.com/a", status_code=200)
     requests_mock.head(
@@ -524,7 +562,9 @@ def test_audit_hijacked_links_summary_shape(requests_mock):
     report = linkrot.audit_hijacked_links(cards, trusted=TRUSTED)
 
     assert report["total_urls"] == 3
-    assert report["counts"] == {"trusted": 1, "hijacked": 1, "unreachable": 1}
+    assert report["counts"] == {
+        "trusted": 1, "hijacked": 1, "not_allowlisted": 0, "unreachable": 1
+    }
     assert set(report.keys()) == {"checked_at", "total_urls", "counts", "results"}
     by_url = {r["url"]: r for r in report["results"]}
     assert by_url["https://anthropic.com/hijacked"]["status"] == "hijacked"
@@ -539,7 +579,9 @@ def test_audit_hijacked_links_with_no_cards_is_a_clean_zero_report(tmp_path):
     )
 
     assert report["total_urls"] == 0
-    assert report["counts"] == {"trusted": 0, "hijacked": 0, "unreachable": 0}
+    assert report["counts"] == {
+        "trusted": 0, "hijacked": 0, "not_allowlisted": 0, "unreachable": 0
+    }
     assert report["results"] == []
 
 
@@ -639,20 +681,26 @@ def test_audit_company_hijacked_links_summary_shape(requests_mock):
     )
     requests_mock.head("https://squatted.example.com/x", status_code=200)
     requests_mock.head(
-        "https://openai.com/down", exc=requests.exceptions.ConnectionError
+        "https://anthropic.com/down", exc=requests.exceptions.ConnectionError
     )
 
     companies = [
         _company_with_citations(
             "anthropic", ["https://anthropic.com/ok", "https://anthropic.com/hijacked"]
         ),
-        _company_with_citations("openai", ["https://openai.com/down"]),
+        # An allowlisted-host URL that fails at the network level -- the
+        # "unreachable" bucket. (An off-allowlist URL would now be
+        # "not_allowlisted" with no network attempt at all; see the
+        # dedicated tests.)
+        _company_with_citations("openai", ["https://anthropic.com/down"]),
     ]
 
     report = linkrot.audit_company_hijacked_links(companies, trusted=TRUSTED)
 
     assert report["total_urls"] == 3
-    assert report["counts"] == {"trusted": 1, "hijacked": 1, "unreachable": 1}
+    assert report["counts"] == {
+        "trusted": 1, "hijacked": 1, "not_allowlisted": 0, "unreachable": 1
+    }
     assert set(report.keys()) == {"checked_at", "total_urls", "counts", "results"}
     by_url = {r["url"]: r for r in report["results"]}
     assert by_url["https://anthropic.com/hijacked"]["status"] == "hijacked"
@@ -660,8 +708,8 @@ def test_audit_company_hijacked_links_summary_shape(requests_mock):
     assert by_url["https://anthropic.com/hijacked"]["final_url"] == (
         "https://squatted.example.com/x"
     )
-    assert by_url["https://openai.com/down"]["company_id"] == "openai"
-    assert by_url["https://openai.com/down"]["status"] == "unreachable"
+    assert by_url["https://anthropic.com/down"]["company_id"] == "openai"
+    assert by_url["https://anthropic.com/down"]["status"] == "unreachable"
 
 
 def test_audit_company_hijacked_links_with_no_companies_is_a_clean_zero_report(
@@ -672,7 +720,9 @@ def test_audit_company_hijacked_links_with_no_companies_is_a_clean_zero_report(
     )
 
     assert report["total_urls"] == 0
-    assert report["counts"] == {"trusted": 0, "hijacked": 0, "unreachable": 0}
+    assert report["counts"] == {
+        "trusted": 0, "hijacked": 0, "not_allowlisted": 0, "unreachable": 0
+    }
     assert report["results"] == []
 
 

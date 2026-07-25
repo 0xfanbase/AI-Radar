@@ -109,6 +109,7 @@ from typing import Mapping, Sequence
 import requests
 
 from auditor.linkrot import load_cards
+from auditor._time import utcnow_iso as _utcnow_iso
 from watcher import http
 from watcher.clustering import _jaccard
 from watcher.config import CACHE_DIR, JACCARD_SIMILARITY_THRESHOLD, REPO_ROOT
@@ -138,10 +139,6 @@ MISSED_STORY_TOP_N = 20
 # type is not a judgment call so much as using the one bar that was always
 # the right one for this comparison.
 MISSED_STORY_JACCARD_THRESHOLD = JACCARD_SIMILARITY_THRESHOLD
-
-
-def _utcnow_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
 
 
 # ---------------------------------------------------------------------------

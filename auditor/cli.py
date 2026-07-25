@@ -31,6 +31,7 @@ from auditor.lexicon_audit import audit_lexicon
 from auditor.linkrot import (
     CARDS_DIR,
     COMPANIES_DIR,
+    UrlProber,
     audit_company_hijacked_links,
     audit_hijacked_links,
     audit_link_rot,
@@ -156,16 +157,20 @@ def run_audit(
     lexicon_entries = load_lexicon(lexicon_path)
     ledger = load_ledger(ledger_path)
 
-    link_rot = audit_link_rot(cards=cards, session=session)
+    # One memoized probe per unique URL across the link-rot + both hijack
+    # checks -- previously each check HEAD-fetched the same citation URLs
+    # again for no additional information (see auditor.linkrot.UrlProber).
+    prober = UrlProber(session)
+    link_rot = audit_link_rot(cards=cards, session=session, prober=prober)
     lexicon = audit_lexicon(cards, lexicon_entries)
     verifier_trend = audit_trend(today=now.date())
     missed_stories = audit_missed_stories(
         hn_items=hn_items, cards=cards, ledger=ledger, session=session, now=now
     )
     duplicates = audit_duplicates(cards=cards)
-    hijacked_links = audit_hijacked_links(cards=cards, session=session)
+    hijacked_links = audit_hijacked_links(cards=cards, session=session, prober=prober)
     company_hijacked_links = audit_company_hijacked_links(
-        companies=companies, session=session
+        companies=companies, session=session, prober=prober
     )
     profile_staleness = audit_profile_staleness(companies=companies, today=now.date())
 

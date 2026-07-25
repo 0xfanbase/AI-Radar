@@ -110,6 +110,16 @@ __all__ = [
 # of exactly +/-0.03 is still `flat`, not a coin-flip) counts as `flat`.
 TREND_FLAT_EPSILON = 0.03
 
+# Absorbs binary-float representation error in the `current - prior`
+# subtraction: a NOMINALLY exact-boundary delta (e.g. 0.90 - 0.87)
+# computes to 0.03000000000000002..., which a bare `> TREND_FLAT_EPSILON`
+# comparison classifies as "rising"/"falling" -- contradicting the
+# documented boundary-inclusive flat band above and firing a spurious
+# HIGH falling-trend backlog finding at exactly the boundary. Far smaller
+# than any real pass-rate resolution (rates are ratios of small integer
+# card counts), so no genuine move can hide inside it.
+_FLOAT_TOLERANCE = 1e-9
+
 # The one state `rolling_pass_rate`'s own `None` return (its
 # division-by-zero guard: no run in a window drafted any cards at all)
 # maps to here, kept distinct from `flat` -- see module docstring.
@@ -138,9 +148,9 @@ def classify_trend(current: float | None, prior: float | None) -> str:
     if current is None or prior is None:
         return INSUFFICIENT_DATA
     delta = current - prior
-    if delta > TREND_FLAT_EPSILON:
+    if delta > TREND_FLAT_EPSILON + _FLOAT_TOLERANCE:
         return "rising"
-    if delta < -TREND_FLAT_EPSILON:
+    if delta < -(TREND_FLAT_EPSILON + _FLOAT_TOLERANCE):
         return "falling"
     return "flat"
 

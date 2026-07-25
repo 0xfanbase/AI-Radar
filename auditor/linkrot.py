@@ -47,18 +47,20 @@ commit-time CI gate) vets a citation's redirect target against
 ``data/trusted_domains.json`` the moment a card/company profile is
 written, but a citation that was trusted at commit time can still be
 hijacked *after* the fact -- a domain lapses and gets squatted, a lab page
-starts redirecting somewhere new, etc. This function re-runs that exact
-same redirect-resolution + allowlist check (:func:`scripts.
-check_outbound_links.resolve_final_url` / ``classify_url``, imported and
-reused verbatim rather than re-implemented a second time -- matching
-``auditor.trend``'s own precedent of importing ``scripts.reconcile_run
-.rolling_pass_rate`` rather than duplicating it) against every citation
-URL already published in ``content/cards/*.json``, on `audit.yml`'s
-weekly cadence, and emits one new finding type
-(:class:`HijackCheckResult`, ``status`` one of ``trusted``/``hijacked``/
-``unreachable``) via the exact same ``{checked_at, total_urls, counts,
-results}`` shape :func:`audit_link_rot` already established -- "consistent
-with this file's existing finding-emission pattern," per this turn's own
+starts redirecting somewhere new, etc. This function re-runs the same
+redirect-resolution + allowlist check the gate does (allowlist
+classification via :func:`scripts.check_outbound_links.classify_url`,
+imported and reused verbatim rather than re-implemented; redirect
+resolution via this module's own shared :class:`UrlProber`, so the weekly
+audit issues ONE network probe per URL across the link-rot and hijack
+checks instead of two) against every citation URL already published in
+``content/cards/*.json``, on `audit.yml`'s weekly cadence, and emits one
+finding type (:class:`HijackCheckResult`, ``status`` one of
+``trusted``/``hijacked``/``not_allowlisted``/``unreachable`` -- see
+:func:`check_hijack` for the hijack-vs-curation-gap split) via the exact
+same ``{checked_at, total_urls, counts, results}`` shape
+:func:`audit_link_rot` already established -- "consistent with this
+file's existing finding-emission pattern," per this turn's own
 instruction, not a new shape invented from scratch.
 
 **Phase 9 addition -- the same hijack re-check, over company-profile
@@ -86,18 +88,17 @@ from __future__ import annotations
 
 import json
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 import requests
 
+from auditor._time import utcnow_iso as _utcnow_iso
 from scripts.check_outbound_links import (
     TRUSTED_DOMAINS_PATH,
     classify_url,
     extract_citation_urls_from_company,
     load_trusted_domains,
-    resolve_final_url,
 )
 from scripts.plan_run import COMPANIES_DIR, load_company_registry
 from watcher import http
@@ -124,8 +125,72 @@ class LinkCheckResult:
     detail: str | None = None  # set only for timeout/connection/other errors
 
 
-def _utcnow_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+@dataclass(frozen=True)
+class ProbeOutcome:
+    """One URL's single network probe: HEAD (GET fallback on 405/501),
+    redirects followed, capturing BOTH the final status code (what the
+    link-rot check needs) and the final resolved URL (what the hijack
+    check needs). ``http_status``/``final_url`` are ``None`` -- and
+    ``detail`` set -- when the request itself failed."""
+
+    url: str
+    http_status: int | None
+    final_url: str | None
+    method: str  # "HEAD" | "GET"
+    detail: str | None = None
+
+
+class UrlProber:
+    """Memoized single-probe-per-URL fetcher shared across the weekly
+    audit's three network checks.
+
+    Before this, ``audit_link_rot`` and ``audit_hijacked_links`` (and the
+    company sibling) each issued their own HEAD/GET for the SAME citation
+    URLs in the same weekly run -- every published citation was fetched
+    twice for no additional information, since one probe already yields
+    both the final status and the final URL. ``auditor/cli.py`` builds
+    one prober and passes it to all three audits; each unique URL is hit
+    exactly once per run.
+    """
+
+    def __init__(
+        self,
+        session: requests.Session,
+        *,
+        timeout: float = REQUEST_TIMEOUT_SECONDS,
+    ) -> None:
+        self._session = session
+        self._timeout = timeout
+        self._memo: dict[str, ProbeOutcome] = {}
+
+    def probe(self, url: str) -> ProbeOutcome:
+        if url not in self._memo:
+            self._memo[url] = self._probe_uncached(url)
+        return self._memo[url]
+
+    def _probe_uncached(self, url: str) -> ProbeOutcome:
+        method = "HEAD"
+        try:
+            response = self._session.head(
+                url, timeout=self._timeout, allow_redirects=True
+            )
+            if response.status_code in HEAD_UNSUPPORTED_STATUS_CODES:
+                method = "GET"
+                response = self._session.get(
+                    url, timeout=self._timeout, allow_redirects=True
+                )
+        except requests.Timeout as exc:
+            return ProbeOutcome(url, None, None, method, f"timeout: {exc}")
+        except requests.ConnectionError as exc:
+            return ProbeOutcome(url, None, None, method, f"connection error: {exc}")
+        except requests.RequestException as exc:
+            return ProbeOutcome(url, None, None, method, f"request error: {exc}")
+        return ProbeOutcome(
+            url=url,
+            http_status=response.status_code,
+            final_url=response.url,
+            method=method,
+        )
 
 
 def classify_status_code(status_code: int) -> str:
@@ -146,11 +211,25 @@ def classify_status_code(status_code: int) -> str:
     return "unreachable"
 
 
+def _link_result_from_probe(outcome: ProbeOutcome) -> LinkCheckResult:
+    if outcome.http_status is None:
+        return LinkCheckResult(
+            outcome.url, "unreachable", None, outcome.method, outcome.detail
+        )
+    return LinkCheckResult(
+        url=outcome.url,
+        status=classify_status_code(outcome.http_status),
+        http_status=outcome.http_status,
+        method=outcome.method,
+    )
+
+
 def check_url(
     session: requests.Session,
     url: str,
     *,
     timeout: float = REQUEST_TIMEOUT_SECONDS,
+    prober: UrlProber | None = None,
 ) -> LinkCheckResult:
     """HEAD-check ``url``, falling back to GET only if HEAD isn't supported.
 
@@ -160,34 +239,12 @@ def check_url(
     unreachable now, don't retry within this run" rule -- there is no
     retry loop in this function beyond whatever ``session``'s own mounted
     adapter already does for connection-level resilience.
+
+    ``prober`` (optional) shares one memoized network probe per URL with
+    the hijack checks -- see :class:`UrlProber`.
     """
-    method = "HEAD"
-    try:
-        response = session.head(url, timeout=timeout, allow_redirects=True)
-    except requests.Timeout as exc:
-        return LinkCheckResult(url, "unreachable", None, method, f"timeout: {exc}")
-    except requests.ConnectionError as exc:
-        return LinkCheckResult(url, "unreachable", None, method, f"connection error: {exc}")
-    except requests.RequestException as exc:
-        return LinkCheckResult(url, "unreachable", None, method, f"request error: {exc}")
-
-    if response.status_code in HEAD_UNSUPPORTED_STATUS_CODES:
-        method = "GET"
-        try:
-            response = session.get(url, timeout=timeout, allow_redirects=True)
-        except requests.Timeout as exc:
-            return LinkCheckResult(url, "unreachable", None, method, f"timeout: {exc}")
-        except requests.ConnectionError as exc:
-            return LinkCheckResult(url, "unreachable", None, method, f"connection error: {exc}")
-        except requests.RequestException as exc:
-            return LinkCheckResult(url, "unreachable", None, method, f"request error: {exc}")
-
-    return LinkCheckResult(
-        url=url,
-        status=classify_status_code(response.status_code),
-        http_status=response.status_code,
-        method=method,
-    )
+    prober = prober or UrlProber(session, timeout=timeout)
+    return _link_result_from_probe(prober.probe(url))
 
 
 def check_links(
@@ -195,9 +252,11 @@ def check_links(
     urls: Iterable[str],
     *,
     timeout: float = REQUEST_TIMEOUT_SECONDS,
+    prober: UrlProber | None = None,
 ) -> list[LinkCheckResult]:
     """Check every URL in ``urls``, in order, returning one result each."""
-    return [check_url(session, url, timeout=timeout) for url in urls]
+    prober = prober or UrlProber(session, timeout=timeout)
+    return [check_url(session, url, timeout=timeout, prober=prober) for url in urls]
 
 
 def load_cards(cards_dir: Path = CARDS_DIR) -> list[dict]:
@@ -238,6 +297,7 @@ def audit_link_rot(
     cards_dir: Path = CARDS_DIR,
     session: requests.Session | None = None,
     timeout: float = REQUEST_TIMEOUT_SECONDS,
+    prober: UrlProber | None = None,
 ) -> dict:
     """Run the full link-rot check and return a summary dict.
 
@@ -265,7 +325,7 @@ def audit_link_rot(
         session = http.build_session()
 
     urls = collect_citation_urls(cards)
-    results = check_links(session, urls, timeout=timeout)
+    results = check_links(session, urls, timeout=timeout, prober=prober)
 
     counts = {"ok": 0, "dead": 0, "unreachable": 0}
     for result in results:
@@ -292,7 +352,7 @@ class HijackCheckResult:
     ``data/trusted_domains.json``."""
 
     url: str
-    status: str  # "trusted" | "hijacked" | "unreachable"
+    status: str  # "trusted" | "hijacked" | "not_allowlisted" | "unreachable"
     final_url: str | None
     detail: str | None = None
 
@@ -303,19 +363,29 @@ def check_hijack(
     trusted: dict[str, Any],
     *,
     timeout: float = REQUEST_TIMEOUT_SECONDS,
+    prober: UrlProber | None = None,
 ) -> HijackCheckResult:
-    """Re-resolve ``url``'s current redirect chain
-    (:func:`scripts.check_outbound_links.resolve_final_url`) and classify
-    the final URL against ``trusted``
-    (:func:`scripts.check_outbound_links.classify_url`) -- the exact same
-    two functions the commit-time CI gate runs, reused verbatim here for
-    the weekly, after-the-fact re-check.
+    """Re-resolve ``url``'s current redirect chain and classify the final
+    URL against ``trusted`` (:func:`scripts.check_outbound_links
+    .classify_url`, the exact function the commit-time CI gate runs,
+    reused verbatim here for the weekly, after-the-fact re-check).
 
     - ``"trusted"`` -- the redirect chain resolved and the final URL still
       clears the allowlist. The common case; no finding.
-    - ``"hijacked"`` -- the redirect chain resolved, but the final URL now
-      fails the allowlist check (a domain that was trusted at commit time
-      now redirects somewhere it shouldn't -- a post-commit hijack).
+    - ``"hijacked"`` -- the published URL itself STILL clears the static
+      allowlist check, but its current redirect target does not: a
+      citation that was trusted as written now lands somewhere untrusted
+      -- the genuine post-publication hijack signal this check exists
+      for.
+    - ``"not_allowlisted"`` -- the published URL itself fails the static
+      allowlist check as written, before any redirect enters into it.
+      Nothing redirected anywhere suspicious; the citation's own host was
+      simply never (or is no longer) in ``data/trusted_domains.json`` --
+      a curation gap for the owner's allowlist checkpoint, not evidence
+      of a hijack. Previously conflated into ``"hijacked"``, which filed
+      three real committed-audit false alarms (moonshot-ai / xai /
+      zhipu-ai citations, each pre-dating their hosts' allowlist entries)
+      as HIGH-severity hijack findings.
     - ``"unreachable"`` -- the redirect chain itself couldn't be resolved
       (timeout, connection error, any other network failure). Unlike
       ``scripts/check_outbound_links.py``'s own commit-time gate (which
@@ -328,16 +398,30 @@ def check_hijack(
       as evidence of a hijack. It's simply checked again next week, same
       spirit as :func:`classify_status_code`'s own "record unreachable
       now, don't retry within this run" rule.
-    """
-    final_url, error = resolve_final_url(session, url, timeout=timeout)
-    if error is not None:
-        return HijackCheckResult(url=url, status="unreachable", final_url=None, detail=error)
 
-    result = classify_url(final_url, trusted)
+    ``prober`` (optional) shares one memoized network probe per URL with
+    the link-rot check -- see :class:`UrlProber`.
+    """
+    # Static classification of the URL as published -- no network needed,
+    # and it's what separates a curation gap from a real hijack.
+    original = classify_url(url, trusted)
+    if not original.ok:
+        return HijackCheckResult(
+            url=url, status="not_allowlisted", final_url=None, detail=original.reason
+        )
+
+    prober = prober or UrlProber(session, timeout=timeout)
+    outcome = prober.probe(url)
+    if outcome.final_url is None:
+        return HijackCheckResult(
+            url=url, status="unreachable", final_url=None, detail=outcome.detail
+        )
+
+    result = classify_url(outcome.final_url, trusted)
     if result.ok:
-        return HijackCheckResult(url=url, status="trusted", final_url=final_url)
+        return HijackCheckResult(url=url, status="trusted", final_url=outcome.final_url)
     return HijackCheckResult(
-        url=url, status="hijacked", final_url=final_url, detail=result.reason
+        url=url, status="hijacked", final_url=outcome.final_url, detail=result.reason
     )
 
 
@@ -347,11 +431,16 @@ def check_hijacks(
     trusted: dict[str, Any],
     *,
     timeout: float = REQUEST_TIMEOUT_SECONDS,
+    prober: UrlProber | None = None,
 ) -> list[HijackCheckResult]:
     """Check every URL in ``urls``, in order, returning one
     :class:`HijackCheckResult` each -- mirrors :func:`check_links`'s own
     shape for the ok/dead/unreachable check."""
-    return [check_hijack(session, url, trusted, timeout=timeout) for url in urls]
+    prober = prober or UrlProber(session, timeout=timeout)
+    return [
+        check_hijack(session, url, trusted, timeout=timeout, prober=prober)
+        for url in urls
+    ]
 
 
 def audit_hijacked_links(
@@ -362,6 +451,7 @@ def audit_hijacked_links(
     trusted_domains_path: Path = TRUSTED_DOMAINS_PATH,
     session: requests.Session | None = None,
     timeout: float = REQUEST_TIMEOUT_SECONDS,
+    prober: UrlProber | None = None,
 ) -> dict:
     """Run the full post-publication hijack check and return a summary
     dict, same ``{checked_at, total_urls, counts, results}`` shape
@@ -383,9 +473,9 @@ def audit_hijacked_links(
         session = http.build_session()
 
     urls = collect_citation_urls(cards)
-    results = check_hijacks(session, urls, trusted, timeout=timeout)
+    results = check_hijacks(session, urls, trusted, timeout=timeout, prober=prober)
 
-    counts = {"trusted": 0, "hijacked": 0, "unreachable": 0}
+    counts = {"trusted": 0, "hijacked": 0, "not_allowlisted": 0, "unreachable": 0}
     for result in results:
         counts[result.status] += 1
 
@@ -436,6 +526,7 @@ def audit_company_hijacked_links(
     trusted_domains_path: Path = TRUSTED_DOMAINS_PATH,
     session: requests.Session | None = None,
     timeout: float = REQUEST_TIMEOUT_SECONDS,
+    prober: UrlProber | None = None,
 ) -> dict:
     """Run :func:`audit_hijacked_links`'s exact same weekly re-check
     (:func:`check_hijack`, reused directly), but over every
@@ -464,11 +555,13 @@ def audit_company_hijacked_links(
         session = http.build_session()
 
     pairs = collect_company_citation_urls(companies)
+    if prober is None:
+        prober = UrlProber(session, timeout=timeout)
 
-    counts = {"trusted": 0, "hijacked": 0, "unreachable": 0}
+    counts = {"trusted": 0, "hijacked": 0, "not_allowlisted": 0, "unreachable": 0}
     results: list[dict[str, Any]] = []
     for company_id, url in pairs:
-        result = check_hijack(session, url, trusted, timeout=timeout)
+        result = check_hijack(session, url, trusted, timeout=timeout, prober=prober)
         counts[result.status] += 1
         entry = asdict(result)
         entry["company_id"] = company_id
