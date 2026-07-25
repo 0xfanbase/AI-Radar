@@ -532,9 +532,33 @@ def test_render_map_page_has_the_scan_panel_button_and_container():
     html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
     assert (
         'id="map-expand-all" class="map-toggle" aria-pressed="false" '
-        'aria-expanded="false" aria-controls="map-scan-panel">Scan all labs</button>'
+        'aria-expanded="false" aria-controls="map-scan-panel" disabled>'
+        "Scan all labs</button>"
     ) in html
     assert '<aside class="map-scan" id="map-scan-panel" hidden' in html
+
+
+def test_render_map_page_script_dependent_controls_ship_disabled():
+    # Every map control does nothing until map.js boots (it removes the
+    # attribute) -- serving them `disabled` tells assistive tech the
+    # truth in the no-JS render instead of exposing five enabled buttons
+    # that silently no-op, and it's what legitimately exempts their
+    # dimmed no-JS styling from WCAG's contrast minimum (inactive
+    # controls are out of scope for AA; see
+    # test_contrast_ratios.py's composited-opacity section).
+    html = map_builder.render_map_page(REAL_COMPANIES, REAL_BOARD_ROWS, [])
+    for button_id in [
+        "map-expand-all",
+        "map-filter-open-weights",
+        "map-zoom-in",
+        "map-zoom-out",
+        "map-zoom-reset",
+    ]:
+        start = html.index(f'id="{button_id}"')
+        tag_end = html.index(">", start)
+        assert "disabled" in html[start:tag_end], (
+            f"#{button_id} must ship disabled in the server-rendered HTML"
+        )
 
 
 def test_render_map_page_scan_panel_has_one_item_per_marker():

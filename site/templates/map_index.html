@@ -51,11 +51,16 @@
     border-color: var(--color-signal-green);
   }
 
-  /* No-JS state: the two toggle buttons do nothing without map.js (no
-     click handler is ever attached), so they're visually de-emphasized
-     by default and only gain their normal "clearly interactive" look
-     once JS confirms it's actually running -- see map.js's own
-     `document.body.classList.add("map-js-ready")` call. */
+  /* No-JS state: the two toggle buttons do nothing without map.js, so
+     they render with a real `disabled` attribute (server-rendered --
+     map.js removes it on boot) and are visually de-emphasized. The
+     `disabled` attribute is the load-bearing part: assistive tech
+     announces a genuinely inactive control instead of an enabled button
+     that silently does nothing, and WCAG's contrast requirement
+     legitimately doesn't apply to inactive controls (the 0.55 dim
+     composites to ~4.4:1, which would be sub-AA for an ACTIVE control).
+     Once JS confirms it's running they become enabled, full-contrast
+     controls -- see map.js's own `map-js-ready` boot block. */
   .map-toggle {
     opacity: 0.55;
     pointer-events: none;
@@ -314,9 +319,14 @@
 
   /* Open-weights filter: dims (never hides -- still fully navigable,
      including by keyboard/screen reader) any marker map.js has flagged
-     as not currently open-weights. */
+     as not currently open-weights. 0.6, not lower: the marker name is
+     real text (--color-ink) and at the previous 0.3 it composited to
+     ~1.98:1 against the map background -- far below WCAG AA -- for
+     markers that are dimmed-but-still-interactive. 0.6 composites to
+     ~5.1:1 (site/tests/test_contrast_ratios.py now checks this
+     composited value, parsed from this very rule). */
   .map-marker--dimmed {
-    opacity: 0.3;
+    opacity: 0.6;
   }
 
   /*
@@ -475,9 +485,10 @@
 
   /* Open-weights filter dims panel items exactly like it dims markers
      on the map itself (never hides -- still fully readable/navigable,
-     including by keyboard/screen reader). */
+     including by keyboard/screen reader). 0.6 for the same composited-
+     AA reason as .map-marker--dimmed above. */
   .map-scan__item--dimmed {
-    opacity: 0.3;
+    opacity: 0.6;
   }
 
   /* Keep the zoom controls reachable while the sidebar is open on wide
@@ -598,9 +609,13 @@
   click its name (or see the full <a href="/companies/">Companies</a>
   list) for a wiki-like fact-checked profile page.</p>
 
+{# Every map control ships `disabled`: without map.js none of them does
+   anything, and a disabled attribute tells assistive tech so honestly
+   (an enabled-looking button that silently no-ops is worse than a
+   disabled one). map.js removes the attribute the moment it boots. #}
 <div class="map-controls">
-  <button type="button" id="map-expand-all" class="map-toggle" aria-pressed="false" aria-expanded="false" aria-controls="map-scan-panel">Scan all labs</button>
-  <button type="button" id="map-filter-open-weights" class="map-toggle" aria-pressed="false">Open-weights only</button>
+  <button type="button" id="map-expand-all" class="map-toggle" aria-pressed="false" aria-expanded="false" aria-controls="map-scan-panel" disabled>Scan all labs</button>
+  <button type="button" id="map-filter-open-weights" class="map-toggle" aria-pressed="false" disabled>Open-weights only</button>
 </div>
 
 {% macro marker_details(marker) %}
@@ -667,9 +682,9 @@
     <p class="map-hint">Scroll or pinch to zoom, drag to pan.</p>
 
     <div class="map-zoom-controls" role="group" aria-label="Map zoom controls">
-      <button type="button" class="map-zoom-btn" id="map-zoom-in" aria-label="Zoom in">+</button>
-      <button type="button" class="map-zoom-btn" id="map-zoom-out" aria-label="Zoom out">&minus;</button>
-      <button type="button" class="map-zoom-btn map-zoom-btn--reset" id="map-zoom-reset" aria-label="Reset map view">Reset</button>
+      <button type="button" class="map-zoom-btn" id="map-zoom-in" aria-label="Zoom in" disabled>+</button>
+      <button type="button" class="map-zoom-btn" id="map-zoom-out" aria-label="Zoom out" disabled>&minus;</button>
+      <button type="button" class="map-zoom-btn map-zoom-btn--reset" id="map-zoom-reset" aria-label="Reset map view" disabled>Reset</button>
     </div>
 
     {# Deliberately a SIBLING of #map-wrap, not a child of it: #map-wrap is

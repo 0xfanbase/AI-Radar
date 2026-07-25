@@ -67,6 +67,16 @@
     // that the DOM is ready.
     document.body.classList.add("map-js-ready");
 
+    // The map controls ship with a real `disabled` attribute (see
+    // map_index.html): without this script none of them can do
+    // anything, and a disabled attribute tells assistive tech so
+    // honestly. Now that this script is definitely running, enable
+    // them.
+    var inertControls = document.querySelectorAll(".map-toggle, .map-zoom-btn");
+    for (var c = 0; c < inertControls.length; c++) {
+      inertControls[c].removeAttribute("disabled");
+    }
+
     function glyphOf(marker) {
       return marker.querySelector(".map-marker__glyph");
     }
