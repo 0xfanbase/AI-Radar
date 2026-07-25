@@ -9,6 +9,7 @@ deliberately not turned into a package -- see IMPROVEMENT_BACKLOG.md.
 from __future__ import annotations
 
 import importlib.util
+import re
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -115,6 +116,44 @@ def test_render_sparkline_accepts_exactly_seven_counts():
 def test_render_sparkline_accepts_fewer_than_seven_counts():
     result = spark.render_sparkline("models", [1, 2])
     assert result.trend == "rising"
+
+
+def test_render_sparkline_caller_supplied_trend_wins_over_recomputation():
+    # B4 regression: a caller with a PRECOMPUTED trend (whats_moving.json's
+    # own field, computed by watcher/velocity.py under a different rule)
+    # must be able to state it verbatim -- previously this module always
+    # recomputed its own, and the two algorithms disagree on real series
+    # shapes (visible copy said "Cooling" while the sparkline's aria-label
+    # said "rising" for identical data).
+    counts = [1, 0, 0, 4, 0, 0, 0]
+    assert spark.classify_trend(counts) == "rising"  # what recomputation says
+    result = spark.render_sparkline("models", counts, trend="falling")
+    assert result.trend == "falling"
+    assert "falling" in result.svg
+    assert "rising" not in result.svg
+
+
+def test_render_sparkline_rejects_an_unknown_trend_word():
+    with pytest.raises(spark.SparklineError):
+        spark.render_sparkline("models", [1, 2, 3], trend="skyrocketing")
+
+
+def test_signal_green_is_sourced_from_tokens_css_not_a_second_literal():
+    # A14 regression: the module previously carried its own hardcoded
+    # copy of the hex, which could silently drift from tokens.css. It
+    # must now equal exactly what the real, on-disk tokens.css declares.
+    tokens_css = (
+        Path(spark.__file__).resolve().parent.parent / "static" / "css" / "tokens.css"
+    ).read_text(encoding="utf-8")
+    match = re.search(r"--color-signal-green:\s*(#[0-9A-Fa-f]{6})\b", tokens_css)
+    assert match is not None
+    assert spark.SIGNAL_GREEN == match.group(1)
+
+
+def test_render_sparkline_color_override_is_used_for_stroke():
+    result = spark.render_sparkline("models", [1, 2, 3], color="#ABCDEF")
+    assert 'stroke="#ABCDEF"' in result.svg
+    assert spark.SIGNAL_GREEN not in result.svg
 
 
 # ---------------------------------------------------------------------------

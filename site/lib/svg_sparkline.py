@@ -18,26 +18,48 @@ survives both without color vision and without sight:
   falling", "(right arrow) flat") right next to the polyline, for sighted
   users who never touch the accessible-name machinery at all.
 
-The polyline itself is drawn in the site's signal-green accent color
-(``tokens.css``'s ``--color-signal-green``, hardcoded here as its resolved
-hex value since this module has no CSS custom-property access -- see
-IMPROVEMENT_BACKLOG.md), but the color is only ever a reinforcing visual
-cue on top of the two textual statements above, never the sole carrier of
-the trend.
+The polyline itself is drawn in the site's signal-green accent color,
+parsed live from ``tokens.css``'s ``--color-signal-green`` at import time
+(never a second hardcoded copy of the hex -- the one earlier duplicated
+literal here is exactly the drift bug ``site/generate.py``'s
+``read_color_token()`` docstring warns against), but the color is only
+ever a reinforcing visual cue on top of the two textual statements above,
+never the sole carrier of the trend. Callers can override it via
+:func:`render_sparkline`'s ``color`` parameter.
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Sequence
 from xml.sax.saxutils import escape as xml_escape
 from xml.sax.saxutils import quoteattr as xml_quoteattr
 
-# Mirrors tokens.css's --color-signal-green (#39FF6E). This module cannot
-# read the CSS custom property directly (it emits plain SVG markup, not a
-# templated fragment with access to the stylesheet cascade), so the hex
-# value is duplicated here deliberately -- spec-silent judgment call,
-# logged in IMPROVEMENT_BACKLOG.md.
-SIGNAL_GREEN = "#39FF6E"
+_TOKENS_CSS_PATH = Path(__file__).resolve().parent.parent / "static" / "css" / "tokens.css"
+_SIGNAL_GREEN_TOKEN_RE = re.compile(r"--color-signal-green:\s*(#[0-9A-Fa-f]{6})\b")
+
+
+def _signal_green_from_tokens(tokens_css_path: Path = _TOKENS_CSS_PATH) -> str:
+    """Parse the real, on-disk tokens.css for `--color-signal-green` --
+    the single source of truth for this hex. Raises loudly (matching
+    `site/generate.py::read_color_token`'s own fail-the-build-visibly
+    philosophy) rather than silently falling back to a stale literal if
+    tokens.css is ever restructured."""
+    css_text = tokens_css_path.read_text(encoding="utf-8")
+    match = _SIGNAL_GREEN_TOKEN_RE.search(css_text)
+    if not match:
+        raise ValueError(
+            f"no --color-signal-green token found in {tokens_css_path} -- "
+            "has the file's format changed?"
+        )
+    return match.group(1)
+
+
+# Resolved once at import from tokens.css -- kept as a module-level name
+# so existing callers/tests referencing SIGNAL_GREEN keep working, but no
+# longer an independently-maintained copy of the hex value.
+SIGNAL_GREEN = _signal_green_from_tokens()
 
 MAX_DAILY_COUNTS = 7
 
@@ -118,6 +140,8 @@ def render_sparkline(
     *,
     width: int = 120,
     height: int = 32,
+    trend: str | None = None,
+    color: str | None = None,
 ) -> Sparkline:
     """Render one topic's daily counts as a labeled, inline SVG
     sparkline.
@@ -126,6 +150,20 @@ def render_sparkline(
     matching ``data/whats_moving.json``'s ``daily_counts`` shape (which
     is always exactly 7 -- this function tolerates fewer for reuse
     against other, shorter series, but never more than 7).
+
+    ``trend``: pass the caller's own already-stored trend word (one of
+    :data:`TRENDS`) to state it verbatim in the aria-label/<title>/
+    visible text. This exists because a caller with a PRECOMPUTED trend
+    (``data/whats_moving.json``'s own ``trend`` field, computed by
+    ``watcher/velocity.py`` under a different rule) previously had no
+    way to stop this module recomputing its own -- and the two
+    algorithms genuinely disagree on real series shapes, so one page
+    could say "Cooling" in its visible copy while this SVG's aria-label
+    said "rising" for the identical data. When omitted, the trend is
+    classified here via :func:`classify_trend` as before.
+
+    ``color`` overrides the polyline/text color; defaults to the live
+    ``--color-signal-green`` token parsed from tokens.css.
     """
     counts = list(daily_counts)
     if not counts:
@@ -137,9 +175,15 @@ def render_sparkline(
         )
     if any(c < 0 for c in counts):
         raise SparklineError("daily_counts must all be non-negative")
+    if trend is not None and trend not in _TREND_GLYPHS:
+        raise SparklineError(
+            f"trend must be one of {TRENDS}, got {trend!r}"
+        )
 
-    trend = classify_trend(counts)
+    if trend is None:
+        trend = classify_trend(counts)
     glyph = _TREND_GLYPHS[trend]
+    stroke = color or SIGNAL_GREEN
 
     pad = 4
     chart_h = height
@@ -174,10 +218,10 @@ def render_sparkline(
         'class="sparkline">'
         f"<title>{xml_escape(label)}</title>"
         f'<polyline points="{points}" fill="none" '
-        f'stroke="{SIGNAL_GREEN}" stroke-width="2" '
+        f'stroke="{stroke}" stroke-width="2" '
         'stroke-linecap="round" stroke-linejoin="round" />'
         f'<text x="{pad}" y="{height + 13}" class="sparkline__trend" '
-        f'font-size="11" fill="{SIGNAL_GREEN}">'
+        f'font-size="11" fill="{stroke}">'
         f"{xml_escape(glyph)} {xml_escape(trend)}</text>"
         "</svg>"
     )
