@@ -117,10 +117,12 @@ def test_build_cited_text_view_no_citations_key_defaults_to_empty():
 # ---------------------------------------------------------------------------
 
 
-def test_board_rows_for_company_finds_the_real_anthropic_row():
+def test_board_rows_for_company_finds_the_real_anthropic_rows():
+    # Anthropic has 3 real rows as of the 2026-07-25 fact-check pass
+    # (Fable 5, Opus 5, Sonnet 5) -- newest release_date first.
     rows = company_builder.board_rows_for_company("anthropic", REAL_BOARD_ROWS)
-    assert len(rows) == 1
-    assert rows[0].model == "Claude Fable 5"
+    assert len(rows) == 3
+    assert [r.model for r in rows] == ["Claude Opus 5", "Claude Sonnet 5", "Claude Fable 5"]
     assert rows[0].context_window_display == "1,000,000"
 
 
@@ -266,9 +268,11 @@ def test_build_company_view_against_real_anthropic_profile():
     assert view.official_site_url == "https://anthropic.com"
     assert view.status_label == "CONFIRMED"
     assert view.status_chip_class == "chip chip--confirmed"
-    assert len(view.what_theyve_done) == 3
+    # 5 as of the 2026-07-25 fact-check pass (added the export-control/
+    # redeployment entry and the Claude Opus 5 release entry).
+    assert len(view.what_theyve_done) == 5
     assert view.roadmap == ()
-    assert len(view.board_rows) == 1
+    assert len(view.board_rows) == 3
     assert view.cards == ()
 
 
@@ -312,11 +316,13 @@ def test_build_index_context_empty_companies():
 
 
 def test_build_index_context_fills_latest_model_and_board_rows_from_real_board():
+    # Anthropic has 3 real rows as of the 2026-07-25 fact-check pass; Opus 5
+    # (2026-07-24) is now the newest, ahead of Sonnet 5 and Fable 5.
     context = company_builder.build_index_context(REAL_COMPANIES, REAL_BOARD_ROWS)
     anthropic_row = next(r for r in context["companies"] if r.id == "anthropic")
-    assert anthropic_row.latest_model == "Claude Fable 5"
-    assert len(anthropic_row.board_rows) == 1
-    assert anthropic_row.board_rows[0].model == "Claude Fable 5"
+    assert anthropic_row.latest_model == "Claude Opus 5"
+    assert len(anthropic_row.board_rows) == 3
+    assert anthropic_row.board_rows[0].model == "Claude Opus 5"
 
 
 def test_build_index_context_company_with_no_board_rows_gets_empty_latest_model():
@@ -413,8 +419,10 @@ def test_render_companies_index_empty_state():
 
 
 def test_render_companies_index_shows_latest_model_in_summary():
+    # Claude Opus 5 (2026-07-24) is Anthropic's newest real row as of the
+    # 2026-07-25 fact-check pass, ahead of Sonnet 5 and Fable 5.
     html = company_builder.render_companies_index(REAL_COMPANIES, REAL_BOARD_ROWS)
-    assert "Claude Fable 5" in html
+    assert "Claude Opus 5" in html
 
 
 def test_render_companies_index_row_name_link_is_not_nested_inside_details():

@@ -42,6 +42,11 @@
             "url": "https://seed.bytedance.com/en/blog/seed2-1-officially-released-advancing-ai-productivity",
             "outlet": "ByteDance Seed (official blog)",
             "quote": "requirement analysis, feature implementation, bug fixing"
+          },
+          {
+            "url": "https://seed.bytedance.com/en/seed2_1",
+            "outlet": "ByteDance Seed (official model page)",
+            "quote": "The Seed2.1 model family is officially released"
           }
         ]
       }
@@ -83,5 +88,5 @@
   "status": "confirmed",
   "generated_at": "2026-07-13T00:00:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-13"
+  "last_verified": "2026-07-25"
 }

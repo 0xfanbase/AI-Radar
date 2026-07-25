@@ -7,6 +7,88 @@ Each entry corresponds to one commit or one phase checkpoint. See
 
 ---
 
+## 2026-07-25 -- End-to-end fact-check pass across all 13 companies: Board grows from 18 to 31 rows
+
+Owner asked for an end-to-end refresh of every company and every Board row,
+fact-checked against the latest real information -- not just re-reading
+what's already cited on the site. Ran this as the same shape the daily
+ANALYST/VERIFIER pipeline is supposed to run, by hand: a research pass per
+company against live primary sources, then an independent adversarial
+verification pass (fable and opus, split across the 13 companies) that
+re-fetched every proposed source from scratch before anything was written,
+exactly like `CLAUDE.md`'s VERIFIER procedure. Nothing was published from
+the research pass alone.
+
+**The verification pass earned its keep.** Of 14 candidate items handed to
+it, 8 needed a real correction before they were publishable -- not typos,
+substantive problems: two quotes were stitched together from non-contiguous
+sentences (a direct Hard Rule 2 violation the research pass didn't catch),
+one quote silently substituted a word, one was 18 words over the 15-word
+cap, one model's actual release date was a full year off (2025 vs. 2026),
+and one date was sourced from the wrong blog post entirely (a later feature
+announcement, not the original release). Every correction is attributed to
+whichever verifier caught it in the diffs below.
+
+**31 Frontier Board rows, up from 18** (all schema-validated,
+`data/trusted_domains.json` extended with 3 newly-cited single-tenant
+hosts): Claude Opus 5 and Claude Sonnet 5 (Anthropic -- Opus 5 closes the
+open item from earlier the same day); Gemini 3.6 Flash and Gemini 3.5
+Flash-Lite (Google DeepMind); DeepSeek-V4 Flash; Ministral 3's sibling
+Mistral Medium 3.5 (release date corrected 05-22 -> 04-28 by fable, who
+found the model card version string the research pass missed); Kimi K3
+(Moonshot -- open-weight release still pending, per Moonshot's own blog,
+confirmed not yet on Hugging Face); Nemotron 3 Nano, Super, and Nano Omni
+(NVIDIA -- Nano's date corrected 2026 -> 2025-12-15 by opus); Seed 2.1
+Turbo (ByteDance); GPT-Live-1 and GPT-Live-1 mini (OpenAI). Every company
+profile touched by a new row also got its `what_theyve_done`/
+`current_focus`/`roadmap` prose updated to match, and every one of the 13
+profiles' `last_verified` moved to today, including the ones with no
+content change (DeepSeek, xAI, Zhipu AI, Alibaba Qwen) -- a genuine
+re-check with nothing new found is still a real verification.
+
+**Anthropic also got a real correction, not just an addition.** The
+research pass surfaced a Fable 5/Mythos 5 "suspension" rumor; fable's
+re-fetch found the real story is both more specific and more serious than
+that framing: a US government export-control action (June 12, 2026), not
+a voluntary pause, and Mythos 5 never fully returned -- only restored for
+a set of US organizations under Anthropic's own-named Glasswing program.
+Published the corrected version, not the vaguer first draft.
+
+**Deliberately NOT added, each for a stated reason (full detail in
+`IMPROVEMENT_BACKLOG.md`):** Qwen3.8-Max-Preview (opus: primary source
+returned HTTP 402 on re-fetch, only one reputable-table outlet --
+`reported`, not `confirmed`, under Hard Rule 1); Gemini 3.5 Flash Cyber and
+Robostral Navigate (both real, but their actual access mechanism --
+government/partner-pilot-only, and enterprise-sales-only respectively --
+has no honest value in `frontier_board.schema.json`'s `api`/`open-weights`/
+`consumer` enum; logged as a schema gap, not routed around); NVIDIA's
+"Nemotron-Labs-TwoTower" (opus's own reasoned call: a decoding-speed
+research technique on an already-tracked frozen backbone, not a release,
+version update, or access change under Hard Rule 8); Grok 4.6, GLM-5.5,
+Olmo 3.2/4, a DeepSeek V4 GA transition, and a Mistral Large 3 reasoning
+variant (all real leads that, on direct re-fetch, hadn't actually shipped
+or didn't clear the corroboration bar yet).
+
+**Also surfaced, not this pass's to fix:** ByteDance Seed's existing
+profile claim about a "Turbo" variant cited a blog post that, on direct
+re-fetch, never actually mentions Turbo -- the citation was pointing at the
+wrong page. The claim itself held up (a different ByteDance page confirms
+it with a benchmark table, now added as the citation), but this is exactly
+the kind of already-published, thinly-sourced claim `data/
+pending_corrections.json` exists for if a future case doesn't hold up.
+
+**Verified:** `python -m pytest` -- 1404 passed, 2 deselected (9 hardcoded
+row-count assertions in `site/tests/test_board_builder.py` moved 18 -> 31;
+3 Anthropic-specific board-row assertions across `test_company_builder.py`
+and `test_map_builder.py` updated for the new newest-first order --
+Opus 5, Sonnet 5, Fable 5 -- and the `what_theyve_done` count 3 -> 5).
+`python site/generate.py` clean build. Rendered and screenshotted the real
+companies index and Anthropic's own profile page post-build: every
+company's latest model, multi-row expansion, and citation list confirmed
+correct by eye, not just by test count.
+
+---
+
 ## 2026-07-25 -- Co-auditor fixes on the companies-index disclosure; Frontier Board grows 4 rows from already-cited sourcing
 
 Follow-on to the same day's companies-index entry below. Two threads: (1) fable and opus's independent co-auditor pass against the actual shipped diff (not the design proposal) landed with a verdict of CONFIRMED WORKING plus a small number of real findings; (2) the owner asked to see "the full list of latest models" per company on expand -- e.g. Anthropic showing Opus 5, Fable 5, Sonnet, Haiku -- which turned out to be a data-coverage question, not a UI one: `board_rows_for_company` already renders every row that exists for a company (Meta AI's 2 rows already proved this), so the gap was that `content/frontier_board.json` tracks each lab's frontier-tier release(s), not a full product catalog.

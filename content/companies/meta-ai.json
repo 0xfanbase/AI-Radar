@@ -67,6 +67,16 @@
             "quote": "now in public preview"
           }
         ]
+      },
+      {
+        "text": "On July 7, 2026 it released Muse Image, its first image-generation model -- text-to-image, image-to-image, and editing -- launching in the Meta AI app with expansion to Facebook, Messenger, Instagram, and WhatsApp planned. A related Muse Video model was previewed alongside it but remains in development, not yet released.",
+        "citations": [
+          {
+            "url": "https://about.fb.com/news/2026/07/introducing-muse-image-meta-ai/",
+            "outlet": "Meta (official newsroom)",
+            "quote": "the creative partner that knows your world"
+          }
+        ]
       }
     ],
     "strengths": [
@@ -122,5 +132,5 @@
   "status": "confirmed",
   "generated_at": "2026-07-13T00:00:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-13"
+  "last_verified": "2026-07-25"
 }

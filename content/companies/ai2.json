@@ -44,6 +44,16 @@
             "quote": "the strongest fully open base and thinking models we're aware of"
           }
         ]
+      },
+      {
+        "text": "On March 5, 2026 it released Olmo Hybrid alongside (not replacing) the Olmo 3 line: a 7-billion-parameter, text-only, open-weight model interleaving standard transformer attention with Gated DeltaNet linear-RNN layers at a 3:1 ratio, on the same 65,536-token context window as Olmo 3.",
+        "citations": [
+          {
+            "url": "https://allenai.org/blog/olmohybrid",
+            "outlet": "Ai2 (official blog)",
+            "quote": "the hybrid model reaches the same accuracy as Olmo 3 using 49% fewer tokens"
+          }
+        ]
       }
     ],
     "strengths": [
@@ -83,5 +93,5 @@
   "status": "confirmed",
   "generated_at": "2026-07-13T00:00:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-13"
+  "last_verified": "2026-07-25"
 }

@@ -55,6 +55,16 @@
             "quote": "outperforming Gemini 3.1 Pro on challenging coding and agentic benchmarks"
           }
         ]
+      },
+      {
+        "text": "On July 21, 2026 it released Gemini 3.6 Flash, taking over as its main workhorse tier from 3.5 Flash, alongside a cheaper Gemini 3.5 Flash-Lite and a Gemini 3.5 Flash Cyber restricted to governments and trusted partners. Gemini 3.6 Flash handles text, image, audio, and video input on a 1-million-token context window with 64,000-token max output.",
+        "citations": [
+          {
+            "url": "https://deepmind.google/models/gemini/flash/",
+            "outlet": "Google DeepMind (official)",
+            "quote": "Best for token efficiency in coding, knowledge work, and multimodal tasks"
+          }
+        ]
       }
     ],
     "strengths": [
@@ -80,23 +90,33 @@
       }
     ],
     "current_focus": {
-      "text": "Google DeepMind's current public focus is the Gemini 3.5 model family, oriented toward agentic workflows and coding rather than general chat, distributed broadly through Google's consumer and developer surfaces at once, while a larger Gemini 3.5 Pro sibling remains in development.",
+      "text": "Google DeepMind's current public focus is Gemini 3.6 Flash, which took over the main workhorse role from 3.5 Flash on July 21, 2026, oriented toward agentic workflows and coding rather than general chat and distributed broadly through Google's consumer and developer surfaces at once. A larger Gemini 3.5 Pro sibling remains in partner testing with no announced release date.",
       "citations": [
         {
-          "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/",
-          "outlet": "Google (official blog)",
-          "quote": "our strongest agentic and coding model yet"
+          "url": "https://deepmind.google/models/gemini/flash/",
+          "outlet": "Google DeepMind (official)",
+          "quote": "Our workhorse model that reduces output token usage by 17% compared to 3.5 Flash"
         }
       ]
     },
     "roadmap": [
       {
-        "text": "Google says it is already using a larger Gemini 3.5 Pro model internally and plans to roll it out the following month.",
+        "text": "As of July 21, 2026, Google says Gemini 3.5 Pro is still in partner testing with no announced release date, walking back its own earlier one-month estimate.",
         "citations": [
           {
-            "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/",
+            "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-6-flash-3-5-flash-lite-3-5-flash-cyber/",
             "outlet": "Google (official blog)",
-            "quote": "we look forward to rolling it out next month"
+            "quote": "currently testing with partners and we plan to make it broadly available"
+          }
+        ]
+      },
+      {
+        "text": "Google says it has started its most ambitious pre-training run yet, for Gemini 4.",
+        "citations": [
+          {
+            "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-6-flash-3-5-flash-lite-3-5-flash-cyber/",
+            "outlet": "Google (official blog)",
+            "quote": "started our most ambitious pre-training run yet, for Gemini 4"
           }
         ]
       }
@@ -105,5 +125,5 @@
   "status": "confirmed",
   "generated_at": "2026-07-13T00:00:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-13"
+  "last_verified": "2026-07-25"
 }

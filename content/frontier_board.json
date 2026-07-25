@@ -16,6 +16,38 @@
     "last_verified": "2026-07-09"
   },
   {
+    "lab": "Anthropic",
+    "region": "US",
+    "company_id": "anthropic",
+    "model": "Claude Opus 5",
+    "release_date": "2026-07-24",
+    "modality": [
+      "text",
+      "image"
+    ],
+    "context_window": 1000000,
+    "access": "api",
+    "significance": "Claude Opus 5, released July 24, 2026, slots between Fable 5 and Sonnet 5 in Anthropic's own pricing table ($5/$25 per million input/output tokens, versus Fable 5's $10/$50 and Sonnet 5's $3/$15) -- Anthropic's own announcement frames it as coming close to Fable 5's frontier intelligence at half the price. It carries the same 1M-token context window and 128k max output as the rest of the current generation. Opus 4.8, the prior Opus-branded flagship, now sits in Anthropic's own docs under a \"Legacy models\" heading.",
+    "source_url": "https://platform.claude.com/docs/en/about-claude/models/overview",
+    "last_verified": "2026-07-25"
+  },
+  {
+    "lab": "Anthropic",
+    "region": "US",
+    "company_id": "anthropic",
+    "model": "Claude Sonnet 5",
+    "release_date": "2026-06-30",
+    "modality": [
+      "text",
+      "image"
+    ],
+    "context_window": 1000000,
+    "access": "api",
+    "significance": "Claude Sonnet 5, released June 30, 2026, is Anthropic's mid-tier model in the current generation -- same 1M-token context window and 128k max output as Fable 5 and Opus 5, at $3/$15 per million input/output tokens (an introductory $2/$10 runs through August 31, 2026). Anthropic's own current-focus messaging positions it as narrowing the capability gap to the Opus-class flagship at a lower price.",
+    "source_url": "https://platform.claude.com/docs/en/about-claude/models/overview",
+    "last_verified": "2026-07-25"
+  },
+  {
     "lab": "DeepSeek",
     "region": "China",
     "company_id": "deepseek",
@@ -61,6 +93,21 @@
     "last_verified": "2026-07-09"
   },
   {
+    "lab": "Ai2",
+    "region": "open-weights",
+    "company_id": "ai2",
+    "model": "Olmo Hybrid",
+    "release_date": "2026-03-05",
+    "modality": [
+      "text"
+    ],
+    "context_window": 65536,
+    "access": "open-weights",
+    "significance": "Olmo Hybrid, released March 5, 2026, ships alongside (not replacing) the Olmo 3 line: a 7-billion-parameter model interleaving standard transformer attention with Gated DeltaNet linear-RNN layers at a 3:1 ratio. Ai2's own post reports \"the hybrid model reaches the same accuracy as Olmo 3 using 49% fewer tokens\" on MMLU, and its model card lists the same 65,536-token context window as the Olmo 3 family.",
+    "source_url": "https://allenai.org/blog/olmohybrid",
+    "last_verified": "2026-07-25"
+  },
+  {
     "lab": "NVIDIA",
     "region": "open-weights",
     "company_id": "nvidia",
@@ -74,6 +121,54 @@
     "significance": "NVIDIA's newest and largest Nemotron 3 release, Ultra is a 550-billion-parameter (55 billion active) Mixture-of-Experts hybrid Mamba-Attention model built for long-running agentic workloads. NVIDIA's own benchmarks put its inference throughput at 1.6x to 5.9x that of three other open models (GLM-5.1-754B-A40B, Kimi-K2.6-1T-A32B, and Qwen-3.5-397B-17B), varying by which one it's measured against, at matching accuracy, plus strong long-context retrieval at its 1M-token window.",
     "source_url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
     "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "NVIDIA",
+    "region": "open-weights",
+    "company_id": "nvidia",
+    "model": "Nemotron 3 Nano",
+    "release_date": "2025-12-15",
+    "modality": [
+      "text"
+    ],
+    "context_window": 1000000,
+    "access": "open-weights",
+    "significance": "Nemotron 3 Nano, NVIDIA's smallest Nemotron 3 tier (30 billion total parameters, up to 3 billion active), launched Dec 15, 2025 as what NVIDIA calls \"the most efficient family of open models with leading accuracy for building agentic AI\" -- the entry point below Super and Ultra, sharing the same 1M-token context window.",
+    "source_url": "https://nvidianews.nvidia.com/news/nvidia-debuts-nemotron-3-family-of-open-models",
+    "last_verified": "2026-07-25"
+  },
+  {
+    "lab": "NVIDIA",
+    "region": "open-weights",
+    "company_id": "nvidia",
+    "model": "Nemotron 3 Super",
+    "release_date": "2026-03-11",
+    "modality": [
+      "text"
+    ],
+    "context_window": 1000000,
+    "access": "open-weights",
+    "significance": "Nemotron 3 Super, the mid tier between Nano and Ultra at 120 billion total parameters (12 billion active), released March 11, 2026 with the same 1M-token context window as its siblings. NVIDIA reports it delivers \"up to 5x higher throughput and up to 2x higher accuracy\" than the previous-generation Nemotron Super model.",
+    "source_url": "https://blogs.nvidia.com/blog/nemotron-3-super-agentic-ai",
+    "last_verified": "2026-07-25"
+  },
+  {
+    "lab": "NVIDIA",
+    "region": "open-weights",
+    "company_id": "nvidia",
+    "model": "Nemotron 3 Nano Omni",
+    "release_date": "2026-04-28",
+    "modality": [
+      "text",
+      "image",
+      "audio",
+      "video"
+    ],
+    "context_window": 256000,
+    "access": "open-weights",
+    "significance": "Nemotron 3 Nano Omni, released April 28, 2026, is a 30B-A3B hybrid Mixture-of-Experts model built for multimodal agents -- accepting text, images, audio, video, and documents in, producing text out, on a 256,000-token context window. NVIDIA reports it delivers \"9x higher throughput than other open omni models\" at the same interactivity.",
+    "source_url": "https://blogs.nvidia.com/blog/nemotron-3-nano-omni-multimodal-ai-agents",
+    "last_verified": "2026-07-25"
   },
   {
     "lab": "OpenAI",
@@ -122,6 +217,36 @@
     "last_verified": "2026-07-25"
   },
   {
+    "lab": "OpenAI",
+    "region": "US",
+    "company_id": "openai",
+    "model": "GPT-Live-1",
+    "release_date": "2026-07-08",
+    "modality": [
+      "audio"
+    ],
+    "context_window": null,
+    "access": "consumer",
+    "significance": "GPT-Live-1, released July 8, 2026, is OpenAI's new full-duplex voice model -- OpenAI's own deployment-safety documentation says it and its mini sibling \"can listen and respond continuously\" rather than waiting for a clearly defined turn to end. It's the default voice experience for ChatGPT Go, Plus, and Pro; API access was announced without a firm date.",
+    "source_url": "https://deploymentsafety.openai.com/gpt-live",
+    "last_verified": "2026-07-25"
+  },
+  {
+    "lab": "OpenAI",
+    "region": "US",
+    "company_id": "openai",
+    "model": "GPT-Live-1 mini",
+    "release_date": "2026-07-08",
+    "modality": [
+      "audio"
+    ],
+    "context_window": null,
+    "access": "consumer",
+    "significance": "GPT-Live-1 mini, released the same day as GPT-Live-1, is the free-tier version of OpenAI's new full-duplex voice model line -- ChatGPT's free tier gets this model by default rather than the full GPT-Live-1.",
+    "source_url": "https://deploymentsafety.openai.com/gpt-live",
+    "last_verified": "2026-07-25"
+  },
+  {
     "lab": "Google DeepMind",
     "region": "US",
     "company_id": "google-deepmind",
@@ -136,6 +261,39 @@
     "significance": "Gemini 3.5 Flash, released May 19, 2026 as the first model in Google's new 3.5 family, is built for agentic workflows and coding rather than general chat; Google's own benchmark table has it outperforming Gemini 3.1 Pro on coding and multi-step agentic tasks while running roughly four times faster on output tokens per second than prior frontier models. It shipped broadly at once across the free Gemini app and Search's AI Mode, the Gemini API in Google AI Studio and Android Studio, the new Antigravity developer platform, and Gemini Enterprise. A larger 3.5 Pro sibling remains in development. Google DeepMind is itself headquartered in London, UK -- a distinct entity from Google/Alphabet's Mountain View corporate HQ -- but this Board, per this project's own logged taxonomy decision, buckets it into the US section alongside its US-headquartered parent, since the Board's three tracked lanes are US, China, and notable open-weights releases, not a geography-complete list of every lab's home country.",
     "source_url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-5/",
     "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "Google DeepMind",
+    "region": "US",
+    "company_id": "google-deepmind",
+    "model": "Gemini 3.6 Flash",
+    "release_date": "2026-07-21",
+    "modality": [
+      "text",
+      "image",
+      "audio",
+      "video"
+    ],
+    "context_window": 1000000,
+    "access": "api",
+    "significance": "Gemini 3.6 Flash, released July 21, 2026 alongside two siblings (Gemini 3.5 Flash-Lite and a governments/trusted-partners-only Gemini 3.5 Flash Cyber this Board cannot list under its own access-tier categories), takes over as Google's main workhorse tier from Gemini 3.5 Flash. It handles a 1M-token input context with a 64,000-token max output, across text, image, audio, and video input.",
+    "source_url": "https://deepmind.google/models/gemini/flash/",
+    "last_verified": "2026-07-25"
+  },
+  {
+    "lab": "Google DeepMind",
+    "region": "US",
+    "company_id": "google-deepmind",
+    "model": "Gemini 3.5 Flash-Lite",
+    "release_date": "2026-07-21",
+    "modality": [
+      "text"
+    ],
+    "context_window": null,
+    "access": "api",
+    "significance": "Gemini 3.5 Flash-Lite, released the same day as Gemini 3.6 Flash, is Google's cheapest current-generation Gemini tier, positioned for high-volume, cost-sensitive use rather than maximum capability.",
+    "source_url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-3-6-flash-3-5-flash-lite-3-5-flash-cyber/",
+    "last_verified": "2026-07-25"
   },
   {
     "lab": "Meta",
@@ -219,6 +377,22 @@
     "last_verified": "2026-07-25"
   },
   {
+    "lab": "Mistral",
+    "region": "US",
+    "company_id": "mistral",
+    "model": "Mistral Medium 3.5",
+    "release_date": "2026-04-28",
+    "modality": [
+      "text",
+      "image"
+    ],
+    "context_window": 256000,
+    "access": "open-weights",
+    "significance": "Mistral Medium 3.5 sits between Ministral 3 and flagship Large 3 in Mistral's lineup: a 128-billion-parameter dense model accepting text and image input with text output, on a 256,000-token context window, released open-weight under a Modified MIT license alongside parallel API pricing ($1.5/$7.5 per million input/output tokens).",
+    "source_url": "https://docs.mistral.ai/getting-started/models/models_overview/",
+    "last_verified": "2026-07-25"
+  },
+  {
     "lab": "Alibaba Qwen",
     "region": "China",
     "company_id": "alibaba-qwen",
@@ -251,6 +425,22 @@
     "last_verified": "2026-07-09"
   },
   {
+    "lab": "Moonshot AI",
+    "region": "China",
+    "company_id": "moonshot-ai",
+    "model": "Kimi K3",
+    "release_date": "2026-07-16",
+    "modality": [
+      "text",
+      "image"
+    ],
+    "context_window": 1000000,
+    "access": "api",
+    "significance": "Kimi K3, which Moonshot announced July 16, 2026, is a 2.8-trillion-parameter model built on Moonshot's own Kimi Delta Attention architecture, with native vision and a 1-million-token context window -- SCMP calls it \"the world's largest open-source artificial intelligence model,\" though the open-weight release itself is still pending: Moonshot's own blog states \"the full model weights will be released by July 27, 2026,\" and no Kimi-K3 repository exists on its Hugging Face org yet. Served today via kimi.com, Kimi Work, Kimi Code, and Moonshot's API at $0.30-$15 per million tokens.",
+    "source_url": "https://kimi.com/blog/kimi-k3",
+    "last_verified": "2026-07-25"
+  },
+  {
     "lab": "Zhipu AI",
     "region": "China",
     "company_id": "zhipu-ai",
@@ -281,5 +471,22 @@
     "significance": "Seed 2.1, which ByteDance's Seed team released on June 23, 2026 in Pro and lighter Turbo variants, is built to carry out full multi-step tasks -- project planning, document processing, end-to-end coding across an entire codebase -- rather than answer single prompts, and adds stronger multimodal understanding of documents, charts, and video. ByteDance serves it through its own Doubao consumer assistant and the Volcano Engine cloud platform rather than as downloadable weights or a widely available third-party API.",
     "source_url": "https://seed.bytedance.com/en/blog/seed2-1-officially-released-advancing-ai-productivity",
     "last_verified": "2026-07-09"
+  },
+  {
+    "lab": "ByteDance",
+    "region": "China",
+    "company_id": "bytedance-seed",
+    "model": "Seed 2.1 Turbo",
+    "release_date": "2026-06-23",
+    "modality": [
+      "text",
+      "image",
+      "video"
+    ],
+    "context_window": null,
+    "access": "api",
+    "significance": "Seed 2.1 Turbo is the lighter, faster sibling ByteDance released alongside Seed 2.1 Pro on the same day. ByteDance's own model page confirms it as one of \"two AI productivity models in different sizes: Pro and Turbo,\" backed by a 25-plus-benchmark comparison table -- the same page the original Pro citation predates and doesn't itself mention Turbo by name.",
+    "source_url": "https://seed.bytedance.com/en/seed2_1",
+    "last_verified": "2026-07-25"
   }
 ]

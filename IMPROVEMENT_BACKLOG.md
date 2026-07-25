@@ -4647,3 +4647,76 @@ drive-by edit alongside an unrelated wording fix" -- this was that pass.
   fetch -- publishable with the ANALYST/VERIFIER's full two-pass procedure,
   not from a single fetch here.
 
+## 2026-07-25 -- End-to-end fact-check pass: resolutions, new exclusions, and the schema gap confirmed as a real pattern
+
+Follow-on to this same day's two entries above and `PROGRESS.md`'s matching
+entry. The owner asked for a full 13-company refresh; this is the decision
+log for what a real two-pass verification (fable + opus, adversarial,
+independent re-fetch) did and didn't clear for publication.
+
+**Both open items from the entry directly above are now resolved, not
+still open:**
+- **Claude Sonnet 5**: fable found Anthropic's own newsroom index states
+  the date plainly ("Sonnet 5 (Jun 30, 2026)") and separately confirmed
+  modality/context window from the docs overview page. Added to the Board.
+- **ByteDance Seed's "Turbo" claim**: opus found the actual confirming page
+  (`seed.bytedance.com/en/seed2_1`, distinct from the originally-cited
+  blog post), with a benchmark table naming both Pro and Turbo. The
+  existing profile claim was accurate all along; only the citation was
+  pointing at the wrong URL. Fixed by adding the correct URL as a second
+  citation on the same sentence, not by rewriting the claim.
+
+**The Mythos-5 schema gap (logged two entries above) is a real, recurring
+pattern, not a one-off.** This pass hit it twice more independently:
+Gemini 3.5 Flash Cyber (Google's own words: "exclusively available to
+governments and trusted partners") and Mistral's Robostral Navigate (no
+stated access mechanism at all -- a sales-contact page only). Neither
+could be honestly forced into `api`/`open-weights`/`consumer`. Both are
+real, both are mentioned in their company's profile prose (where free text
+can carry the nuance), neither is a Board row. Three independent hits in
+one day raises this from "one odd case" to "the schema is missing a real
+category" -- still logged for a deliberate owner/PM checkpoint decision,
+not fixed ad hoc, but now with three concrete precedents to design against
+instead of one.
+
+**New exclusions this pass, each for a stated, re-checked reason:**
+- **Qwen3.8-Max-Preview** (Alibaba) -- real (SCMP corroborates), but its
+  claimed primary source (Qwen's own X/Twitter post) returned HTTP 402 on
+  opus's independent re-fetch, and only one reputable-table outlet exists.
+  Primary-unverifiable + one outlet clears `reported`, not `confirmed`,
+  under Hard Rule 1 -- correctly not a Board row yet. Revisit if the
+  primary post becomes fetchable again or a second table outlet covers it.
+- **"Nemotron-Labs-TwoTower"** (NVIDIA) -- opus's own reasoned judgment
+  call: an arXiv diffusion-decoding paper on NVIDIA's already-tracked,
+  frozen Nemotron-3-Nano-30B-A3B backbone, retaining 98.7% of baseline
+  quality (i.e. a research speed/quality trade-off, not an improvement) at
+  2.42x throughput. Fails all three Hard Rule 8 triggers: not a new
+  release, not a version update (same weights), not an access-tier change
+  (Nano was already open-weight). The `Nemotron-Labs-` prefix is itself
+  NVIDIA's own signal this sits outside the Nano/Super/Ultra product
+  taxonomy. If it's newsworthy at all, it's Wire-card material, not a
+  Board row -- and the Wire isn't in the live build regardless (see
+  `CLAUDE.md`'s "Site surface" section).
+- **Grok 4.6** (xAI/SpaceXAI) -- Musk's own social-media claim of a
+  finished pre-training run, no public release, no reputable-table outlet
+  coverage (only off-table aggregators), and x.ai's own docs still show
+  Grok 4.5 as newest. Doesn't clear the corroboration bar even at
+  `reported`, and hasn't shipped regardless.
+- **GLM-5.5** (Zhipu) -- "expected August 2026" appears only in
+  speculative third-party posts; no Zhipu statement found. Rumor, not a
+  lead.
+- **Olmo 3.2/4** (Ai2), a **DeepSeek V4 GA transition** (DeepSeek's own
+  homepage still reads "Preview" as of this pass's fetch, contradicting
+  secondary reports of a mid-July GA), and a **shipped Mistral Large 3
+  reasoning variant** ("coming soon" per Mistral's own site, unchanged) --
+  all real leads that didn't hold up on direct re-fetch. None added.
+
+**Cross-cutting finding worth its own line:** the first-pass research
+agents' proposed quotes needed correction in 5 of 14 cases -- two stitched
+from non-contiguous sentences (a direct Hard Rule 2 violation), one with a
+silent word substitution, one 18 words over the 15-word cap, and one
+citing the wrong announcement post entirely for its date. Every one of
+these would have passed a casual read. This is the concrete, in-repo
+evidence for why CLAUDE.md's VERIFIER role re-fetches everything from
+scratch instead of proofreading the ANALYST's draft -- a lesson this
+pass's own two-stage design was built to demonstrate, not just assert.

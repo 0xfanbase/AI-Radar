@@ -46,7 +46,17 @@
         ]
       },
       {
-        "text": "On June 4, 2026 NVIDIA released Nemotron 3 Ultra, a 550-billion-parameter (55-billion-active) Mixture-of-Experts hybrid Mamba-Attention model with a 1-million-token context window, released open-weight with training checkpoints and datasets included.",
+        "text": "NVIDIA built out the Nemotron 3 family in tiers well before Ultra: Nano (30B total, up to 3B active) on Dec 15, 2025, Super (120B total, 12B active) on March 11, 2026, and the multimodal Nano Omni (30B-A3B, accepting text/image/audio/video/documents) on April 28, 2026 -- all open-weight, all on large context windows.",
+        "citations": [
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-debuts-nemotron-3-family-of-open-models",
+            "outlet": "NVIDIA (official newsroom)",
+            "quote": "most efficient family of open models with leading accuracy for building agentic AI"
+          }
+        ]
+      },
+      {
+        "text": "On June 4, 2026 NVIDIA released Nemotron 3 Ultra, a 550-billion-parameter (55-billion-active) Mixture-of-Experts hybrid Mamba-Attention model with a 1-million-token context window, released open-weight with training checkpoints and datasets included -- the top of the Nemotron 3 tier lineup, not NVIDIA's only release in the family.",
         "citations": [
           {
             "url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
@@ -79,7 +89,7 @@
       }
     ],
     "current_focus": {
-      "text": "NVIDIA's current AI-model focus is Nemotron 3 Ultra, built for long-running agentic workloads with inference-time reasoning budget control, released open-weight alongside its full training data and post-training methodology combining supervised fine-tuning, reinforcement learning and multi-teacher distillation.",
+      "text": "NVIDIA's current AI-model focus is the full Nemotron 3 family -- Nano, Super, Nano Omni, and flagship Ultra -- covering everything from lightweight agentic workloads up to Ultra's inference-time reasoning budget control, all released open-weight alongside their full training data and post-training methodology combining supervised fine-tuning, reinforcement learning and multi-teacher distillation.",
       "citations": [
         {
           "url": "https://research.nvidia.com/labs/nemotron/Nemotron-3-Ultra/",
@@ -93,5 +103,5 @@
   "status": "confirmed",
   "generated_at": "2026-07-13T00:00:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-13"
+  "last_verified": "2026-07-25"
 }

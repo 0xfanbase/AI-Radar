@@ -68,6 +68,16 @@
             "quote": "5.6 is now available across ChatGPT, Codex, and the OpenAI API"
           }
         ]
+      },
+      {
+        "text": "On July 8, 2026 it released GPT-Live-1 and a free-tier GPT-Live-1 mini, its new full-duplex voice models -- able to listen and respond in real time rather than waiting for a turn to end. API access was announced without a firm date.",
+        "citations": [
+          {
+            "url": "https://deploymentsafety.openai.com/gpt-live",
+            "outlet": "OpenAI (official deployment-safety docs)",
+            "quote": "full-duplex, meaning they can listen and respond continuously"
+          }
+        ]
       }
     ],
     "strengths": [
@@ -112,5 +122,5 @@
   "status": "confirmed",
   "generated_at": "2026-07-13T00:00:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-13"
+  "last_verified": "2026-07-25"
 }
