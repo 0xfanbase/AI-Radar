@@ -2,7 +2,7 @@
   {
     "cluster_hash": "7b8185bb33e0bdd00afd4037a64c624af6ac8d234de869787ff15cb0394a91b9",
     "rank": 1,
-    "score": 1016.0518799757607,
+    "score": 334.23310781454836,
     "sources": [
       {
         "outlet": null,
@@ -20,7 +20,7 @@
       },
       {
         "outlet": "anthropic.com",
-        "points": 1222,
+        "points": 1735,
         "source_type": "hn",
         "title": "Claude Opus 5",
         "url": "https://www.anthropic.com/news/claude-opus-5"
@@ -28,27 +28,41 @@
     ]
   },
   {
-    "cluster_hash": "ac01b28f85e133214755b7cc96477f7669b21f4f614b570a2f54a780d0eebd15",
+    "cluster_hash": "8e418fc06184a07b7c2a834f6f4f9c2dac52e95145fa8418f39df1968206dc0f",
     "rank": 2,
-    "score": 50.925687697038576,
+    "score": 35.907765758830855,
     "sources": [
       {
-        "outlet": "theguardian.com",
-        "points": 388,
+        "outlet": "claude.com",
+        "points": 122,
         "source_type": "hn",
-        "title": "Be skeptical of OpenAI's rogue hacker agent story",
-        "url": "https://www.theguardian.com/technology/2026/jul/24/openai-rogue-hacker"
+        "title": "The new rules of context engineering for Claude 5 generation models",
+        "url": "https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "d923a364b09ddb01750cc377e80cd1fe01a6679146f646660491bd3543e0bd4a",
+    "rank": 3,
+    "score": 31.906735129983048,
+    "sources": [
+      {
+        "outlet": "tobi.knaup.me",
+        "points": 296,
+        "source_type": "hn",
+        "title": "Open-weight AI is having its Kubernetes moment",
+        "url": "https://tobi.knaup.me/2026-07-25-open-weight-ai-is-having-its-kubernetes-moment/"
       }
     ]
   },
   {
     "cluster_hash": "ea0b9960b25ff2dec7aa3f223a52e5e74c785d4adf0a2930123fecd4c6f2a5d9",
-    "rank": 3,
-    "score": 43.90794152281271,
+    "rank": 4,
+    "score": 18.689074652103383,
     "sources": [
       {
         "outlet": "cnbc.com",
-        "points": 467,
+        "points": 646,
         "source_type": "hn",
         "title": "Nvidia, Microsoft, Meta warn against overregulating open-weight models",
         "url": "https://www.cnbc.com/2026/07/24/nvidia-microsoft-meta-open-weight-ai-models.html"
@@ -56,72 +70,58 @@
     ]
   },
   {
-    "cluster_hash": "e3f3a5eb05a479c86e2451c1b0669df4ff4ce58a90ec1b470e6a564cc5a90f77",
-    "rank": 4,
-    "score": 31.551937194840267,
-    "sources": [
-      {
-        "outlet": "politico.com",
-        "points": 1037,
-        "source_type": "hn",
-        "title": "Startup founders urge U.S. government not to shut off Chinese open weight AI",
-        "url": "https://www.politico.com/news/2026/07/22/startup-founders-urge-trump-not-to-shut-off-chinese-open-weight-ai-01008992"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "c2b72901f9de6df7eb0b36129dd16349fca005b86d9c88478c100ac3c76b8b0b",
+    "cluster_hash": "ac01b28f85e133214755b7cc96477f7669b21f4f614b570a2f54a780d0eebd15",
     "rank": 5,
-    "score": 19.329173156735912,
+    "score": 16.545845623046322,
     "sources": [
       {
-        "outlet": "futurism.com",
-        "points": 677,
+        "outlet": "theguardian.com",
+        "points": 522,
         "source_type": "hn",
-        "title": "AI Companies Are Trying to Hide a Staggering Amount of Debt",
-        "url": "https://futurism.com/artificial-intelligence/ai-companies-hide-debt-off-balance-sheet"
+        "title": "Be skeptical of OpenAI's rogue hacker agent story",
+        "url": "https://www.theguardian.com/technology/2026/jul/24/openai-rogue-hacker"
       }
     ]
   },
   {
-    "cluster_hash": "c0249fe790f20b7f078bf7020b590b214b81e691a054ba8eac8c6b9e4c0e9568",
+    "cluster_hash": "dee57a43e45d4650be64eca897b57843ced517538f5f8edcb205ebec182d86eb",
     "rank": 6,
-    "score": 14.98155756355609,
+    "score": 14.256949408013481,
     "sources": [
       {
-        "outlet": "platform.claude.com",
-        "points": 285,
+        "outlet": "daringfireball.net",
+        "points": 40,
         "source_type": "hn",
-        "title": "Claude Cookbook",
-        "url": "https://platform.claude.com/cookbook/"
+        "title": "'AI Mania Is Eviscerating Global Decision-Making'",
+        "url": "https://daringfireball.net/linked/2026/07/25/ai-mania-nikhil-suresh"
       }
     ]
   },
   {
-    "cluster_hash": "cb0acfe200913bdbcee5eeb5ed8799d24b548e7d356dbbd7751d4e0b152b8787",
+    "cluster_hash": "e9a7813c5aef77e05c49223613362c2e715204c48c3c557cf6cb0445f91f3d3a",
     "rank": 7,
-    "score": 12.130385582376066,
+    "score": 10.313651217866164,
     "sources": [
       {
-        "outlet": "simonwillison.net",
-        "points": 569,
+        "outlet": "debian.org",
+        "points": 45,
         "source_type": "hn",
-        "title": "OpenAI\u2019s accidental attack against Hugging Face is science fiction that happened",
-        "url": "https://simonwillison.net/2026/Jul/22/openai-cyberattack/"
+        "title": "General Resolution: LLM Usage in Debian",
+        "url": "https://www.debian.org/vote/2026/vote_002"
       }
     ]
   },
   {
-    "cluster_hash": "de7a1b7cfdbed7567025f8482bf3067cee630bc6b7955e1a878bc6f0d6f0cd83",
+    "cluster_hash": "ae1b587d932ea4fc207a224d81c0bc8b51dd8c925278ba9b87a80aae0d640b5b",
     "rank": 8,
-    "score": 10.87429759941171,
+    "score": 8.304243628925924,
     "sources": [
       {
-        "outlet": "images.nvidia.com",
-        "points": 111,
+        "outlet": "youtube.com",
+        "points": 63,
         "source_type": "hn",
-        "title": "Open Weights and American AI Leadership [pdf]",
-        "url": "https://images.nvidia.com/pdf/Open-Weights-and-American-AI-Leadership.pdf"
+        "title": "Politician reads AI prompt during assembly",
+        "url": "https://www.youtube.com/watch?v=wlYa8NV5k-U"
       }
     ]
   }
