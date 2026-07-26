@@ -2875,13 +2875,13 @@
       "status": "queued"
     },
     "7b8185bb33e0bdd00afd4037a64c624af6ac8d234de869787ff15cb0394a91b9": {
-      "card_id": null,
+      "card_id": "2026-07-26-introducing-claude-opus-5-7b8185",
       "first_seen": "2026-07-25",
       "last_seen": "2026-07-26",
       "member_urls": [
         "https://anthropic.com/news/claude-opus-5"
       ],
-      "status": "queued"
+      "status": "published"
     },
     "7b8581bcaaaace050421aac4441b944cf54dbdd2400be83a0970a9fb57a29778": {
       "card_id": null,
@@ -3335,13 +3335,13 @@
       "status": "queued"
     },
     "8e418fc06184a07b7c2a834f6f4f9c2dac52e95145fa8418f39df1968206dc0f": {
-      "card_id": null,
+      "card_id": "2026-07-26-the-new-rules-of-context-engineering-for-claude-5-generation-8e418f",
       "first_seen": "2026-07-26",
       "last_seen": "2026-07-26",
       "member_urls": [
         "https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models"
       ],
-      "status": "queued"
+      "status": "published"
     },
     "8e64f4513c18cd9d79d30d588339ebd8023d3f63d66f8429ab9d798af2865bf6": {
       "card_id": null,
@@ -4160,7 +4160,11 @@
       "member_urls": [
         "https://theguardian.com/technology/2026/jul/24/openai-rogue-hacker"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-26T22:41:56Z"
+      }
     },
     "aca7847db12030b3da7ae0dda9403c40917066f5e8b9a7330a49e7296b49b294": {
       "card_id": null,
@@ -4196,7 +4200,11 @@
       "member_urls": [
         "https://youtube.com/watch?v=wlYa8NV5k-U"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-26T22:41:56Z"
+      }
     },
     "aeda24ebb6769d08cc8947584bf06f4a11dcace5afc77518580d527cbb1e8f3c": {
       "card_id": null,
@@ -5161,7 +5169,11 @@
       "member_urls": [
         "https://tobi.knaup.me/2026-07-25-open-weight-ai-is-having-its-kubernetes-moment"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-26T22:41:56Z"
+      }
     },
     "d925d8c91f460a44f07089c2f27b36a626fbcac0f80dde4b561ae3114c0febb2": {
       "card_id": null,
@@ -5332,7 +5344,11 @@
       "member_urls": [
         "https://daringfireball.net/linked/2026/07/25/ai-mania-nikhil-suresh"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-26T22:41:56Z"
+      }
     },
     "df1fe051b58f9e418259659d41ad1e4f8b8c255a03309e3cba891b42a1e5ad42": {
       "card_id": null,
@@ -5638,7 +5654,11 @@
       "member_urls": [
         "https://debian.org/vote/2026/vote_002"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-26T22:41:56Z"
+      }
     },
     "ea0b9960b25ff2dec7aa3f223a52e5e74c785d4adf0a2930123fecd4c6f2a5d9": {
       "card_id": null,
@@ -5647,7 +5667,11 @@
       "member_urls": [
         "https://cnbc.com/2026/07/24/nvidia-microsoft-meta-open-weight-ai-models.html"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-26T22:41:56Z"
+      }
     },
     "ea0f37ba9a74dd6f63b358608e11218f228b7469ea181a99d69fbb38467b706f": {
       "card_id": null,

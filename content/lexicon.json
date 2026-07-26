@@ -69,7 +69,7 @@
       "context window",
       "test-time compute"
     ],
-    "seen_in": []
+    "seen_in": ["2026-07-26-the-new-rules-of-context-engineering-for-claude-5-generation-8e418f"]
   },
   {
     "term": "RAG",
@@ -201,7 +201,7 @@
       "hallucination",
       "scaling laws"
     ],
-    "seen_in": []
+    "seen_in": ["2026-07-26-introducing-claude-opus-5-7b8185"]
   },
   {
     "term": "multimodal",
@@ -358,5 +358,28 @@
       "evals"
     ],
     "seen_in": []
+  },
+  {
+    "term": "context engineering",
+    "one_liner": "Context engineering is the practice of deciding what information -- system instructions, past conversation, retrieved documents, tool results -- a model actually sees at each step, rather than just writing a single one-off prompt.",
+    "deeper": "Where prompt engineering focuses on how you phrase one request, context engineering treats the model's entire input -- system prompts, skills, memory, tool outputs, and any retrieved documents -- as a budget to be curated deliberately, since a model can only act on what's actually placed in front of it at that step. As agents run longer and juggle more tools, a common technique is progressive disclosure: keeping detailed guidance out of the main system prompt and instead letting the model pull in specifics only when a given skill or file is actually needed, which keeps the working context focused. Anthropic argues this shift matters more with each new model generation, reporting it removed over 80% of Claude Code's system prompt for its Claude 5-generation models with no performance loss, as described in <a href=\"https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models\">its own guidance on context engineering for Claude 5-generation models</a>.",
+    "related": [
+      "context window",
+      "agent",
+      "system prompt",
+      "inference"
+    ],
+    "seen_in": ["2026-07-26-the-new-rules-of-context-engineering-for-claude-5-generation-8e418f"]
+  },
+  {
+    "term": "system prompt",
+    "one_liner": "A system prompt is the standing set of instructions a developer attaches behind the scenes to steer an AI model's behavior, tone, and rules, separate from whatever the user actually types.",
+    "deeper": "Every conversation with a model is shaped by two layers of input: the system prompt, written once by the application developer to set persistent behavior (what persona to adopt, what tools exist, what not to do), and the user's own messages, which change every turn. Because the system prompt is reused across every request rather than tailored to one, it tends to stay general -- which is why AI labs now push developers to keep it lean and offload highly specific guidance elsewhere instead of trying to anticipate every situation in one giant upfront instruction block (see context engineering). Anthropic's own guidance on Claude 5-generation models argues newer models need much less of this upfront scaffolding, reporting it cut Claude Code's system prompt by more than 80% with no drop in performance, as described in <a href=\"https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models\">Anthropic's post on context engineering for Claude 5-generation models</a>.",
+    "related": [
+      "context engineering",
+      "agent",
+      "context window"
+    ],
+    "seen_in": ["2026-07-26-the-new-rules-of-context-engineering-for-claude-5-generation-8e418f"]
   }
 ]

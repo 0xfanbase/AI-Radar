@@ -1,4 +1,13 @@
 {
-  "runs": [],
+  "runs": [
+    {
+      "cards_drafted": 8,
+      "confirmed": 2,
+      "date": "2026-07-26",
+      "dropped": 6,
+      "pass_rate": 0.25,
+      "reported": 0
+    }
+  ],
   "version": 1
 }

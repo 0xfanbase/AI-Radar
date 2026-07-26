@@ -1,0 +1,21 @@
+{
+  "id": "2026-07-26-introducing-claude-opus-5-7b8185",
+  "date": "2026-07-26",
+  "headline": "Anthropic Releases Claude Opus 5, Aiming for Fable 5-Class Intelligence at Half the Price",
+  "what_happened": "Anthropic released Claude Opus 5 on July 24, 2026, priced the same as predecessor Opus 4.8 ($5/$25 per million input/output tokens). Anthropic positions it as approaching flagship Fable 5's capability at half the per-task cost, citing strength in coding, scientific research, and iterative problem-solving. It's available immediately via the Claude API, Claude.ai, Claude Code, and Claude Cowork, with an optional faster mode at double price.",
+  "why_it_matters": "Opus 5 gives Anthropic a mid-tier flagship that, per its own benchmarks, roughly doubles Opus 4.8's coding score and nearly matches pricier Fable 5 at half the cost -- sharpening price/performance competition among frontier labs, though Anthropic says it still trails its own Mythos 5 on cybersecurity tasks.",
+  "one_liner": "Claude Opus 5 is Anthropic's newest AI model, built to think through hard coding and science problems nearly as well as a pricier model, but for about half the cost.",
+  "topics": ["models", "products"],
+  "status": "confirmed",
+  "citations": [
+    {
+      "url": "https://www.anthropic.com/news/claude-opus-5",
+      "outlet": "Anthropic",
+      "quote": "more than doubles Opus 4.8's performance"
+    }
+  ],
+  "lexicon_terms": ["benchmark"],
+  "generated_at": "2026-07-26T02:10:00Z",
+  "model": "claude-sonnet-5",
+  "companies": ["anthropic"]
+}

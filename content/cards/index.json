@@ -1,0 +1,32 @@
+{
+  "cards": [
+    {
+      "date": "2026-07-26",
+      "headline": "Anthropic Says Claude 5 Models Need Less Rigid Prompting, More Judgment",
+      "id": "2026-07-26-the-new-rules-of-context-engineering-for-claude-5-generation-8e418f",
+      "lexicon_terms": [
+        "context engineering",
+        "system prompt",
+        "agent"
+      ],
+      "status": "confirmed",
+      "topics": [
+        "products"
+      ]
+    },
+    {
+      "date": "2026-07-26",
+      "headline": "Anthropic Releases Claude Opus 5, Aiming for Fable 5-Class Intelligence at Half the Price",
+      "id": "2026-07-26-introducing-claude-opus-5-7b8185",
+      "lexicon_terms": [
+        "benchmark"
+      ],
+      "status": "confirmed",
+      "topics": [
+        "models",
+        "products"
+      ]
+    }
+  ],
+  "version": 1
+}

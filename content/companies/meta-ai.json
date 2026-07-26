@@ -59,12 +59,17 @@
         ]
       },
       {
-        "text": "It followed up on July 9, 2026 with Muse Spark 1.1, opening a public-preview Meta Model API for developers for the first time and giving the model a working context of 1 million tokens.",
+        "text": "It followed up on July 9, 2026 with Muse Spark 1.1, opening a public-preview Meta Model API for developers for the first time and giving the model a working context of 1 million tokens. Meta priced API access at $1.25 per million input tokens and $4.25 per million output tokens, positioning the agentic-coding-focused model as a low-cost alternative to rivals from OpenAI and Anthropic.",
         "citations": [
           {
             "url": "https://ai.meta.com/blog/introducing-muse-spark-meta-model-api/",
             "outlet": "Meta (official)",
             "quote": "now in public preview"
+          },
+          {
+            "url": "https://techcrunch.com/2026/07/09/meta-enters-the-crowded-ai-coding-battle-with-muse-spark-1-1/",
+            "outlet": "TechCrunch",
+            "quote": "$1.25 per million input tokens and $4.25 per million output tokens"
           }
         ]
       },
@@ -75,6 +80,26 @@
             "url": "https://about.fb.com/news/2026/07/introducing-muse-image-meta-ai/",
             "outlet": "Meta (official newsroom)",
             "quote": "the creative partner that knows your world"
+          }
+        ]
+      },
+      {
+        "text": "On July 21, 2026 Meta detailed how two of its open-source vision models, Segment Anything Model 3 (SAM 3) and DINOv3, are being used in the U.S. Department of Energy's Genesis Mission: a multi-lab project called SYNAPS-I fine-tuned both models on scientific imaging data and ran them across roughly 300 GPUs at Lawrence Berkeley National Laboratory's Advanced Light Source, cutting a beamline image-analysis workflow from about a month to roughly 15 minutes.",
+        "citations": [
+          {
+            "url": "https://ai.meta.com/blog/genesis-mission-lawrence-berkeley-national-laboratory-segment-anything-dino/",
+            "outlet": "Meta (official)",
+            "quote": "The SYNAPS-I team fine-tuned both models on scientific imaging data collected at DOE beamlines."
+          }
+        ]
+      },
+      {
+        "text": "On July 24, 2026 Meta gave the Meta AI app agentic capabilities built on Muse Spark 1.1: it can now plan and follow through on multi-step tasks, such as scheduling or pulling together research, without step-by-step prompting. The feature began rolling out in the Meta AI app and on meta.ai, with WhatsApp and additional countries to follow.",
+        "citations": [
+          {
+            "url": "https://about.fb.com/news/2026/07/meta-ai-muse-spark-doesnt-just-think-it-acts/",
+            "outlet": "Meta (official newsroom)",
+            "quote": "Meta AI can now make plans, work with your apps, and follow through"
           }
         ]
       }
@@ -92,7 +117,7 @@
       }
     ],
     "current_focus": {
-      "text": "Meta Superintelligence Labs' current focus is the Muse Spark line, which Meta describes as a deliberate, scientific step in model scaling where each generation is validated before a bigger one is built. With Muse Spark 1.1 the lab opened a public-preview developer API for the first time, alongside the model's continued rollout through Meta's own consumer apps, while larger successor models are developed in private.",
+      "text": "Meta Superintelligence Labs' current focus is the Muse Spark line, which Meta describes as a deliberate, scientific step in model scaling where each generation is validated before a bigger one is built. With Muse Spark 1.1 the lab opened a public-preview developer API for the first time, alongside the model's continued rollout through Meta's own consumer apps, while larger successor models are developed in private. That consumer rollout now extends to giving the Meta AI app agentic behavior -- planning and following through on multi-step tasks on a user's behalf -- starting in the Meta AI app and on meta.ai, with WhatsApp and more countries to follow.",
       "citations": [
         {
           "url": "https://about.fb.com/news/2026/04/introducing-muse-spark-meta-superintelligence-labs/",
@@ -103,6 +128,11 @@
           "url": "https://ai.meta.com/blog/introducing-muse-spark-meta-model-api/",
           "outlet": "Meta (official)",
           "quote": "Developers can begin building with Muse Spark 1.1"
+        },
+        {
+          "url": "https://about.fb.com/news/2026/07/meta-ai-muse-spark-doesnt-just-think-it-acts/",
+          "outlet": "Meta (official newsroom)",
+          "quote": "Meta AI can now give you a daily briefing, pulling what's on your calendar"
         }
       ]
     },
@@ -130,7 +160,7 @@
     ]
   },
   "status": "confirmed",
-  "generated_at": "2026-07-13T00:00:00Z",
+  "generated_at": "2026-07-26T01:45:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-25"
+  "last_verified": "2026-07-26"
 }
