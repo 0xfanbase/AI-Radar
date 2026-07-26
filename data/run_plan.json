@@ -1,0 +1,52 @@
+{
+  "cards_cap": 8,
+  "clusters": [
+    {
+      "cluster_hash": "7b8185bb33e0bdd00afd4037a64c624af6ac8d234de869787ff15cb0394a91b9",
+      "proposed_card_id": "2026-07-26-introducing-claude-opus-5-7b8185",
+      "rank": 1
+    },
+    {
+      "cluster_hash": "8e418fc06184a07b7c2a834f6f4f9c2dac52e95145fa8418f39df1968206dc0f",
+      "proposed_card_id": "2026-07-26-the-new-rules-of-context-engineering-for-claude-5-generation-8e418f",
+      "rank": 2
+    },
+    {
+      "cluster_hash": "d923a364b09ddb01750cc377e80cd1fe01a6679146f646660491bd3543e0bd4a",
+      "proposed_card_id": "2026-07-26-open-weight-ai-is-having-its-kubernetes-moment-d923a3",
+      "rank": 3
+    },
+    {
+      "cluster_hash": "ea0b9960b25ff2dec7aa3f223a52e5e74c785d4adf0a2930123fecd4c6f2a5d9",
+      "proposed_card_id": "2026-07-26-nvidia-microsoft-meta-warn-against-overregulating-open-weigh-ea0b99",
+      "rank": 4
+    },
+    {
+      "cluster_hash": "ac01b28f85e133214755b7cc96477f7669b21f4f614b570a2f54a780d0eebd15",
+      "proposed_card_id": "2026-07-26-be-skeptical-of-openai-s-rogue-hacker-agent-story-ac01b2",
+      "rank": 5
+    },
+    {
+      "cluster_hash": "dee57a43e45d4650be64eca897b57843ced517538f5f8edcb205ebec182d86eb",
+      "proposed_card_id": "2026-07-26-ai-mania-is-eviscerating-global-decision-making-dee57a",
+      "rank": 6
+    },
+    {
+      "cluster_hash": "e9a7813c5aef77e05c49223613362c2e715204c48c3c557cf6cb0445f91f3d3a",
+      "proposed_card_id": "2026-07-26-general-resolution-llm-usage-in-debian-e9a781",
+      "rank": 7
+    },
+    {
+      "cluster_hash": "ae1b587d932ea4fc207a224d81c0bc8b51dd8c925278ba9b87a80aae0d640b5b",
+      "proposed_card_id": "2026-07-26-politician-reads-ai-prompt-during-assembly-ae1b58",
+      "rank": 8
+    }
+  ],
+  "degradation_level": 0,
+  "generated_at": "2026-07-26T01:09:22Z",
+  "profile_reason": "company id 'meta-ai' is named (by name/alias) in a source title of one of this run's selected clusters -- predicting a Frontier Board upsert for that company is likely this run (a deterministic prediction from cluster content, not a confirmed post-hoc fact, since this plan is written before the analyst runs)",
+  "profile_target": "meta-ai",
+  "reason": "degradation_level=0: normal run, up to 8 clusters (8 available)",
+  "run_mode": "normal",
+  "version": 1
+}
