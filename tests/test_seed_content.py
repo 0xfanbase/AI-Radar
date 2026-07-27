@@ -47,7 +47,10 @@ PRIMER_PATH = CONTENT_DIR / "primer.json"
 # rows is still caught even if it doesn't drop all the way below 12.
 FRONTIER_BOARD_TARGET_MIN_ROWS = 12
 FRONTIER_BOARD_ACTUAL_ROWS = 13
-LEXICON_TARGET_COUNT = 30
+# A floor, not an exact target -- content/lexicon.json grows over time via
+# the daily analyst's lexicon auto-growth rule (CLAUDE.md), the same reason
+# FRONTIER_BOARD_ACTUAL_ROWS above is a ">=" floor rather than "==".
+LEXICON_SEED_COUNT = 30
 
 _HREF_RE = re.compile(r"<a\s+href=", re.IGNORECASE)
 _ANCHOR_TEXT_RE = re.compile(r'<a\s+href="[^"]+">([^<]+)</a>')
@@ -146,9 +149,9 @@ def test_lexicon_validates_against_schema():
     validate(lexicon, "lexicon")  # must not raise
 
 
-def test_lexicon_has_exactly_30_entries():
+def test_lexicon_has_at_least_the_seeded_30_entries():
     lexicon = _load(LEXICON_PATH)
-    assert len(lexicon) == LEXICON_TARGET_COUNT
+    assert len(lexicon) >= LEXICON_SEED_COUNT
 
 
 def test_lexicon_terms_are_unique():

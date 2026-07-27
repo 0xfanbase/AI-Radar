@@ -94,7 +94,9 @@ def test_real_primer_matches_the_expected_dependency_order():
 
 def test_build_slug_to_entry_real_content_has_all_30_terms():
     slug_to_entry = primer.build_slug_to_entry(REAL_LEXICON)
-    assert len(slug_to_entry) == 30
+    # Floor, not an exact count -- content/lexicon.json grows over time via
+    # the daily analyst's lexicon auto-growth rule (CLAUDE.md).
+    assert len(slug_to_entry) >= 30
     for slug in EXPECTED_ORDER:
         assert slug in slug_to_entry
 

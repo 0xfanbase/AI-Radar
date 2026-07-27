@@ -335,9 +335,15 @@ def test_components_css_has_no_hardcoded_hex_colors(tmp_path):
     )
 
 
-def test_load_cards_handles_empty_cards_dir_gracefully():
-    # content/cards/ has no real analyst output yet -- must not crash, and
-    # must return an empty list rather than None or raise.
+def test_load_cards_handles_empty_cards_dir_gracefully(tmp_path, monkeypatch):
+    # Redirect CONTENT_DIR to a genuinely empty scratch directory -- the
+    # real content/cards/ held no real analyst output only until the daily
+    # pipeline's first real run; this test's own point (missing/empty dir
+    # must not crash, must return [] rather than None or raise) needs an
+    # actually-empty directory regardless of the real repo's current state,
+    # same pattern test_load_cards_fails_loudly_on_a_card_that_fails_
+    # schema_validation already uses just below.
+    monkeypatch.setattr(generate, "CONTENT_DIR", tmp_path)
     cards = generate.load_cards()
     assert cards == []
 
@@ -545,7 +551,7 @@ def test_every_real_lexicon_term_gets_its_own_page(built_site):
     lexicon_entries = json.loads(
         (generate.CONTENT_DIR / "lexicon.json").read_text(encoding="utf-8")
     )
-    assert len(lexicon_entries) == 30  # Phase 3's own seeded acceptance bar
+    assert len(lexicon_entries) >= 30  # Phase 3's own seeded floor; grows over time
     for entry in lexicon_entries:
         slug = entry["term"].lower().replace(" ", "-")
         page = built_site / "lexicon" / slug / "index.html"

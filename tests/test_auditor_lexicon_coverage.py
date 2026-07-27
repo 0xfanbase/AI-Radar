@@ -350,16 +350,16 @@ def test_audit_lexicon_clean_state_reports_nothing():
 
 
 def test_real_lexicon_json_loads_and_scans_without_raising():
-    """`content/lexicon.json` (the real, seeded 30-entry file) at least
-    loads and runs through every function in this module without
-    raising, against a couple of synthetic cards -- a defensive
-    integration check distinct from the fixture-only unit tests above,
-    which are what actually exercise the coverage-gap/orphan logic in
-    detail per this turn's explicit fixture-based scope (`content/cards/`
-    itself is empty; there are no real cards to check against yet)."""
+    """`content/lexicon.json` (the real file, seeded with 30 entries and
+    growing over time via the daily analyst's lexicon auto-growth rule --
+    CLAUDE.md) at least loads and runs through every function in this
+    module without raising, against a couple of synthetic cards -- a
+    defensive integration check distinct from the fixture-only unit tests
+    above, which are what actually exercise the coverage-gap/orphan logic
+    in detail per this turn's explicit fixture-based scope."""
     lexicon_path = REPO_ROOT / "content" / "lexicon.json"
     lexicon_entries = json.loads(lexicon_path.read_text())
-    assert len(lexicon_entries) == 30
+    assert len(lexicon_entries) >= 30
 
     synthetic_cards = [
         _card(
@@ -375,9 +375,11 @@ def test_real_lexicon_json_loads_and_scans_without_raising():
     result = audit_lexicon(synthetic_cards, lexicon_entries)
     assert isinstance(result["coverage_gaps"], list)
     assert isinstance(result["orphans"], list)
-    # Every real entry has an empty seen_in[] today (no analyst run has
-    # ever happened), so every term not mentioned in the one synthetic
-    # card above is expected to be reported as an orphan -- sanity-check
-    # that at least the vast majority of the 30 terms show up (only
-    # "RAG" and "fine-tuning" are mentioned in the synthetic prose).
-    assert len(result["orphans"]) >= 27
+    # No fixed orphan-count assertion here deliberately: real seen_in[]
+    # usage grows over time as the daily analyst publishes cards (a term
+    # mentioned by any real card is no longer an orphan), so any specific
+    # threshold would be a ticking time bomb against the real, evolving
+    # file -- this smoke test's actual job (per its own docstring) is
+    # proving the module runs against real data without raising; the
+    # fixture-only unit tests above are what exercise orphan-detection
+    # behavior precisely.

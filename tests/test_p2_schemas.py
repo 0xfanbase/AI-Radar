@@ -167,34 +167,27 @@ def test_real_committed_ledger_still_validates_unchanged():
     validate(real_ledger, "ledger")  # must not raise
 
 
-def test_real_ledger_has_no_dropped_entries_yet():
-    """Sanity check on the real data: Phase 2 hasn't run yet, so every
-    real entry today is 'queued' (none 'published' or 'dropped') -- this
-    is what makes the new if/then conditional safe to add without
-    touching the committed file."""
-    real_ledger = _load(DATA_DIR / "ledger.json")
-    statuses = {entry["status"] for entry in real_ledger["entries"].values()}
-    assert statuses == {"queued"}
-
-
 # --------------------------------------------------------------------------
 # seed data files
 # --------------------------------------------------------------------------
 
 
-def test_seed_verifier_stats_validates():
+def test_real_verifier_stats_validates():
+    """data/verifier_stats.json started as the empty {"version": 1, "runs":
+    []} seed shape, but scripts/reconcile_run.py appends a real row every
+    day the analyst/verifier pipeline actually runs -- so this checks the
+    real, current file still validates against its schema, not that it's
+    still the untouched seed (which is no longer true after the first real
+    run, by design)."""
     instance = _load(DATA_DIR / "verifier_stats.json")
-    assert instance == {"version": 1, "runs": []}
     validate(instance, "verifier_stats")
 
 
-def test_seed_pending_corrections_validates():
+def test_real_pending_corrections_validates():
+    """Same reasoning as test_real_verifier_stats_validates: data/
+    pending_corrections.json started as the empty seed shape, but the
+    corrections workflow (CLAUDE.md) both feeds and drains real entries
+    over time, so only schema-validity is a permanent invariant here --
+    not "pending[] is still empty"."""
     instance = _load(DATA_DIR / "pending_corrections.json")
-    assert instance == {"version": 1, "pending": []}
     validate(instance, "pending_corrections")
-
-
-def test_no_run_plan_seed_file_yet():
-    """Per this turn's explicit scope: data/run_plan.json is NOT seeded --
-    scripts/plan_run.py (a later Phase 2 commit) produces real ones."""
-    assert not (DATA_DIR / "run_plan.json").exists()
