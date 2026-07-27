@@ -1,0 +1,20 @@
+{
+  "id": "2026-07-27-cloudflare-s-new-ai-traffic-options-for-customers-f0a020",
+  "date": "2026-07-27",
+  "headline": "Cloudflare Lets Websites Set Different Rules for AI Search, Agent, and Training Bots",
+  "what_happened": "Cloudflare launched controls letting website owners set separate policies for three categories of AI bot traffic -- Search, Agent, and Training -- instead of one all-or-nothing block, choosing to allow or block each category and set a content-use level (no storage, reference-only, or full reuse) via a robots.txt extension.",
+  "why_it_matters": "Cloudflare sits in front of more than 20% of the web, so its defaults effectively shape how AI crawlers can access much of the internet -- a concrete move in the fight over whether AI companies must pay for, or get, the content their models train on.",
+  "one_liner": "Cloudflare now lets website owners decide separately whether AI search tools, AI agents, and AI model training can each access their site, instead of one all-or-nothing switch.",
+  "topics": ["products", "policy"],
+  "status": "confirmed",
+  "citations": [
+    {
+      "url": "https://blog.cloudflare.com/content-independence-day-ai-options/",
+      "outlet": "Cloudflare",
+      "quote": "Being honest about what you do earns you more access, not less"
+    }
+  ],
+  "lexicon_terms": ["agent"],
+  "generated_at": "2026-07-27T02:10:00Z",
+  "model": "claude-sonnet-5"
+}

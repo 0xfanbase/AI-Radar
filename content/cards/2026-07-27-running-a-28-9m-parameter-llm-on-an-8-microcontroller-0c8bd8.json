@@ -1,0 +1,20 @@
+{
+  "id": "2026-07-27-running-a-28-9m-parameter-llm-on-an-8-microcontroller-0c8bd8",
+  "date": "2026-07-27",
+  "headline": "Developer Runs a 28.9M-Parameter Language Model on an $8 Microcontroller",
+  "what_happened": "Developer slvDev built and open-sourced a 28.9-million-parameter language model that runs entirely on an ESP32-S3 microcontroller costing roughly $8, generating short stories at about 9.5 tokens per second with no network connection. Using 4-bit quantization and a Gemma-derived technique that keeps most weights in flash memory instead of scarce RAM, the 14.9MB model ships with full firmware, training code, and on-chip benchmark results under an MIT license.",
+  "why_it_matters": "It's a concrete demonstration that useful language models can run entirely offline on sub-$10 hardware, no cloud or GPU required -- a data point for the broader trend of pushing AI inference onto tiny, cheap edge devices rather than relying on datacenter-scale compute.",
+  "one_liner": "A developer got a tiny AI model to write simple stories entirely on an $8 computer chip, with no internet connection needed.",
+  "topics": ["chips/compute", "open-source"],
+  "status": "confirmed",
+  "citations": [
+    {
+      "url": "https://github.com/slvDev/esp32-ai",
+      "outlet": "GitHub (slvDev/esp32-ai)",
+      "quote": "28.9 million parameter language model that generates text on an ESP32-S3"
+    }
+  ],
+  "lexicon_terms": ["parameter count", "quantization"],
+  "generated_at": "2026-07-27T01:55:00Z",
+  "model": "claude-sonnet-5"
+}

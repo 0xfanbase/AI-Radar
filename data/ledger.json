@@ -253,13 +253,13 @@
       "status": "queued"
     },
     "0c8bd8e44146054e0fc52dd11e4afacfe3a13a1028c23f9858b03c9d86e6ff01": {
-      "card_id": null,
+      "card_id": "2026-07-27-running-a-28-9m-parameter-llm-on-an-8-microcontroller-0c8bd8",
       "first_seen": "2026-07-26",
       "last_seen": "2026-07-27",
       "member_urls": [
         "https://github.com/slvDev/esp32-ai"
       ],
-      "status": "queued"
+      "status": "published"
     },
     "0ca98805681839e2bea87e20c602e906c53be975de05c3741c3c15a6ea3ed34a": {
       "card_id": null,
@@ -3115,7 +3115,11 @@
       "member_urls": [
         "https://rickmanelius.com/p/the-new-ai-superpowers-focus-and"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-27T01:46:28Z"
+      }
     },
     "85d8ef9781fde7265ed24f99b05996eb5c492eec795c0afa5da2a943b69814d3": {
       "card_id": null,
@@ -3206,7 +3210,11 @@
       "member_urls": [
         "https://github.com/demo-zexuan/liang-wenfeng-investor-meeting-2026-7-22/blob/master/%E6%A2%81%E6%96%87%E9%94%8B%E6%8A%95%E8%B5%84%E8%80%85%E4%BA%A4%E6%B5%81%E4%BC%9A-%E6%96%87%E5%AD%97%E7%A8%BF_1_18_translate_20260723201651.pdf"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-27T01:46:28Z"
+      }
     },
     "881a4d7393ec87f57719f0a6aef54f0c04e59c29831d0d2d26aa408818145748": {
       "card_id": null,
@@ -3809,7 +3817,11 @@
       "member_urls": [
         "https://teorth.github.io/tao-web/slides/age-of-ai-icm-2026.pdf"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-27T01:46:28Z"
+      }
     },
     "9f75baac4fcc1991231bd2b83503d3e6ee0b5ac039fa070e28a037245aaba335": {
       "card_id": null,
@@ -5169,7 +5181,11 @@
       "member_urls": [
         "https://hardresetmedia.com/p/the-ai-productivity-illusion"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-27T01:46:28Z"
+      }
     },
     "d6e49d61e10cda1c23de5ddde9152cdfcf7f60bcde548dd8bceeee9b1dd5038f": {
       "card_id": null,
@@ -5851,7 +5867,11 @@
       "member_urls": [
         "https://andys.blog/this-july-i-was-fired-from-simple-ai"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-27T01:46:28Z"
+      }
     },
     "ede787800a2b3ab79c86448211cd39a668fddc28ae9749515f6eff234933a611": {
       "card_id": null,
@@ -5918,13 +5938,13 @@
       "status": "queued"
     },
     "f0a020308d6332796f5193ae8e5b1de3fabd625cb9aecbb934e737631667133b": {
-      "card_id": null,
+      "card_id": "2026-07-27-cloudflare-s-new-ai-traffic-options-for-customers-f0a020",
       "first_seen": "2026-07-27",
       "last_seen": "2026-07-27",
       "member_urls": [
         "https://blog.cloudflare.com/content-independence-day-ai-options"
       ],
-      "status": "queued"
+      "status": "published"
     },
     "f10175059bb0049c0652101f7753eb70c038577895c186973e5c9eebf6754345": {
       "card_id": null,
@@ -6325,13 +6345,13 @@
       "status": "queued"
     },
     "fe97eee23786b810e4202ff5d66d53a3fea369071f17bd309063deeb34293a3d": {
-      "card_id": null,
+      "card_id": "2026-07-27-what-is-happening-to-jobs-separating-ai-hype-from-reality-fe97ee",
       "first_seen": "2026-07-27",
       "last_seen": "2026-07-27",
       "member_urls": [
         "https://siepr.stanford.edu/publications/policy-brief/what-really-happening-jobs-separating-ai-hype-reality"
       ],
-      "status": "queued"
+      "status": "published"
     },
     "ff9ab916b841d4cd6d29b4d801ced278f616be1313e2e7124b8662a7047acdca": {
       "card_id": null,

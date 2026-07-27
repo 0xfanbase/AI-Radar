@@ -59,6 +59,26 @@
             "quote": "Open-source SOTA in Agentic Coding benchmarks"
           }
         ]
+      },
+      {
+        "text": "TechCrunch reported that DeepSeek closed its first outside funding round in June 2026, raising about $7 billion at roughly a $50 billion valuation, and that by mid-July 2026 it was in talks to raise a further $1.5 billion at close to a $71 billion valuation while preparing for a possible IPO debut in 2027, which TechCrunch said could come as early as late 2026.",
+        "citations": [
+          {
+            "url": "https://techcrunch.com/2026/07/14/deepseek-reportedly-in-talks-to-raise-1-5b-then-ipo/",
+            "outlet": "TechCrunch",
+            "quote": "raised $7 billion in funds just a month ago at around a $50 billion valuation"
+          }
+        ]
+      },
+      {
+        "text": "On July 24, 2026, DeepSeek fully retired its legacy deepseek-chat and deepseek-reasoner API model names, completing its transition to serving only its V4 family -- offered as two variants, DeepSeek-V4-Flash and DeepSeek-V4-Pro -- across its API and chat platforms.",
+        "citations": [
+          {
+            "url": "https://api-docs.deepseek.com/quick_start/pricing",
+            "outlet": "DeepSeek (official docs)",
+            "quote": "The model names deepseek-chat and deepseek-reasoner will be deprecated on 2026/07/24 15:59 UTC"
+          }
+        ]
       }
     ],
     "strengths": [
@@ -107,7 +127,7 @@
     ]
   },
   "status": "confirmed",
-  "generated_at": "2026-07-13T00:00:00Z",
+  "generated_at": "2026-07-27T02:45:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-25"
+  "last_verified": "2026-07-27"
 }

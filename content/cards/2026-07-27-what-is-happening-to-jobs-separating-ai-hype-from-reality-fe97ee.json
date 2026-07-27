@@ -1,0 +1,20 @@
+{
+  "id": "2026-07-27-what-is-happening-to-jobs-separating-ai-hype-from-reality-fe97ee",
+  "date": "2026-07-27",
+  "headline": "New Stanford Data Finds AI Isn't Broadly Cutting Jobs -- Except for New Grads",
+  "what_happened": "A new Stanford SIEPR policy brief by economists Neale Mahoney, Erika McEntarfer, and Karsen Wahal analyzed payroll and employment data through 2026 to test whether AI is displacing workers. They found new college graduates -- especially in software development and customer service -- face a sharper, more AI-linked unemployment increase, even as adoption studies show real productivity gains.",
+  "why_it_matters": "This is exactly the empirical check the AI-and-jobs debate has lacked: hard data instead of anecdote. It complicates both alarmist predictions of imminent mass AI unemployment and claims AI has had no labor-market effect yet, isolating young, AI-exposed entry-level workers as the clearest early casualty.",
+  "one_liner": "Stanford researchers checked real job data and found AI hasn't caused broad job losses so far, but new college grads in AI-exposed fields are struggling more to find work.",
+  "topics": ["policy", "research"],
+  "status": "confirmed",
+  "citations": [
+    {
+      "url": "https://siepr.stanford.edu/publications/policy-brief/what-really-happening-jobs-separating-ai-hype-reality",
+      "outlet": "Stanford SIEPR",
+      "quote": "There is little evidence that AI is causing significant job losses right now."
+    }
+  ],
+  "lexicon_terms": [],
+  "generated_at": "2026-07-27T01:40:00Z",
+  "model": "claude-sonnet-5"
+}

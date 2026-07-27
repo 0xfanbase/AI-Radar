@@ -1,6 +1,44 @@
 {
   "cards": [
     {
+      "date": "2026-07-27",
+      "headline": "New Stanford Data Finds AI Isn't Broadly Cutting Jobs -- Except for New Grads",
+      "id": "2026-07-27-what-is-happening-to-jobs-separating-ai-hype-from-reality-fe97ee",
+      "lexicon_terms": [],
+      "status": "confirmed",
+      "topics": [
+        "policy",
+        "research"
+      ]
+    },
+    {
+      "date": "2026-07-27",
+      "headline": "Developer Runs a 28.9M-Parameter Language Model on an $8 Microcontroller",
+      "id": "2026-07-27-running-a-28-9m-parameter-llm-on-an-8-microcontroller-0c8bd8",
+      "lexicon_terms": [
+        "parameter count",
+        "quantization"
+      ],
+      "status": "confirmed",
+      "topics": [
+        "chips/compute",
+        "open-source"
+      ]
+    },
+    {
+      "date": "2026-07-27",
+      "headline": "Cloudflare Lets Websites Set Different Rules for AI Search, Agent, and Training Bots",
+      "id": "2026-07-27-cloudflare-s-new-ai-traffic-options-for-customers-f0a020",
+      "lexicon_terms": [
+        "agent"
+      ],
+      "status": "confirmed",
+      "topics": [
+        "products",
+        "policy"
+      ]
+    },
+    {
       "date": "2026-07-26",
       "headline": "Anthropic Says Claude 5 Models Need Less Rigid Prompting, More Judgment",
       "id": "2026-07-26-the-new-rules-of-context-engineering-for-claude-5-generation-8e418f",
