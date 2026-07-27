@@ -1,127 +1,113 @@
 [
   {
-    "cluster_hash": "7b8185bb33e0bdd00afd4037a64c624af6ac8d234de869787ff15cb0394a91b9",
+    "cluster_hash": "859d78f36dfae19fa27b851077744b1087ef3d2ae9b7dd0244f4d059b0f0ddf0",
     "rank": 1,
-    "score": 334.23310781454836,
+    "score": 11.18609147035123,
     "sources": [
       {
-        "outlet": null,
-        "points": null,
-        "source_type": "lab",
-        "title": "Introducing Claude Opus 5",
-        "url": "https://www.anthropic.com/news/claude-opus-5"
-      },
-      {
-        "outlet": "anthropic.com",
-        "points": 73,
-        "source_type": "hn",
-        "title": "Claude Opus 5",
-        "url": "https://www.anthropic.com/news/claude-opus-5"
-      },
-      {
-        "outlet": "anthropic.com",
-        "points": 1735,
-        "source_type": "hn",
-        "title": "Claude Opus 5",
-        "url": "https://www.anthropic.com/news/claude-opus-5"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "8e418fc06184a07b7c2a834f6f4f9c2dac52e95145fa8418f39df1968206dc0f",
-    "rank": 2,
-    "score": 35.907765758830855,
-    "sources": [
-      {
-        "outlet": "claude.com",
+        "outlet": "rickmanelius.com",
         "points": 122,
         "source_type": "hn",
-        "title": "The new rules of context engineering for Claude 5 generation models",
-        "url": "https://claude.com/blog/the-new-rules-of-context-engineering-for-claude-5-generation-models"
+        "title": "The New AI Superpowers: Focus and Followthrough",
+        "url": "https://www.rickmanelius.com/p/the-new-ai-superpowers-focus-and"
       }
     ]
   },
   {
-    "cluster_hash": "d923a364b09ddb01750cc377e80cd1fe01a6679146f646660491bd3543e0bd4a",
+    "cluster_hash": "87f0571bef377a4b4b7edf58d2ef5337d38f7baa7ee63eebc3d68ea662d6f94e",
+    "rank": 2,
+    "score": 9.96880015810347,
+    "sources": [
+      {
+        "outlet": "github.com",
+        "points": 245,
+        "source_type": "hn",
+        "title": "DeepSeek pause fundraise after comments on compute gap to US leaked (transcript) [pdf]",
+        "url": "https://github.com/demo-zexuan/liang-wenfeng-investor-meeting-2026-7-22/blob/master/%E6%A2%81%E6%96%87%E9%94%8B%E6%8A%95%E8%B5%84%E8%80%85%E4%BA%A4%E6%B5%81%E4%BC%9A-%E6%96%87%E5%AD%97%E7%A8%BF_1_18_translate_20260723201651.pdf"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "fe97eee23786b810e4202ff5d66d53a3fea369071f17bd309063deeb34293a3d",
     "rank": 3,
-    "score": 31.906735129983048,
+    "score": 9.536576478904642,
     "sources": [
       {
-        "outlet": "tobi.knaup.me",
-        "points": 296,
+        "outlet": "siepr.stanford.edu",
+        "points": 241,
         "source_type": "hn",
-        "title": "Open-weight AI is having its Kubernetes moment",
-        "url": "https://tobi.knaup.me/2026-07-25-open-weight-ai-is-having-its-kubernetes-moment/"
+        "title": "What is happening to jobs? Separating AI hype from reality",
+        "url": "https://siepr.stanford.edu/publications/policy-brief/what-really-happening-jobs-separating-ai-hype-reality"
       }
     ]
   },
   {
-    "cluster_hash": "ea0b9960b25ff2dec7aa3f223a52e5e74c785d4adf0a2930123fecd4c6f2a5d9",
+    "cluster_hash": "0c8bd8e44146054e0fc52dd11e4afacfe3a13a1028c23f9858b03c9d86e6ff01",
     "rank": 4,
-    "score": 18.689074652103383,
+    "score": 9.23551914004541,
     "sources": [
       {
-        "outlet": "cnbc.com",
-        "points": 646,
+        "outlet": "github.com",
+        "points": 269,
         "source_type": "hn",
-        "title": "Nvidia, Microsoft, Meta warn against overregulating open-weight models",
-        "url": "https://www.cnbc.com/2026/07/24/nvidia-microsoft-meta-open-weight-ai-models.html"
+        "title": "Running a 28.9M parameter LLM on an $8 microcontroller",
+        "url": "https://github.com/slvDev/esp32-ai"
       }
     ]
   },
   {
-    "cluster_hash": "ac01b28f85e133214755b7cc96477f7669b21f4f614b570a2f54a780d0eebd15",
+    "cluster_hash": "9ef2632ac56475919cbb86e541abed0913ce205e5a0e5744598f13482a2e5581",
     "rank": 5,
-    "score": 16.545845623046322,
+    "score": 7.510578032788624,
     "sources": [
       {
-        "outlet": "theguardian.com",
-        "points": 522,
+        "outlet": "teorth.github.io",
+        "points": 102,
         "source_type": "hn",
-        "title": "Be skeptical of OpenAI's rogue hacker agent story",
-        "url": "https://www.theguardian.com/technology/2026/jul/24/openai-rogue-hacker"
+        "title": "Terence Tao: Mathematics in the Age of AI [pdf]",
+        "url": "https://teorth.github.io/tao-web/slides/age-of-ai-icm-2026.pdf"
       }
     ]
   },
   {
-    "cluster_hash": "dee57a43e45d4650be64eca897b57843ced517538f5f8edcb205ebec182d86eb",
+    "cluster_hash": "f0a020308d6332796f5193ae8e5b1de3fabd625cb9aecbb934e737631667133b",
     "rank": 6,
-    "score": 14.256949408013481,
+    "score": 7.398042523782663,
     "sources": [
       {
-        "outlet": "daringfireball.net",
-        "points": 40,
+        "outlet": "blog.cloudflare.com",
+        "points": 187,
         "source_type": "hn",
-        "title": "'AI Mania Is Eviscerating Global Decision-Making'",
-        "url": "https://daringfireball.net/linked/2026/07/25/ai-mania-nikhil-suresh"
+        "title": "Cloudflare's new AI traffic options for customers",
+        "url": "https://blog.cloudflare.com/content-independence-day-ai-options/"
       }
     ]
   },
   {
-    "cluster_hash": "e9a7813c5aef77e05c49223613362c2e715204c48c3c557cf6cb0445f91f3d3a",
+    "cluster_hash": "edb6c32e1a5ce63d38e609a3b0ead8437ddcb960ea837a42e09533327927d624",
     "rank": 7,
-    "score": 10.313651217866164,
+    "score": 6.09307943475748,
     "sources": [
       {
-        "outlet": "debian.org",
-        "points": 45,
+        "outlet": "andys.blog",
+        "points": 48,
         "source_type": "hn",
-        "title": "General Resolution: LLM Usage in Debian",
-        "url": "https://www.debian.org/vote/2026/vote_002"
+        "title": "This July I Was Fired from Simple AI (A Deeply YC Company)",
+        "url": "https://andys.blog/this-july-i-was-fired-from-simple-ai/"
       }
     ]
   },
   {
-    "cluster_hash": "ae1b587d932ea4fc207a224d81c0bc8b51dd8c925278ba9b87a80aae0d640b5b",
+    "cluster_hash": "d6e457037d974f196b87aed08dc0f0b5d4468e602723fdd3e57881781a3f07aa",
     "rank": 8,
-    "score": 8.304243628925924,
+    "score": 1.8314982248201277,
     "sources": [
       {
-        "outlet": "youtube.com",
+        "outlet": "hardresetmedia.com",
         "points": 63,
         "source_type": "hn",
-        "title": "Politician reads AI prompt during assembly",
-        "url": "https://www.youtube.com/watch?v=wlYa8NV5k-U"
+        "title": "The AI Productivity Illusion",
+        "url": "https://www.hardresetmedia.com/p/the-ai-productivity-illusion"
       }
     ]
   }
