@@ -269,9 +269,16 @@ def test_build_ledger_stats_handles_empty_ledger_gracefully():
 # ---------------------------------------------------------------------------
 
 
-def test_build_verifier_summary_against_real_empty_runs_has_no_zero_division():
-    assert REAL_VERIFIER_STATS["runs"] == []
-    summary = method.build_verifier_summary(REAL_VERIFIER_STATS)
+def test_build_verifier_summary_against_empty_runs_has_no_zero_division():
+    # A synthetic empty-runs stats object, not the real data/verifier_
+    # stats.json -- that file started at this empty seed shape but the
+    # daily analyst/verifier pipeline appends a real row every day it
+    # actually runs (true as of this pipeline's first real run), so this
+    # test's actual point (zero-division safety on an empty history) needs
+    # a genuinely-empty fixture regardless of the real file's current
+    # state.
+    empty_stats = {"version": 1, "runs": []}
+    summary = method.build_verifier_summary(empty_stats)
     assert summary["total_runs"] == 0
     assert summary["overall_pass_rate"] is None
 
@@ -294,7 +301,11 @@ def test_build_verifier_summary_aggregates_a_synthetic_multi_run_history():
 
 
 def test_render_method_page_shows_a_pass_rate_only_when_there_are_runs():
-    html_no_runs = method.render_method_page(REAL_LEDGER, REAL_VERIFIER_STATS, None)
+    # Synthetic empty-runs stats, not REAL_VERIFIER_STATS -- see
+    # test_build_verifier_summary_against_empty_runs_has_no_zero_division's
+    # comment; this test needs the "no runs happened" branch specifically,
+    # which the real file no longer represents.
+    html_no_runs = method.render_method_page(REAL_LEDGER, {"version": 1, "runs": []}, None)
     assert "Overall verifier pass rate" not in html_no_runs
 
     verifier_stats = {

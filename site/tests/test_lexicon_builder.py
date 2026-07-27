@@ -62,8 +62,10 @@ REAL_ENTRIES = _load_real_lexicon()
 # ---------------------------------------------------------------------------
 
 
-def test_real_lexicon_has_exactly_30_entries():
-    assert len(REAL_ENTRIES) == 30
+def test_real_lexicon_has_at_least_the_seeded_30_entries():
+    # Floor, not an exact count -- the daily analyst's lexicon auto-growth
+    # rule (CLAUDE.md) adds more over time.
+    assert len(REAL_ENTRIES) >= 30
 
 
 def test_all_real_related_references_resolve_to_another_real_term():
@@ -77,15 +79,6 @@ def test_all_real_related_references_resolve_to_another_real_term():
             assert rel in terms, f"{entry['term']!r} has unresolvable related term {rel!r}"
 
 
-def test_all_real_seen_in_are_empty():
-    # This build stage's known state -- no analyst run has happened for
-    # real yet, so every seeded term's seen_in[] must still be empty. If
-    # this ever fails it means real content changed and the "empty
-    # seen_in renders a message, not a crash" tests below should gain a
-    # non-empty real-content counterpart.
-    assert all(entry["seen_in"] == [] for entry in REAL_ENTRIES)
-
-
 # ---------------------------------------------------------------------------
 # slugify / slug map -- reused verbatim from site/lib/linkify.py
 # ---------------------------------------------------------------------------
@@ -97,10 +90,10 @@ def test_slugify_matches_linkify_convention():
     assert lexicon.slugify("open weights") == "open-weights"
 
 
-def test_all_slugs_real_content_yields_30_unique_slugs():
+def test_all_slugs_real_content_yields_at_least_30_unique_slugs():
     slugs = lexicon.all_slugs(REAL_ENTRIES)
-    assert len(slugs) == 30
-    assert len(set(slugs)) == 30
+    assert len(slugs) >= 30
+    assert len(set(slugs)) == len(slugs)  # every slug still unique, whatever the count
 
 
 def test_all_slugs_match_slugify_of_each_term():
@@ -281,9 +274,9 @@ def test_resolve_seen_in_unresolvable_id_falls_back_to_the_card_id_label():
 # ---------------------------------------------------------------------------
 
 
-def test_build_index_context_real_content_has_30_entries_alphabetical():
+def test_build_index_context_real_content_has_at_least_30_entries_alphabetical():
     context = lexicon.build_index_context(REAL_ENTRIES)
-    assert context["total_terms"] == 30
+    assert context["total_terms"] >= 30
     terms_lower = [row.term.lower() for row in context["entries"]]
     assert terms_lower == sorted(terms_lower)
 
@@ -295,10 +288,20 @@ def test_build_term_context_real_content_every_slug_resolves():
         assert context["empty_seen_in_message"] == lexicon.EMPTY_SEEN_IN_MESSAGE
 
 
-def test_build_term_context_real_content_seen_in_is_empty_for_every_term():
+def test_build_term_context_real_content_seen_in_matches_raw_entry():
+    # However many seen_in[] ids a real entry actually has today (zero for
+    # a term the daily analyst's auto-growth rule (CLAUDE.md) hasn't
+    # touched yet, one or more once a real card references it), resolve_
+    # seen_in must resolve exactly that many SeenInView entries, in order
+    # -- this holds regardless of how many real entries currently have
+    # real usage, unlike asserting every one is empty (only ever true
+    # before the daily pipeline's first real run).
+    raw_by_slug = {lexicon.slugify(e["term"]): e for e in REAL_ENTRIES}
     for slug in lexicon.all_slugs(REAL_ENTRIES):
         context = lexicon.build_term_context(REAL_ENTRIES, slug)
-        assert context["entry"].seen_in == ()
+        raw_seen_in = raw_by_slug[slug].get("seen_in", [])
+        resolved = context["entry"].seen_in
+        assert [ref.card_id for ref in resolved] == list(raw_seen_in)
 
 
 def test_build_term_context_unknown_slug_raises_key_error():
@@ -339,11 +342,33 @@ def test_render_lexicon_term_real_content_has_one_h1_matching_the_term():
 
 def test_render_lexicon_term_real_content_empty_seen_in_shows_message_not_empty_list():
     for entry in REAL_ENTRIES:
+        if entry.get("seen_in"):
+            continue  # covered by the non-empty counterpart below
         slug = lexicon.slugify(entry["term"])
         html = lexicon.render_lexicon_term(REAL_ENTRIES, slug)
         assert lexicon.EMPTY_SEEN_IN_MESSAGE in html
         # No empty <ul></ul> rendered for the seen_in section.
         assert "<ul" not in html.split('id="lexicon-term-seen-in-heading"')[1].split("</section>")[0]
+
+
+def test_render_lexicon_term_real_content_nonempty_seen_in_shows_list_not_message():
+    # Counterpart the now-removed test_all_real_seen_in_are_empty's own
+    # docstring called for: once the daily analyst's auto-growth rule
+    # actually references a real term from a real card (true for at least
+    # one real entry as of this pipeline's first real run), that entry's
+    # page must show the seen_in list, not the empty-state message.
+    real_with_seen_in = [e for e in REAL_ENTRIES if e.get("seen_in")]
+    assert real_with_seen_in, "expected at least one real entry with real seen_in usage"
+    for entry in real_with_seen_in:
+        slug = lexicon.slugify(entry["term"])
+        html = lexicon.render_lexicon_term(REAL_ENTRIES, slug)
+        section_html = html.split('id="lexicon-term-seen-in-heading"')[1].split("</section>")[0]
+        assert lexicon.EMPTY_SEEN_IN_MESSAGE not in section_html
+        assert "<ul" in section_html
+        # No `cards` mapping passed, so each label falls back to the bare
+        # card id (resolve_seen_in's own documented fallback).
+        for card_id in entry["seen_in"]:
+            assert f"<li>{card_id}</li>" in section_html
 
 
 def test_render_lexicon_term_real_content_related_terms_link_to_real_pages():
@@ -461,10 +486,10 @@ def test_render_lexicon_term_seen_in_falls_back_to_the_card_id_as_plain_text_whe
 # ---------------------------------------------------------------------------
 
 
-def test_write_lexicon_pages_real_content_generates_all_30_term_pages(tmp_path):
+def test_write_lexicon_pages_real_content_generates_all_seeded_term_pages(tmp_path):
     env = lexicon.build_jinja_env()
     written = lexicon.write_lexicon_pages(env, REAL_ENTRIES, tmp_path)
-    assert len(written) == 31  # index + 30 term pages
+    assert len(written) == len(REAL_ENTRIES) + 1  # index + one page per term
     assert (tmp_path / "lexicon" / "index.html").is_file()
     for slug in lexicon.all_slugs(REAL_ENTRIES):
         assert (tmp_path / "lexicon" / slug / "index.html").is_file()

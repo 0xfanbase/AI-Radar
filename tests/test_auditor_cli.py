@@ -35,7 +35,10 @@ NOW = datetime(2026, 7, 11, 23, 30, 0, tzinfo=timezone.utc)
 def test_load_lexicon_loads_the_real_repo_file():
     entries = cli_mod.load_lexicon()
     assert isinstance(entries, list)
-    assert len(entries) == 30  # Phase 3's real, seeded backfill
+    # Phase 3 seeded 30; the daily analyst's lexicon auto-growth rule adds
+    # more over time (CLAUDE.md), so this is a floor, not an exact count --
+    # mirrors tests/test_seed_content.py's own frontier-board-row pattern.
+    assert len(entries) >= 30
     assert all("term" in entry for entry in entries)
 
 
@@ -56,16 +59,27 @@ def test_load_lexicon_reads_a_small_fixture(tmp_path: Path):
 # ---------------------------------------------------------------------------
 
 
-def test_run_audit_against_real_empty_repo_state_is_schema_valid():
+def test_run_audit_against_real_empty_repo_state_is_schema_valid(tmp_path: Path):
     # companies=[] keeps this fully offline -- the real content/companies/
     # registry carries real, live citation URLs that audit_company_
     # hijacked_links would otherwise try to HEAD/GET for real (blocked by
     # tests/conftest.py's autouse no-live-network fixture); feed_corrections
     # is left at its real True default deliberately (see the dedicated
     # feed_corrections tests below) but with companies=[] there is nothing
-    # for it to feed either way.
+    # for it to feed either way. cards_dir points at an empty, nonexistent
+    # tmp_path subdirectory rather than the real content/cards/ -- the real
+    # directory held zero cards only until the daily analyst pipeline first
+    # ran for real; now that real cards (with real, live citation URLs)
+    # exist there, run_audit's own default cards_dir would make this
+    # "empty repo state" test attempt real network calls. auditor.linkrot
+    # .load_cards returns [] for a directory that doesn't exist, matching
+    # this test's intended fully-offline empty-repo scenario exactly.
     report = cli_mod.run_audit(
-        now=NOW, hn_items=[], companies=[], append_to_backlog=False
+        now=NOW,
+        hn_items=[],
+        companies=[],
+        cards_dir=tmp_path / "cards",
+        append_to_backlog=False,
     )
     validate(report, "audit")  # must not raise
     assert report["findings_appended_to_backlog"] == 0
@@ -85,6 +99,7 @@ def test_run_audit_dry_run_never_touches_backlog_file(tmp_path: Path):
         now=NOW,
         hn_items=[],
         companies=[],
+        cards_dir=tmp_path / "cards",
         append_to_backlog=False,
         backlog_path=backlog_path,
     )
@@ -113,6 +128,7 @@ def test_run_audit_real_append_writes_to_the_given_backlog_path(tmp_path: Path):
         now=NOW,
         hn_items=[],
         companies=[],
+        cards_dir=tmp_path / "cards",
         append_to_backlog=True,
         backlog_path=backlog_path,
         ledger_path=ledger_path,
@@ -161,6 +177,7 @@ def test_run_audit_appends_a_real_finding_when_one_exists(tmp_path: Path, monkey
         now=NOW,
         hn_items=[],
         companies=[],
+        cards_dir=tmp_path / "cards",
         append_to_backlog=True,
         backlog_path=backlog_path,
         ledger_path=ledger_path,
