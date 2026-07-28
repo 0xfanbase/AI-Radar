@@ -15,6 +15,14 @@
       "dropped": 5,
       "pass_rate": 0.375,
       "reported": 0
+    },
+    {
+      "cards_drafted": 8,
+      "confirmed": 0,
+      "date": "2026-07-28",
+      "dropped": 8,
+      "pass_rate": 0.0,
+      "reported": 0
     }
   ],
   "version": 1

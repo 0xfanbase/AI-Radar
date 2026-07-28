@@ -57,6 +57,26 @@
         ]
       },
       {
+        "text": "On June 30, 2026 it released two generative-media models, Nano Banana 2 Lite and Gemini Omni Flash: a fast, low-cost text-to-image model producing images in about four seconds, and a video-generation and conversational video-editing model, both rolling out across Google AI Studio, the Gemini API and consumer surfaces including Search's AI Mode, Google Photos and Google Flow.",
+        "citations": [
+          {
+            "url": "https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-omni-flash-nano-banana-2-lite/",
+            "outlet": "Google (official blog)",
+            "quote": "The real magic happens when you chain these models together"
+          }
+        ]
+      },
+      {
+        "text": "On July 16, 2026 it published a joint bioresilience approach with Isomorphic Labs covering AI-assisted prevention, detection, and response to biological threats, citing more than 15 partnerships built over the prior year with governments, biosecurity organizations, and researchers, and drawing on tools including AlphaFold, AlphaGenome, and the SynthID watermarking system.",
+        "citations": [
+          {
+            "url": "https://deepmind.google/blog/our-approach-to-bioresilience/",
+            "outlet": "Google DeepMind (official)",
+            "quote": "AI is a critical tool for our response"
+          }
+        ]
+      },
+      {
         "text": "On July 21, 2026 it released Gemini 3.6 Flash, taking over as its main workhorse tier from 3.5 Flash, alongside a cheaper Gemini 3.5 Flash-Lite and a Gemini 3.5 Flash Cyber restricted to governments and trusted partners. Gemini 3.6 Flash handles text, image, audio, and video input on a 1-million-token context window with 64,000-token max output.",
         "citations": [
           {
@@ -123,7 +143,7 @@
     ]
   },
   "status": "confirmed",
-  "generated_at": "2026-07-13T00:00:00Z",
+  "generated_at": "2026-07-28T01:30:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-25"
+  "last_verified": "2026-07-28"
 }

@@ -2,50 +2,50 @@
   "cards_cap": 8,
   "clusters": [
     {
-      "cluster_hash": "859d78f36dfae19fa27b851077744b1087ef3d2ae9b7dd0244f4d059b0f0ddf0",
-      "proposed_card_id": "2026-07-27-the-new-ai-superpowers-focus-and-followthrough-859d78",
+      "cluster_hash": "23072d09f70e646cf9209030f7723ff394ca604c97aa862003da63a223128dc9",
+      "proposed_card_id": "2026-07-28-ai-companies-are-shredding-rare-books-23072d",
       "rank": 1
     },
     {
-      "cluster_hash": "87f0571bef377a4b4b7edf58d2ef5337d38f7baa7ee63eebc3d68ea662d6f94e",
-      "proposed_card_id": "2026-07-27-deepseek-pause-fundraise-after-comments-on-compute-gap-to-us-87f057",
+      "cluster_hash": "530d5f69b02b0013f648305d7628247d4b3834382f3175aba1d6ebdf93f8b4c9",
+      "proposed_card_id": "2026-07-28-introducing-claude-opus-5-530d5f",
       "rank": 2
     },
     {
-      "cluster_hash": "fe97eee23786b810e4202ff5d66d53a3fea369071f17bd309063deeb34293a3d",
-      "proposed_card_id": "2026-07-27-what-is-happening-to-jobs-separating-ai-hype-from-reality-fe97ee",
+      "cluster_hash": "58104f758c6d44a0f237cc9946af5c0886c3a86e1c8dce61ad1e10bc666abc26",
+      "proposed_card_id": "2026-07-28-ai-companies-spend-record-sums-on-washington-lobbying-58104f",
       "rank": 3
     },
     {
-      "cluster_hash": "0c8bd8e44146054e0fc52dd11e4afacfe3a13a1028c23f9858b03c9d86e6ff01",
-      "proposed_card_id": "2026-07-27-running-a-28-9m-parameter-llm-on-an-8-microcontroller-0c8bd8",
+      "cluster_hash": "968ac3f020736b5bad46fd5acd3c8160c410296e1aaec539e9a7cdcf5f8b1c75",
+      "proposed_card_id": "2026-07-28-apple-will-watch-everything-burn-when-the-ai-bubble-bursts-968ac3",
       "rank": 4
     },
     {
-      "cluster_hash": "9ef2632ac56475919cbb86e541abed0913ce205e5a0e5744598f13482a2e5581",
-      "proposed_card_id": "2026-07-27-terence-tao-mathematics-in-the-age-of-ai-pdf-9ef263",
+      "cluster_hash": "4a0083d45f04709db102ed4b9082fe7f40b7424aa7f21893b3ba2b1823a7c98c",
+      "proposed_card_id": "2026-07-28-professor-s-invisible-prompt-trap-catches-32-35-students-che-4a0083",
       "rank": 5
     },
     {
-      "cluster_hash": "f0a020308d6332796f5193ae8e5b1de3fabd625cb9aecbb934e737631667133b",
-      "proposed_card_id": "2026-07-27-cloudflare-s-new-ai-traffic-options-for-customers-f0a020",
+      "cluster_hash": "a00379b3035c3b9af459f58b60b944bfab453aa721c4f719a839fcdddd2dcb4b",
+      "proposed_card_id": "2026-07-28-why-i-left-google-deepmind-a00379",
       "rank": 6
     },
     {
-      "cluster_hash": "edb6c32e1a5ce63d38e609a3b0ead8437ddcb960ea837a42e09533327927d624",
-      "proposed_card_id": "2026-07-27-this-july-i-was-fired-from-simple-ai-a-deeply-yc-company-edb6c3",
+      "cluster_hash": "5a2e94febadbf8a052ebae87986a172cf4b8b8afcf6f93e4ef1517a65364e28a",
+      "proposed_card_id": "2026-07-28-nvidia-s-750b-in-deals-reignite-circular-ai-fears-5a2e94",
       "rank": 7
     },
     {
-      "cluster_hash": "d6e457037d974f196b87aed08dc0f0b5d4468e602723fdd3e57881781a3f07aa",
-      "proposed_card_id": "2026-07-27-the-ai-productivity-illusion-d6e457",
+      "cluster_hash": "1157c987239e41259b2b1ae51dcda1c5e631178e3545bf25dafd94ab8fd0f7f0",
+      "proposed_card_id": "2026-07-28-jensen-huang-s-first-post-on-twitter-is-in-defense-of-open-a-1157c9",
       "rank": 8
     }
   ],
   "degradation_level": 0,
-  "generated_at": "2026-07-27T01:10:57Z",
-  "profile_reason": "company id 'deepseek' is named (by name/alias) in a source title of one of this run's selected clusters -- predicting a Frontier Board upsert for that company is likely this run (a deterministic prediction from cluster content, not a confirmed post-hoc fact, since this plan is written before the analyst runs)",
-  "profile_target": "deepseek",
+  "generated_at": "2026-07-28T01:09:58Z",
+  "profile_reason": "company id 'google-deepmind' is named (by name/alias) in a source title of one of this run's selected clusters -- predicting a Frontier Board upsert for that company is likely this run (a deterministic prediction from cluster content, not a confirmed post-hoc fact, since this plan is written before the analyst runs)",
+  "profile_target": "google-deepmind",
   "reason": "degradation_level=0: normal run, up to 8 clusters (8 available)",
   "run_mode": "normal",
   "version": 1

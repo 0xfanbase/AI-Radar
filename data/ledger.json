@@ -475,7 +475,11 @@
       "member_urls": [
         "https://pcgamer.com/software/ai/jensen-huangs-first-ever-post-on-x-is-in-defense-of-open-access-to-ai-models-alongside-google-openai-and-meta"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-28T01:29:03Z"
+      }
     },
     "115b40afdd3b1d2e4384c473084272265a7cd73b1df247b50a14d991669274da": {
       "card_id": null,
@@ -935,7 +939,11 @@
       "member_urls": [
         "https://twitter.com/HedgieMarkets/status/2081534588485296565"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-28T01:29:03Z"
+      }
     },
     "2322e05dc4c7e687a0e3526b475242cb2420dedee59a1bbc16943956995cea8e": {
       "card_id": null,
@@ -1928,7 +1936,11 @@
       "member_urls": [
         "https://techspot.com/news/113243-professor-invisible-prompt-trap-catches-32-students-cheating.html"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-28T01:29:03Z"
+      }
     },
     "4ba2a217667184c34b32dae2a84672b12a356b214cdd73d1c869e79bdbcfa432": {
       "card_id": null,
@@ -2154,7 +2166,11 @@
         "https://anthropic.com/news/claude-opus-5",
         "https://status.claude.com/incidents/mfdtrknpxghq"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-28T01:29:03Z"
+      }
     },
     "5358d62d64b11b819a4aedeea80fbbff5b536f98fd837292981529d4a9161945": {
       "card_id": null,
@@ -2316,7 +2332,11 @@
       "member_urls": [
         "https://ft.com/content/d8a5f95e-3b6d-463a-a848-c9ef8e2394db"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-28T01:29:03Z"
+      }
     },
     "585e5dbcd6a5411083707c9a35729f0bcc9bcc45d0d99e1be948dcded0cffd12": {
       "card_id": null,
@@ -2370,7 +2390,11 @@
       "member_urls": [
         "https://bloomberg.com/news/articles/2026-07-27/nvidia-s-750-billion-deals-revive-fear-of-ai-circular-financing"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-28T01:29:03Z"
+      }
     },
     "5a7c527e84b4a1e5ac6759d420b1f41f2d17b53faa11cc8fd87536547e3b21ed": {
       "card_id": null,
@@ -3936,7 +3960,11 @@
       "member_urls": [
         "https://macrumors.com/2026/07/27/ed-zitron-apple-watch-it-burn-ai-bubble-bursts"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-28T01:29:03Z"
+      }
     },
     "96b7553c9e016e2fbda820068836d69571f4592ee56adf4069169b3616275f24": {
       "card_id": null,
@@ -4228,7 +4256,11 @@
       "member_urls": [
         "https://lesswrong.com/posts/iKm2FhpWkuuBojm82/why-i-left-google-deepmind"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-28T01:29:03Z"
+      }
     },
     "a04c08e6b1785b22714a9a31105f1094b62571bbdb2c1ca140eade9e9e42169b": {
       "card_id": null,
