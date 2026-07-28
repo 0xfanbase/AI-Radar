@@ -1,113 +1,120 @@
 [
   {
-    "cluster_hash": "859d78f36dfae19fa27b851077744b1087ef3d2ae9b7dd0244f4d059b0f0ddf0",
+    "cluster_hash": "23072d09f70e646cf9209030f7723ff394ca604c97aa862003da63a223128dc9",
     "rank": 1,
-    "score": 11.18609147035123,
+    "score": 63.19131533073684,
     "sources": [
       {
-        "outlet": "rickmanelius.com",
-        "points": 122,
+        "outlet": "twitter.com",
+        "points": 732,
         "source_type": "hn",
-        "title": "The New AI Superpowers: Focus and Followthrough",
-        "url": "https://www.rickmanelius.com/p/the-new-ai-superpowers-focus-and"
+        "title": "AI companies are shredding rare books",
+        "url": "https://twitter.com/HedgieMarkets/status/2081534588485296565"
       }
     ]
   },
   {
-    "cluster_hash": "87f0571bef377a4b4b7edf58d2ef5337d38f7baa7ee63eebc3d68ea662d6f94e",
+    "cluster_hash": "530d5f69b02b0013f648305d7628247d4b3834382f3175aba1d6ebdf93f8b4c9",
     "rank": 2,
-    "score": 9.96880015810347,
+    "score": 45.79309806907331,
     "sources": [
       {
-        "outlet": "github.com",
-        "points": 245,
+        "outlet": null,
+        "points": null,
+        "source_type": "lab",
+        "title": "Introducing Claude Opus 5",
+        "url": "https://www.anthropic.com/news/claude-opus-5"
+      },
+      {
+        "outlet": "status.claude.com",
+        "points": 96,
         "source_type": "hn",
-        "title": "DeepSeek pause fundraise after comments on compute gap to US leaked (transcript) [pdf]",
-        "url": "https://github.com/demo-zexuan/liang-wenfeng-investor-meeting-2026-7-22/blob/master/%E6%A2%81%E6%96%87%E9%94%8B%E6%8A%95%E8%B5%84%E8%80%85%E4%BA%A4%E6%B5%81%E4%BC%9A-%E6%96%87%E5%AD%97%E7%A8%BF_1_18_translate_20260723201651.pdf"
+        "title": "Elevated errors on Claude Opus 5",
+        "url": "https://status.claude.com/incidents/mfdtrknpxghq"
       }
     ]
   },
   {
-    "cluster_hash": "fe97eee23786b810e4202ff5d66d53a3fea369071f17bd309063deeb34293a3d",
+    "cluster_hash": "58104f758c6d44a0f237cc9946af5c0886c3a86e1c8dce61ad1e10bc666abc26",
     "rank": 3,
-    "score": 9.536576478904642,
+    "score": 25.02368002657653,
     "sources": [
       {
-        "outlet": "siepr.stanford.edu",
-        "points": 241,
+        "outlet": "ft.com",
+        "points": 250,
         "source_type": "hn",
-        "title": "What is happening to jobs? Separating AI hype from reality",
-        "url": "https://siepr.stanford.edu/publications/policy-brief/what-really-happening-jobs-separating-ai-hype-reality"
+        "title": "AI companies spend record sums on Washington lobbying",
+        "url": "https://www.ft.com/content/d8a5f95e-3b6d-463a-a848-c9ef8e2394db"
       }
     ]
   },
   {
-    "cluster_hash": "0c8bd8e44146054e0fc52dd11e4afacfe3a13a1028c23f9858b03c9d86e6ff01",
+    "cluster_hash": "968ac3f020736b5bad46fd5acd3c8160c410296e1aaec539e9a7cdcf5f8b1c75",
     "rank": 4,
-    "score": 9.23551914004541,
+    "score": 24.550575507101282,
     "sources": [
       {
-        "outlet": "github.com",
-        "points": 269,
+        "outlet": "macrumors.com",
+        "points": 231,
         "source_type": "hn",
-        "title": "Running a 28.9M parameter LLM on an $8 microcontroller",
-        "url": "https://github.com/slvDev/esp32-ai"
+        "title": "Apple Will 'Watch Everything Burn' When the AI Bubble Bursts",
+        "url": "https://www.macrumors.com/2026/07/27/ed-zitron-apple-watch-it-burn-ai-bubble-bursts/"
       }
     ]
   },
   {
-    "cluster_hash": "9ef2632ac56475919cbb86e541abed0913ce205e5a0e5744598f13482a2e5581",
+    "cluster_hash": "4a0083d45f04709db102ed4b9082fe7f40b7424aa7f21893b3ba2b1823a7c98c",
     "rank": 5,
-    "score": 7.510578032788624,
+    "score": 18.610073796454284,
     "sources": [
       {
-        "outlet": "teorth.github.io",
-        "points": 102,
+        "outlet": "techspot.com",
+        "points": 81,
         "source_type": "hn",
-        "title": "Terence Tao: Mathematics in the Age of AI [pdf]",
-        "url": "https://teorth.github.io/tao-web/slides/age-of-ai-icm-2026.pdf"
+        "title": "Professor's invisible prompt trap catches 32/35 students cheating with AI",
+        "url": "https://www.techspot.com/news/113243-professor-invisible-prompt-trap-catches-32-students-cheating.html"
       }
     ]
   },
   {
-    "cluster_hash": "f0a020308d6332796f5193ae8e5b1de3fabd625cb9aecbb934e737631667133b",
+    "cluster_hash": "a00379b3035c3b9af459f58b60b944bfab453aa721c4f719a839fcdddd2dcb4b",
     "rank": 6,
-    "score": 7.398042523782663,
+    "score": 12.485076241267235,
     "sources": [
       {
-        "outlet": "blog.cloudflare.com",
-        "points": 187,
+        "outlet": "lesswrong.com",
+        "points": 177,
         "source_type": "hn",
-        "title": "Cloudflare's new AI traffic options for customers",
-        "url": "https://blog.cloudflare.com/content-independence-day-ai-options/"
+        "title": "Why I Left Google DeepMind",
+        "url": "https://www.lesswrong.com/posts/iKm2FhpWkuuBojm82/why-i-left-google-deepmind"
       }
     ]
   },
   {
-    "cluster_hash": "edb6c32e1a5ce63d38e609a3b0ead8437ddcb960ea837a42e09533327927d624",
+    "cluster_hash": "5a2e94febadbf8a052ebae87986a172cf4b8b8afcf6f93e4ef1517a65364e28a",
     "rank": 7,
-    "score": 6.09307943475748,
+    "score": 9.39756231897879,
     "sources": [
       {
-        "outlet": "andys.blog",
-        "points": 48,
+        "outlet": "bloomberg.com",
+        "points": 76,
         "source_type": "hn",
-        "title": "This July I Was Fired from Simple AI (A Deeply YC Company)",
-        "url": "https://andys.blog/this-july-i-was-fired-from-simple-ai/"
+        "title": "Nvidia's $750B in Deals Reignite Circular AI Fears",
+        "url": "https://www.bloomberg.com/news/articles/2026-07-27/nvidia-s-750-billion-deals-revive-fear-of-ai-circular-financing"
       }
     ]
   },
   {
-    "cluster_hash": "d6e457037d974f196b87aed08dc0f0b5d4468e602723fdd3e57881781a3f07aa",
+    "cluster_hash": "1157c987239e41259b2b1ae51dcda1c5e631178e3545bf25dafd94ab8fd0f7f0",
     "rank": 8,
-    "score": 1.8314982248201277,
+    "score": 7.2796120929101225,
     "sources": [
       {
-        "outlet": "hardresetmedia.com",
-        "points": 63,
+        "outlet": "pcgamer.com",
+        "points": 45,
         "source_type": "hn",
-        "title": "The AI Productivity Illusion",
-        "url": "https://www.hardresetmedia.com/p/the-ai-productivity-illusion"
+        "title": "Jensen Huang's first post on Twitter is in defense of open access to AI models",
+        "url": "https://www.pcgamer.com/software/ai/jensen-huangs-first-ever-post-on-x-is-in-defense-of-open-access-to-ai-models-alongside-google-openai-and-meta/"
       }
     ]
   }
