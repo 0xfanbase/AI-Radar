@@ -2,50 +2,50 @@
   "cards_cap": 8,
   "clusters": [
     {
-      "cluster_hash": "23072d09f70e646cf9209030f7723ff394ca604c97aa862003da63a223128dc9",
-      "proposed_card_id": "2026-07-28-ai-companies-are-shredding-rare-books-23072d",
+      "cluster_hash": "4843bcaedd469ff204b5147bad33346e30778c005fe07c2311130476f523e546",
+      "proposed_card_id": "2026-07-29-discovering-cryptographic-weaknesses-with-claude-4843bc",
       "rank": 1
     },
     {
-      "cluster_hash": "530d5f69b02b0013f648305d7628247d4b3834382f3175aba1d6ebdf93f8b4c9",
-      "proposed_card_id": "2026-07-28-introducing-claude-opus-5-530d5f",
+      "cluster_hash": "dce87fe1ab5fa7c8111703bd52c89ec79b01b8648e10c4afab86a846b7bc6674",
+      "proposed_card_id": "2026-07-29-anthropic-publishes-a-practical-key-recovery-attack-on-hawk-dce87f",
       "rank": 2
     },
     {
-      "cluster_hash": "58104f758c6d44a0f237cc9946af5c0886c3a86e1c8dce61ad1e10bc666abc26",
-      "proposed_card_id": "2026-07-28-ai-companies-spend-record-sums-on-washington-lobbying-58104f",
+      "cluster_hash": "5461ed44198ebac233ae352e3e87892add23d03db3ed8a794e633c74fb9e4838",
+      "proposed_card_id": "2026-07-29-introducing-claude-opus-5-5461ed",
       "rank": 3
     },
     {
-      "cluster_hash": "968ac3f020736b5bad46fd5acd3c8160c410296e1aaec539e9a7cdcf5f8b1c75",
-      "proposed_card_id": "2026-07-28-apple-will-watch-everything-burn-when-the-ai-bubble-bursts-968ac3",
+      "cluster_hash": "26db6f7328b78082a72442d1029fc6b07bd7ff2ac6d3b2680c3eac4c2724bb77",
+      "proposed_card_id": "2026-07-29-banning-ai-will-not-make-it-go-away-26db6f",
       "rank": 4
     },
     {
-      "cluster_hash": "4a0083d45f04709db102ed4b9082fe7f40b7424aa7f21893b3ba2b1823a7c98c",
-      "proposed_card_id": "2026-07-28-professor-s-invisible-prompt-trap-catches-32-35-students-che-4a0083",
+      "cluster_hash": "fac7cb2d7a6648bae76324a302bdb6c9ac0b9c9b8d0032b504c4d64215c2ecdb",
+      "proposed_card_id": "2026-07-29-google-s-beyond-zero-enterprise-security-for-the-ai-era-fac7cb",
       "rank": 5
     },
     {
-      "cluster_hash": "a00379b3035c3b9af459f58b60b944bfab453aa721c4f719a839fcdddd2dcb4b",
-      "proposed_card_id": "2026-07-28-why-i-left-google-deepmind-a00379",
+      "cluster_hash": "167f0086e4a5aace6e604b61f7dc1b7129877cabeb513263778005671c6712a5",
+      "proposed_card_id": "2026-07-29-show-hn-formally-verified-3d-csg-trust-93-lines-spec-not-100-167f00",
       "rank": 6
     },
     {
-      "cluster_hash": "5a2e94febadbf8a052ebae87986a172cf4b8b8afcf6f93e4ef1517a65364e28a",
-      "proposed_card_id": "2026-07-28-nvidia-s-750b-in-deals-reignite-circular-ai-fears-5a2e94",
+      "cluster_hash": "a5126e34e88e2d6f6270a4caaa1c8806cec5bf28403f5c1780d169569705dc99",
+      "proposed_card_id": "2026-07-29-what-ai-developers-could-learn-from-charles-bukowski-a5126e",
       "rank": 7
     },
     {
-      "cluster_hash": "1157c987239e41259b2b1ae51dcda1c5e631178e3545bf25dafd94ab8fd0f7f0",
-      "proposed_card_id": "2026-07-28-jensen-huang-s-first-post-on-twitter-is-in-defense-of-open-a-1157c9",
+      "cluster_hash": "d8f40e9bb5e77cab9595bfc406b9709352e80513b0602acc0cd046a7c4021322",
+      "proposed_card_id": "2026-07-29-chip-stocks-tumble-as-ai-sell-off-deepens-d8f40e",
       "rank": 8
     }
   ],
   "degradation_level": 0,
-  "generated_at": "2026-07-28T01:09:58Z",
-  "profile_reason": "company id 'google-deepmind' is named (by name/alias) in a source title of one of this run's selected clusters -- predicting a Frontier Board upsert for that company is likely this run (a deterministic prediction from cluster content, not a confirmed post-hoc fact, since this plan is written before the analyst runs)",
-  "profile_target": "google-deepmind",
+  "generated_at": "2026-07-29T01:09:20Z",
+  "profile_reason": "company id 'anthropic' is named (by name/alias) in a source title of one of this run's selected clusters -- predicting a Frontier Board upsert for that company is likely this run (a deterministic prediction from cluster content, not a confirmed post-hoc fact, since this plan is written before the analyst runs)",
+  "profile_target": "anthropic",
   "reason": "degradation_level=0: normal run, up to 8 clusters (8 available)",
   "run_mode": "normal",
   "version": 1
