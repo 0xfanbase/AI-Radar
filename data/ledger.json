@@ -117,6 +117,15 @@
       ],
       "status": "queued"
     },
+    "0603843f13116b8fdd3eebf41327fe0173d787e57fefe4a31a293b82c2bdbe02": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24555v1"
+      ],
+      "status": "queued"
+    },
     "060adbe5be256c11b4b47c4642632110e2576dba7ee142152e0cf4efa0820477": {
       "card_id": null,
       "first_seen": "2026-07-24",
@@ -183,7 +192,7 @@
     "082c4173c70b04519142ea2a756f2c82885c05f2267804c9d63123d0bb7bfe20": {
       "card_id": null,
       "first_seen": "2026-07-23",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/building-ai-infrastructure-with-the-effingham-county-community"
       ],
@@ -589,6 +598,15 @@
       ],
       "status": "queued"
     },
+    "144ad30dc0973adca43c138c5c100e86fb760d6c7f8a29a4a10ae22bec0e3d39": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24649v1"
+      ],
+      "status": "queued"
+    },
     "144f9038d6abd12e69ae11226a78d485ce2b4698915f2ad06f41b76730b8f016": {
       "card_id": null,
       "first_seen": "2026-07-27",
@@ -625,6 +643,15 @@
       ],
       "status": "queued"
     },
+    "15ce442a52ba6f7c913d493b20719b394f8abc8587f4d4f3be998b5dd69fe221": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24569v1"
+      ],
+      "status": "queued"
+    },
     "15ffb7c45e391bba5534daa3c97f2fac1a5084d564d2bb0851293ef00087619a": {
       "card_id": null,
       "first_seen": "2026-07-25",
@@ -634,10 +661,19 @@
       ],
       "status": "queued"
     },
+    "167f0086e4a5aace6e604b61f7dc1b7129877cabeb513263778005671c6712a5": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://github.com/schildep/verified-3d-mesh-intersection"
+      ],
+      "status": "queued"
+    },
     "16e13c52f7cd02d4ace3d47abac95ccf3b9e630262bd24e605b9bb93a859298e": {
       "card_id": null,
       "first_seen": "2026-07-17",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://deepmind.google/blog/our-approach-to-bioresilience"
       ],
@@ -766,6 +802,15 @@
       "last_seen": "2026-07-25",
       "member_urls": [
         "https://arxiv.org/abs/2607.21498v1"
+      ],
+      "status": "queued"
+    },
+    "1d3656ebb68e85db070526199de8394399be8bcffdd2deb3a18a162d3d167c48": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24662v1"
       ],
       "status": "queued"
     },
@@ -905,6 +950,15 @@
       ],
       "status": "queued"
     },
+    "21fdb4c450d0499f46e7f6030068e9d6eb034bffc21688ba859adea6bde78c79": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24568v1"
+      ],
+      "status": "queued"
+    },
     "22690c0506f0ff3bb0a5a7f0c72e8cfa39d009d0a466b9a30567cd786d501eea": {
       "card_id": null,
       "first_seen": "2026-07-13",
@@ -966,7 +1020,7 @@
     "23b1197c74335456a9552d5a5661cf050c548ca7ee725da5e63d6be172adcf52": {
       "card_id": null,
       "first_seen": "2026-07-16",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/advancing-ai-safety-through-state-and-federal-action"
       ],
@@ -1107,6 +1161,15 @@
       ],
       "status": "queued"
     },
+    "26db6f7328b78082a72442d1029fc6b07bd7ff2ac6d3b2680c3eac4c2724bb77": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://vishal.rs/essay/banning-ai-will-not-make-it-go-away"
+      ],
+      "status": "queued"
+    },
     "271cd1b24d5ceb6706b5a79c375780f3c38b55b34731387957457a3adb704d9e": {
       "card_id": null,
       "first_seen": "2026-07-18",
@@ -1116,12 +1179,30 @@
       ],
       "status": "queued"
     },
+    "278eb21c4c73b2c3dae61525e48d7717002f601c7d0ed449f70b81251a03387f": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24645v1"
+      ],
+      "status": "queued"
+    },
     "27a2def167b365d2c45d7ab77c636b029091a06e3c54c4848291339a6c7244ca": {
       "card_id": null,
       "first_seen": "2026-07-09",
       "last_seen": "2026-07-09",
       "member_urls": [
         "https://arxiv.org/abs/2607.07702v1"
+      ],
+      "status": "queued"
+    },
+    "27ef891024bdf4843694a304c118c276fb1c7c67c2fa5ffb6b01faa030266e8a": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24560v1"
       ],
       "status": "queued"
     },
@@ -1317,7 +1398,7 @@
     "3064e426d18ccd85acab9b00d8511c97976c1d62bf25b663ad46f55f6cae1deb": {
       "card_id": null,
       "first_seen": "2026-07-21",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/introducing-chatgpt-small-business-program"
       ],
@@ -1413,6 +1494,15 @@
       ],
       "status": "queued"
     },
+    "33728a8f25a8a45af31a61967ba5dc890d3a326c0ee4906499b71b84b6fa9770": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24672v1"
+      ],
+      "status": "queued"
+    },
     "33cc21c9daff14151feb9f17a6d370709f56b1e1478c3c67389b87902d22d0c0": {
       "card_id": null,
       "first_seen": "2026-07-24",
@@ -1458,6 +1548,15 @@
       ],
       "status": "queued"
     },
+    "3695fab226dc522fae7a6502f821050bda31e1bba84eaefb6bff9ca274cb1109": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24577v1"
+      ],
+      "status": "queued"
+    },
     "37a3ab9c0163b5cd793e9e581eb8080a2aa2d2f61876be103cd64a2f0068276c": {
       "card_id": null,
       "first_seen": "2026-07-09",
@@ -1488,7 +1587,7 @@
     "389ebd02d2834f48054db326e779179584d07821b4cc86483479843fc8aba7d7": {
       "card_id": null,
       "first_seen": "2026-07-23",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/ntt-data"
       ],
@@ -1566,6 +1665,15 @@
       ],
       "status": "queued"
     },
+    "3ae84c86ff070fda4f58df52a67d3a87d65016223dbb809ba6aca8d19b96767e": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24688v1"
+      ],
+      "status": "queued"
+    },
     "3b312f21c3a0b200e659edf4b3d691fd3b213a88344fed871ba59d16af6247d7": {
       "card_id": null,
       "first_seen": "2026-07-09",
@@ -1581,6 +1689,15 @@
       "last_seen": "2026-07-16",
       "member_urls": [
         "https://bis.org/publ/bisbull120.pdf"
+      ],
+      "status": "queued"
+    },
+    "3b541d04aad14f2287709990274f1ae4b69803294e6dc892cfe5660f2b861188": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24726v1"
       ],
       "status": "queued"
     },
@@ -1671,6 +1788,15 @@
       "last_seen": "2026-07-21",
       "member_urls": [
         "https://arxiv.org/abs/2607.18088v1"
+      ],
+      "status": "queued"
+    },
+    "3e147629eb495235d467027663445e2cf0cc057482a97e4c5caddf2b3cb3e668": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24585v1"
       ],
       "status": "queued"
     },
@@ -1791,6 +1917,15 @@
       ],
       "status": "queued"
     },
+    "4516295491cc08c64d43c36f79b2f4546a3a5fa5e6de571ae864f67ecdf9d906": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24586v1"
+      ],
+      "status": "queued"
+    },
     "45b162bf865acb549b9106777c5e4ad1819ea7dde74d030e2c44d4c2230141bc": {
       "card_id": null,
       "first_seen": "2026-07-17",
@@ -1803,7 +1938,7 @@
     "45ec0625d8ec319e39fd1aa7ee1c09d87bdfe682d3ec0643b3a33c67df73963b": {
       "card_id": null,
       "first_seen": "2026-07-28",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://deepmind.google/blog/introducing-gemini-3-5-flash-cyber",
         "https://deepmind.google/blog/introducing-gemini-3-6-flash-3-5-flash-lite-and-3-5-flash-cyber"
@@ -1893,12 +2028,39 @@
       ],
       "status": "queued"
     },
+    "47f047502cd744ee10f2e4fcd94ea2c6fb358d258d28cd76a539fb16a2bd9d14": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24732v1"
+      ],
+      "status": "queued"
+    },
+    "4843bcaedd469ff204b5147bad33346e30778c005fe07c2311130476f523e546": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://anthropic.com/research/discovering-cryptographic-weaknesses"
+      ],
+      "status": "queued"
+    },
     "487c06d9a73561e8ba90788dc7b1e0a43d57cbaa6466e89995772f0fd392c215": {
       "card_id": null,
       "first_seen": "2026-07-21",
       "last_seen": "2026-07-23",
       "member_urls": [
         "https://help.trmnl.com/en/articles/14130438-ai-agent"
+      ],
+      "status": "queued"
+    },
+    "48a24e4b1880d520a0f172a6fa76452475bc789e43021f8d478f8d77080e088f": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24683v1"
       ],
       "status": "queued"
     },
@@ -1923,7 +2085,7 @@
     "49857bbbb2f8af4d05865cdcc952a457647c1a69bfbf2811e642c9f583ca523d": {
       "card_id": null,
       "first_seen": "2026-07-24",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/codex-collaborator-creative-team"
       ],
@@ -1941,6 +2103,15 @@
         "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
         "last_attempted_at": "2026-07-28T01:29:03Z"
       }
+    },
+    "4ab43e4aa6e18b510ba6db58c728aaaaf47caf6d63fca9b71fc67102e02cfbf9": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24604v1"
+      ],
+      "status": "queued"
     },
     "4ba2a217667184c34b32dae2a84672b12a356b214cdd73d1c869e79bdbcfa432": {
       "card_id": null,
@@ -1969,6 +2140,15 @@
       ],
       "status": "queued"
     },
+    "4c44d3ef61a99cfba36d0c523afb09b9a96eaf88b03b8aaf23418f3144a53adb": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24567v1"
+      ],
+      "status": "queued"
+    },
     "4c50eff0e4e9fea01ce293370d1651be4e071c17b462496853b4a744ec4a6582": {
       "card_id": null,
       "first_seen": "2026-07-17",
@@ -1981,7 +2161,7 @@
     "4cbe27118717f94f536efc91e71efd9fb7c6e5ef089c091a4681e1d0d6879805": {
       "card_id": null,
       "first_seen": "2026-07-28",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://anthropic.com/news/position-open-weights-models"
       ],
@@ -2032,6 +2212,15 @@
       ],
       "status": "queued"
     },
+    "4ea4ebe664db7c519e47363d2aff2597a5f42c26f83b868ccc05a369081193d0": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24593v1"
+      ],
+      "status": "queued"
+    },
     "4eac084e512a2c3048b44b81a01db1af3204b0ec463225b7c72def96f0450814": {
       "card_id": null,
       "first_seen": "2026-07-17",
@@ -2074,6 +2263,24 @@
       "last_seen": "2026-07-13",
       "member_urls": [
         "https://arxiv.org/abs/2607.09438v1"
+      ],
+      "status": "queued"
+    },
+    "503a193f933c594bdf807de88594fde6362fa7ec713ef2a942381902cd0c052c": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24731v1"
+      ],
+      "status": "queued"
+    },
+    "509bb54e8c12d0b45035ffec099bba09ab16b77b826b025a37dfcc201e15cf34": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24563v1"
       ],
       "status": "queued"
     },
@@ -2208,6 +2415,17 @@
       ],
       "status": "queued"
     },
+    "5461ed44198ebac233ae352e3e87892add23d03db3ed8a794e633c74fb9e4838": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://anthropic.com/news/claude-opus-5",
+        "https://status.claude.com/incidents/lhqp09kxq7pb",
+        "https://status.claude.com/incidents/mfdtrknpxghq"
+      ],
+      "status": "queued"
+    },
     "549da42a1776e56cfb07f917514c289d03e7e844546d5ea11fcc864be2ee29e6": {
       "card_id": null,
       "first_seen": "2026-07-16",
@@ -2262,6 +2480,15 @@
       ],
       "status": "queued"
     },
+    "55fa1137ac828e4fe5392b34bcb0c2a4f18b6ddf77e1fe773172ca297ed157ca": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24601v1"
+      ],
+      "status": "queued"
+    },
     "5604280b5af2811cdabf74488dd97bb0049a5a5437afb94066506a57339b614f": {
       "card_id": null,
       "first_seen": "2026-07-09",
@@ -2310,7 +2537,7 @@
     "577ddf6b90e6d70b43383fc6b5bf29af9051645ec6ba8ce542b298223ecbfa62": {
       "card_id": null,
       "first_seen": "2026-07-23",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/advancing-the-next-era-of-national-science"
       ],
@@ -2337,6 +2564,15 @@
         "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
         "last_attempted_at": "2026-07-28T01:29:03Z"
       }
+    },
+    "58183fb0e2d0fb64ec87f98219817f89b88b9a3acd050c9ccce79d8db9ff3d07": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24730v1"
+      ],
+      "status": "queued"
     },
     "585e5dbcd6a5411083707c9a35729f0bcc9bcc45d0d99e1be948dcded0cffd12": {
       "card_id": null,
@@ -2612,6 +2848,15 @@
       ],
       "status": "queued"
     },
+    "63d3d60d05833288d792fb1f0138cdb1738fa2458d42d71ece9fb9d144929336": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24647v1"
+      ],
+      "status": "queued"
+    },
     "64835939b02b7e11e8896f42b005f3b679ead612e3a180e1540d7ef0cbc30d57": {
       "card_id": null,
       "first_seen": "2026-07-21",
@@ -2813,7 +3058,7 @@
     "69e481323262afa1b5216cbe98dd7c3d5122fa06b483d2f7f01243ab98947b44": {
       "card_id": null,
       "first_seen": "2026-07-21",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/david-velez-robin-vince-join-openai-boards"
       ],
@@ -2924,6 +3169,15 @@
       "last_seen": "2026-07-24",
       "member_urls": [
         "https://arxiv.org/abs/2607.20301v1"
+      ],
+      "status": "queued"
+    },
+    "6e3354ef0f81c2e8dd49035b43d34989799ee0a1b46cfeaf4fe079d17c71de68": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://justinflick.com/2026/07/27/llm-confidence-scores.html"
       ],
       "status": "queued"
     },
@@ -3074,7 +3328,7 @@
     "76aa4a6f69ddf5d21519f39929256be30bb1af825a63513e0cadec12b57bcd94": {
       "card_id": null,
       "first_seen": "2026-07-09",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://anthropic.com/news/announcing-our-updated-responsible-scaling-policy"
       ],
@@ -3149,6 +3403,15 @@
       "last_seen": "2026-07-18",
       "member_urls": [
         "https://arxiv.org/abs/2607.15258v1"
+      ],
+      "status": "queued"
+    },
+    "7953eaa843616a4fd354eda5c46ed761810d2cd939df99e06cf2c0308dcba3bd": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24673v1"
       ],
       "status": "queued"
     },
@@ -3251,6 +3514,15 @@
       ],
       "status": "queued"
     },
+    "7cbc4d2c27eee27f089d16e38a9cce20f2d19d8ac2c8ffad215039b4cdd79d25": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24707v1"
+      ],
+      "status": "queued"
+    },
     "7d2d9bb4d0a55a058927fa8edd7e69c0ade16e3243f6a5b0b7c2b1d53a20c155": {
       "card_id": null,
       "first_seen": "2026-07-17",
@@ -3305,12 +3577,30 @@
       ],
       "status": "queued"
     },
+    "7f30fdaa175b6605d5ac5c3537c46c819b9541d655cd433bab0fdbdb31f03409": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24589v1"
+      ],
+      "status": "queued"
+    },
     "7f3870efb27d33574a3a7e5e016ac9fe8096319b8fee669ef74698bbb6d576c7": {
       "card_id": null,
       "first_seen": "2026-07-12",
       "last_seen": "2026-07-12",
       "member_urls": [
         "https://arxiv.org/abs/2607.08641v1"
+      ],
+      "status": "queued"
+    },
+    "7f3ede1816ce17721a4878b3be9e40b02c6c0db6684cd82147461855a2d326cc": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24667v1"
       ],
       "status": "queued"
     },
@@ -3350,6 +3640,15 @@
       ],
       "status": "queued"
     },
+    "824b5ba22f1e74f57103cf97c6ccba2fd0427fcaf3709c76d98de2dd553286e5": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://openai.com/index/scientific-computing-agentic-ai"
+      ],
+      "status": "queued"
+    },
     "826253f437dd727ec642ed12e45df51ddef6b2c869827d212408916cbffc145d": {
       "card_id": null,
       "first_seen": "2026-07-09",
@@ -3365,6 +3664,15 @@
       "last_seen": "2026-07-21",
       "member_urls": [
         "https://arxiv.org/abs/2607.18162v1"
+      ],
+      "status": "queued"
+    },
+    "8310e6ba64fd1c7b6bbd6b722bbd184128f9f120ae798febc5b4b8c91e2f3b3f": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24686v1"
       ],
       "status": "queued"
     },
@@ -3389,9 +3697,18 @@
     "839f7a51d7b587ae6fb6fad7749706514391475c0a696dde71fbacdaca270ce7": {
       "card_id": null,
       "first_seen": "2026-07-23",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/introducing-openai-presence"
+      ],
+      "status": "queued"
+    },
+    "83f99c46fa0d39e7e0b4d383bde4558fd5980a05f866e33b96945ff0cb787e9d": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24562v1"
       ],
       "status": "queued"
     },
@@ -3407,7 +3724,7 @@
     "8438182d5ea718983d6d1b25c4decd897c827b4729f65fbe8679e34ed685b24f": {
       "card_id": null,
       "first_seen": "2026-07-23",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://anthropic.com/news/economic-futures-research-fund-agenda"
       ],
@@ -3674,6 +3991,24 @@
       ],
       "status": "queued"
     },
+    "8d2622d4249f3147767f30cab74ef4a4e48d7ab3529b3fac4baaf7bb6617faf1": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24588v1"
+      ],
+      "status": "queued"
+    },
+    "8d6ed760ab7fcb3a4148f262e2383913cb2f318feb39fc7c3106183b8c4b89e6": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24714v1"
+      ],
+      "status": "queued"
+    },
     "8dd9f8147964cdb4a8f89601dc5e28f64871371c999c8b14d7247706e7e76090": {
       "card_id": null,
       "first_seen": "2026-07-09",
@@ -3875,7 +4210,7 @@
     "932591afba7f1cf55372f3f455c6c008f9ff2b3d6f73c68ab2f0a4a130897d6d": {
       "card_id": null,
       "first_seen": "2026-07-23",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/how-news-organizations-are-using-ai"
       ],
@@ -3932,6 +4267,15 @@
       "last_seen": "2026-07-13",
       "member_urls": [
         "https://arxiv.org/abs/2607.09560v1"
+      ],
+      "status": "queued"
+    },
+    "95d942a8370341772585706c3a53427ab019d14601035a0cf36a7ef97b2d2754": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://jfrog.com/blog/jfrog-and-openai-collaboration-on-zero-day-security-findings"
       ],
       "status": "queued"
     },
@@ -4074,6 +4418,15 @@
       ],
       "status": "queued"
     },
+    "9a6487535c358cc25509c0a755880a7139af0b2152a6b31a92be05b84c2a3eeb": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24556v1"
+      ],
+      "status": "queued"
+    },
     "9aa8a81d83f86c0b65c0c546459539313278e6c54f172dc15719b4e4ec7aea29": {
       "card_id": null,
       "first_seen": "2026-07-28",
@@ -4143,6 +4496,15 @@
       "last_seen": "2026-07-28",
       "member_urls": [
         "https://arxiv.org/abs/2607.22445v1"
+      ],
+      "status": "queued"
+    },
+    "9c53f0e70bc1b9081c711e6017a603d676fac892f54c85ec343213134295d961": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24743v1"
       ],
       "status": "queued"
     },
@@ -4406,6 +4768,15 @@
       ],
       "status": "queued"
     },
+    "a31edd67950d56baf5a0f08bbf1f0148d5f396596aa559cc1b95e761698c410a": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24582v1"
+      ],
+      "status": "queued"
+    },
     "a339695819d2bd44ee7234abd7e58f2d2632f9c6067851743981999efb8ba368": {
       "card_id": null,
       "first_seen": "2026-07-21",
@@ -4442,6 +4813,15 @@
       ],
       "status": "queued"
     },
+    "a5126e34e88e2d6f6270a4caaa1c8806cec5bf28403f5c1780d169569705dc99": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://galjot.si/what-ai-developers-could-learn-from-charles-bukowski"
+      ],
+      "status": "queued"
+    },
     "a5818b0687cb419b893cba74ed5cd824efc722955aded9438792f020f55b455c": {
       "card_id": null,
       "first_seen": "2026-07-21",
@@ -4454,7 +4834,7 @@
     "a5ab872c216c2f944ec77d4d072f84e82e060aae4903cb3932963f9bd7c8bda4": {
       "card_id": null,
       "first_seen": "2026-07-21",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/safety-alignment-long-horizon-models"
       ],
@@ -4514,6 +4894,15 @@
       ],
       "status": "queued"
     },
+    "a76d72588758a44fe5efa5635ec55ad386b9a518d9d80201e3e4c6bf5a9b0481": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24663v1"
+      ],
+      "status": "queued"
+    },
     "a7a3032028ca51bbe6a70f965cbe863b29eae0c2481d3cbfc86a34bf4adc578d": {
       "card_id": null,
       "first_seen": "2026-07-24",
@@ -4559,10 +4948,19 @@
       ],
       "status": "queued"
     },
+    "a8fc2f3e34715380dcdc3286899fcf5c85e8d0fa4ab10f03977cc7d5d26bead2": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24583v1"
+      ],
+      "status": "queued"
+    },
     "a907415b440a72c97ae113fef1ec4712f495e77ca68c1416652d44e576d949fd": {
       "card_id": null,
       "first_seen": "2026-07-17",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/why-teens-deserve-access-safe-ai"
       ],
@@ -4729,6 +5127,15 @@
       ],
       "status": "queued"
     },
+    "b059fb0e246aeae5d6dcbd77efc8b86b74c271e1b601d87d1b7d3ac701184c6d": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24608v1"
+      ],
+      "status": "queued"
+    },
     "b069180b6e4e0251c494af82f00b045f4cd27e931e298fdb20e86ff6450da996": {
       "card_id": null,
       "first_seen": "2026-07-16",
@@ -4774,6 +5181,15 @@
       ],
       "status": "queued"
     },
+    "b2cb816e9499c37c1147b2d092d95e4122a439608fe9112026ef732920cffc68": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24692v1"
+      ],
+      "status": "queued"
+    },
     "b312003e92bed26766d0c0cb86336cf56fa7d7612caad02293b62a8ba81202c4": {
       "card_id": null,
       "first_seen": "2026-07-21",
@@ -4786,7 +5202,7 @@
     "b372e3a2f08a4a7ff0428704f2a11a38a619e9f5785d0e26673422e22a213cce": {
       "card_id": null,
       "first_seen": "2026-07-21",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://anthropic.com/news/rare-disease-research-grants"
       ],
@@ -4807,6 +5223,15 @@
       "last_seen": "2026-07-21",
       "member_urls": [
         "https://ludic.mataroa.blog/blog/ai-mania-is-eviscerating-global-decision-making"
+      ],
+      "status": "queued"
+    },
+    "b462a12eb31f611dae462ed84bb391849f4bd229dd430ebc26609592c2b57fb3": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24625v1"
       ],
       "status": "queued"
     },
@@ -5084,7 +5509,7 @@
     "bf70d809f9542eeef4af8727140322b50521173b898dd368bf4dae652a9efd17": {
       "card_id": null,
       "first_seen": "2026-07-24",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/health-in-chatgpt"
       ],
@@ -5132,6 +5557,15 @@
       "last_seen": "2026-07-12",
       "member_urls": [
         "https://arxiv.org/abs/2607.08748v1"
+      ],
+      "status": "queued"
+    },
+    "c17fe79d2d3c04c36d31c852eb33b51ebef61341c1d0592c6fa407689fcf1e53": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24553v1"
       ],
       "status": "queued"
     },
@@ -5246,7 +5680,7 @@
     "c5c5248230951857dae9664d8976aabb3764bf6936706cfde3b2931f62916be6": {
       "card_id": null,
       "first_seen": "2026-07-17",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/a-scorecard-for-the-ai-age"
       ],
@@ -5318,7 +5752,7 @@
     "c9188684c37e1a5f3f4e81ad4346cf638bde96852b08a05dbbb2d62ecb15a302": {
       "card_id": null,
       "first_seen": "2026-07-23",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://anthropic.com/news/donation-public-first-action"
       ],
@@ -5439,6 +5873,24 @@
       "last_seen": "2026-07-13",
       "member_urls": [
         "https://arxiv.org/abs/2607.09544v1"
+      ],
+      "status": "queued"
+    },
+    "cce3fb93ecdee3c03697d24430810c8a3488b82e1b776c3d7baee922b08eff31": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24570v1"
+      ],
+      "status": "queued"
+    },
+    "cd61cd5245d901319f942a17464db673485b2deaabc36d9256deddbe04f3569e": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24665v1"
       ],
       "status": "queued"
     },
@@ -5565,6 +6017,15 @@
       "last_seen": "2026-07-09",
       "member_urls": [
         "https://arxiv.org/abs/2607.07471v1"
+      ],
+      "status": "queued"
+    },
+    "d467275faa31008ddac8b9da178f8e202ee895bf8c5abaa93168d3f3f14a2a29": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24717v1"
       ],
       "status": "queued"
     },
@@ -5707,6 +6168,15 @@
       ],
       "status": "queued"
     },
+    "d8f40e9bb5e77cab9595bfc406b9709352e80513b0602acc0cd046a7c4021322": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://ft.com/content/f8c03b5b-e194-4236-82c3-389b6f5dd7ae"
+      ],
+      "status": "queued"
+    },
     "d923a364b09ddb01750cc377e80cd1fe01a6679146f646660491bd3543e0bd4a": {
       "card_id": null,
       "first_seen": "2026-07-26",
@@ -5723,7 +6193,7 @@
     "d925d8c91f460a44f07089c2f27b36a626fbcac0f80dde4b561ae3114c0febb2": {
       "card_id": null,
       "first_seen": "2026-07-21",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/hugging-face-model-evaluation-security-incident"
       ],
@@ -5786,7 +6256,7 @@
     "db9d0913513df69e6eee2103c352167bdc6b0fd41d292f61fb456bed2e3c7061": {
       "card_id": null,
       "first_seen": "2026-07-28",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/how-ai-is-expanding-what-people-do-at-work"
       ],
@@ -5810,6 +6280,15 @@
       ],
       "status": "queued"
     },
+    "dc34b98fff9fd602ee295a66b7e2819b564db8b42e3e4a20a9b1a92e12207c41": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24573v1"
+      ],
+      "status": "queued"
+    },
     "dc6294cd550315842a02f6a66f9e9d38dab6f7547cdb92de3074f80692d2d5c9": {
       "card_id": null,
       "first_seen": "2026-07-14",
@@ -5825,6 +6304,15 @@
       "last_seen": "2026-07-09",
       "member_urls": [
         "https://noma.security/blog/gitlost-how-we-tricked-githubs-ai-agent-into-leaking-private-repos"
+      ],
+      "status": "queued"
+    },
+    "dce87fe1ab5fa7c8111703bd52c89ec79b01b8648e10c4afab86a846b7bc6674": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://github.com/anthropics/cryptography-research-demo"
       ],
       "status": "queued"
     },
@@ -6006,7 +6494,7 @@
     "e08c4d4e6d11f25f77a6eb4ca92c2b228b9305a5816982622029c8c224f463a8": {
       "card_id": null,
       "first_seen": "2026-07-23",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://deepmind.google/blog/accelerating-the-frontiers-of-scientific-discovery-googles-40m-commitment-to-the-genesis-mission"
       ],
@@ -6259,6 +6747,15 @@
         "last_attempted_at": "2026-07-26T22:41:56Z"
       }
     },
+    "e9ce9303ba5b6675e0bf242c9382a9da655db76283bfa902dbc7aad9838a6460": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24622v1"
+      ],
+      "status": "queued"
+    },
     "ea0b9960b25ff2dec7aa3f223a52e5e74c785d4adf0a2930123fecd4c6f2a5d9": {
       "card_id": null,
       "first_seen": "2026-07-25",
@@ -6326,10 +6823,19 @@
       ],
       "status": "queued"
     },
+    "eaa1c720ef1eafaa6552d2fe6d0973460468333a9b4f577d1b7e18395ef969db": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24551v1"
+      ],
+      "status": "queued"
+    },
     "eb0678cc82527b4e0292ef44dc0ae322c2c49e80e96a1c14e82496608f9d14ec": {
       "card_id": null,
       "first_seen": "2026-07-23",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://anthropic.com/news/anthropic-economic-index-connector"
       ],
@@ -6368,6 +6874,15 @@
       "last_seen": "2026-07-18",
       "member_urls": [
         "https://arxiv.org/abs/2607.15200v1"
+      ],
+      "status": "queued"
+    },
+    "ec5aa732bb5f121ab51ae4c8ff7e475919f392f563a5b50db33ee0e1231d5619": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24651v1"
       ],
       "status": "queued"
     },
@@ -6468,7 +6983,7 @@
     "ef5186928b3338df10ed4a6ef1dd3398c486e06353c89a1c3d0e2cdf7d52e8e6": {
       "card_id": null,
       "first_seen": "2026-07-28",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://anthropic.com/news/cognizant-anthropic"
       ],
@@ -6649,7 +7164,7 @@
     "f47e8f0dcf67a37eae93618a0a25f51216c505f634e7722ae5be0eba4f7ac180": {
       "card_id": null,
       "first_seen": "2026-07-17",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/cars24"
       ],
@@ -6688,6 +7203,15 @@
       "last_seen": "2026-07-18",
       "member_urls": [
         "https://arxiv.org/abs/2607.15232v1"
+      ],
+      "status": "queued"
+    },
+    "f636edeb4d29f55262e2c3d712abaee7eb98694a96222bec3393577963c4957b": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24653v1"
       ],
       "status": "queued"
     },
@@ -6766,7 +7290,7 @@
     "f8df3e0d3cc81402169fbdee61bfd5fe093e09e8ae9a90ce6327c888ac618438": {
       "card_id": null,
       "first_seen": "2026-07-16",
-      "last_seen": "2026-07-28",
+      "last_seen": "2026-07-29",
       "member_urls": [
         "https://openai.com/index/unlocking-self-improvement-gpt-red"
       ],
@@ -6799,6 +7323,15 @@
       ],
       "status": "queued"
     },
+    "f9e4ac9cae08e59c016326b29dabcd7c1a34ca0c35717d8fe8642f5900ceeca7": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24720v1"
+      ],
+      "status": "queued"
+    },
     "fa3cab3ec02edea99a0533becc9a3fb69576ddfa0257a9ab5dc2e6b4acc6c8bd": {
       "card_id": null,
       "first_seen": "2026-07-17",
@@ -6814,6 +7347,24 @@
       "last_seen": "2026-07-14",
       "member_urls": [
         "https://arxiv.org/abs/2607.11818v1"
+      ],
+      "status": "queued"
+    },
+    "fac7cb2d7a6648bae76324a302bdb6c9ac0b9c9b8d0032b504c4d64215c2ecdb": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://spawn-queue.acm.org/doi/10.1145/3819083"
+      ],
+      "status": "queued"
+    },
+    "fad62d2b716e243da2173618944d60e69183a50054309f9a284f1841a8ecd405": {
+      "card_id": null,
+      "first_seen": "2026-07-29",
+      "last_seen": "2026-07-29",
+      "member_urls": [
+        "https://arxiv.org/abs/2607.24741v1"
       ],
       "status": "queued"
     },

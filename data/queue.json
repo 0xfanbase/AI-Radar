@@ -1,22 +1,36 @@
 [
   {
-    "cluster_hash": "23072d09f70e646cf9209030f7723ff394ca604c97aa862003da63a223128dc9",
+    "cluster_hash": "4843bcaedd469ff204b5147bad33346e30778c005fe07c2311130476f523e546",
     "rank": 1,
-    "score": 63.19131533073684,
+    "score": 24.937630278406843,
     "sources": [
       {
-        "outlet": "twitter.com",
-        "points": 732,
+        "outlet": "anthropic.com",
+        "points": 167,
         "source_type": "hn",
-        "title": "AI companies are shredding rare books",
-        "url": "https://twitter.com/HedgieMarkets/status/2081534588485296565"
+        "title": "Discovering Cryptographic Weaknesses with Claude",
+        "url": "https://www.anthropic.com/research/discovering-cryptographic-weaknesses"
       }
     ]
   },
   {
-    "cluster_hash": "530d5f69b02b0013f648305d7628247d4b3834382f3175aba1d6ebdf93f8b4c9",
+    "cluster_hash": "dce87fe1ab5fa7c8111703bd52c89ec79b01b8648e10c4afab86a846b7bc6674",
     "rank": 2,
-    "score": 45.79309806907331,
+    "score": 19.346548155719187,
+    "sources": [
+      {
+        "outlet": "github.com",
+        "points": 52,
+        "source_type": "hn",
+        "title": "Anthropic publishes a practical key-recovery attack on HAWK-256",
+        "url": "https://github.com/anthropics/cryptography-research-demo"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "5461ed44198ebac233ae352e3e87892add23d03db3ed8a794e633c74fb9e4838",
+    "rank": 3,
+    "score": 16.91964188850508,
     "sources": [
       {
         "outlet": null,
@@ -27,7 +41,14 @@
       },
       {
         "outlet": "status.claude.com",
-        "points": 96,
+        "points": 50,
+        "source_type": "hn",
+        "title": "Elevated errors on Claude Opus 5",
+        "url": "https://status.claude.com/incidents/lhqp09kxq7pb"
+      },
+      {
+        "outlet": "status.claude.com",
+        "points": 103,
         "source_type": "hn",
         "title": "Elevated errors on Claude Opus 5",
         "url": "https://status.claude.com/incidents/mfdtrknpxghq"
@@ -35,86 +56,72 @@
     ]
   },
   {
-    "cluster_hash": "58104f758c6d44a0f237cc9946af5c0886c3a86e1c8dce61ad1e10bc666abc26",
-    "rank": 3,
-    "score": 25.02368002657653,
+    "cluster_hash": "26db6f7328b78082a72442d1029fc6b07bd7ff2ac6d3b2680c3eac4c2724bb77",
+    "rank": 4,
+    "score": 15.979219469792204,
+    "sources": [
+      {
+        "outlet": "vishal.rs",
+        "points": 21,
+        "source_type": "hn",
+        "title": "Banning AI will not make it go away",
+        "url": "https://vishal.rs/essay/banning-ai-will-not-make-it-go-away"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "fac7cb2d7a6648bae76324a302bdb6c9ac0b9c9b8d0032b504c4d64215c2ecdb",
+    "rank": 5,
+    "score": 10.155619935826302,
+    "sources": [
+      {
+        "outlet": "spawn-queue.acm.org",
+        "points": 143,
+        "source_type": "hn",
+        "title": "Google's Beyond Zero: Enterprise Security for the AI Era",
+        "url": "https://spawn-queue.acm.org/doi/10.1145/3819083"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "167f0086e4a5aace6e604b61f7dc1b7129877cabeb513263778005671c6712a5",
+    "rank": 6,
+    "score": 9.591439021097159,
+    "sources": [
+      {
+        "outlet": "github.com",
+        "points": 105,
+        "source_type": "hn",
+        "title": "Show HN: Formally verified 3D CSG: Trust 93 lines spec, not 1000 lines AI code",
+        "url": "https://github.com/schildep/verified-3d-mesh-intersection"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "a5126e34e88e2d6f6270a4caaa1c8806cec5bf28403f5c1780d169569705dc99",
+    "rank": 7,
+    "score": 5.874652283483138,
+    "sources": [
+      {
+        "outlet": "galjot.si",
+        "points": 65,
+        "source_type": "hn",
+        "title": "What AI developers could learn from Charles Bukowski?",
+        "url": "https://galjot.si/what-ai-developers-could-learn-from-charles-bukowski"
+      }
+    ]
+  },
+  {
+    "cluster_hash": "d8f40e9bb5e77cab9595bfc406b9709352e80513b0602acc0cd046a7c4021322",
+    "rank": 8,
+    "score": 5.674871804266491,
     "sources": [
       {
         "outlet": "ft.com",
-        "points": 250,
+        "points": 35,
         "source_type": "hn",
-        "title": "AI companies spend record sums on Washington lobbying",
-        "url": "https://www.ft.com/content/d8a5f95e-3b6d-463a-a848-c9ef8e2394db"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "968ac3f020736b5bad46fd5acd3c8160c410296e1aaec539e9a7cdcf5f8b1c75",
-    "rank": 4,
-    "score": 24.550575507101282,
-    "sources": [
-      {
-        "outlet": "macrumors.com",
-        "points": 231,
-        "source_type": "hn",
-        "title": "Apple Will 'Watch Everything Burn' When the AI Bubble Bursts",
-        "url": "https://www.macrumors.com/2026/07/27/ed-zitron-apple-watch-it-burn-ai-bubble-bursts/"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "4a0083d45f04709db102ed4b9082fe7f40b7424aa7f21893b3ba2b1823a7c98c",
-    "rank": 5,
-    "score": 18.610073796454284,
-    "sources": [
-      {
-        "outlet": "techspot.com",
-        "points": 81,
-        "source_type": "hn",
-        "title": "Professor's invisible prompt trap catches 32/35 students cheating with AI",
-        "url": "https://www.techspot.com/news/113243-professor-invisible-prompt-trap-catches-32-students-cheating.html"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "a00379b3035c3b9af459f58b60b944bfab453aa721c4f719a839fcdddd2dcb4b",
-    "rank": 6,
-    "score": 12.485076241267235,
-    "sources": [
-      {
-        "outlet": "lesswrong.com",
-        "points": 177,
-        "source_type": "hn",
-        "title": "Why I Left Google DeepMind",
-        "url": "https://www.lesswrong.com/posts/iKm2FhpWkuuBojm82/why-i-left-google-deepmind"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "5a2e94febadbf8a052ebae87986a172cf4b8b8afcf6f93e4ef1517a65364e28a",
-    "rank": 7,
-    "score": 9.39756231897879,
-    "sources": [
-      {
-        "outlet": "bloomberg.com",
-        "points": 76,
-        "source_type": "hn",
-        "title": "Nvidia's $750B in Deals Reignite Circular AI Fears",
-        "url": "https://www.bloomberg.com/news/articles/2026-07-27/nvidia-s-750-billion-deals-revive-fear-of-ai-circular-financing"
-      }
-    ]
-  },
-  {
-    "cluster_hash": "1157c987239e41259b2b1ae51dcda1c5e631178e3545bf25dafd94ab8fd0f7f0",
-    "rank": 8,
-    "score": 7.2796120929101225,
-    "sources": [
-      {
-        "outlet": "pcgamer.com",
-        "points": 45,
-        "source_type": "hn",
-        "title": "Jensen Huang's first post on Twitter is in defense of open access to AI models",
-        "url": "https://www.pcgamer.com/software/ai/jensen-huangs-first-ever-post-on-x-is-in-defense-of-open-access-to-ai-models-alongside-google-openai-and-meta/"
+        "title": "Chip stocks tumble as AI sell-off deepens",
+        "url": "https://www.ft.com/content/f8c03b5b-e194-4236-82c3-389b6f5dd7ae"
       }
     ]
   }
