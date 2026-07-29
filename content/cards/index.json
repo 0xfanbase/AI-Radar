@@ -1,6 +1,45 @@
 {
   "cards": [
     {
+      "date": "2026-07-29",
+      "headline": "Formal Verification Lets a 93-Line Spec Stand In for 1,000+ Lines of AI-Written Code",
+      "id": "2026-07-29-show-hn-formally-verified-3d-csg-trust-93-lines-spec-not-100-167f00",
+      "lexicon_terms": [
+        "formal verification"
+      ],
+      "status": "confirmed",
+      "topics": [
+        "open-source",
+        "research"
+      ]
+    },
+    {
+      "date": "2026-07-29",
+      "headline": "Google Introduces \"Beyond Zero\" to Rethink Enterprise Security for AI Agents",
+      "id": "2026-07-29-google-s-beyond-zero-enterprise-security-for-the-ai-era-fac7cb",
+      "lexicon_terms": [
+        "agent"
+      ],
+      "status": "confirmed",
+      "topics": [
+        "products",
+        "safety"
+      ]
+    },
+    {
+      "date": "2026-07-29",
+      "headline": "Claude Found Mathematical Flaws in Cryptographic Algorithms Themselves, Anthropic Says",
+      "id": "2026-07-29-discovering-cryptographic-weaknesses-with-claude-4843bc",
+      "lexicon_terms": [
+        "agent"
+      ],
+      "status": "confirmed",
+      "topics": [
+        "research",
+        "safety"
+      ]
+    },
+    {
       "date": "2026-07-27",
       "headline": "New Stanford Data Finds AI Isn't Broadly Cutting Jobs -- Except for New Grads",
       "id": "2026-07-27-what-is-happening-to-jobs-separating-ai-hype-from-reality-fe97ee",

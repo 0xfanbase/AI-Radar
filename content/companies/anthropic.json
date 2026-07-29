@@ -84,6 +84,56 @@
             "quote": "For complex agentic coding and enterprise work"
           }
         ]
+      },
+      {
+        "text": "In July 2026 Anthropic donated another $20 million to Public First Action, a nonpartisan group that educates the public on AI policy across party lines, bringing its total support for the group to $40 million since an initial donation in February 2026.",
+        "citations": [
+          {
+            "url": "https://www.anthropic.com/news/donation-public-first-action",
+            "outlet": "Anthropic (official)",
+            "quote": "Anthropic is donating another $20 million to Public First Action"
+          }
+        ]
+      },
+      {
+        "text": "In July 2026 Anthropic committed $200 million to a new Economic Futures Research Fund, an expansion of its year-old Economic Futures program, to pay outside researchers studying how workers, firms and governments can prepare for AI's economic impact.",
+        "citations": [
+          {
+            "url": "https://www.anthropic.com/news/economic-futures-research-fund-agenda",
+            "outlet": "Anthropic (official)",
+            "quote": "committing $200 million to the fund to support ambitious external research"
+          }
+        ]
+      },
+      {
+        "text": "In July 2026 Anthropic expanded its partnership with IT services firm Cognizant, which is training more than 30,000 staff on Claude and embedding it across its enterprise engineering platforms, and has become a Global Premier Partner in the Claude Partner Network.",
+        "citations": [
+          {
+            "url": "https://www.anthropic.com/news/cognizant-anthropic",
+            "outlet": "Anthropic (official)",
+            "quote": "Cognizant brings that domain context, along with the engineering depth and delivery scale"
+          }
+        ]
+      },
+      {
+        "text": "In July 2026 Anthropic publicly stated it has never called for banning open-weights models, saying its actual policy priorities are chip export controls to China, curbing distillation of its own models, and mandatory safety testing for sufficiently capable models regardless of whether their weights are open.",
+        "citations": [
+          {
+            "url": "https://www.anthropic.com/news/position-open-weights-models",
+            "outlet": "Anthropic (official)",
+            "quote": "Anthropic has never advocated for a ban on open-weights models"
+          }
+        ]
+      },
+      {
+        "text": "In late July 2026, Anthropic's Frontier Red Team said an agentic Claude Mythos Preview model, working largely on its own, found genuine mathematical weaknesses in cryptographic schemes rather than implementation bugs -- including a practical key-recovery attack cutting HAWK-256's claimed security from 2^64 to 2^38, and a 200-800x speedup on attacks against reduced, 7-round AES. Anthropic disclosed the HAWK weakness to the scheme's authors in June, before publishing.",
+        "citations": [
+          {
+            "url": "https://www.anthropic.com/research/discovering-cryptographic-weaknesses",
+            "outlet": "Anthropic (official research)",
+            "quote": "Claude is able to find mathematical flaws in the algorithms themselves"
+          }
+        ]
       }
     ],
     "strengths": [
@@ -106,6 +156,16 @@
             "quote": "It can make plans, use tools like browsers and terminals"
           }
         ]
+      },
+      {
+        "text": "Its Frontier Red Team has shown Claude models can do genuine cryptanalysis research at an expert level, semi-autonomously, rather than just testing software for implementation bugs -- including finding a real design weakness in the post-quantum signature candidate HAWK.",
+        "citations": [
+          {
+            "url": "https://www.anthropic.com/research/discovering-cryptographic-weaknesses",
+            "outlet": "Anthropic (official research)",
+            "quote": "Claude is able to perform cryptographic research at the level of top experts"
+          }
+        ]
       }
     ],
     "current_focus": {
@@ -118,10 +178,21 @@
         }
       ]
     },
-    "roadmap": []
+    "roadmap": [
+      {
+        "text": "Anthropic says it plans to fund external research projects, typically in the $5-30 million range, on AI's workplace impact, retraining and transitions, income-support modernization, worker stakes in AI gains, and public-investment evidence, through its new $200 million Economic Futures Research Fund.",
+        "citations": [
+          {
+            "url": "https://www.anthropic.com/news/economic-futures-research-fund-agenda",
+            "outlet": "Anthropic (official)",
+            "quote": "We plan to primarily fund projects in the $5-30 million range"
+          }
+        ]
+      }
+    ]
   },
   "status": "confirmed",
-  "generated_at": "2026-07-13T00:00:00Z",
+  "generated_at": "2026-07-29T02:15:00Z",
   "model": "claude-sonnet-5",
-  "last_verified": "2026-07-25"
+  "last_verified": "2026-07-29"
 }

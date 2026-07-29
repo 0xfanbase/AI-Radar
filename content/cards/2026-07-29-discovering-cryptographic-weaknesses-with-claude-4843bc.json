@@ -1,0 +1,21 @@
+{
+  "id": "2026-07-29-discovering-cryptographic-weaknesses-with-claude-4843bc",
+  "date": "2026-07-29",
+  "headline": "Claude Found Mathematical Flaws in Cryptographic Algorithms Themselves, Anthropic Says",
+  "what_happened": "Anthropic says its Claude Mythos Preview model, acting as an autonomous agent in a sandboxed environment, found mathematical weaknesses in cryptographic schemes themselves, not just bugs in code implementing them. Most notably: an improved key-recovery attack cutting HAWK-256's claimed security from 2^64 to 2^38 (HAWK is a post-quantum signature scheme under NIST review), plus a technique speeding up attacks on reduced, 7-round AES by 200-800x. Anthropic disclosed the HAWK finding to its creators in June, before publishing.",
+  "why_it_matters": "This is a real capability jump: an AI model working largely on its own found a genuine design weakness in a cryptographic scheme, not just buggy code. That matters for how much scrutiny post-quantum candidates need before standardization, and for how AI reshapes security research generally.",
+  "one_liner": "Anthropic had one of its AI models work mostly on its own to find real weaknesses in the math of an encryption scheme, not just bugs in code that uses it.",
+  "topics": ["research", "safety"],
+  "status": "confirmed",
+  "citations": [
+    {
+      "url": "https://www.anthropic.com/research/discovering-cryptographic-weaknesses",
+      "outlet": "Anthropic",
+      "quote": "Claude is able to find mathematical flaws in the algorithms themselves"
+    }
+  ],
+  "lexicon_terms": ["agent"],
+  "generated_at": "2026-07-29T01:40:00Z",
+  "model": "claude-sonnet-5",
+  "companies": ["anthropic"]
+}

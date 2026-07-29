@@ -1,0 +1,20 @@
+{
+  "id": "2026-07-29-show-hn-formally-verified-3d-csg-trust-93-lines-spec-not-100-167f00",
+  "date": "2026-07-29",
+  "headline": "Formal Verification Lets a 93-Line Spec Stand In for 1,000+ Lines of AI-Written Code",
+  "what_happened": "Developer \"schildep\" published a formally verified 3D mesh-intersection library: a 93-line mathematical specification, in the Lean 4 proof language, that a human can read and trust, backing an implementation with over 1,000 lines of AI-generated code and 60,000-plus lines of AI-generated proofs. Lean's compiler automatically checks every proof against the spec, so reviewers never inspect the implementation itself. A WebAssembly browser demo lets users test it on sample meshes or their own STL files.",
+  "why_it_matters": "It's a concrete answer to \"how do you trust AI-written code\": don't review the code at all, write a short, human-checkable spec and let a proof checker verify the AI's much larger implementation against it automatically, catching errors a manual code review would likely miss.",
+  "one_liner": "A developer showed that instead of trying to read and trust thousands of lines of AI-written code, you can write a much shorter set of rules and have a computer prove the AI's code actually follows them.",
+  "topics": ["open-source", "research"],
+  "status": "confirmed",
+  "citations": [
+    {
+      "url": "https://github.com/schildep/verified-3d-mesh-intersection",
+      "outlet": "GitHub (schildep/verified-3d-mesh-intersection)",
+      "quote": "trust 93 lines of spec, not 1000+ lines of AI-written code"
+    }
+  ],
+  "lexicon_terms": ["formal verification"],
+  "generated_at": "2026-07-29T02:10:00Z",
+  "model": "claude-sonnet-5"
+}

@@ -69,7 +69,7 @@
       "context window",
       "test-time compute"
     ],
-    "seen_in": ["2026-07-26-the-new-rules-of-context-engineering-for-claude-5-generation-8e418f", "2026-07-27-cloudflare-s-new-ai-traffic-options-for-customers-f0a020"]
+    "seen_in": ["2026-07-26-the-new-rules-of-context-engineering-for-claude-5-generation-8e418f", "2026-07-27-cloudflare-s-new-ai-traffic-options-for-customers-f0a020", "2026-07-29-discovering-cryptographic-weaknesses-with-claude-4843bc", "2026-07-29-google-s-beyond-zero-enterprise-security-for-the-ai-era-fac7cb"]
   },
   {
     "term": "RAG",
@@ -393,5 +393,16 @@
       "compute"
     ],
     "seen_in": ["2026-07-27-running-a-28-9m-parameter-llm-on-an-8-microcontroller-0c8bd8"]
+  },
+  {
+    "term": "formal verification",
+    "one_liner": "Formal verification is mathematically proving that a piece of software always behaves exactly as a written specification says, instead of just testing it on a sample of inputs and hoping that generalizes.",
+    "deeper": "Where ordinary software testing runs a program against a finite set of example inputs and can never rule out a bug lurking in some untested case, formal verification uses a proof language and an automated checker to prove a property holds for every possible input at once, the same way a mathematical proof holds for every number rather than a few tried by hand. This lets a reviewer read a short, human-scale specification of what code is supposed to do and trust a much larger, more complex implementation without personally inspecting it line by line, as long as the proof checker confirms the implementation matches the spec. The technique has taken on new relevance as AI models generate more and more production code, since a compact formal spec plus an automated checker can validate AI-written implementations at a scale no human code review could match, as demonstrated in <a href=\"https://github.com/schildep/verified-3d-mesh-intersection\">a formally verified 3D mesh-intersection library</a> whose 93-line spec stood in for over 1,000 lines of AI-generated code and 60,000-plus lines of AI-generated proof.",
+    "related": [
+      "hallucination",
+      "agent",
+      "evals"
+    ],
+    "seen_in": ["2026-07-29-show-hn-formally-verified-3d-csg-trust-93-lines-spec-not-100-167f00"]
   }
 ]

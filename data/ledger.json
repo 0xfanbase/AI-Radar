@@ -662,13 +662,13 @@
       "status": "queued"
     },
     "167f0086e4a5aace6e604b61f7dc1b7129877cabeb513263778005671c6712a5": {
-      "card_id": null,
+      "card_id": "2026-07-29-show-hn-formally-verified-3d-csg-trust-93-lines-spec-not-100-167f00",
       "first_seen": "2026-07-29",
       "last_seen": "2026-07-29",
       "member_urls": [
         "https://github.com/schildep/verified-3d-mesh-intersection"
       ],
-      "status": "queued"
+      "status": "published"
     },
     "16e13c52f7cd02d4ace3d47abac95ccf3b9e630262bd24e605b9bb93a859298e": {
       "card_id": null,
@@ -1168,7 +1168,11 @@
       "member_urls": [
         "https://vishal.rs/essay/banning-ai-will-not-make-it-go-away"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-29T01:44:17Z"
+      }
     },
     "271cd1b24d5ceb6706b5a79c375780f3c38b55b34731387957457a3adb704d9e": {
       "card_id": null,
@@ -2038,13 +2042,13 @@
       "status": "queued"
     },
     "4843bcaedd469ff204b5147bad33346e30778c005fe07c2311130476f523e546": {
-      "card_id": null,
+      "card_id": "2026-07-29-discovering-cryptographic-weaknesses-with-claude-4843bc",
       "first_seen": "2026-07-29",
       "last_seen": "2026-07-29",
       "member_urls": [
         "https://anthropic.com/research/discovering-cryptographic-weaknesses"
       ],
-      "status": "queued"
+      "status": "published"
     },
     "487c06d9a73561e8ba90788dc7b1e0a43d57cbaa6466e89995772f0fd392c215": {
       "card_id": null,
@@ -2424,7 +2428,11 @@
         "https://status.claude.com/incidents/lhqp09kxq7pb",
         "https://status.claude.com/incidents/mfdtrknpxghq"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-29T01:44:17Z"
+      }
     },
     "549da42a1776e56cfb07f917514c289d03e7e844546d5ea11fcc864be2ee29e6": {
       "card_id": null,
@@ -4820,7 +4828,11 @@
       "member_urls": [
         "https://galjot.si/what-ai-developers-could-learn-from-charles-bukowski"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-29T01:44:17Z"
+      }
     },
     "a5818b0687cb419b893cba74ed5cd824efc722955aded9438792f020f55b455c": {
       "card_id": null,
@@ -6175,7 +6187,11 @@
       "member_urls": [
         "https://ft.com/content/f8c03b5b-e194-4236-82c3-389b6f5dd7ae"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-29T01:44:17Z"
+      }
     },
     "d923a364b09ddb01750cc377e80cd1fe01a6679146f646660491bd3543e0bd4a": {
       "card_id": null,
@@ -6314,7 +6330,11 @@
       "member_urls": [
         "https://github.com/anthropics/cryptography-research-demo"
       ],
-      "status": "queued"
+      "status": "dropped",
+      "verifier_outcome": {
+        "dropped_reason": "no content/cards/<id>.json was published for this cluster this run (verifier drop or analyst skip)",
+        "last_attempted_at": "2026-07-29T01:44:17Z"
+      }
     },
     "dcf364f8d3ab164c7cd3aa4a78f78a8abb60e6e942c3feacb3afc7c93e2a687d": {
       "card_id": null,
@@ -7351,13 +7371,13 @@
       "status": "queued"
     },
     "fac7cb2d7a6648bae76324a302bdb6c9ac0b9c9b8d0032b504c4d64215c2ecdb": {
-      "card_id": null,
+      "card_id": "2026-07-29-google-s-beyond-zero-enterprise-security-for-the-ai-era-fac7cb",
       "first_seen": "2026-07-29",
       "last_seen": "2026-07-29",
       "member_urls": [
         "https://spawn-queue.acm.org/doi/10.1145/3819083"
       ],
-      "status": "queued"
+      "status": "published"
     },
     "fad62d2b716e243da2173618944d60e69183a50054309f9a284f1841a8ecd405": {
       "card_id": null,

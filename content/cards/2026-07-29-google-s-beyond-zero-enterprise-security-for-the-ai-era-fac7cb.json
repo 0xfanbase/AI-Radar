@@ -1,0 +1,20 @@
+{
+  "id": "2026-07-29-google-s-beyond-zero-enterprise-security-for-the-ai-era-fac7cb",
+  "date": "2026-07-29",
+  "headline": "Google Introduces \"Beyond Zero\" to Rethink Enterprise Security for AI Agents",
+  "what_happened": "Google published a new enterprise-security framework, Beyond Zero, on July 27, 2026, aimed at organizations deploying AI agents alongside human employees. It extends Google's 2014 BeyondCorp zero-trust model down from whole applications to individual actions and resources, combining fixed authorization rules with real-time, dynamic risk judgments so both human and agent requests can be approved or blocked at machine speed. Google says early prototypes improved detection of access abuse.",
+  "why_it_matters": "As companies give AI agents real access to internal systems, old all-or-nothing app permissions stop being enough: a compromised agent can act as fast as an attacker. Beyond Zero is Google's attempt to police each individual action agents take, not just whether they're logged in at all.",
+  "one_liner": "Google built a new security system, called Beyond Zero, designed to check every single action an AI agent takes inside a company, not just whether it's allowed in the door.",
+  "topics": ["products", "safety"],
+  "status": "confirmed",
+  "citations": [
+    {
+      "url": "https://blog.google/security/going-beyond-zero-a-new-paradigm-for-enterprise-security/",
+      "outlet": "Google",
+      "quote": "Every single action taken inside an enterprise is authorized."
+    }
+  ],
+  "lexicon_terms": ["agent"],
+  "generated_at": "2026-07-29T01:55:00Z",
+  "model": "claude-sonnet-5"
+}
