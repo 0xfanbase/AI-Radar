@@ -2,48 +2,48 @@
   "cards_cap": 8,
   "clusters": [
     {
-      "cluster_hash": "4843bcaedd469ff204b5147bad33346e30778c005fe07c2311130476f523e546",
-      "proposed_card_id": "2026-07-29-discovering-cryptographic-weaknesses-with-claude-4843bc",
+      "cluster_hash": "38dccf62a921a5a9b41717b99f69cd01b810f5c831060a4f3c76ed567a6613e8",
+      "proposed_card_id": "2026-07-30-claude-elevated-errors-across-all-models-resolved-38dccf",
       "rank": 1
     },
     {
-      "cluster_hash": "dce87fe1ab5fa7c8111703bd52c89ec79b01b8648e10c4afab86a846b7bc6674",
-      "proposed_card_id": "2026-07-29-anthropic-publishes-a-practical-key-recovery-attack-on-hawk-dce87f",
+      "cluster_hash": "d6c8d1cdd874152769408b0cd9224d97fba45ae2ffdc275c8311e01d4a5efbcb",
+      "proposed_card_id": "2026-07-30-ai-s-top-startups-are-barely-publishing-their-research-d6c8d1",
       "rank": 2
     },
     {
-      "cluster_hash": "5461ed44198ebac233ae352e3e87892add23d03db3ed8a794e633c74fb9e4838",
-      "proposed_card_id": "2026-07-29-introducing-claude-opus-5-5461ed",
+      "cluster_hash": "119813105b52d4e76320be68116dcd15142d11314f75ffd06be9854912b10b9e",
+      "proposed_card_id": "2026-07-30-document-borne-ai-worms-can-self-propagate-through-copilot-f-119813",
       "rank": 3
     },
     {
-      "cluster_hash": "26db6f7328b78082a72442d1029fc6b07bd7ff2ac6d3b2680c3eac4c2724bb77",
-      "proposed_card_id": "2026-07-29-banning-ai-will-not-make-it-go-away-26db6f",
+      "cluster_hash": "0294221f209290b0d560d1bde5f0227ef7d520529d1733b67edd1259841fc65c",
+      "proposed_card_id": "2026-07-30-some-thoughts-about-anthropic-s-new-cryptanalysis-results-029422",
       "rank": 4
     },
     {
-      "cluster_hash": "fac7cb2d7a6648bae76324a302bdb6c9ac0b9c9b8d0032b504c4d64215c2ecdb",
-      "proposed_card_id": "2026-07-29-google-s-beyond-zero-enterprise-security-for-the-ai-era-fac7cb",
+      "cluster_hash": "ea153b4bd6bbf07ea694925c2a9627960c841218f044014d0f0ebf7e9ea585f1",
+      "proposed_card_id": "2026-07-30-learnvector-andrew-ng-s-ai-company-building-one-to-one-learn-ea153b",
       "rank": 5
     },
     {
-      "cluster_hash": "167f0086e4a5aace6e604b61f7dc1b7129877cabeb513263778005671c6712a5",
-      "proposed_card_id": "2026-07-29-show-hn-formally-verified-3d-csg-trust-93-lines-spec-not-100-167f00",
+      "cluster_hash": "30263965179ebd1ba3bd368a1728f44be2b9d36be239e88064b1cb6a752b3efd",
+      "proposed_card_id": "2026-07-30-after-the-ai-crash-302639",
       "rank": 6
     },
     {
-      "cluster_hash": "a5126e34e88e2d6f6270a4caaa1c8806cec5bf28403f5c1780d169569705dc99",
-      "proposed_card_id": "2026-07-29-what-ai-developers-could-learn-from-charles-bukowski-a5126e",
+      "cluster_hash": "dbf16e456727ceae2e0d871a7f59e6981f4fea6c99cb1ccf3b1f6d495673a36a",
+      "proposed_card_id": "2026-07-30-commodification-of-intelligence-good-bad-and-ugly-circular-a-dbf16e",
       "rank": 7
     },
     {
-      "cluster_hash": "d8f40e9bb5e77cab9595bfc406b9709352e80513b0602acc0cd046a7c4021322",
-      "proposed_card_id": "2026-07-29-chip-stocks-tumble-as-ai-sell-off-deepens-d8f40e",
+      "cluster_hash": "6e8c1eec99eb74d90ae6ce150e112a9dadd6c22da6c9bd7fb5e813430dfaabf8",
+      "proposed_card_id": "2026-07-30-gpt-5-6-vs-claude-fable-5-for-physical-ai-which-performs-bes-6e8c1e",
       "rank": 8
     }
   ],
   "degradation_level": 0,
-  "generated_at": "2026-07-29T01:09:20Z",
+  "generated_at": "2026-07-30T01:09:46Z",
   "profile_reason": "company id 'anthropic' is named (by name/alias) in a source title of one of this run's selected clusters -- predicting a Frontier Board upsert for that company is likely this run (a deterministic prediction from cluster content, not a confirmed post-hoc fact, since this plan is written before the analyst runs)",
   "profile_target": "anthropic",
   "reason": "degradation_level=0: normal run, up to 8 clusters (8 available)",
