@@ -268,10 +268,15 @@ def test_build_company_view_against_real_anthropic_profile():
     assert view.official_site_url == "https://anthropic.com"
     assert view.status_label == "CONFIRMED"
     assert view.status_chip_class == "chip chip--confirmed"
-    # 5 as of the 2026-07-25 fact-check pass (added the export-control/
-    # redeployment entry and the Claude Opus 5 release entry).
-    assert len(view.what_theyve_done) == 5
-    assert view.roadmap == ()
+    # Floor, not an exact count -- what_theyve_done[] grows over time via
+    # the daily PROFILER's incremental refreshes (5 as of the 2026-07-25
+    # fact-check pass; more added since).
+    assert len(view.what_theyve_done) >= 5
+    # roadmap[] also grows over time (first populated 2026-07-29) -- just
+    # confirm the view surfaces whatever real content currently exists;
+    # the empty-roadmap rendering path itself is covered separately
+    # against a synthetic fixture, not this real, evolving profile.
+    assert len(view.roadmap) >= 1
     assert len(view.board_rows) == 3
     assert view.cards == ()
 
@@ -388,9 +393,15 @@ def test_render_company_page_shows_board_row():
 
 
 def test_render_company_page_shows_roadmap_note_for_empty_roadmap():
-    # anthropic.json's real roadmap[] is empty -- the honest "no roadmap
-    # on record" copy must render, not a crash or a blank section.
-    html = company_builder.render_company_page(_real_anthropic(), REAL_BOARD_ROWS, [])
+    # anthropic.json's real roadmap[] is no longer empty (first populated
+    # 2026-07-29), so force an empty one on a copy -- the honest "no
+    # roadmap on record" copy must render for a company with none, not a
+    # crash or a blank section, regardless of what the real profile
+    # currently has.
+    raw = dict(_real_anthropic())
+    raw["profile"] = dict(raw["profile"])
+    raw["profile"]["roadmap"] = []
+    html = company_builder.render_company_page(raw, REAL_BOARD_ROWS, [])
     assert "No publicly stated roadmap on record yet." in html
 
 

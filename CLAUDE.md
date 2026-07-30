@@ -24,6 +24,34 @@ subscription.
 
 ---
 
+## Project status: PAUSED (since 2026-07-30)
+
+At the owner's explicit request, this project is paused. As of this date:
+
+- The Claude Code Remote Routine that drove the daily analyst+verifier+
+  profiler refresh (`trig_013iY691jZFPWGcFpFf6SsGf`, "AI Frontier Wire —
+  daily analyst+verifier+profiler refresh") has been deleted.
+- `watch.yml` and `audit.yml` each had their own `schedule:` trigger
+  removed from their `on:` block — see each file for the exact cron,
+  left commented out in place. Both still support `workflow_dispatch`
+  for a manual run; neither fires automatically anymore.
+- No card, board, lexicon, or company-profile updates will happen while
+  paused. The pipeline stops exactly where it left off — nothing was
+  rolled back, no in-flight content was reverted.
+
+To resume: restore each workflow's `schedule:` block (the cron to
+restore is commented directly above the `workflow_dispatch: {}` line in
+both files) and re-create the daily Routine per this file's own "Daily
+self-learning loop" section below, which still describes, unchanged,
+exactly how that Routine should be configured and what each firing
+should do — nothing about the design itself changed, only its trigger.
+
+Everything below this point describes the project as designed and as it
+operated through 2026-07-30 — read it as the reference for how to
+resume, not as a description of what is currently running.
+
+---
+
 ## Site surface (current, since 2026-07-13)
 
 The live build (`site/generate.py`) renders **Map + Companies**

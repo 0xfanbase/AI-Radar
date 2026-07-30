@@ -13,8 +13,12 @@ name: watch
 # documented target hour; corrected at the Phase 1 PM checkpoint -- see
 # PROGRESS.md.)
 on:
-  schedule:
-    - cron: "0 23 * * *"
+  # Project paused 2026-07-30 at owner request -- schedule trigger removed
+  # so this workflow no longer fires automatically. workflow_dispatch is
+  # kept so it can still be run manually; resuming later is just restoring
+  # the schedule block below, not reconstructing it from scratch:
+  #   schedule:
+  #     - cron: "0 23 * * *"
   workflow_dispatch: {}
 
 permissions:
