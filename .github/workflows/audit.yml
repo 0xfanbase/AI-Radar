@@ -60,8 +60,12 @@ name: audit
 # Write/Edit access actually sits between untrusted fetched text and a
 # git commit.
 on:
-  schedule:
-    - cron: "0 0 * * 0"
+  # Project paused 2026-07-30 at owner request -- schedule trigger removed
+  # so this workflow no longer fires automatically. workflow_dispatch is
+  # kept so it can still be run manually; resuming later is just restoring
+  # the schedule block below, not reconstructing it from scratch:
+  #   schedule:
+  #     - cron: "0 0 * * 0"
   workflow_dispatch: {}
 
 permissions:
