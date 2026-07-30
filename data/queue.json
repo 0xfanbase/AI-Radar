@@ -1,127 +1,113 @@
 [
   {
-    "cluster_hash": "4843bcaedd469ff204b5147bad33346e30778c005fe07c2311130476f523e546",
+    "cluster_hash": "38dccf62a921a5a9b41717b99f69cd01b810f5c831060a4f3c76ed567a6613e8",
     "rank": 1,
-    "score": 24.937630278406843,
+    "score": 60.24115690321129,
     "sources": [
       {
-        "outlet": "anthropic.com",
-        "points": 167,
+        "outlet": "status.claude.com",
+        "points": 255,
         "source_type": "hn",
-        "title": "Discovering Cryptographic Weaknesses with Claude",
-        "url": "https://www.anthropic.com/research/discovering-cryptographic-weaknesses"
+        "title": "Claude: Elevated errors across all models \u2013 Resolved",
+        "url": "https://status.claude.com/incidents/q2kg8n613kr3"
       }
     ]
   },
   {
-    "cluster_hash": "dce87fe1ab5fa7c8111703bd52c89ec79b01b8648e10c4afab86a846b7bc6674",
+    "cluster_hash": "d6c8d1cdd874152769408b0cd9224d97fba45ae2ffdc275c8311e01d4a5efbcb",
     "rank": 2,
-    "score": 19.346548155719187,
+    "score": 46.788768749238336,
     "sources": [
       {
-        "outlet": "github.com",
-        "points": 52,
+        "outlet": "science.org",
+        "points": 124,
         "source_type": "hn",
-        "title": "Anthropic publishes a practical key-recovery attack on HAWK-256",
-        "url": "https://github.com/anthropics/cryptography-research-demo"
+        "title": "AI's top startups are barely publishing their research",
+        "url": "https://www.science.org/content/article/ai-s-top-startups-are-barely-publishing-their-research"
       }
     ]
   },
   {
-    "cluster_hash": "5461ed44198ebac233ae352e3e87892add23d03db3ed8a794e633c74fb9e4838",
+    "cluster_hash": "119813105b52d4e76320be68116dcd15142d11314f75ffd06be9854912b10b9e",
     "rank": 3,
-    "score": 16.91964188850508,
+    "score": 26.671019560810695,
     "sources": [
       {
-        "outlet": null,
-        "points": null,
-        "source_type": "lab",
-        "title": "Introducing Claude Opus 5",
-        "url": "https://www.anthropic.com/news/claude-opus-5"
-      },
-      {
-        "outlet": "status.claude.com",
-        "points": 50,
+        "outlet": "enklypesalt.com",
+        "points": 329,
         "source_type": "hn",
-        "title": "Elevated errors on Claude Opus 5",
-        "url": "https://status.claude.com/incidents/lhqp09kxq7pb"
-      },
-      {
-        "outlet": "status.claude.com",
-        "points": 103,
-        "source_type": "hn",
-        "title": "Elevated errors on Claude Opus 5",
-        "url": "https://status.claude.com/incidents/mfdtrknpxghq"
+        "title": "Document-borne AI worms can self-propagate through Copilot for Word",
+        "url": "https://enklypesalt.com/posts/context-collapse-part3-ai-worming-through-word/"
       }
     ]
   },
   {
-    "cluster_hash": "26db6f7328b78082a72442d1029fc6b07bd7ff2ac6d3b2680c3eac4c2724bb77",
+    "cluster_hash": "0294221f209290b0d560d1bde5f0227ef7d520529d1733b67edd1259841fc65c",
     "rank": 4,
-    "score": 15.979219469792204,
+    "score": 12.750204313490078,
     "sources": [
       {
-        "outlet": "vishal.rs",
-        "points": 21,
+        "outlet": "blog.cryptographyengineering.com",
+        "points": 94,
         "source_type": "hn",
-        "title": "Banning AI will not make it go away",
-        "url": "https://vishal.rs/essay/banning-ai-will-not-make-it-go-away"
+        "title": "Some thoughts about Anthropic's new cryptanalysis results",
+        "url": "https://blog.cryptographyengineering.com/2026/07/29/some-notes-about-anthropics-new-results/"
       }
     ]
   },
   {
-    "cluster_hash": "fac7cb2d7a6648bae76324a302bdb6c9ac0b9c9b8d0032b504c4d64215c2ecdb",
+    "cluster_hash": "ea153b4bd6bbf07ea694925c2a9627960c841218f044014d0f0ebf7e9ea585f1",
     "rank": 5,
-    "score": 10.155619935826302,
+    "score": 11.547426092611571,
     "sources": [
       {
-        "outlet": "spawn-queue.acm.org",
-        "points": 143,
+        "outlet": "learnvector.ai",
+        "points": 257,
         "source_type": "hn",
-        "title": "Google's Beyond Zero: Enterprise Security for the AI Era",
-        "url": "https://spawn-queue.acm.org/doi/10.1145/3819083"
+        "title": "LearnVector \u2013 Andrew Ng's AI company building one\u2011to\u2011one learning experiences",
+        "url": "https://learnvector.ai/"
       }
     ]
   },
   {
-    "cluster_hash": "167f0086e4a5aace6e604b61f7dc1b7129877cabeb513263778005671c6712a5",
+    "cluster_hash": "30263965179ebd1ba3bd368a1728f44be2b9d36be239e88064b1cb6a752b3efd",
     "rank": 6,
-    "score": 9.591439021097159,
+    "score": 9.758607205292538,
     "sources": [
       {
-        "outlet": "github.com",
-        "points": 105,
+        "outlet": "potsandpansbyccg.com",
+        "points": 108,
         "source_type": "hn",
-        "title": "Show HN: Formally verified 3D CSG: Trust 93 lines spec, not 1000 lines AI code",
-        "url": "https://github.com/schildep/verified-3d-mesh-intersection"
+        "title": "After the AI Crash",
+        "url": "https://potsandpansbyccg.com/2026/07/29/after-the-ai-crash/"
       }
     ]
   },
   {
-    "cluster_hash": "a5126e34e88e2d6f6270a4caaa1c8806cec5bf28403f5c1780d169569705dc99",
+    "cluster_hash": "dbf16e456727ceae2e0d871a7f59e6981f4fea6c99cb1ccf3b1f6d495673a36a",
     "rank": 7,
-    "score": 5.874652283483138,
+    "score": 9.365472356400648,
     "sources": [
       {
-        "outlet": "galjot.si",
-        "points": 65,
+        "outlet": "emergingtrajectories.com",
+        "points": 48,
         "source_type": "hn",
-        "title": "What AI developers could learn from Charles Bukowski?",
-        "url": "https://galjot.si/what-ai-developers-could-learn-from-charles-bukowski"
+        "title": "Commodification of Intelligence: Good, Bad, and Ugly Circular AI Deals",
+        "url": "https://www.emergingtrajectories.com/lh/commodification-and-circularity/"
       }
     ]
   },
   {
-    "cluster_hash": "d8f40e9bb5e77cab9595bfc406b9709352e80513b0602acc0cd046a7c4021322",
+    "cluster_hash": "6e8c1eec99eb74d90ae6ce150e112a9dadd6c22da6c9bd7fb5e813430dfaabf8",
     "rank": 8,
-    "score": 5.674871804266491,
+    "score": 9.302961569122278,
     "sources": [
       {
-        "outlet": "ft.com",
-        "points": 35,
+        "outlet": "juliahub.com",
+        "points": 85,
         "source_type": "hn",
-        "title": "Chip stocks tumble as AI sell-off deepens",
-        "url": "https://www.ft.com/content/f8c03b5b-e194-4236-82c3-389b6f5dd7ae"
+        "title": "GPT-5.6 vs. Claude Fable 5 for Physical AI, which performs best?",
+        "url": "https://juliahub.com/blog/frontier-models-physical-ai-evaluation"
       }
     ]
   }
